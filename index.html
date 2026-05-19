@@ -247,6 +247,33 @@ body {
 }
 .filter-reset:hover { color: var(--hot); border-color: var(--hot); }
 
+/* rating chips (multi-select toggles) */
+.rating-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.rating-chip {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+}
+.rating-chip:hover { color: var(--ink); border-color: var(--ink-soft); }
+.rating-chip.active {
+  background: var(--warm);
+  color: var(--bg);
+  border-color: var(--warm);
+}
+.rating-chip.fav.active {
+  background: var(--hot);
+  color: white;
+  border-color: var(--hot);
+}
+
 /* ============================================================
    RESULTS HEADER
    ============================================================ */
@@ -873,6 +900,144 @@ body {
   color: var(--ink-mute);
 }
 
+/* year-best: row per year with mini-poster cards */
+.year-best-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--rule);
+  align-items: center;
+}
+.year-best-row:first-child { border-top: none; }
+@media (max-width: 600px) {
+  .year-best-row { grid-template-columns: 56px 1fr; gap: 12px; }
+}
+.year-best-year {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 32px;
+  color: var(--warm);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+@media (max-width: 600px) {
+  .year-best-year { font-size: 22px; }
+}
+.year-best-films {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.year-best-film {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  max-width: 320px;
+}
+.year-best-film:hover { background: var(--bg-elev-2); }
+.year-best-poster {
+  width: 36px;
+  height: 54px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.year-best-title {
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.25;
+}
+.year-best-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-mute);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
+
+/* divergence: two columns of films */
+.divergence {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 720px) {
+  .divergence { grid-template-columns: 1fr 1fr; }
+}
+.divergence-block-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+.divergence-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 6px;
+  background: var(--bg);
+}
+.divergence-row:hover { background: var(--bg-elev-2); }
+.divergence-poster {
+  width: 40px;
+  height: 60px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-elev);
+  border-radius: 4px;
+}
+.divergence-title {
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.divergence-ratings {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.divergence-ratings strong { color: var(--ink); }
+.divergence-diff {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.divergence-diff.pos {
+  background: rgba(127, 194, 143, 0.15);
+  color: var(--green);
+}
+.divergence-diff.neg {
+  background: rgba(217, 119, 87, 0.15);
+  color: var(--red);
+}
+
 /* ============================================================
    FOOTER
    ============================================================ */
@@ -911,7 +1076,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   <header class="masthead">
     <div class="brand" id="brand">
       <h1 class="wordmark"><span class="ast">*</span>films</h1>
-      <div class="sub">(— ma collection —)</div>
     </div>
     <div class="nav">
       <button class="nav-btn active" data-page="collection" id="nav-collection">collection</button>
@@ -923,10 +1087,9 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   <main class="collection-page" id="collection-page">
     <div class="filter-bar">
       <div class="tabs" id="status-tabs">
-        <button class="tab active" data-status="all">tous<span class="count" id="count-all">0</span></button>
+        <button class="tab active" data-status="a_voir">à voir<span class="count" id="count-a_voir">0</span></button>
         <button class="tab" data-status="vu">vus<span class="count" id="count-vu">0</span></button>
-        <button class="tab" data-status="a_voir">à voir<span class="count" id="count-a_voir">0</span></button>
-        <button class="tab" data-status="favorite">❤<span class="count" id="count-favorite">0</span></button>
+        <button class="tab" data-status="all">tous<span class="count" id="count-all">0</span></button>
       </div>
       <div class="search-wrap">
         <span class="search-icon">⌕</span>
@@ -955,15 +1118,16 @@ button:focus-visible, input:focus-visible, select:focus-visible {
         <div class="filter-label">année vue</div>
         <select id="filter-yearvu"><option value="">toutes</option></select>
       </div>
-      <div class="filter-group">
-        <div class="filter-label">note minimum</div>
-        <select id="filter-rating">
-          <option value="">toutes</option>
-          <option value="6">❤ uniquement</option>
-          <option value="5">5★ et plus</option>
-          <option value="4">4★ et plus</option>
-          <option value="3">3★ et plus</option>
-        </select>
+      <div class="filter-group" style="flex: 1 0 100%;">
+        <div class="filter-label">notes</div>
+        <div class="rating-chips" id="rating-chips">
+          <button class="rating-chip" data-rating="1">1★</button>
+          <button class="rating-chip" data-rating="2">2★</button>
+          <button class="rating-chip" data-rating="3">3★</button>
+          <button class="rating-chip" data-rating="4">4★</button>
+          <button class="rating-chip" data-rating="5">5★</button>
+          <button class="rating-chip fav" data-rating="6">❤</button>
+        </div>
       </div>
       <div class="filter-group">
         <div class="filter-label">trier par</div>
@@ -1000,12 +1164,20 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   <!-- ============== STATS PAGE ============== -->
   <main class="stats-page" id="stats-page">
     <div class="stats-numbers" id="stats-numbers"></div>
+
     <div class="chart-section">
       <h3 class="chart-title">par mois</h3>
       <div class="chart-subtitle">cadence de visionnage</div>
       <div class="sparkline-wrap"><svg class="sparkline-svg" id="sparkline" preserveAspectRatio="none"></svg></div>
       <div id="sparkline-legend" style="display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute); margin-top: 8px;"></div>
     </div>
+
+    <div class="chart-section">
+      <h3 class="chart-title">par année</h3>
+      <div class="chart-subtitle">total annuel</div>
+      <div id="year-chart"></div>
+    </div>
+
     <div class="chart-section">
       <h3 class="chart-title">distribution des notes</h3>
       <div class="chart-subtitle">comment tu notes en moyenne</div>
@@ -1014,11 +1186,19 @@ button:focus-visible, input:focus-visible, select:focus-visible {
         <div>1★</div><div>2★</div><div>3★</div><div>4★</div><div>5★</div><div>❤</div>
       </div>
     </div>
+
+    <div class="chart-section">
+      <h3 class="chart-title">note moyenne par genre</h3>
+      <div class="chart-subtitle">quels genres tu sembles préférer</div>
+      <div id="genre-rating-chart"></div>
+    </div>
+
     <div class="chart-section">
       <h3 class="chart-title">par décennie</h3>
       <div class="chart-subtitle">de quelle époque sont tes films</div>
       <div id="decade-chart"></div>
     </div>
+
     <div class="chart-section">
       <h3 class="chart-title">par lieu</h3>
       <div class="chart-subtitle">où tu vois tes films</div>
@@ -1027,15 +1207,35 @@ button:focus-visible, input:focus-visible, select:focus-visible {
         <div class="donut-legend" id="donut-lieu-legend"></div>
       </div>
     </div>
+
     <div class="chart-section">
       <h3 class="chart-title">top genres</h3>
       <div class="chart-subtitle">10 genres les plus représentés</div>
       <div id="genre-chart"></div>
     </div>
+
     <div class="chart-section">
       <h3 class="chart-title">top réalisateurs</h3>
       <div class="chart-subtitle">qui revient le plus chez toi</div>
       <div id="director-chart"></div>
+    </div>
+
+    <div class="chart-section">
+      <h3 class="chart-title">top acteurs &amp; actrices</h3>
+      <div class="chart-subtitle">visages qui reviennent</div>
+      <div id="actor-chart"></div>
+    </div>
+
+    <div class="chart-section">
+      <h3 class="chart-title">ton film de l'année</h3>
+      <div class="chart-subtitle">le mieux noté pour chaque année de visionnage</div>
+      <div id="year-best"></div>
+    </div>
+
+    <div class="chart-section">
+      <h3 class="chart-title">tes plus grands désaccords avec tmdb</h3>
+      <div class="chart-subtitle">où ton goût s'éloigne du grand public</div>
+      <div id="divergence" class="divergence"></div>
     </div>
   </main>
 
@@ -1062,19 +1262,25 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 // ============================================================
 // STATE
 // ============================================================
+const TAB_SORT_DEFAULTS = {
+  all: 'date_vue_desc',
+  vu: 'date_vue_desc',
+  a_voir: 'year_desc',
+};
+
 const state = {
   films: [],
   filtered: [],
   filters: {
-    status: 'all',       // 'all' | 'vu' | 'a_voir' | 'favorite'
+    status: 'a_voir',     // default: à voir
     search: '',
     genre: '',
     lieu: '',
     decade: '',
     yearvu: '',
-    rating: '',
+    ratings: new Set(),    // multi-select set of 1..6 (empty = all)
   },
-  sort: 'date_vue_desc',
+  sort: TAB_SORT_DEFAULTS.a_voir,
   page: 1,
   pageSize: 60,
 };
@@ -1089,6 +1295,8 @@ async function loadFilms() {
     const data = await r.json();
     state.films = data.films || [];
     initFilters();
+    // Reflect initial sort in the sort select
+    document.getElementById('sort').value = state.sort;
     applyFilters();
     renderStats();
   } catch (e) {
@@ -1148,7 +1356,6 @@ function initFilters() {
   document.getElementById('count-all').textContent = state.films.length;
   document.getElementById('count-vu').textContent = state.films.filter(f => f.user?.statut === 'vu').length;
   document.getElementById('count-a_voir').textContent = state.films.filter(f => f.user?.statut === 'a_voir').length;
-  document.getElementById('count-favorite').textContent = state.films.filter(f => f.user?.favorite).length;
 }
 
 function fillSelect(id, items) {
@@ -1176,7 +1383,6 @@ function applyFilters() {
   // Status
   if (f.status === 'vu') list = list.filter(x => x.user?.statut === 'vu');
   else if (f.status === 'a_voir') list = list.filter(x => x.user?.statut === 'a_voir');
-  else if (f.status === 'favorite') list = list.filter(x => x.user?.favorite);
 
   // Search
   if (f.search) {
@@ -1201,9 +1407,8 @@ function applyFilters() {
       return dv.startsWith(f.yearvu);
     });
   }
-  if (f.rating) {
-    const min = parseInt(f.rating, 10);
-    list = list.filter(x => (x.user?.rating || 0) >= min);
+  if (f.ratings.size > 0) {
+    list = list.filter(x => x.user?.rating && f.ratings.has(x.user.rating));
   }
 
   // Sort
@@ -1240,15 +1445,24 @@ function sortList(list, sortKey) {
     case 'title_asc':
       list.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'fr')); break;
     case 'year_desc':
-      list.sort((a, b) => (b.year || 0) - (a.year || 0)); break;
+      list.sort((a, b) => {
+        const ya = a.year || 0, yb = b.year || 0;
+        if (ya === yb) return (a.title || '').localeCompare(b.title || '', 'fr');
+        return yb - ya;
+      }); break;
     case 'year_asc':
-      list.sort((a, b) => (a.year || 0) - (b.year || 0)); break;
+      list.sort((a, b) => {
+        const ya = a.year || 9999, yb = b.year || 9999;  // nulls last
+        if (ya === yb) return (a.title || '').localeCompare(b.title || '', 'fr');
+        return ya - yb;
+      }); break;
   }
 }
 
 function updateFilterBadge() {
   const f = state.filters;
-  const active = ['genre', 'lieu', 'decade', 'yearvu', 'rating'].filter(k => f[k]).length;
+  let active = ['genre', 'lieu', 'decade', 'yearvu'].filter(k => f[k]).length;
+  if (f.ratings.size > 0) active++;
   const badge = document.getElementById('filter-badge');
   if (active > 0) {
     badge.style.display = '';
@@ -1467,6 +1681,41 @@ function renderStats() {
   // Favorites
   const favorites = films.filter(f => f.user?.favorite).length;
 
+  // Films per year, find peak year
+  const perYear = new Map();
+  for (const f of vus) {
+    const dv = f.user?.date_vue;
+    if (!dv) continue;
+    let y;
+    if (dv.startsWith('before-')) y = 'avant ' + dv.slice(7);
+    else if (dv.length >= 4) y = dv.slice(0, 4);
+    else continue;
+    perYear.set(y, (perYear.get(y) || 0) + 1);
+  }
+  // For "moyenne par an", count only full numeric years (skip "avant", skip current incomplete year)
+  const currentYear = new Date().getFullYear();
+  const fullYears = [...perYear.entries()]
+    .filter(([y]) => /^\d{4}$/.test(y) && parseInt(y, 10) < currentYear);
+  const avgPerYear = fullYears.length
+    ? Math.round(fullYears.reduce((s, [, c]) => s + c, 0) / fullYears.length)
+    : 0;
+  // Peak year (numeric year only)
+  const numericPerYear = [...perYear.entries()].filter(([y]) => /^\d{4}$/.test(y));
+  numericPerYear.sort((a, b) => b[1] - a[1]);
+  const peakYear = numericPerYear.length ? numericPerYear[0] : null;
+
+  // Cinema count
+  const cinemaCount = vus.filter(f => f.user?.lieu === 'Cinéma').length;
+
+  // Distinct directors
+  const directors = new Set();
+  for (const f of vus) {
+    if (f.director) {
+      // Some directors are stored as "A, B" for TV — split
+      f.director.split(',').forEach(d => directors.add(d.trim()));
+    }
+  }
+
   // Number cards
   document.getElementById('stats-numbers').innerHTML = `
     <div class="stat-card">
@@ -1489,14 +1738,39 @@ function renderStats() {
       <div class="stat-card-value">${favorites}</div>
       <div class="stat-card-detail">${(favorites * 100 / Math.max(1, vus.length)).toFixed(0)}% des vus</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-card-label">films par an</div>
+      <div class="stat-card-value">${avgPerYear}</div>
+      <div class="stat-card-detail">moyenne (années complètes)</div>
+    </div>
+    <div class="stat-card accent">
+      <div class="stat-card-label">année la plus active</div>
+      <div class="stat-card-value">${peakYear ? peakYear[0] : '—'}</div>
+      <div class="stat-card-detail">${peakYear ? peakYear[1] + ' films' : ''}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">au cinéma</div>
+      <div class="stat-card-value">${cinemaCount}</div>
+      <div class="stat-card-detail">${(cinemaCount * 100 / Math.max(1, vus.length)).toFixed(0)}% des vus</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">réalisateurs</div>
+      <div class="stat-card-value">${directors.size}</div>
+      <div class="stat-card-detail">distincts</div>
+    </div>
   `;
 
   renderSparkline();
+  renderYearChart();
   renderRatingDist();
+  renderGenreRatingChart();
   renderDecadeChart();
   renderDonutLieu();
   renderGenreChart();
   renderDirectorChart();
+  renderActorChart();
+  renderYearBest();
+  renderDivergence();
 }
 
 function renderSparkline() {
@@ -1704,6 +1978,183 @@ function renderDirectorChart() {
     </div>`).join('');
 }
 
+function renderYearChart() {
+  // Films per year (year of viewing)
+  const counts = new Map();
+  for (const f of state.films) {
+    if (f.user?.statut !== 'vu') continue;
+    const dv = f.user.date_vue;
+    if (!dv) continue;
+    let y;
+    if (dv.startsWith('before-')) y = 'avant ' + dv.slice(7);
+    else if (dv.length >= 4) y = dv.slice(0, 4);
+    else continue;
+    counts.set(y, (counts.get(y) || 0) + 1);
+  }
+  // Sort: numeric ascending, with "avant X" first
+  const entries = [...counts.entries()].sort((a, b) => {
+    const aBefore = a[0].startsWith('avant ');
+    const bBefore = b[0].startsWith('avant ');
+    if (aBefore && !bBefore) return -1;
+    if (!aBefore && bBefore) return 1;
+    return a[0].localeCompare(b[0]);
+  });
+  const max = Math.max(...entries.map(([, c]) => c), 1);
+  const root = document.getElementById('year-chart');
+  root.innerHTML = entries.map(([y, c]) => {
+    const isBefore = y.startsWith('avant ');
+    return `<div class="bar-row">
+      <div class="bar-label">${escapeHtml(y)}</div>
+      <div class="bar-track"><div class="bar-fill ${isBefore ? '' : 'hot'}" style="width:${(c / max * 100).toFixed(1)}%"></div></div>
+      <div class="bar-value">${c}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderGenreRatingChart() {
+  // For each genre, compute average rating across rated films
+  const buckets = new Map(); // genre → [sum, count]
+  for (const f of state.films) {
+    if (!f.user?.rating) continue;
+    for (const g of (f.genres || [])) {
+      const b = buckets.get(g) || [0, 0];
+      b[0] += f.user.rating;
+      b[1] += 1;
+      buckets.set(g, b);
+    }
+  }
+  // Only keep genres with at least 5 rated films, sort by avg desc
+  const entries = [...buckets.entries()]
+    .filter(([, b]) => b[1] >= 5)
+    .map(([g, b]) => [g, b[0] / b[1], b[1]])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12);
+  const root = document.getElementById('genre-rating-chart');
+  if (!entries.length) {
+    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic;">pas assez de données.</div>';
+    return;
+  }
+  // Bars are 0..6 wide (matching rating scale)
+  root.innerHTML = entries.map(([g, avg, n]) => {
+    const pct = (avg / 6 * 100).toFixed(1);
+    const stars = avg.toFixed(1);
+    return `<div class="bar-row">
+      <div class="bar-label">${escapeHtml(g)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="bar-value">${stars}<span style="color: var(--ink-mute); margin-left: 4px;">(${n})</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderActorChart() {
+  const counts = new Map();
+  for (const f of state.films) {
+    for (const c of (f.cast || [])) {
+      counts.set(c, (counts.get(c) || 0) + 1);
+    }
+  }
+  const sorted = [...counts.entries()].filter(([, c]) => c >= 3).sort((a, b) => b[1] - a[1]).slice(0, 15);
+  const max = sorted.length ? sorted[0][1] : 1;
+  const root = document.getElementById('actor-chart');
+  if (!sorted.length) {
+    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic;">aucun acteur ne revient au moins 3 fois.</div>';
+    return;
+  }
+  root.innerHTML = sorted.map(([a, c]) => `
+    <div class="bar-row">
+      <div class="bar-label">${escapeHtml(a)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(c / max * 100).toFixed(1)}%"></div></div>
+      <div class="bar-value">${c}</div>
+    </div>`).join('');
+}
+
+function renderYearBest() {
+  // For each year of viewing, find the highest-rated film
+  const byYear = new Map(); // year → [films]
+  for (const f of state.films) {
+    if (f.user?.statut !== 'vu' || !f.user.rating) continue;
+    const dv = f.user.date_vue;
+    if (!dv || dv.startsWith('before-')) continue;
+    const y = dv.slice(0, 4);
+    if (!byYear.has(y)) byYear.set(y, []);
+    byYear.get(y).push(f);
+  }
+  const years = [...byYear.keys()].sort().reverse();
+  const root = document.getElementById('year-best');
+  if (!years.length) {
+    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic;">pas de données suffisantes.</div>';
+    return;
+  }
+  root.innerHTML = years.map(y => {
+    const list = byYear.get(y);
+    list.sort((a, b) => b.user.rating - a.user.rating);
+    const top = list[0];
+    const others = list.filter(f => f.user.rating === top.user.rating).slice(0, 3);
+    const filmCells = others.map(f => `
+      <div class="year-best-film" onclick="openModalFromCard('${f.id}')" role="button" tabindex="0">
+        <div class="year-best-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${f.poster})"` : ''}></div>
+        <div class="year-best-title">${escapeHtml(f.title)}</div>
+        <div class="year-best-meta">${f.user.favorite ? '❤' : '★'.repeat(f.user.rating)}${f.director ? ' · ' + escapeHtml(f.director) : ''}</div>
+      </div>`).join('');
+    return `<div class="year-best-row">
+      <div class="year-best-year">${y}</div>
+      <div class="year-best-films">${filmCells}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDivergence() {
+  // Compute divergence: (user_rating_in_10) - tmdb_rating
+  // user 1-6 maps to 10/6 scale → roughly 1.67, 3.33, 5.0, 6.67, 8.33, 10
+  const conv = r => r * (10 / 6);
+  const items = state.films
+    .filter(f => f.user?.rating && f.tmdb_rating && f.tmdb_rating > 0)
+    .map(f => ({
+      f,
+      userIn10: conv(f.user.rating),
+      tmdb: f.tmdb_rating,
+      diff: conv(f.user.rating) - f.tmdb_rating,
+    }));
+
+  // Top 5 over-rated (you love it, public doesn't): biggest positive diff
+  const lovedByYou = [...items].sort((a, b) => b.diff - a.diff).slice(0, 5);
+  // Top 5 over-rated by public (you don't care, public adores): biggest negative diff
+  const lovedByPublic = [...items].sort((a, b) => a.diff - b.diff).slice(0, 5);
+
+  const cell = (item, sign) => {
+    const f = item.f;
+    return `<div class="divergence-row" onclick="openModalFromCard('${f.id}')" role="button" tabindex="0">
+      <div class="divergence-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${f.poster})"` : ''}></div>
+      <div class="divergence-meta">
+        <div class="divergence-title">${escapeHtml(f.title)}</div>
+        <div class="divergence-ratings">
+          <span>toi <strong>${item.userIn10.toFixed(1)}</strong></span>
+          <span style="color: var(--ink-mute)">·</span>
+          <span>tmdb <strong style="color: var(--ink-soft)">${item.tmdb.toFixed(1)}</strong></span>
+        </div>
+      </div>
+      <div class="divergence-diff ${sign}">${sign === 'pos' ? '+' : ''}${item.diff.toFixed(1)}</div>
+    </div>`;
+  };
+
+  document.getElementById('divergence').innerHTML = `
+    <div class="divergence-block">
+      <div class="divergence-block-label">tu aimes — le public, moins</div>
+      ${lovedByYou.map(it => cell(it, 'pos')).join('')}
+    </div>
+    <div class="divergence-block">
+      <div class="divergence-block-label">le public aime — toi, moins</div>
+      ${lovedByPublic.map(it => cell(it, 'neg')).join('')}
+    </div>
+  `;
+}
+
+// Helper to open modal from a card click in stats (lookup by id)
+function openModalFromCard(filmId) {
+  const f = state.films.find(x => x.id === filmId);
+  if (f) openModal(f);
+}
+
 // ============================================================
 // HELPERS
 // ============================================================
@@ -1715,12 +2166,17 @@ function escapeHtml(s) {
 // EVENT WIRING
 // ============================================================
 function wireEvents() {
-  // Status tabs
+  // Status tabs — also sets per-tab default sort
   document.querySelectorAll('#status-tabs .tab').forEach(t => {
     t.addEventListener('click', () => {
       document.querySelectorAll('#status-tabs .tab').forEach(x => x.classList.remove('active'));
       t.classList.add('active');
-      state.filters.status = t.dataset.status;
+      const newStatus = t.dataset.status;
+      state.filters.status = newStatus;
+      // Apply this tab's preferred sort
+      const newSort = TAB_SORT_DEFAULTS[newStatus] || 'date_vue_desc';
+      state.sort = newSort;
+      document.getElementById('sort').value = newSort;
       applyFilters();
     });
   });
@@ -1740,17 +2196,31 @@ function wireEvents() {
     document.getElementById('filter-panel').classList.toggle('open');
   });
 
-  // Filter dropdowns
+  // Filter dropdowns (genre, lieu, decade, yearvu)
   const filterIds = {
     'filter-genre': 'genre',
     'filter-lieu': 'lieu',
     'filter-decade': 'decade',
     'filter-yearvu': 'yearvu',
-    'filter-rating': 'rating',
   };
   Object.entries(filterIds).forEach(([id, key]) => {
     document.getElementById(id).addEventListener('change', (e) => {
       state.filters[key] = e.target.value;
+      applyFilters();
+    });
+  });
+
+  // Rating chips (multi-select)
+  document.querySelectorAll('#rating-chips .rating-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const r = parseInt(chip.dataset.rating, 10);
+      if (state.filters.ratings.has(r)) {
+        state.filters.ratings.delete(r);
+        chip.classList.remove('active');
+      } else {
+        state.filters.ratings.add(r);
+        chip.classList.add('active');
+      }
       applyFilters();
     });
   });
@@ -1761,15 +2231,16 @@ function wireEvents() {
     applyFilters();
   });
 
-  // Reset
+  // Reset — restore defaults including the per-tab sort
   document.getElementById('filter-reset').addEventListener('click', () => {
-    state.filters = { status: 'all', search: '', genre: '', lieu: '', decade: '', yearvu: '', rating: '' };
-    state.sort = 'date_vue_desc';
+    state.filters = { status: 'a_voir', search: '', genre: '', lieu: '', decade: '', yearvu: '', ratings: new Set() };
+    state.sort = TAB_SORT_DEFAULTS.a_voir;
     document.getElementById('search').value = '';
     document.querySelectorAll('#status-tabs .tab').forEach(t => t.classList.remove('active'));
-    document.querySelector('#status-tabs .tab[data-status="all"]').classList.add('active');
+    document.querySelector('#status-tabs .tab[data-status="a_voir"]').classList.add('active');
     Object.keys(filterIds).forEach(id => { document.getElementById(id).value = ''; });
-    document.getElementById('sort').value = 'date_vue_desc';
+    document.querySelectorAll('#rating-chips .rating-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('sort').value = TAB_SORT_DEFAULTS.a_voir;
     applyFilters();
   });
 
