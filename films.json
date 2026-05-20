@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T12:25:42.675Z",
+  "generated_at": "2026-05-20T12:25:57.637Z",
   "count": 531,
   "films": [
     {
@@ -33,11 +33,11 @@
       },
       "user": {
         "statut": "vu",
-        "rating": null,
+        "rating": 3,
         "favorite": false,
-        "lieu": null,
-        "date_vue": null,
-        "date_vue_label": null,
+        "lieu": "Disque dur",
+        "date_vue": "before-2022",
+        "date_vue_label": "avant 2022",
         "csv_genres": []
       }
     },
