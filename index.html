@@ -825,13 +825,80 @@ body {
   text-align: right;
 }
 
-/* sparkline for "films par mois" */
-.sparkline-wrap {
+/* months chart (bars) */
+.months-chart-wrap {
   width: 100%;
-  height: 140px;
+  height: 220px;
   position: relative;
 }
-.sparkline-svg { width: 100%; height: 100%; display: block; }
+.months-chart {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.month-bar { transition: opacity 0.15s; }
+.month-bar:hover { opacity: 0.8; }
+.months-tooltip {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--bg);
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.months-tooltip strong { color: var(--ink); font-weight: 700; }
+.months-tooltip span { color: var(--ink-mute); margin-left: 4px; }
+
+/* heatmap */
+.heatmap-row {
+  display: grid;
+  grid-template-columns: 130px repeat(6, 1fr);
+  gap: 3px;
+  margin-bottom: 3px;
+}
+@media (max-width: 600px) {
+  .heatmap-row { grid-template-columns: 90px repeat(6, 1fr); gap: 2px; }
+}
+.heatmap-header { margin-bottom: 8px; }
+.heatmap-genre-label {
+  font-size: 12px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.heatmap-cell-header {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-mute);
+  text-align: center;
+  padding: 4px 0;
+  font-weight: 500;
+}
+.heatmap-cell {
+  aspect-ratio: 1.4 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 3px;
+  transition: transform 0.1s;
+}
+.heatmap-cell:hover { transform: scale(1.05); }
+@media (max-width: 600px) {
+  .heatmap-cell { font-size: 10px; }
+}
 
 /* rating distribution */
 .rating-dist {
@@ -869,35 +936,6 @@ body {
   font-size: 10px;
   color: var(--ink-mute);
   text-align: center;
-}
-
-/* donut for "lieu" */
-.donut-wrap {
-  display: flex;
-  gap: 32px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.donut-svg { width: 180px; height: 180px; flex-shrink: 0; }
-.donut-legend { flex: 1; min-width: 200px; }
-.donut-legend-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 0;
-  font-size: 13px;
-}
-.donut-legend-row .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-.donut-legend-row .label { flex: 1; color: var(--ink); }
-.donut-legend-row .val {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--ink-mute);
 }
 
 /* year-best: row per year with mini-poster cards */
@@ -1055,8 +1093,377 @@ body {
 .footer .ast { font-size: 0.9em; transform: none; }
 
 /* ============================================================
-   ACCESSIBILITY / FOCUS
+   ADMIN MODE
    ============================================================ */
+.admin-btn { 
+  border-color: var(--rule);
+  font-size: 14px;
+  padding: 6px 10px;
+  letter-spacing: 0;
+}
+.admin-btn.active {
+  background: rgba(127, 194, 143, 0.15);
+  border-color: var(--green);
+  color: var(--green);
+}
+body.admin-mode .app { 
+  /* subtle outline indicator that we're in edit mode */
+  position: relative;
+}
+body.admin-mode .app::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  border: 2px solid rgba(127, 194, 143, 0.25);
+  pointer-events: none;
+  z-index: 200;
+  border-radius: 0;
+}
+
+/* Admin modals (similar shape to detail modal but no backdrop image) */
+.admin-modal {
+  max-width: 640px;
+  margin: 40px auto;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+}
+@media (max-width: 600px) {
+  .admin-modal { margin: 0; min-height: 100vh; border-radius: 0; border: none; }
+}
+.admin-modal-body { padding: 32px; }
+@media (max-width: 600px) { .admin-modal-body { padding: 24px 20px; } }
+.admin-modal-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 28px;
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+}
+.admin-modal-body .field { margin-bottom: 20px; }
+.admin-modal-body label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 6px;
+}
+.admin-modal-body input[type="text"],
+.admin-modal-body input[type="password"],
+.admin-modal-body select {
+  width: 100%;
+  background: var(--bg-elev);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.15s;
+}
+.admin-modal-body input:focus, .admin-modal-body select:focus { border-color: var(--warm); }
+.admin-modal-body input[type="password"] { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.admin-modal-body .note { font-size: 12px; color: var(--ink-mute); margin-top: 4px; }
+.admin-modal-body button {
+  background: var(--warm);
+  color: var(--bg);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.admin-modal-body button:hover:not(:disabled) { background: var(--ink); }
+.admin-modal-body button:disabled { opacity: 0.5; cursor: not-allowed; }
+.admin-modal-body button.ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule-strong);
+}
+.admin-modal-body button.ghost:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-soft); }
+.admin-modal-body button.danger {
+  background: var(--red);
+  color: white;
+}
+
+.error-inline {
+  background: rgba(217, 119, 87, 0.1);
+  border: 1px solid var(--red);
+  color: var(--red);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin: 8px 0;
+}
+.success-inline {
+  background: rgba(127, 194, 143, 0.1);
+  border: 1px solid var(--green);
+  color: var(--green);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+/* Search results in add/rematch modal */
+.search-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 4px;
+}
+.search-result {
+  background: var(--bg-elev);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.search-result:hover, .search-result.selected {
+  border-color: var(--warm);
+  background: var(--bg-elev-2);
+}
+.search-result.selected {
+  border-color: var(--green);
+}
+.search-result-poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  background-color: var(--bg);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  background-size: cover;
+  background-position: center;
+}
+.search-result-title {
+  font-size: 11px;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.search-result-year {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-mute);
+}
+.search-result-type {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  color: var(--warm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+  padding: 1px 5px;
+  border: 1px solid var(--warm);
+  border-radius: 4px;
+}
+
+.selected-preview {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: var(--bg-elev);
+  padding: 12px;
+  border-radius: 8px;
+}
+.selected-preview-poster {
+  width: 60px;
+  aspect-ratio: 2/3;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.selected-preview-meta { flex: 1; }
+.selected-preview-title { font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.selected-preview-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+
+/* Radio buttons */
+.radio-group { display: flex; gap: 6px; }
+.radio-btn {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.radio-btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+.radio-btn.active {
+  background: var(--warm);
+  color: var(--bg);
+  border-color: var(--warm);
+}
+
+/* Floating add button */
+.floating-add {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--warm);
+  color: var(--bg);
+  border: none;
+  font-size: 28px;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  z-index: 50;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.floating-add:hover { background: var(--ink); transform: translateY(-2px); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--bg-elev);
+  color: var(--ink);
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--rule-strong);
+  font-size: 14px;
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s;
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast.success { border-color: var(--green); color: var(--green); }
+.toast.error { border-color: var(--red); color: var(--red); }
+
+/* Edit form inside detail modal */
+.edit-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+}
+.edit-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--green);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.edit-section-title::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  display: inline-block;
+}
+.edit-form .field { margin-bottom: 16px; }
+.edit-form label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 6px;
+}
+.edit-form select {
+  background: var(--bg-elev);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 13px;
+  outline: none;
+}
+.edit-form .rating-chips { gap: 6px; }
+.edit-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.edit-form-actions button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+.edit-save {
+  background: var(--green);
+  color: var(--bg);
+}
+.edit-save:hover { background: var(--ink); }
+.edit-rematch {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule-strong);
+}
+.edit-rematch:hover { color: var(--warm); border-color: var(--warm); }
+.edit-delete {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+  margin-left: auto;
+}
+.edit-delete:hover { background: var(--red); color: white; }
+.edit-form .selected-rating-chip.active {
+  background: var(--warm);
+  color: var(--bg);
+  border-color: var(--warm);
+}
+.edit-form .selected-rating-chip.fav.active {
+  background: var(--hot);
+  color: white;
+  border-color: var(--hot);
+}
+
+
 button:focus-visible, input:focus-visible, select:focus-visible {
   outline: 2px solid var(--warm);
   outline-offset: 2px;
@@ -1080,6 +1487,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     <div class="nav">
       <button class="nav-btn active" data-page="collection" id="nav-collection">collection</button>
       <button class="nav-btn" data-page="stats" id="nav-stats">stats</button>
+      <button class="nav-btn admin-btn" id="nav-admin" title="mode édition">🔒</button>
     </div>
   </header>
 
@@ -1168,8 +1576,11 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     <div class="chart-section">
       <h3 class="chart-title">par mois</h3>
       <div class="chart-subtitle">cadence de visionnage</div>
-      <div class="sparkline-wrap"><svg class="sparkline-svg" id="sparkline" preserveAspectRatio="none"></svg></div>
-      <div id="sparkline-legend" style="display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute); margin-top: 8px;"></div>
+      <div class="months-chart-wrap">
+        <svg class="months-chart" id="months-chart" preserveAspectRatio="none"></svg>
+        <div class="months-tooltip" id="months-tooltip"></div>
+      </div>
+      <div id="months-axis"></div>
     </div>
 
     <div class="chart-section">
@@ -1194,18 +1605,9 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     </div>
 
     <div class="chart-section">
-      <h3 class="chart-title">par décennie</h3>
-      <div class="chart-subtitle">de quelle époque sont tes films</div>
-      <div id="decade-chart"></div>
-    </div>
-
-    <div class="chart-section">
-      <h3 class="chart-title">par lieu</h3>
-      <div class="chart-subtitle">où tu vois tes films</div>
-      <div class="donut-wrap">
-        <svg class="donut-svg" id="donut-lieu" viewBox="0 0 100 100"></svg>
-        <div class="donut-legend" id="donut-lieu-legend"></div>
-      </div>
+      <h3 class="chart-title">genre × note</h3>
+      <div class="chart-subtitle">heatmap — chaque case montre le nombre de films</div>
+      <div id="heatmap"></div>
     </div>
 
     <div class="chart-section">
@@ -1255,6 +1657,141 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     </div>
   </article>
 </div>
+
+<!-- ============== ADMIN SETUP MODAL ============== -->
+<div class="modal-backdrop admin-modal-backdrop" id="admin-setup-backdrop">
+  <article class="modal admin-modal">
+    <button class="modal-close" id="admin-setup-close" aria-label="fermer">✕</button>
+    <div class="admin-modal-body">
+      <h2 class="admin-modal-title">mode édition</h2>
+      <p style="color: var(--ink-soft);">Pour modifier, ajouter ou supprimer des films, deux clés sont nécessaires. Elles sont stockées dans ce navigateur uniquement — elles ne sont jamais publiées sur ton site.</p>
+
+      <div class="field">
+        <label>clé api tmdb</label>
+        <input type="password" id="admin-tmdb-key" placeholder="32 caractères hexadécimaux" autocomplete="off">
+        <div class="note">la même que pour la migration. sert à chercher des films.</div>
+      </div>
+
+      <div class="field">
+        <label>github personal access token</label>
+        <input type="password" id="admin-gh-token" placeholder="ghp_… ou github_pat_…" autocomplete="off">
+        <div class="note">sert à enregistrer tes modifications dans le repo. <a href="#" id="admin-pat-help" style="color: var(--warm); text-decoration: underline;">→ comment en créer un</a></div>
+      </div>
+
+      <div id="admin-help" style="display: none; background: var(--bg-elev); padding: 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: var(--ink-soft); line-height: 1.6;">
+        <strong style="color: var(--ink);">Créer un token GitHub :</strong>
+        <ol style="padding-left: 20px; margin: 8px 0;">
+          <li>Va sur <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color: var(--warm);">github.com/settings/personal-access-tokens/new</a></li>
+          <li>Token name : <code>films-admin</code></li>
+          <li>Expiration : 1 an (ou ce que tu veux)</li>
+          <li>Repository access → <strong>Only select repositories</strong> → coche <code>films</code></li>
+          <li>Permissions → <strong>Repository permissions</strong> → <strong>Contents</strong> → <strong>Read and write</strong></li>
+          <li>Generate token (en bas) → copie-le ici</li>
+        </ol>
+      </div>
+
+      <div id="admin-error" class="error-inline" style="display: none;"></div>
+      <div id="admin-success" class="success-inline" style="display: none;"></div>
+
+      <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+        <button id="admin-activate-btn">tester et activer</button>
+        <button class="ghost" id="admin-disable-btn" style="display: none;">déconnecter l'admin</button>
+      </div>
+    </div>
+  </article>
+</div>
+
+<!-- ============== ADD / SEARCH MODAL ============== -->
+<div class="modal-backdrop admin-modal-backdrop" id="add-modal-backdrop">
+  <article class="modal admin-modal">
+    <button class="modal-close" id="add-modal-close" aria-label="fermer">✕</button>
+    <div class="admin-modal-body">
+      <h2 class="admin-modal-title">ajouter un film</h2>
+      <div class="field">
+        <label>recherche tmdb</label>
+        <input type="text" id="add-search-input" placeholder="titre, réalisateur…" autocomplete="off">
+        <div class="note" id="add-search-status"></div>
+      </div>
+      <div id="add-results" class="search-results"></div>
+      <div id="add-form" style="display: none;">
+        <hr style="border: none; border-top: 1px solid var(--rule); margin: 20px 0;">
+        <div id="add-selected-preview" style="margin-bottom: 20px;"></div>
+        <div class="field">
+          <label>statut</label>
+          <div class="radio-group" id="add-statut">
+            <button class="radio-btn active" data-value="a_voir">à voir</button>
+            <button class="radio-btn" data-value="vu">vu</button>
+          </div>
+        </div>
+        <div class="field" id="add-rating-field" style="display: none;">
+          <label>note</label>
+          <div class="rating-chips" id="add-rating-chips">
+            <button class="rating-chip" data-rating="1">1★</button>
+            <button class="rating-chip" data-rating="2">2★</button>
+            <button class="rating-chip" data-rating="3">3★</button>
+            <button class="rating-chip" data-rating="4">4★</button>
+            <button class="rating-chip" data-rating="5">5★</button>
+            <button class="rating-chip fav" data-rating="6">❤</button>
+          </div>
+        </div>
+        <div class="field" id="add-lieu-field" style="display: none;">
+          <label>lieu</label>
+          <select id="add-lieu">
+            <option value="">—</option>
+            <option value="Cinéma">Cinéma</option>
+            <option value="Stremio">Stremio</option>
+            <option value="Disque dur">Disque dur</option>
+            <option value="Autre">Autre</option>
+            <option value="À trouver">À trouver</option>
+          </select>
+        </div>
+        <div class="field" id="add-date-field" style="display: none;">
+          <label>date vue</label>
+          <div style="display: flex; gap: 8px;">
+            <select id="add-date-year" style="flex: 1;"></select>
+            <select id="add-date-month" style="flex: 1;">
+              <option value="">—</option>
+              <option value="01">janvier</option><option value="02">février</option>
+              <option value="03">mars</option><option value="04">avril</option>
+              <option value="05">mai</option><option value="06">juin</option>
+              <option value="07">juillet</option><option value="08">août</option>
+              <option value="09">septembre</option><option value="10">octobre</option>
+              <option value="11">novembre</option><option value="12">décembre</option>
+            </select>
+          </div>
+        </div>
+        <div id="add-form-error" class="error-inline" style="display: none;"></div>
+        <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+          <button id="add-submit-btn">ajouter à ma collection</button>
+          <button class="ghost" id="add-cancel-btn">annuler</button>
+        </div>
+      </div>
+    </div>
+  </article>
+</div>
+
+<!-- ============== REMATCH MODAL ============== -->
+<div class="modal-backdrop admin-modal-backdrop" id="rematch-backdrop">
+  <article class="modal admin-modal">
+    <button class="modal-close" id="rematch-close" aria-label="fermer">✕</button>
+    <div class="admin-modal-body">
+      <h2 class="admin-modal-title">re-matcher tmdb</h2>
+      <p style="color: var(--ink-soft);">remplace les métadonnées (affiche, casting, durée…) tout en gardant tes données perso (note, lieu, date).</p>
+      <div class="field">
+        <label>recherche tmdb</label>
+        <input type="text" id="rematch-input" placeholder="titre alternatif…" autocomplete="off">
+        <div class="note" id="rematch-status"></div>
+      </div>
+      <div id="rematch-results" class="search-results"></div>
+    </div>
+  </article>
+</div>
+
+<!-- ============== TOAST ============== -->
+<div class="toast" id="toast"></div>
+
+<!-- ============== FLOATING ADD BUTTON ============== -->
+<button class="floating-add" id="floating-add" style="display: none;" title="ajouter un film">+</button>
 
 <script>
 'use strict';
@@ -1634,6 +2171,9 @@ function openModal(f) {
     <div class="modal-section-label">synopsis</div>
     <p class="synopsis">${escapeHtml(f.synopsis)}</p>` : '';
 
+  // Edit form (admin mode only)
+  const editFormHtml = admin.active ? renderEditForm(f) : '';
+
   body.innerHTML = `
     <div class="modal-head">
       <div class="modal-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${f.poster})"` : ''}>${f.poster ? '' : "pas d'affiche"}</div>
@@ -1649,7 +2189,11 @@ function openModal(f) {
     ${synopsisHtml}
     ${castHtml}
     ${links.length ? `<div class="ext-links">${links.join('')}</div>` : ''}
+    ${editFormHtml}
   `;
+
+  // If admin, wire up the edit form
+  if (admin.active) wireEditForm(f);
 
   document.getElementById('modal-backdrop').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1743,16 +2287,6 @@ function renderStats() {
       <div class="stat-card-value">${avgPerYear}</div>
       <div class="stat-card-detail">moyenne (années complètes)</div>
     </div>
-    <div class="stat-card accent">
-      <div class="stat-card-label">année la plus active</div>
-      <div class="stat-card-value">${peakYear ? peakYear[0] : '—'}</div>
-      <div class="stat-card-detail">${peakYear ? peakYear[1] + ' films' : ''}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-label">au cinéma</div>
-      <div class="stat-card-value">${cinemaCount}</div>
-      <div class="stat-card-detail">${(cinemaCount * 100 / Math.max(1, vus.length)).toFixed(0)}% des vus</div>
-    </div>
     <div class="stat-card">
       <div class="stat-card-label">réalisateurs</div>
       <div class="stat-card-value">${directors.size}</div>
@@ -1760,12 +2294,11 @@ function renderStats() {
     </div>
   `;
 
-  renderSparkline();
+  renderMonthsChart();
   renderYearChart();
   renderRatingDist();
   renderGenreRatingChart();
-  renderDecadeChart();
-  renderDonutLieu();
+  renderHeatmap();
   renderGenreChart();
   renderDirectorChart();
   renderActorChart();
@@ -1773,29 +2306,25 @@ function renderStats() {
   renderDivergence();
 }
 
-function renderSparkline() {
-  // Films per month (only "vu" with date_vue parsable as YYYY-MM)
-  const buckets = new Map(); // "YYYY-MM" → count
+function renderMonthsChart() {
+  // Films per month (only "vu" with full YYYY-MM date)
+  const buckets = new Map();
   for (const f of state.films) {
     if (f.user?.statut !== 'vu') continue;
     const dv = f.user.date_vue;
-    if (!dv || dv.startsWith('before-')) continue;
-    let key;
-    if (dv.length === 4) continue; // skip year-only (no month info)
-    key = dv.slice(0, 7); // YYYY-MM
-    buckets.set(key, (buckets.get(key) || 0) + 1);
+    if (!dv || dv.startsWith('before-') || dv.length !== 7) continue;
+    buckets.set(dv, (buckets.get(dv) || 0) + 1);
   }
 
   if (buckets.size === 0) return;
 
-  // Build a continuous time series from min to max month
+  // Continuous month series from min to max
   const keys = [...buckets.keys()].sort();
-  const start = keys[0], end = keys[keys.length - 1];
+  let cur = keys[0];
+  const end = keys[keys.length - 1];
   const months = [];
-  let cur = start;
   while (cur <= end) {
     months.push({ key: cur, count: buckets.get(cur) || 0 });
-    // increment month
     const [y, m] = cur.split('-').map(Number);
     const nm = m === 12 ? 1 : m + 1;
     const ny = m === 12 ? y + 1 : y;
@@ -1803,45 +2332,143 @@ function renderSparkline() {
   }
 
   const max = Math.max(...months.map(d => d.count), 1);
-  const w = 1000, h = 140, pad = 8;
+  const W = 1000, H = 200;
+  const padLeft = 4, padRight = 4, padTop = 16, padBottom = 28;
+  const innerW = W - padLeft - padRight;
+  const innerH = H - padTop - padBottom;
   const n = months.length;
-  const xStep = (w - pad * 2) / Math.max(1, n - 1);
+  const gap = 2;
+  const barW = (innerW - gap * (n - 1)) / n;
 
-  let pathD = '';
-  let areaD = '';
+  // Build bars and year markers
+  let bars = '';
+  let yearLines = '';
+  let yearLabels = '';
+  let lastYear = null;
   months.forEach((d, i) => {
-    const x = pad + i * xStep;
-    const y = h - pad - (d.count / max) * (h - pad * 2);
-    pathD += (i === 0 ? 'M' : 'L') + ' ' + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
-    areaD += (i === 0 ? 'M' : 'L') + ' ' + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+    const x = padLeft + i * (barW + gap);
+    const barH = (d.count / max) * innerH;
+    const y = padTop + innerH - barH;
+    const [yr, mo] = d.key.split('-');
+    const isCurrent = d.count === max;
+    bars += `<rect class="month-bar" data-key="${d.key}" data-count="${d.count}" x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${barW.toFixed(2)}" height="${Math.max(1, barH).toFixed(2)}" fill="${isCurrent ? 'var(--hot)' : 'var(--warm)'}" rx="1"/>`;
+    // Year marker on January or at first month
+    if (mo === '01' || lastYear === null) {
+      yearLines += `<line x1="${(x - gap/2).toFixed(2)}" y1="${padTop}" x2="${(x - gap/2).toFixed(2)}" y2="${padTop + innerH}" stroke="var(--rule-strong)" stroke-width="0.5" stroke-dasharray="2 2"/>`;
+      yearLabels += `<text x="${(x + barW/2).toFixed(2)}" y="${H - 8}" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--ink-soft)" text-anchor="start" letter-spacing="0.5">${yr}</text>`;
+      lastYear = yr;
+    }
   });
-  // Close area
-  areaD += `L ${(pad + (n - 1) * xStep).toFixed(1)} ${h - pad} L ${pad} ${h - pad} Z`;
 
-  const svg = document.getElementById('sparkline');
-  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-  svg.innerHTML = `
-    <defs>
-      <linearGradient id="sparkfill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="var(--warm)" stop-opacity="0.35"/>
-        <stop offset="100%" stop-color="var(--warm)" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-    <path d="${areaD}" fill="url(#sparkfill)"/>
-    <path d="${pathD}" fill="none" stroke="var(--warm)" stroke-width="2" stroke-linejoin="round"/>
-    ${months.map((d, i) => {
-      if (d.count !== max) return '';
-      const x = pad + i * xStep;
-      const y = h - pad - (d.count / max) * (h - pad * 2);
-      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="var(--hot)"/>`;
-    }).join('')}
+  // Horizontal max line + label
+  const maxLine = `
+    <line x1="${padLeft}" y1="${padTop}" x2="${W - padRight}" y2="${padTop}" stroke="var(--rule)" stroke-width="0.5"/>
+    <text x="${padLeft}" y="${padTop - 4}" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--ink-mute)" letter-spacing="0.5">${max}</text>
   `;
 
-  document.getElementById('sparkline-legend').innerHTML = `
+  const svg = document.getElementById('months-chart');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = `
+    ${yearLines}
+    ${maxLine}
+    ${bars}
+    ${yearLabels}
+  `;
+
+  // Interactivity: hover/tap → tooltip
+  const tooltip = document.getElementById('months-tooltip');
+  const rects = svg.querySelectorAll('.month-bar');
+  rects.forEach(r => {
+    r.style.cursor = 'pointer';
+    r.addEventListener('mouseenter', (e) => showMonthTip(r));
+    r.addEventListener('touchstart', (e) => showMonthTip(r), { passive: true });
+  });
+  svg.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+
+  function showMonthTip(r) {
+    const key = r.dataset.key;
+    const count = r.dataset.count;
+    const [y, m] = key.split('-');
+    const names = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+    tooltip.innerHTML = `<strong>${count}</strong> film${count > 1 ? 's' : ''} <span>· ${names[parseInt(m, 10) - 1]} ${y}</span>`;
+    tooltip.style.opacity = '1';
+  }
+
+  // Bottom legend axis: just a hint
+  document.getElementById('months-axis').innerHTML = `<div style="display:flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute); margin-top: 8px;">
     <span>${prettyMonth(months[0].key)}</span>
     <span style="color: var(--ink-soft)">pic: ${max} films / mois</span>
     <span>${prettyMonth(months[months.length - 1].key)}</span>
-  `;
+  </div>`;
+}
+
+function renderHeatmap() {
+  // Top N most-frequent genres × ratings 1..6
+  const genreCounts = new Map();
+  for (const f of state.films) {
+    for (const g of (f.genres || [])) genreCounts.set(g, (genreCounts.get(g) || 0) + 1);
+  }
+  const topGenres = [...genreCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([g]) => g);
+
+  // Matrix: row = genre, col = rating (1..6)
+  const matrix = topGenres.map(g => {
+    const row = [0, 0, 0, 0, 0, 0]; // ratings 1-6
+    for (const f of state.films) {
+      if (!f.user?.rating) continue;
+      if (!(f.genres || []).includes(g)) continue;
+      row[f.user.rating - 1]++;
+    }
+    return { genre: g, row };
+  });
+
+  // Find max value across the matrix for color scaling
+  let maxCell = 0;
+  for (const m of matrix) for (const v of m.row) if (v > maxCell) maxCell = v;
+
+  // Render
+  const root = document.getElementById('heatmap');
+  // Header
+  let html = `<div class="heatmap-row heatmap-header">
+    <div class="heatmap-genre-label"></div>
+    <div class="heatmap-cell-header">1★</div>
+    <div class="heatmap-cell-header">2★</div>
+    <div class="heatmap-cell-header">3★</div>
+    <div class="heatmap-cell-header">4★</div>
+    <div class="heatmap-cell-header">5★</div>
+    <div class="heatmap-cell-header">❤</div>
+  </div>`;
+  for (const m of matrix) {
+    html += `<div class="heatmap-row">
+      <div class="heatmap-genre-label">${escapeHtml(m.genre)}</div>`;
+    for (let i = 0; i < 6; i++) {
+      const v = m.row[i];
+      const intensity = maxCell > 0 ? v / maxCell : 0;
+      const isFav = i === 5;
+      const bg = heatmapColor(intensity, isFav);
+      const textCol = intensity > 0.55 ? '#fff' : 'var(--ink-soft)';
+      html += `<div class="heatmap-cell" style="background:${bg}; color:${textCol}">${v > 0 ? v : '·'}</div>`;
+    }
+    html += `</div>`;
+  }
+  root.innerHTML = html;
+}
+
+function heatmapColor(intensity, isFav) {
+  // From bg-elev (low) to warm (mid) to hot (high) for normal cells
+  // For ❤ column, use a more red-ish progression
+  if (intensity === 0) return 'var(--bg-elev)';
+  if (isFav) {
+    // hot (red) gradient
+    const r = Math.round(28 + (255 - 28) * intensity);
+    const g = Math.round(39 + (107 - 39) * intensity);
+    const b = Math.round(47 + (74 - 47) * intensity);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+  // warm gradient: bg-elev #1c272f → warm #d4a574
+  const r = Math.round(28 + (212 - 28) * intensity);
+  const g = Math.round(39 + (165 - 39) * intensity);
+  const b = Math.round(47 + (116 - 47) * intensity);
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
 function prettyMonth(yyyymm) {
@@ -1866,79 +2493,6 @@ function renderRatingDist() {
     bar.innerHTML = `<span class="rating-bar-count">${counts[i]}</span>`;
     root.appendChild(bar);
   }
-}
-
-function renderDecadeChart() {
-  const counts = new Map();
-  for (const f of state.films) {
-    if (!f.year) continue;
-    const d = Math.floor(f.year / 10) * 10;
-    counts.set(d, (counts.get(d) || 0) + 1);
-  }
-  const sorted = [...counts.entries()].sort((a, b) => a[0] - b[0]);
-  const max = Math.max(...sorted.map(([, c]) => c), 1);
-  const root = document.getElementById('decade-chart');
-  root.innerHTML = '';
-  for (const [d, c] of sorted) {
-    const isCurrent = d >= 2020;
-    const row = document.createElement('div');
-    row.className = 'bar-row';
-    row.innerHTML = `
-      <div class="bar-label">${d}s</div>
-      <div class="bar-track"><div class="bar-fill ${isCurrent ? 'hot' : ''}" style="width: ${(c / max * 100).toFixed(1)}%"></div></div>
-      <div class="bar-value">${c}</div>`;
-    root.appendChild(row);
-  }
-}
-
-function renderDonutLieu() {
-  const counts = new Map();
-  for (const f of state.films) {
-    const l = f.user?.lieu || '?';
-    counts.set(l, (counts.get(l) || 0) + 1);
-  }
-  const entries = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-  const total = entries.reduce((s, [, c]) => s + c, 0);
-  const colors = ['#d4a574', '#ff6b4a', '#7fc28f', '#e3c16e', '#a59f86', '#5e6d75'];
-
-  const svg = document.getElementById('donut-lieu');
-  let acc = 0;
-  let svgContent = '';
-  entries.forEach((e, i) => {
-    const [lieu, c] = e;
-    const frac = c / total;
-    const start = acc;
-    const end = acc + frac;
-    acc = end;
-    const color = colors[i % colors.length];
-    svgContent += arcPath(50, 50, 35, 50, start, end, color);
-  });
-  svg.innerHTML = svgContent + `
-    <circle cx="50" cy="50" r="22" fill="var(--bg-elev)"/>
-    <text x="50" y="48" text-anchor="middle" font-family="Instrument Serif, serif" font-style="italic" font-size="14" fill="var(--ink)">${total}</text>
-    <text x="50" y="60" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="5" fill="var(--ink-mute)" letter-spacing="0.4">FILMS</text>`;
-
-  const legend = document.getElementById('donut-lieu-legend');
-  legend.innerHTML = entries.map((e, i) => {
-    const [l, c] = e;
-    return `<div class="donut-legend-row">
-      <div class="dot" style="background:${colors[i % colors.length]}"></div>
-      <div class="label">${escapeHtml(l)}</div>
-      <div class="val">${c} · ${Math.round(c / total * 100)}%</div>
-    </div>`;
-  }).join('');
-}
-
-// Build SVG path for an annulus segment
-function arcPath(cx, cy, rInner, rOuter, startFrac, endFrac, color) {
-  const a1 = (startFrac - 0.25) * 2 * Math.PI;
-  const a2 = (endFrac - 0.25) * 2 * Math.PI;
-  const large = (endFrac - startFrac) > 0.5 ? 1 : 0;
-  const x1 = cx + rOuter * Math.cos(a1), y1 = cy + rOuter * Math.sin(a1);
-  const x2 = cx + rOuter * Math.cos(a2), y2 = cy + rOuter * Math.sin(a2);
-  const x3 = cx + rInner * Math.cos(a2), y3 = cy + rInner * Math.sin(a2);
-  const x4 = cx + rInner * Math.cos(a1), y4 = cy + rInner * Math.sin(a1);
-  return `<path d="M ${x1} ${y1} A ${rOuter} ${rOuter} 0 ${large} 1 ${x2} ${y2} L ${x3} ${y3} A ${rInner} ${rInner} 0 ${large} 0 ${x4} ${y4} Z" fill="${color}"/>`;
 }
 
 function renderGenreChart() {
@@ -2163,8 +2717,746 @@ function escapeHtml(s) {
 }
 
 // ============================================================
-// EVENT WIRING
+// ADMIN MODE
 // ============================================================
+
+// Configuration: auto-detect repo from URL (GitHub Pages)
+const REPO = (function() {
+  const host = window.location.hostname;
+  const path = window.location.pathname;
+  if (host.endsWith('.github.io')) {
+    const owner = host.replace('.github.io', '');
+    const segs = path.split('/').filter(Boolean);
+    if (segs.length === 0) return { owner, repo: owner + '.github.io' };
+    return { owner, repo: segs[0] };
+  }
+  return null; // local file — admin disabled
+})();
+
+const admin = {
+  active: false,
+  tmdbKey: null,
+  ghToken: null,
+  filmsSHA: null,
+  pendingRematchFilmId: null, // when rematch flow is open, the film being rematched
+};
+
+function loadAdminCreds() {
+  admin.tmdbKey = localStorage.getItem('films_tmdb_key') || null;
+  admin.ghToken = localStorage.getItem('films_gh_token') || null;
+}
+
+function saveAdminCreds() {
+  if (admin.tmdbKey) localStorage.setItem('films_tmdb_key', admin.tmdbKey);
+  if (admin.ghToken) localStorage.setItem('films_gh_token', admin.ghToken);
+}
+
+function clearAdminCreds() {
+  localStorage.removeItem('films_tmdb_key');
+  localStorage.removeItem('films_gh_token');
+  admin.tmdbKey = null;
+  admin.ghToken = null;
+}
+
+// ----------------- TMDB --------------------
+const TMDB_BASE = 'https://api.themoviedb.org/3';
+const TMDB_IMG = 'https://image.tmdb.org/t/p';
+function tmdbImgUrl(path, size = 'w342') { return path ? TMDB_IMG + '/' + size + path : null; }
+
+async function tmdbSearch(query) {
+  if (!query) return [];
+  const url = `${TMDB_BASE}/search/multi?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&query=${encodeURIComponent(query)}&page=1&include_adult=false`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('TMDB search ' + r.status);
+  const data = await r.json();
+  return (data.results || []).filter(it => it.media_type === 'movie' || it.media_type === 'tv');
+}
+
+async function tmdbDetails(id, type) {
+  const path = type === 'tv' ? 'tv' : 'movie';
+  const url = `${TMDB_BASE}/${path}/${id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,external_ids`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('TMDB details ' + r.status);
+  return await r.json();
+}
+
+async function tmdbTestKey(key) {
+  const r = await fetch(`${TMDB_BASE}/configuration?api_key=${encodeURIComponent(key)}`);
+  if (r.status === 401) throw new Error('clé tmdb invalide');
+  if (!r.ok) throw new Error('tmdb injoignable (' + r.status + ')');
+}
+
+// Build a full film object from TMDB detail data (movie or tv)
+function buildFilmFromTmdb(detail, type, csvTitle = null) {
+  let director = null;
+  let cast = [];
+  if (detail.credits) {
+    if (type === 'movie') {
+      const dir = (detail.credits.crew || []).find(c => c.job === 'Director');
+      director = dir ? dir.name : null;
+    } else {
+      director = (detail.created_by || []).map(c => c.name).join(', ') || null;
+    }
+    cast = (detail.credits.cast || []).slice(0, 5).map(c => c.name);
+  }
+  const release = detail.release_date || detail.first_air_date || '';
+  const year = release ? parseInt(release.slice(0, 4), 10) : null;
+  const genres = (detail.genres || []).map(g => g.name);
+  return {
+    id: type + '-' + detail.id,
+    tmdb_id: detail.id,
+    type: type,
+    title: detail.title || detail.name,
+    original_title: detail.original_title || detail.original_name || null,
+    year: year,
+    release_date: release || null,
+    director: director,
+    cast: cast,
+    runtime: type === 'movie' ? (detail.runtime || null) : (Array.isArray(detail.episode_run_time) && detail.episode_run_time[0]) || null,
+    genres: genres,
+    poster: detail.poster_path ? tmdbImgUrl(detail.poster_path, 'w500') : null,
+    backdrop: detail.backdrop_path ? tmdbImgUrl(detail.backdrop_path, 'w1280') : null,
+    synopsis: detail.overview || null,
+    tmdb_rating: detail.vote_average || null,
+    imdb_id: (detail.external_ids && detail.external_ids.imdb_id) || detail.imdb_id || null,
+    source: csvTitle ? { csv_title: csvTitle } : { added_via: 'admin', added_at: new Date().toISOString() },
+  };
+}
+
+// ----------------- GITHUB --------------------
+async function ghTestToken() {
+  if (!REPO) throw new Error('admin disponible uniquement sur github pages');
+  const r = await fetch(`https://api.github.com/repos/${REPO.owner}/${REPO.repo}`, {
+    headers: { 'Authorization': `token ${admin.ghToken}`, 'Accept': 'application/vnd.github+json' }
+  });
+  if (r.status === 401 || r.status === 403) throw new Error('token github invalide ou sans permission');
+  if (r.status === 404) throw new Error('repo ' + REPO.owner + '/' + REPO.repo + ' inaccessible avec ce token');
+  if (!r.ok) throw new Error('github injoignable (' + r.status + ')');
+}
+
+async function ghGetFile(path) {
+  const r = await fetch(`https://api.github.com/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=main`, {
+    headers: { 'Authorization': `token ${admin.ghToken}`, 'Accept': 'application/vnd.github+json' }
+  });
+  if (!r.ok) throw new Error('github get ' + r.status);
+  const data = await r.json();
+  // content is base64; need UTF-8 decode
+  const bytes = atob(data.content.replace(/\n/g, ''));
+  // bytes here is a binary string. To get UTF-8 string:
+  const decoded = decodeURIComponent(escape(bytes));
+  return { content: decoded, sha: data.sha };
+}
+
+async function ghPutFile(path, content, sha, message) {
+  // Encode UTF-8 to base64
+  const b64 = btoa(unescape(encodeURIComponent(content)));
+  const body = { message, content: b64 };
+  if (sha) body.sha = sha;
+  const r = await fetch(`https://api.github.com/repos/${REPO.owner}/${REPO.repo}/contents/${path}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${admin.ghToken}`,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    throw new Error('github put ' + r.status + ': ' + (err.message || ''));
+  }
+  return await r.json(); // contains content.sha for new version
+}
+
+// Save current state.films to GitHub
+async function saveFilmsToGithub(message) {
+  // Always refetch SHA first to avoid stale conflicts (lightweight)
+  if (!admin.filmsSHA) {
+    const cur = await ghGetFile('films.json');
+    admin.filmsSHA = cur.sha;
+  }
+  const payload = {
+    version: 1,
+    generated_at: new Date().toISOString(),
+    count: state.films.length,
+    films: state.films,
+  };
+  const content = JSON.stringify(payload, null, 2);
+  try {
+    const result = await ghPutFile('films.json', content, admin.filmsSHA, message);
+    admin.filmsSHA = result.content.sha;
+  } catch (e) {
+    // If conflict (409), refetch and retry once
+    if (e.message.includes('409') || e.message.toLowerCase().includes('does not match')) {
+      const cur = await ghGetFile('films.json');
+      admin.filmsSHA = cur.sha;
+      const result = await ghPutFile('films.json', content, admin.filmsSHA, message);
+      admin.filmsSHA = result.content.sha;
+    } else {
+      throw e;
+    }
+  }
+}
+
+// ----------------- TOAST --------------------
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  setTimeout(() => el.className = 'toast', 3500);
+}
+
+// ----------------- ADMIN SETUP --------------------
+function openAdminSetup() {
+  const backdrop = document.getElementById('admin-setup-backdrop');
+  const tmdbInput = document.getElementById('admin-tmdb-key');
+  const ghInput = document.getElementById('admin-gh-token');
+  tmdbInput.value = admin.tmdbKey || '';
+  ghInput.value = admin.ghToken || '';
+  document.getElementById('admin-error').style.display = 'none';
+  document.getElementById('admin-success').style.display = 'none';
+  document.getElementById('admin-disable-btn').style.display = admin.active ? '' : 'none';
+  if (!REPO) {
+    document.getElementById('admin-error').textContent = 'admin disponible uniquement sur github pages (https://*.github.io/...)';
+    document.getElementById('admin-error').style.display = '';
+    document.getElementById('admin-activate-btn').disabled = true;
+  }
+  backdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAdminSetup() {
+  document.getElementById('admin-setup-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function activateAdmin() {
+  const tmdbKey = document.getElementById('admin-tmdb-key').value.trim();
+  const ghToken = document.getElementById('admin-gh-token').value.trim();
+  const errBox = document.getElementById('admin-error');
+  const okBox = document.getElementById('admin-success');
+  const btn = document.getElementById('admin-activate-btn');
+  errBox.style.display = 'none';
+  okBox.style.display = 'none';
+
+  if (!tmdbKey || tmdbKey.length < 20) {
+    errBox.textContent = 'clé tmdb manquante ou trop courte';
+    errBox.style.display = ''; return;
+  }
+  if (!ghToken || ghToken.length < 20) {
+    errBox.textContent = 'token github manquant';
+    errBox.style.display = ''; return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'test en cours…';
+  admin.tmdbKey = tmdbKey;
+  admin.ghToken = ghToken;
+  try {
+    await tmdbTestKey(tmdbKey);
+    await ghTestToken();
+    // Fetch films.json SHA so we're ready to save later
+    const cur = await ghGetFile('films.json');
+    admin.filmsSHA = cur.sha;
+    saveAdminCreds();
+    admin.active = true;
+    document.body.classList.add('admin-mode');
+    document.getElementById('nav-admin').classList.add('active');
+    document.getElementById('nav-admin').textContent = '🔓';
+    document.getElementById('floating-add').style.display = '';
+    okBox.textContent = '✓ admin actif — tu peux fermer cette fenêtre';
+    okBox.style.display = '';
+    document.getElementById('admin-disable-btn').style.display = '';
+    setTimeout(closeAdminSetup, 1200);
+  } catch (e) {
+    errBox.textContent = e.message;
+    errBox.style.display = '';
+    admin.tmdbKey = null;
+    admin.ghToken = null;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'tester et activer';
+  }
+}
+
+function disableAdmin() {
+  if (!confirm('déconnecter le mode admin ? les clés seront supprimées de ce navigateur.')) return;
+  clearAdminCreds();
+  admin.active = false;
+  admin.filmsSHA = null;
+  document.body.classList.remove('admin-mode');
+  document.getElementById('nav-admin').classList.remove('active');
+  document.getElementById('nav-admin').textContent = '🔒';
+  document.getElementById('floating-add').style.display = 'none';
+  closeAdminSetup();
+  showToast('admin déconnecté');
+}
+
+// ----------------- DATE HELPERS --------------------
+function formatDateLabel(dv) {
+  if (!dv) return '';
+  if (dv.startsWith('before-')) return 'avant ' + dv.slice(7);
+  if (/^\d{4}$/.test(dv)) return dv;
+  if (/^\d{4}-\d{2}$/.test(dv)) {
+    const [y, m] = dv.split('-');
+    const names = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    return names[parseInt(m, 10) - 1] + ' ' + y;
+  }
+  return dv;
+}
+
+function buildYearOptions(selectEl) {
+  selectEl.innerHTML = '<option value="">—</option>';
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear + 1; y >= 1900; y--) {
+    const opt = document.createElement('option');
+    opt.value = String(y);
+    opt.textContent = String(y);
+    selectEl.appendChild(opt);
+  }
+  const before = document.createElement('option');
+  before.value = 'before-2022';
+  before.textContent = 'avant 2022';
+  selectEl.appendChild(before);
+}
+
+// ----------------- ADD MODAL --------------------
+const addState = { selected: null, statut: 'a_voir', rating: null, lieu: '', dateVue: null };
+
+function openAddModal() {
+  // Reset state
+  addState.selected = null;
+  addState.statut = 'a_voir';
+  addState.rating = null;
+  addState.lieu = '';
+  addState.dateVue = null;
+  document.getElementById('add-search-input').value = '';
+  document.getElementById('add-search-status').textContent = '';
+  document.getElementById('add-results').innerHTML = '';
+  document.getElementById('add-form').style.display = 'none';
+  document.getElementById('add-form-error').style.display = 'none';
+  document.getElementById('add-rating-field').style.display = 'none';
+  document.getElementById('add-lieu-field').style.display = 'none';
+  document.getElementById('add-date-field').style.display = 'none';
+  // Reset radio
+  document.querySelectorAll('#add-statut .radio-btn').forEach(b => b.classList.toggle('active', b.dataset.value === 'a_voir'));
+  // Reset rating chips
+  document.querySelectorAll('#add-rating-chips .rating-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('add-lieu').value = '';
+  buildYearOptions(document.getElementById('add-date-year'));
+  document.getElementById('add-date-month').value = '';
+
+  document.getElementById('add-modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('add-search-input').focus(), 100);
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+let addSearchTimer = null;
+async function handleAddSearch(query) {
+  const resultsEl = document.getElementById('add-results');
+  const statusEl = document.getElementById('add-search-status');
+  if (!query || query.length < 2) {
+    resultsEl.innerHTML = '';
+    statusEl.textContent = '';
+    return;
+  }
+  statusEl.textContent = 'recherche…';
+  try {
+    const results = await tmdbSearch(query);
+    statusEl.textContent = results.length + ' résultats';
+    resultsEl.innerHTML = '';
+    for (const r of results.slice(0, 16)) {
+      const div = document.createElement('div');
+      div.className = 'search-result';
+      const year = (r.release_date || r.first_air_date || '').slice(0, 4) || '?';
+      div.innerHTML = `
+        <div class="search-result-poster" ${r.poster_path ? `style="background-image:url(${tmdbImgUrl(r.poster_path, 'w185')})"` : ''}></div>
+        <div class="search-result-title">${escapeHtml(r.title || r.name)}</div>
+        <div class="search-result-year">${year}</div>
+        <div class="search-result-type">${r.media_type === 'tv' ? 'série' : 'film'}</div>
+      `;
+      div.addEventListener('click', () => selectAddResult(r, div));
+      resultsEl.appendChild(div);
+    }
+  } catch (e) {
+    statusEl.textContent = 'erreur : ' + e.message;
+  }
+}
+
+function selectAddResult(result, el) {
+  document.querySelectorAll('#add-results .search-result').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  addState.selected = result;
+  // Show form
+  document.getElementById('add-form').style.display = '';
+  const year = (result.release_date || result.first_air_date || '').slice(0, 4) || '?';
+  document.getElementById('add-selected-preview').innerHTML = `
+    <div class="selected-preview">
+      <div class="selected-preview-poster" ${result.poster_path ? `style="background-image:url(${tmdbImgUrl(result.poster_path, 'w185')})"` : ''}></div>
+      <div class="selected-preview-meta">
+        <div class="selected-preview-title">${escapeHtml(result.title || result.name)}</div>
+        <div class="selected-preview-sub">${year} · ${result.media_type === 'tv' ? 'série' : 'film'}</div>
+      </div>
+    </div>
+  `;
+  updateAddFormVisibility();
+  // Scroll form into view
+  setTimeout(() => document.getElementById('add-form').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function updateAddFormVisibility() {
+  const isVu = addState.statut === 'vu';
+  document.getElementById('add-rating-field').style.display = isVu ? '' : 'none';
+  document.getElementById('add-lieu-field').style.display = isVu ? '' : 'none';
+  document.getElementById('add-date-field').style.display = isVu ? '' : 'none';
+}
+
+async function submitAddForm() {
+  const errEl = document.getElementById('add-form-error');
+  errEl.style.display = 'none';
+  if (!addState.selected) {
+    errEl.textContent = 'aucun film sélectionné';
+    errEl.style.display = '';
+    return;
+  }
+
+  // Check duplicate
+  const newId = addState.selected.media_type + '-' + addState.selected.id;
+  if (state.films.some(f => f.id === newId)) {
+    errEl.textContent = 'ce film est déjà dans ta collection.';
+    errEl.style.display = '';
+    return;
+  }
+
+  // Build user data
+  const isVu = addState.statut === 'vu';
+  let dateVue = null, dateLabel = null;
+  if (isVu) {
+    const y = document.getElementById('add-date-year').value;
+    const m = document.getElementById('add-date-month').value;
+    if (y === 'before-2022') {
+      dateVue = 'before-2022';
+      dateLabel = 'avant 2022';
+    } else if (y) {
+      dateVue = m ? (y + '-' + m) : y;
+      dateLabel = formatDateLabel(dateVue);
+    }
+  }
+  const userData = {
+    statut: isVu ? 'vu' : 'a_voir',
+    rating: isVu ? addState.rating : null,
+    favorite: addState.rating === 6,
+    lieu: document.getElementById('add-lieu').value || null,
+    date_vue: dateVue,
+    date_vue_label: dateLabel,
+    csv_genres: [],
+  };
+
+  const submitBtn = document.getElementById('add-submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'récupération des détails…';
+  try {
+    // Fetch full TMDB details
+    const detail = await tmdbDetails(addState.selected.id, addState.selected.media_type);
+    const film = buildFilmFromTmdb(detail, addState.selected.media_type);
+    film.user = userData;
+
+    // Add to state
+    state.films.unshift(film);
+
+    submitBtn.textContent = 'enregistrement sur github…';
+    await saveFilmsToGithub('add: ' + film.title);
+
+    // Refresh views
+    initFilters();
+    applyFilters();
+    renderStats();
+    closeAddModal();
+    showToast('✓ ajouté : ' + film.title, 'success');
+  } catch (e) {
+    errEl.textContent = 'erreur : ' + e.message;
+    errEl.style.display = '';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'ajouter à ma collection';
+  }
+}
+
+// ----------------- EDIT FILM (within detail modal) --------------------
+function renderEditForm(film) {
+  // Returns HTML for the edit form
+  const u = film.user || {};
+  const isVu = u.statut === 'vu';
+
+  return `
+    <div class="edit-section edit-form">
+      <div class="edit-section-title">mode édition</div>
+
+      <div class="field">
+        <label>statut</label>
+        <div class="radio-group" data-field="statut">
+          <button class="radio-btn ${u.statut === 'a_voir' ? 'active' : ''}" data-value="a_voir">à voir</button>
+          <button class="radio-btn ${u.statut === 'vu' ? 'active' : ''}" data-value="vu">vu</button>
+        </div>
+      </div>
+
+      <div class="field edit-vu-field" style="display: ${isVu ? '' : 'none'}">
+        <label>note</label>
+        <div class="rating-chips" data-field="rating">
+          ${[1, 2, 3, 4, 5, 6].map(r => {
+            const isActive = u.rating === r;
+            const isFav = r === 6;
+            return `<button class="rating-chip ${isFav ? 'fav' : ''} ${isActive ? 'active' : ''}" data-rating="${r}">${isFav ? '❤' : r + '★'}</button>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="field edit-vu-field" style="display: ${isVu ? '' : 'none'}">
+        <label>lieu</label>
+        <select data-field="lieu">
+          <option value="">—</option>
+          <option value="Cinéma" ${u.lieu === 'Cinéma' ? 'selected' : ''}>Cinéma</option>
+          <option value="Stremio" ${u.lieu === 'Stremio' ? 'selected' : ''}>Stremio</option>
+          <option value="Disque dur" ${u.lieu === 'Disque dur' ? 'selected' : ''}>Disque dur</option>
+          <option value="Autre" ${u.lieu === 'Autre' ? 'selected' : ''}>Autre</option>
+          <option value="À trouver" ${u.lieu === 'À trouver' ? 'selected' : ''}>À trouver</option>
+        </select>
+      </div>
+
+      <div class="field edit-vu-field" style="display: ${isVu ? '' : 'none'}">
+        <label>date vue</label>
+        <div style="display: flex; gap: 8px;">
+          <select data-field="year" id="edit-date-year" style="flex:1;"></select>
+          <select data-field="month" id="edit-date-month" style="flex:1;">
+            <option value="">—</option>
+            <option value="01">janvier</option><option value="02">février</option>
+            <option value="03">mars</option><option value="04">avril</option>
+            <option value="05">mai</option><option value="06">juin</option>
+            <option value="07">juillet</option><option value="08">août</option>
+            <option value="09">septembre</option><option value="10">octobre</option>
+            <option value="11">novembre</option><option value="12">décembre</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="edit-form-error error-inline" style="display: none;"></div>
+
+      <div class="edit-form-actions">
+        <button class="edit-save" data-film-id="${film.id}">enregistrer</button>
+        <button class="edit-rematch" data-film-id="${film.id}">re-matcher tmdb</button>
+        <button class="edit-delete" data-film-id="${film.id}">🗑 supprimer</button>
+      </div>
+    </div>
+  `;
+}
+
+function wireEditForm(film) {
+  // After modal is rendered, set initial year/month based on existing date_vue
+  const yearSel = document.getElementById('edit-date-year');
+  const monthSel = document.getElementById('edit-date-month');
+  if (yearSel) {
+    buildYearOptions(yearSel);
+    const dv = film.user?.date_vue || '';
+    if (dv.startsWith('before-')) {
+      yearSel.value = 'before-2022';
+      monthSel.value = '';
+    } else if (/^\d{4}-\d{2}$/.test(dv)) {
+      yearSel.value = dv.slice(0, 4);
+      monthSel.value = dv.slice(5, 7);
+    } else if (/^\d{4}$/.test(dv)) {
+      yearSel.value = dv;
+      monthSel.value = '';
+    }
+  }
+
+  // Statut radio
+  document.querySelectorAll('.edit-form .radio-group[data-field="statut"] .radio-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.edit-form .radio-group[data-field="statut"] .radio-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      const newStatut = b.dataset.value;
+      document.querySelectorAll('.edit-form .edit-vu-field').forEach(el => el.style.display = newStatut === 'vu' ? '' : 'none');
+    });
+  });
+
+  // Rating chips (single select)
+  document.querySelectorAll('.edit-form .rating-chips[data-field="rating"] .rating-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      const wasActive = c.classList.contains('active');
+      document.querySelectorAll('.edit-form .rating-chips[data-field="rating"] .rating-chip').forEach(x => x.classList.remove('active'));
+      if (!wasActive) c.classList.add('active');
+      // Toggling off if it was already active = no rating
+    });
+  });
+
+  // Save button
+  document.querySelector('.edit-form .edit-save').addEventListener('click', () => saveEditedFilm(film.id));
+  document.querySelector('.edit-form .edit-rematch').addEventListener('click', () => openRematchModal(film));
+  document.querySelector('.edit-form .edit-delete').addEventListener('click', () => deleteFilm(film));
+}
+
+async function saveEditedFilm(filmId) {
+  const filmIndex = state.films.findIndex(f => f.id === filmId);
+  if (filmIndex === -1) return;
+  const film = state.films[filmIndex];
+  const errEl = document.querySelector('.edit-form .edit-form-error');
+  errEl.style.display = 'none';
+
+  // Read form values
+  const statutBtn = document.querySelector('.edit-form .radio-group[data-field="statut"] .radio-btn.active');
+  const ratingBtn = document.querySelector('.edit-form .rating-chips[data-field="rating"] .rating-chip.active');
+  const lieuSel = document.querySelector('.edit-form select[data-field="lieu"]');
+  const yearSel = document.getElementById('edit-date-year');
+  const monthSel = document.getElementById('edit-date-month');
+
+  const statut = statutBtn ? statutBtn.dataset.value : 'vu';
+  const isVu = statut === 'vu';
+  const rating = (isVu && ratingBtn) ? parseInt(ratingBtn.dataset.rating, 10) : null;
+
+  let dateVue = null, dateLabel = null;
+  if (isVu) {
+    const y = yearSel.value;
+    const m = monthSel.value;
+    if (y === 'before-2022') { dateVue = 'before-2022'; dateLabel = 'avant 2022'; }
+    else if (y) { dateVue = m ? (y + '-' + m) : y; dateLabel = formatDateLabel(dateVue); }
+  }
+
+  const newUser = {
+    ...film.user,
+    statut,
+    rating,
+    favorite: rating === 6,
+    lieu: isVu ? (lieuSel.value || null) : (film.user?.lieu || null),
+    date_vue: dateVue,
+    date_vue_label: dateLabel,
+  };
+
+  const saveBtn = document.querySelector('.edit-form .edit-save');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'enregistrement…';
+  try {
+    state.films[filmIndex].user = newUser;
+    await saveFilmsToGithub('edit: ' + film.title);
+    initFilters();
+    applyFilters();
+    renderStats();
+    closeModal();
+    showToast('✓ ' + film.title + ' mis à jour', 'success');
+  } catch (e) {
+    errEl.textContent = 'erreur : ' + e.message;
+    errEl.style.display = '';
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'enregistrer';
+  }
+}
+
+async function deleteFilm(film) {
+  if (!confirm('supprimer "' + film.title + '" de ta collection ?')) return;
+  const idx = state.films.findIndex(f => f.id === film.id);
+  if (idx === -1) return;
+
+  try {
+    state.films.splice(idx, 1);
+    await saveFilmsToGithub('delete: ' + film.title);
+    initFilters();
+    applyFilters();
+    renderStats();
+    closeModal();
+    showToast('✓ supprimé : ' + film.title, 'success');
+  } catch (e) {
+    showToast('erreur : ' + e.message, 'error');
+  }
+}
+
+// ----------------- REMATCH MODAL --------------------
+function openRematchModal(film) {
+  admin.pendingRematchFilmId = film.id;
+  document.getElementById('rematch-input').value = film.title || '';
+  document.getElementById('rematch-status').textContent = '';
+  document.getElementById('rematch-results').innerHTML = '';
+  document.getElementById('rematch-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    document.getElementById('rematch-input').focus();
+    handleRematchSearch(film.title || '');
+  }, 100);
+}
+
+function closeRematchModal() {
+  document.getElementById('rematch-backdrop').classList.remove('open');
+  admin.pendingRematchFilmId = null;
+  document.body.style.overflow = '';
+}
+
+let rematchSearchTimer = null;
+async function handleRematchSearch(query) {
+  const resultsEl = document.getElementById('rematch-results');
+  const statusEl = document.getElementById('rematch-status');
+  if (!query || query.length < 2) {
+    resultsEl.innerHTML = '';
+    statusEl.textContent = '';
+    return;
+  }
+  statusEl.textContent = 'recherche…';
+  try {
+    const results = await tmdbSearch(query);
+    statusEl.textContent = results.length + ' résultats';
+    resultsEl.innerHTML = '';
+    for (const r of results.slice(0, 16)) {
+      const div = document.createElement('div');
+      div.className = 'search-result';
+      const year = (r.release_date || r.first_air_date || '').slice(0, 4) || '?';
+      div.innerHTML = `
+        <div class="search-result-poster" ${r.poster_path ? `style="background-image:url(${tmdbImgUrl(r.poster_path, 'w185')})"` : ''}></div>
+        <div class="search-result-title">${escapeHtml(r.title || r.name)}</div>
+        <div class="search-result-year">${year}</div>
+        <div class="search-result-type">${r.media_type === 'tv' ? 'série' : 'film'}</div>
+      `;
+      div.addEventListener('click', () => confirmRematch(r));
+      resultsEl.appendChild(div);
+    }
+  } catch (e) {
+    statusEl.textContent = 'erreur : ' + e.message;
+  }
+}
+
+async function confirmRematch(result) {
+  const filmId = admin.pendingRematchFilmId;
+  if (!filmId) return;
+  const idx = state.films.findIndex(f => f.id === filmId);
+  if (idx === -1) return;
+  const oldFilm = state.films[idx];
+
+  if (!confirm('remplacer les métadonnées par "' + (result.title || result.name) + '" ?')) return;
+
+  const statusEl = document.getElementById('rematch-status');
+  statusEl.textContent = 'récupération des détails…';
+  try {
+    const detail = await tmdbDetails(result.id, result.media_type);
+    const newFilm = buildFilmFromTmdb(detail, result.media_type, oldFilm.source?.csv_title);
+    newFilm.user = oldFilm.user; // keep user data intact
+    newFilm.source = { ...oldFilm.source, rematched_at: new Date().toISOString() };
+    state.films[idx] = newFilm;
+
+    statusEl.textContent = 'enregistrement…';
+    await saveFilmsToGithub('rematch: ' + oldFilm.title + ' → ' + newFilm.title);
+    initFilters();
+    applyFilters();
+    renderStats();
+    closeRematchModal();
+    closeModal();
+    showToast('✓ re-matché : ' + newFilm.title, 'success');
+  } catch (e) {
+    statusEl.textContent = 'erreur : ' + e.message;
+  }
+}
+
+
 function wireEvents() {
   // Status tabs — also sets per-tab default sort
   document.querySelectorAll('#status-tabs .tab').forEach(t => {
@@ -2263,6 +3555,86 @@ function wireEvents() {
   document.getElementById('nav-collection').addEventListener('click', () => showPage('collection'));
   document.getElementById('nav-stats').addEventListener('click', () => showPage('stats'));
   document.getElementById('brand').addEventListener('click', () => showPage('collection'));
+
+  // ========== ADMIN WIRING ==========
+
+  // Admin nav button
+  document.getElementById('nav-admin').addEventListener('click', () => openAdminSetup());
+
+  // Admin setup modal
+  document.getElementById('admin-setup-close').addEventListener('click', closeAdminSetup);
+  document.getElementById('admin-setup-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'admin-setup-backdrop') closeAdminSetup();
+  });
+  document.getElementById('admin-activate-btn').addEventListener('click', activateAdmin);
+  document.getElementById('admin-disable-btn').addEventListener('click', disableAdmin);
+  document.getElementById('admin-pat-help').addEventListener('click', (e) => {
+    e.preventDefault();
+    const h = document.getElementById('admin-help');
+    h.style.display = h.style.display === 'none' ? '' : 'none';
+  });
+
+  // Floating add button
+  document.getElementById('floating-add').addEventListener('click', () => {
+    if (!admin.active) {
+      openAdminSetup();
+      return;
+    }
+    openAddModal();
+  });
+
+  // Add modal
+  document.getElementById('add-modal-close').addEventListener('click', closeAddModal);
+  document.getElementById('add-cancel-btn').addEventListener('click', closeAddModal);
+  document.getElementById('add-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'add-modal-backdrop') closeAddModal();
+  });
+  document.getElementById('add-search-input').addEventListener('input', (e) => {
+    clearTimeout(addSearchTimer);
+    addSearchTimer = setTimeout(() => handleAddSearch(e.target.value.trim()), 300);
+  });
+  // statut radio
+  document.querySelectorAll('#add-statut .radio-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#add-statut .radio-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      addState.statut = b.dataset.value;
+      updateAddFormVisibility();
+    });
+  });
+  // rating chips (single-select)
+  document.querySelectorAll('#add-rating-chips .rating-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      const r = parseInt(c.dataset.rating, 10);
+      const wasActive = c.classList.contains('active');
+      document.querySelectorAll('#add-rating-chips .rating-chip').forEach(x => x.classList.remove('active'));
+      if (!wasActive) {
+        c.classList.add('active');
+        addState.rating = r;
+      } else {
+        addState.rating = null;
+      }
+    });
+  });
+  document.getElementById('add-submit-btn').addEventListener('click', submitAddForm);
+
+  // Rematch modal
+  document.getElementById('rematch-close').addEventListener('click', closeRematchModal);
+  document.getElementById('rematch-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'rematch-backdrop') closeRematchModal();
+  });
+  document.getElementById('rematch-input').addEventListener('input', (e) => {
+    clearTimeout(rematchSearchTimer);
+    rematchSearchTimer = setTimeout(() => handleRematchSearch(e.target.value.trim()), 300);
+  });
+
+  // Escape closes any open admin modal too
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('admin-setup-backdrop').classList.contains('open')) closeAdminSetup();
+    if (document.getElementById('add-modal-backdrop').classList.contains('open')) closeAddModal();
+    if (document.getElementById('rematch-backdrop').classList.contains('open')) closeRematchModal();
+  });
 }
 
 function showPage(name) {
@@ -2275,8 +3647,28 @@ function showPage(name) {
 // ============================================================
 // BOOT
 // ============================================================
+loadAdminCreds();
 wireEvents();
 loadFilms();
+
+// Auto-activate admin if creds previously saved
+(async function tryAutoAdmin() {
+  if (admin.tmdbKey && admin.ghToken && REPO) {
+    try {
+      await tmdbTestKey(admin.tmdbKey);
+      await ghTestToken();
+      admin.active = true;
+      document.body.classList.add('admin-mode');
+      document.getElementById('nav-admin').classList.add('active');
+      document.getElementById('nav-admin').textContent = '🔓';
+      document.getElementById('floating-add').style.display = '';
+      // We'll fetch SHA on first save lazily, no need to do it now
+    } catch (e) {
+      // Silently fail — user can re-activate via the admin button
+      console.warn('Auto-admin failed:', e.message);
+    }
+  }
+})();
 
 </script>
 </body>
