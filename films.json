@@ -1,8 +1,49 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T07:52:59.321Z",
-  "count": 528,
+  "generated_at": "2026-05-20T07:54:10.496Z",
+  "count": 529,
   "films": [
+    {
+      "id": "movie-310593",
+      "tmdb_id": 310593,
+      "type": "movie",
+      "title": "Youth – La giovinezza",
+      "original_title": "Youth – La giovinezza",
+      "year": 2015,
+      "release_date": "2015-05-20",
+      "director": "Paolo Sorrentino",
+      "cast": [
+        "Michael Caine",
+        "Harvey Keitel",
+        "Rachel Weisz",
+        "Paul Dano",
+        "Jane Fonda"
+      ],
+      "runtime": 118,
+      "genres": [
+        "Comédie",
+        "Drame",
+        "Romance"
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/8fruFhYsqc1ufF5NvG2PzKJQ5su.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/7nFfW8RM50PANBIdfI9Ut3FdoSB.jpg",
+      "synopsis": "Fred et Mick, deux vieux amis approchant les quatre-vingts ans, profitent de leurs vacances dans un bel hôtel au pied des Alpes. Fred, compositeur et chef d’orchestre désormais à la retraite, n’a aucune intention de revenir à la carrière musicale qu’il a abandonnée depuis longtemps, tandis que Mick, réalisateur, travaille toujours, s’empressant de terminer le scénario de son dernier film. Les deux amis savent que le temps leur est compté et décident de faire face à leur avenir ensemble. Mais contrairement à eux, personne ne semble se soucier du temps qui passe…",
+      "tmdb_rating": 6.899,
+      "imdb_id": "tt3312830",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-20T07:54:06.930Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-869886",
       "tmdb_id": 869886,
