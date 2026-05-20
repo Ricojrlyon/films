@@ -1,8 +1,49 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T07:51:04.673Z",
-  "count": 527,
+  "generated_at": "2026-05-20T07:52:37.614Z",
+  "count": 528,
   "films": [
+    {
+      "id": "movie-869886",
+      "tmdb_id": 869886,
+      "type": "movie",
+      "title": "A man",
+      "original_title": "ある男",
+      "year": 2022,
+      "release_date": "2022-11-18",
+      "director": "石川慶",
+      "cast": [
+        "妻夫木聡",
+        "Sakura Ando",
+        "Masataka Kubota",
+        "清野菜名",
+        "Hidekazu Mashima"
+      ],
+      "runtime": 121,
+      "genres": [
+        "Drame",
+        "Thriller",
+        "Mystère"
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/kui6UzS9CWolNhw6LmNhyjrYlfx.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/uQH89ABEDUzgVr06ILurTDO60jw.jpg",
+      "synopsis": "Rie découvre que son mari disparu n'est pas celui qu'il prétendait être. Elle engage un avocat pour connaître la véritable identité de celui qu'elle aimait.",
+      "tmdb_rating": 7.1,
+      "imdb_id": "tt20251822",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-20T07:51:24.746Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-582913",
       "tmdb_id": 582913,
