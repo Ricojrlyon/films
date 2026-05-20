@@ -1,8 +1,50 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T07:23:33.301Z",
-  "count": 526,
+  "generated_at": "2026-05-20T07:49:58.128Z",
+  "count": 527,
   "films": [
+    {
+      "id": "movie-582913",
+      "tmdb_id": 582913,
+      "type": "movie",
+      "title": "The Room",
+      "original_title": "The Room",
+      "year": 2019,
+      "release_date": "2019-09-12",
+      "director": "Christian Volckman",
+      "cast": [
+        "Olga Kurylenko",
+        "Kevin Janssens",
+        "Francis Chapman",
+        "Joshua Wilson",
+        "John Flanders"
+      ],
+      "runtime": 100,
+      "genres": [
+        "Horreur",
+        "Drame",
+        "Mystère",
+        "Science-Fiction"
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/9K0ptZ90ZceUykfYx2AcPhJPpSj.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/snbRXbkzEpc35mFDlwUg41cN8aw.jpg",
+      "synopsis": "Kate et Matt, la trentaine, sont en quête d'authenticité. Le jeune couple décide de quitter la ville et achète une grande maison à retaper dans un coin reculé perdu dans le Maryland. Peu après leur déménagement, ils découvrent une chambre étrange capable d'exaucer tous leurs désirs. Leur nouvelle vie devient un véritable conte de fée… pour le moment.",
+      "tmdb_rating": 6.406,
+      "imdb_id": "tt8485364",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-20T07:49:40.536Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1297842",
       "tmdb_id": 1297842,
