@@ -1,8 +1,47 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T07:55:14.390Z",
-  "count": 530,
+  "generated_at": "2026-05-20T12:23:55.733Z",
+  "count": 531,
   "films": [
+    {
+      "id": "movie-547258",
+      "tmdb_id": 547258,
+      "type": "movie",
+      "title": "Play",
+      "original_title": "Play",
+      "year": 2019,
+      "release_date": "2019-09-04",
+      "director": "Anthony Marciano",
+      "cast": [
+        "Max Boublil",
+        "Alice Isaaz",
+        "Malik Zidi",
+        "Arthur Périer",
+        "Noémie Lvovsky"
+      ],
+      "runtime": 108,
+      "genres": [
+        "Comédie"
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/95gpzUQBJH6rR6FpVyNe3aSjmwc.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/zDImqr200WJbigCQNdCF1DNeLTK.jpg",
+      "synopsis": "En 1993, Max a 13 ans quand on lui offre sa première caméra. Pendant 25 ans il ne s’arrêtera pas de filmer. La bande de potes, les amours, les succès, les échecs. Des années 90 aux années 2010, c’est le portrait de toute une génération qui se dessine à travers son objectif.",
+      "tmdb_rating": 7.252,
+      "imdb_id": "tt7998848",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-20T12:23:49.195Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-602334",
       "tmdb_id": 602334,
