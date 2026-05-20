@@ -1,8 +1,46 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T12:24:43.340Z",
-  "count": 530,
+  "generated_at": "2026-05-20T12:25:42.675Z",
+  "count": 531,
   "films": [
+    {
+      "id": "movie-382811",
+      "tmdb_id": 382811,
+      "type": "movie",
+      "title": "The End",
+      "original_title": "The End",
+      "year": 2016,
+      "release_date": "2016-02-14",
+      "director": "Guillaume Nicloux",
+      "cast": [
+        "Gérard Depardieu",
+        "Audrey Bonnet",
+        "Swann Arlaud"
+      ],
+      "runtime": 81,
+      "genres": [
+        "Mystère",
+        "Drame"
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/heYWVI5MXJxVKq3GVOYGieW2Bbg.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/xhOp74cdQOTiS2mOpipFDTWcXPN.jpg",
+      "synopsis": "Un homme part chasser dans une forêt qu'il croyait connaître. Mais son chien s'enfuit puis son fusil disparaît. Alors qu'il se perd, une atmosphère hostile et étrange s'installe...",
+      "tmdb_rating": 5.348,
+      "imdb_id": "tt5231798",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-20T12:25:40.486Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-547258",
       "tmdb_id": 547258,
