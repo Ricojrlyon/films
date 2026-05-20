@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T07:08:57.714Z",
+  "generated_at": "2026-05-20T07:23:33.301Z",
   "count": 526,
   "films": [
     {
@@ -35,12 +35,12 @@
         "added_at": "2026-05-20T07:08:57.469Z"
       },
       "user": {
-        "statut": "a_voir",
-        "rating": null,
+        "statut": "vu",
+        "rating": 2,
         "favorite": false,
-        "lieu": null,
-        "date_vue": null,
-        "date_vue_label": null,
+        "lieu": "Stremio",
+        "date_vue": "2026-05",
+        "date_vue_label": "Mai 2026",
         "csv_genres": []
       }
     },
