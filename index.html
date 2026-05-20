@@ -1301,28 +1301,135 @@ body.admin-mode .app::before {
   color: var(--ink-mute);
 }
 
-/* Radio buttons */
-.radio-group { display: flex; gap: 6px; }
-.radio-btn {
-  background: var(--bg);
+/* Radio buttons (segmented control style) */
+.radio-group { 
+  display: inline-flex; 
+  gap: 0; 
+  background: var(--bg-elev); 
   border: 1px solid var(--rule);
-  color: var(--ink-soft);
-  padding: 8px 16px;
+  border-radius: 999px;
+  padding: 4px;
+}
+.radio-btn {
+  background: transparent;
+  border: none;
+  color: var(--ink-mute);
+  padding: 10px 18px;
   border-radius: 999px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.18s;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.radio-btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+.radio-btn:hover:not(.active) { color: var(--ink); }
 .radio-btn.active {
   background: var(--warm);
   color: var(--bg);
-  border-color: var(--warm);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
+}
+.radio-btn::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rule-strong);
+  background: transparent;
+  transition: all 0.18s;
+  flex-shrink: 0;
+}
+.radio-btn.active::before {
+  border-color: var(--bg);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 4px var(--warm);
 }
 
-/* Floating add button */
+/* Explorer */
+.explorer-btn {
+  font-size: 14px;
+  padding: 6px 10px;
+  letter-spacing: 0;
+}
+.explorer-modal { max-width: 800px; }
+.search-result.in-collection {
+  border-color: var(--green);
+  opacity: 0.7;
+}
+.search-result.in-collection:hover { opacity: 1; }
+.explorer-detail-card {
+  margin-top: 24px;
+  background: var(--bg-elev);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+.explorer-backdrop {
+  width: 100%;
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.explorer-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(28, 39, 47, 0.9) 100%);
+}
+.explorer-detail-body {
+  padding: 24px;
+  position: relative;
+}
+.explorer-detail-poster {
+  width: 100px;
+  aspect-ratio: 2/3;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.explorer-detail-poster.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--ink-mute);
+  font-style: italic;
+  text-align: center;
+  padding: 8px;
+}
+.explorer-action {
+  background: var(--warm);
+  color: var(--bg);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.explorer-action:hover:not(:disabled) { background: var(--ink); }
+.explorer-action:disabled { opacity: 0.5; cursor: not-allowed; }
+.explorer-action.ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule-strong);
+}
+.explorer-action.ghost:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-soft); }
+
+
 .floating-add {
   position: fixed;
   bottom: 24px;
@@ -1487,6 +1594,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     <div class="nav">
       <button class="nav-btn active" data-page="collection" id="nav-collection">collection</button>
       <button class="nav-btn" data-page="stats" id="nav-stats">stats</button>
+      <button class="nav-btn explorer-btn" id="nav-explorer" title="recherche dans toute la base TMDB">🔍</button>
       <button class="nav-btn admin-btn" id="nav-admin" title="mode édition">🔒</button>
     </div>
   </header>
@@ -1783,6 +1891,33 @@ button:focus-visible, input:focus-visible, select:focus-visible {
         <div class="note" id="rematch-status"></div>
       </div>
       <div id="rematch-results" class="search-results"></div>
+    </div>
+  </article>
+</div>
+
+<!-- ============== TMDB EXPLORER MODAL ============== -->
+<div class="modal-backdrop admin-modal-backdrop" id="explorer-backdrop">
+  <article class="modal admin-modal explorer-modal">
+    <button class="modal-close" id="explorer-close" aria-label="fermer">✕</button>
+    <div class="admin-modal-body">
+      <h2 class="admin-modal-title">explorer tmdb</h2>
+      <p style="color: var(--ink-soft);">recherche libre dans la base tmdb (films + séries) et consulte leurs fiches détaillées.</p>
+
+      <div id="explorer-needs-key" style="display: none;">
+        <div class="error-inline">
+          il faut configurer une clé tmdb pour utiliser l'explorer. clique <a href="#" id="explorer-setup-link" style="color: var(--warm); text-decoration: underline;">ici</a> pour la renseigner.
+        </div>
+      </div>
+
+      <div id="explorer-main">
+        <div class="field">
+          <label>recherche</label>
+          <input type="text" id="explorer-input" placeholder="titre, réalisateur, série…" autocomplete="off">
+          <div class="note" id="explorer-status"></div>
+        </div>
+        <div id="explorer-results" class="search-results"></div>
+        <div id="explorer-detail" style="display: none;"></div>
+      </div>
     </div>
   </article>
 </div>
@@ -2713,7 +2848,7 @@ function openModalFromCard(filmId) {
 // HELPERS
 // ============================================================
 function escapeHtml(s) {
-  return (s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
 // ============================================================
@@ -3456,6 +3591,182 @@ async function confirmRematch(result) {
   }
 }
 
+// ----------------- TMDB EXPLORER --------------------
+function openExplorer() {
+  if (!admin.tmdbKey) {
+    document.getElementById('explorer-needs-key').style.display = '';
+    document.getElementById('explorer-main').style.display = 'none';
+  } else {
+    document.getElementById('explorer-needs-key').style.display = 'none';
+    document.getElementById('explorer-main').style.display = '';
+    document.getElementById('explorer-input').value = '';
+    document.getElementById('explorer-status').textContent = '';
+    document.getElementById('explorer-results').innerHTML = '';
+    document.getElementById('explorer-detail').style.display = 'none';
+    document.getElementById('explorer-detail').innerHTML = '';
+  }
+  document.getElementById('explorer-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    const inp = document.getElementById('explorer-input');
+    if (inp) inp.focus();
+  }, 100);
+}
+
+function closeExplorer() {
+  document.getElementById('explorer-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+let explorerSearchTimer = null;
+async function handleExplorerSearch(query) {
+  const resultsEl = document.getElementById('explorer-results');
+  const statusEl = document.getElementById('explorer-status');
+  const detailEl = document.getElementById('explorer-detail');
+  detailEl.style.display = 'none';
+  detailEl.innerHTML = '';
+  if (!query || query.length < 2) {
+    resultsEl.innerHTML = '';
+    statusEl.textContent = '';
+    return;
+  }
+  statusEl.textContent = 'recherche…';
+  try {
+    const results = await tmdbSearch(query);
+    statusEl.textContent = results.length + ' résultats';
+    resultsEl.innerHTML = '';
+    for (const r of results.slice(0, 20)) {
+      const div = document.createElement('div');
+      div.className = 'search-result';
+      const year = (r.release_date || r.first_air_date || '').slice(0, 4) || '?';
+      const newId = r.media_type + '-' + r.id;
+      const inCollection = state.films.some(f => f.id === newId);
+      div.innerHTML = `
+        <div class="search-result-poster" ${r.poster_path ? `style="background-image:url(${tmdbImgUrl(r.poster_path, 'w185')})"` : ''}></div>
+        <div class="search-result-title">${escapeHtml(r.title || r.name)}</div>
+        <div class="search-result-year">${year}</div>
+        <div class="search-result-type">${r.media_type === 'tv' ? 'série' : 'film'}${inCollection ? ' · dans ma collec' : ''}</div>
+      `;
+      if (inCollection) div.classList.add('in-collection');
+      div.addEventListener('click', () => showExplorerDetail(r));
+      resultsEl.appendChild(div);
+    }
+  } catch (e) {
+    statusEl.textContent = 'erreur : ' + e.message;
+  }
+}
+
+async function showExplorerDetail(result) {
+  const detailEl = document.getElementById('explorer-detail');
+  detailEl.style.display = '';
+  detailEl.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--ink-mute);">chargement des détails…</div>';
+  setTimeout(() => detailEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+
+  try {
+    const detail = await tmdbDetails(result.id, result.media_type);
+    const film = buildFilmFromTmdb(detail, result.media_type);
+    const newId = film.id;
+    const existing = state.films.find(f => f.id === newId);
+
+    let actionsHtml = '';
+    if (existing) {
+      actionsHtml = `
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+          <button class="explorer-action" id="explorer-open-collection">↗ voir dans ma collection</button>
+        </div>
+        <div style="margin-top: 8px; font-size: 12px; color: var(--green);">✓ déjà dans ta collection (${existing.user?.statut === 'vu' ? 'vu' : 'à voir'})</div>
+      `;
+    } else if (admin.active) {
+      actionsHtml = `
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+          <button class="explorer-action" id="explorer-add-avoir">+ à ma liste à voir</button>
+          <button class="explorer-action ghost" id="explorer-add-vu">+ comme déjà vu</button>
+        </div>
+      `;
+    } else {
+      actionsHtml = `<div style="margin-top: 16px; font-size: 12px; color: var(--ink-mute); font-style: italic;">active le mode admin pour ajouter ce film à ta collection.</div>`;
+    }
+
+    const links = [];
+    if (film.imdb_id) links.push(`<a class="ext-link" href="https://www.imdb.com/title/${film.imdb_id}" target="_blank" rel="noopener">imdb ↗</a>`);
+    links.push(`<a class="ext-link" href="https://www.themoviedb.org/${film.type === 'tv' ? 'tv' : 'movie'}/${film.tmdb_id}" target="_blank" rel="noopener">tmdb ↗</a>`);
+
+    const meta = [];
+    if (film.year) meta.push(String(film.year));
+    if (film.runtime) meta.push(film.runtime + ' min');
+    if (film.type === 'tv') meta.push('série');
+    if (film.tmdb_rating) meta.push(film.tmdb_rating.toFixed(1) + '/10 tmdb');
+
+    detailEl.innerHTML = `
+      <div class="explorer-detail-card">
+        ${film.backdrop ? `<div class="explorer-backdrop" style="background-image:url(${film.backdrop})"></div>` : ''}
+        <div class="explorer-detail-body">
+          <div style="display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px;">
+            <div class="explorer-detail-poster ${film.poster ? '' : 'empty'}" ${film.poster ? `style="background-image:url(${film.poster})"` : ''}></div>
+            <div style="flex: 1; min-width: 0;">
+              <h3 style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 26px; margin: 0 0 4px; color: var(--ink);">${escapeHtml(film.title)}</h3>
+              ${film.original_title && film.original_title !== film.title ? `<div style="font-style: italic; color: var(--ink-mute); margin-bottom: 6px;">${escapeHtml(film.original_title)}</div>` : ''}
+              ${film.director ? `<div style="color: var(--ink-soft); font-size: 13px; margin-bottom: 4px;">par <strong style="color: var(--ink);">${escapeHtml(film.director)}</strong></div>` : ''}
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.04em;">${meta.map(escapeHtml).join(' · ')}</div>
+            </div>
+          </div>
+          ${film.synopsis ? `<p style="color: var(--ink-soft); line-height: 1.55; font-size: 14px;">${escapeHtml(film.synopsis)}</p>` : ''}
+          ${film.genres && film.genres.length ? `<div class="genres" style="margin: 12px 0;">${film.genres.map(g => `<span class="genre-pill">${escapeHtml(g)}</span>`).join('')}</div>` : ''}
+          ${film.cast && film.cast.length ? `
+            <div style="margin-top: 16px;">
+              <div class="modal-section-label">casting</div>
+              <div class="cast-list">${film.cast.map(c => `<div class="cast-item">${escapeHtml(c)}</div>`).join('')}</div>
+            </div>
+          ` : ''}
+          ${links.length ? `<div class="ext-links" style="margin-top: 16px;">${links.join('')}</div>` : ''}
+          ${actionsHtml}
+        </div>
+      </div>
+    `;
+
+    if (existing) {
+      document.getElementById('explorer-open-collection').addEventListener('click', () => {
+        closeExplorer();
+        openModal(existing);
+      });
+    } else if (admin.active) {
+      document.getElementById('explorer-add-avoir').addEventListener('click', () => addFromExplorer(film, 'a_voir'));
+      document.getElementById('explorer-add-vu').addEventListener('click', () => addFromExplorer(film, 'vu'));
+    }
+  } catch (e) {
+    detailEl.innerHTML = `<div class="error-inline">erreur : ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function addFromExplorer(film, statut) {
+  if (!admin.active) { showToast('mode admin requis pour ajouter', 'error'); return; }
+  film.user = {
+    statut: statut,
+    rating: null,
+    favorite: false,
+    lieu: null,
+    date_vue: null,
+    date_vue_label: null,
+    csv_genres: [],
+  };
+  document.querySelectorAll('.explorer-action').forEach(b => b.disabled = true);
+  try {
+    state.films.unshift(film);
+    await saveFilmsToGithub('add (explorer): ' + film.title);
+    initFilters();
+    applyFilters();
+    renderStats();
+    showToast('✓ ajouté à "' + (statut === 'vu' ? 'vus' : 'à voir') + '" : ' + film.title, 'success');
+    // Refresh detail panel to show "déjà dans collec"
+    await showExplorerDetail({ id: film.tmdb_id, media_type: film.type });
+  } catch (e) {
+    showToast('erreur : ' + e.message, 'error');
+    const idx = state.films.findIndex(f => f.id === film.id);
+    if (idx >= 0) state.films.splice(idx, 1);
+    document.querySelectorAll('.explorer-action').forEach(b => b.disabled = false);
+  }
+}
+
 
 function wireEvents() {
   // Status tabs — also sets per-tab default sort
@@ -3628,12 +3939,29 @@ function wireEvents() {
     rematchSearchTimer = setTimeout(() => handleRematchSearch(e.target.value.trim()), 300);
   });
 
+  // Explorer
+  document.getElementById('nav-explorer').addEventListener('click', openExplorer);
+  document.getElementById('explorer-close').addEventListener('click', closeExplorer);
+  document.getElementById('explorer-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'explorer-backdrop') closeExplorer();
+  });
+  document.getElementById('explorer-input').addEventListener('input', (e) => {
+    clearTimeout(explorerSearchTimer);
+    explorerSearchTimer = setTimeout(() => handleExplorerSearch(e.target.value.trim()), 300);
+  });
+  document.getElementById('explorer-setup-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    closeExplorer();
+    openAdminSetup();
+  });
+
   // Escape closes any open admin modal too
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     if (document.getElementById('admin-setup-backdrop').classList.contains('open')) closeAdminSetup();
     if (document.getElementById('add-modal-backdrop').classList.contains('open')) closeAddModal();
     if (document.getElementById('rematch-backdrop').classList.contains('open')) closeRematchModal();
+    if (document.getElementById('explorer-backdrop').classList.contains('open')) closeExplorer();
   });
 }
 
