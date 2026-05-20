@@ -144,13 +144,13 @@ body {
   font-size: 9px;
 }
 
-.search-wrap { flex: 1; min-width: 200px; max-width: 320px; position: relative; }
+.search-wrap { flex: 1; min-width: 240px; max-width: 380px; position: relative; }
 .search-input {
   width: 100%;
   background: var(--bg-elev);
   border: 1px solid var(--rule);
   color: var(--ink);
-  padding: 9px 14px 9px 36px;
+  padding: 9px 78px 9px 36px;
   border-radius: 999px;
   font-family: 'Inter Tight', sans-serif;
   font-size: 13px;
@@ -168,6 +168,26 @@ body {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   pointer-events: none;
+}
+.search-tmdb-link {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.search-tmdb-link:hover {
+  color: var(--warm);
+  border-color: var(--warm);
 }
 
 .filter-toggle {
@@ -600,33 +620,40 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ink-mute);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
-.rating-cell-value {
+.rating-cell-stars-big {
+  font-size: 28px;
+  color: var(--warm);
+  letter-spacing: 3px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.rating-cell-stars-big.fav { color: var(--hot); font-size: 34px; letter-spacing: 0; }
+.rating-cell-value-medium {
   font-family: 'Instrument Serif', Georgia, serif;
   font-style: italic;
-  font-size: 28px;
-  color: var(--ink);
+  font-size: 26px;
+  color: var(--ink-soft);
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
+  margin-bottom: 4px;
 }
-.rating-cell-value .denominator {
+.rating-cell-footnote {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.06em;
+}
+.rating-cell-value-medium .denominator,
+.rating-cell-footnote .denominator {
   font-family: 'Inter Tight', sans-serif;
   font-style: normal;
-  font-size: 14px;
+  font-size: 11px;
   color: var(--ink-mute);
   font-weight: 400;
 }
-.rating-cell-stars {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--warm);
-  letter-spacing: 0.04em;
-}
-.rating-cell-stars.fav { color: var(--hot); }
-.rating-cell.fav .rating-cell-value { color: var(--hot); }
-.rating-cell.tmdb .rating-cell-value { color: var(--ink-soft); }
 
 /* viewing info card */
 .viewing-card {
@@ -730,7 +757,7 @@ body {
   margin-bottom: 32px;
 }
 @media (min-width: 720px) {
-  .stats-numbers { grid-template-columns: repeat(4, 1fr); }
+  .stats-numbers { grid-template-columns: repeat(3, 1fr); }
 }
 .stat-card {
   background: var(--bg-elev);
@@ -859,16 +886,17 @@ body {
 /* heatmap */
 .heatmap-row {
   display: grid;
-  grid-template-columns: 130px repeat(6, 1fr);
+  grid-template-columns: 110px repeat(6, 1fr);
   gap: 3px;
   margin-bottom: 3px;
+  max-width: 560px;
 }
 @media (max-width: 600px) {
-  .heatmap-row { grid-template-columns: 90px repeat(6, 1fr); gap: 2px; }
+  .heatmap-row { grid-template-columns: 78px repeat(6, 1fr); gap: 2px; }
 }
-.heatmap-header { margin-bottom: 8px; }
+.heatmap-header { margin-bottom: 6px; }
 .heatmap-genre-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--ink);
   display: flex;
   align-items: center;
@@ -878,26 +906,26 @@ body {
 }
 .heatmap-cell-header {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--ink-mute);
   text-align: center;
-  padding: 4px 0;
+  padding: 2px 0;
   font-weight: 500;
 }
 .heatmap-cell {
-  aspect-ratio: 1.4 / 1;
+  aspect-ratio: 2 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   border-radius: 3px;
   transition: transform 0.1s;
 }
 .heatmap-cell:hover { transform: scale(1.05); }
 @media (max-width: 600px) {
-  .heatmap-cell { font-size: 10px; }
+  .heatmap-cell { font-size: 9px; aspect-ratio: 1.6 / 1; }
 }
 
 /* rating distribution */
@@ -1429,29 +1457,6 @@ body.admin-mode .app::before {
 }
 .explorer-action.ghost:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-soft); }
 
-
-.floating-add {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--warm);
-  color: var(--bg);
-  border: none;
-  font-size: 28px;
-  font-weight: 300;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-  z-index: 50;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.floating-add:hover { background: var(--ink); transform: translateY(-2px); }
-
 /* Toast */
 .toast {
   position: fixed;
@@ -1594,7 +1599,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     <div class="nav">
       <button class="nav-btn active" data-page="collection" id="nav-collection">collection</button>
       <button class="nav-btn" data-page="stats" id="nav-stats">stats</button>
-      <button class="nav-btn explorer-btn" id="nav-explorer" title="recherche dans toute la base TMDB">🔍</button>
       <button class="nav-btn admin-btn" id="nav-admin" title="mode édition">🔒</button>
     </div>
   </header>
@@ -1610,6 +1614,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
       <div class="search-wrap">
         <span class="search-icon">⌕</span>
         <input class="search-input" id="search" type="text" placeholder="rechercher un titre, un·e réal…">
+        <button class="search-tmdb-link" id="search-tmdb-link" title="rechercher sur tmdb">→ tmdb</button>
       </div>
       <button class="filter-toggle" id="filter-toggle">
         <span>filtres</span>
@@ -1771,40 +1776,79 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   <article class="modal admin-modal">
     <button class="modal-close" id="admin-setup-close" aria-label="fermer">✕</button>
     <div class="admin-modal-body">
-      <h2 class="admin-modal-title">mode édition</h2>
-      <p style="color: var(--ink-soft);">Pour modifier, ajouter ou supprimer des films, deux clés sont nécessaires. Elles sont stockées dans ce navigateur uniquement — elles ne sont jamais publiées sur ton site.</p>
 
-      <div class="field">
-        <label>clé api tmdb</label>
-        <input type="password" id="admin-tmdb-key" placeholder="32 caractères hexadécimaux" autocomplete="off">
-        <div class="note">la même que pour la migration. sert à chercher des films.</div>
+      <!-- VIEW: SETUP (first-time) -->
+      <div class="admin-view" id="admin-view-setup" style="display: none;">
+        <h2 class="admin-modal-title">activer le mode édition</h2>
+        <p style="color: var(--ink-soft);">Une seule fois, tu as besoin de coller ton <strong>token github</strong> et de choisir un <strong>code</strong>. Ensuite, pour modifier des films, tu n'auras qu'à entrer ton code.</p>
+
+        <div class="field">
+          <label>1. github personal access token</label>
+          <input type="password" id="admin-setup-pat" placeholder="ghp_… ou github_pat_…" autocomplete="off">
+          <div class="note">colle ton token github. <a href="#" id="admin-pat-help" style="color: var(--warm); text-decoration: underline;">→ comment en créer un</a></div>
+        </div>
+
+        <div id="admin-help" style="display: none; background: var(--bg-elev); padding: 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: var(--ink-soft); line-height: 1.6;">
+          <strong style="color: var(--ink);">Créer un token GitHub :</strong>
+          <ol style="padding-left: 20px; margin: 8px 0;">
+            <li>Va sur <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color: var(--warm);">github.com/settings/personal-access-tokens/new</a></li>
+            <li>Token name : <code>films-admin</code></li>
+            <li>Expiration : <strong>No expiration</strong> (pour ne plus jamais y revenir)</li>
+            <li>Repository access → <strong>Only select repositories</strong> → coche <code>films</code></li>
+            <li>Permissions → <strong>Repository permissions</strong> → <strong>Contents</strong> → <strong>Read and write</strong></li>
+            <li>Generate token (en bas) → copie-le ici</li>
+          </ol>
+        </div>
+
+        <div class="field">
+          <label>2. choisis ton code (4+ caractères)</label>
+          <input type="password" id="admin-setup-code" placeholder="ton code secret" autocomplete="off">
+          <div class="note">tu auras besoin de ce code à chaque session pour activer l'édition. choisis quelque chose de simple à retenir mais que toi seul connais.</div>
+        </div>
+
+        <div class="field">
+          <label>3. confirme ton code</label>
+          <input type="password" id="admin-setup-code-confirm" placeholder="le même code" autocomplete="off">
+        </div>
+
+        <div class="error-inline admin-err" style="display: none;"></div>
+        <div class="success-inline admin-ok" style="display: none;"></div>
+
+        <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+          <button id="admin-setup-btn">activer</button>
+        </div>
       </div>
 
-      <div class="field">
-        <label>github personal access token</label>
-        <input type="password" id="admin-gh-token" placeholder="ghp_… ou github_pat_…" autocomplete="off">
-        <div class="note">sert à enregistrer tes modifications dans le repo. <a href="#" id="admin-pat-help" style="color: var(--warm); text-decoration: underline;">→ comment en créer un</a></div>
+      <!-- VIEW: UNLOCK (encrypted PAT exists, need code) -->
+      <div class="admin-view" id="admin-view-unlock" style="display: none;">
+        <h2 class="admin-modal-title">activer l'édition</h2>
+        <p style="color: var(--ink-soft);">entre ton code pour activer le mode édition.</p>
+
+        <div class="field">
+          <label>ton code</label>
+          <input type="password" id="admin-unlock-code" placeholder="ton code secret" autocomplete="off">
+        </div>
+
+        <div class="error-inline admin-err" style="display: none;"></div>
+        <div class="success-inline admin-ok" style="display: none;"></div>
+
+        <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; align-items: center;">
+          <button id="admin-unlock-btn">déverrouiller</button>
+          <a href="#" id="admin-reset-link" style="color: var(--ink-mute); font-size: 12px; text-decoration: underline;">code oublié, tout recommencer</a>
+        </div>
       </div>
 
-      <div id="admin-help" style="display: none; background: var(--bg-elev); padding: 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: var(--ink-soft); line-height: 1.6;">
-        <strong style="color: var(--ink);">Créer un token GitHub :</strong>
-        <ol style="padding-left: 20px; margin: 8px 0;">
-          <li>Va sur <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color: var(--warm);">github.com/settings/personal-access-tokens/new</a></li>
-          <li>Token name : <code>films-admin</code></li>
-          <li>Expiration : 1 an (ou ce que tu veux)</li>
-          <li>Repository access → <strong>Only select repositories</strong> → coche <code>films</code></li>
-          <li>Permissions → <strong>Repository permissions</strong> → <strong>Contents</strong> → <strong>Read and write</strong></li>
-          <li>Generate token (en bas) → copie-le ici</li>
-        </ol>
+      <!-- VIEW: MANAGE (admin active) -->
+      <div class="admin-view" id="admin-view-manage" style="display: none;">
+        <h2 class="admin-modal-title">mode édition actif</h2>
+        <p style="color: var(--ink-soft);">Tu peux maintenant modifier, ajouter, supprimer ou re-matcher des films. Ouvre un film pour voir le formulaire d'édition.</p>
+
+        <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+          <button class="ghost" id="admin-lock-btn">verrouiller (rester admin pour cette session)</button>
+          <button class="ghost" id="admin-disable-btn">tout réinitialiser (oublier mon code)</button>
+        </div>
       </div>
 
-      <div id="admin-error" class="error-inline" style="display: none;"></div>
-      <div id="admin-success" class="success-inline" style="display: none;"></div>
-
-      <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
-        <button id="admin-activate-btn">tester et activer</button>
-        <button class="ghost" id="admin-disable-btn" style="display: none;">déconnecter l'admin</button>
-      </div>
     </div>
   </article>
 </div>
@@ -1850,7 +1894,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
             <option value="Stremio">Stremio</option>
             <option value="Disque dur">Disque dur</option>
             <option value="Autre">Autre</option>
-            <option value="À trouver">À trouver</option>
           </select>
         </div>
         <div class="field" id="add-date-field" style="display: none;">
@@ -1924,9 +1967,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
 <!-- ============== TOAST ============== -->
 <div class="toast" id="toast"></div>
-
-<!-- ============== FLOATING ADD BUTTON ============== -->
-<button class="floating-add" id="floating-add" style="display: none;" title="ajouter un film">+</button>
 
 <script>
 'use strict';
@@ -2237,27 +2277,26 @@ function openModal(f) {
     bg.style.background = 'var(--bg-elev)';
   }
 
-  // Ratings: user (1-6) and TMDB (0-10)
+  // Ratings: user (1-6, stars primary) and TMDB (0-10)
   const rating = f.user?.rating;
   const fav = !!f.user?.favorite;
   const userRatingHtml = rating ? (() => {
-    const stars10 = (rating * (10 / 6)).toFixed(1); // converted to /10
     const visualStars = fav
       ? '❤'
-      : '★'.repeat(rating) + '<span style="color:var(--ink-mute)">★</span>'.repeat(5 - rating);
+      : '★'.repeat(rating) + '<span style="color:rgba(255,255,255,0.12)">★</span>'.repeat(6 - rating);
     return `
       <div class="rating-cell ${fav ? 'fav' : ''}">
         <div class="rating-cell-label">ta note</div>
-        <div class="rating-cell-value">${stars10}<span class="denominator">/10</span></div>
-        <div class="rating-cell-stars ${fav ? 'fav' : ''}">${visualStars}</div>
+        <div class="rating-cell-stars-big ${fav ? 'fav' : ''}">${visualStars}</div>
+        <div class="rating-cell-footnote">${rating}<span class="denominator"> / 6</span></div>
       </div>`;
   })() : '';
 
   const tmdbRatingHtml = f.tmdb_rating ? `
     <div class="rating-cell tmdb">
       <div class="rating-cell-label">tmdb</div>
-      <div class="rating-cell-value">${f.tmdb_rating.toFixed(1)}<span class="denominator">/10</span></div>
-      <div class="rating-cell-stars" style="color: var(--ink-mute)">moyenne tmdb</div>
+      <div class="rating-cell-value-medium">${f.tmdb_rating.toFixed(1)}<span class="denominator"> / 10</span></div>
+      <div class="rating-cell-footnote" style="color: var(--ink-mute)">moyenne tmdb</div>
     </div>` : '';
 
   const ratingsHtml = (userRatingHtml || tmdbRatingHtml)
@@ -2868,29 +2907,78 @@ const REPO = (function() {
   return null; // local file — admin disabled
 })();
 
+// User's TMDB v3 API key — used for explorer search and admin add/rematch/edit.
+// Safe to include here: TMDB v3 keys are designed for client-side use,
+// are read-only, and rate-limited per IP. To rotate, just replace the value below.
+const TMDB_KEY = '0d4800441b51145563ae046ef3b943ac';
+
 const admin = {
   active: false,
-  tmdbKey: null,
-  ghToken: null,
+  tmdbKey: TMDB_KEY,
+  ghToken: null,         // decrypted PAT, in memory only after unlock
+  encryptedPAT: null,    // base64 string from localStorage; null = first-time setup
   filmsSHA: null,
-  pendingRematchFilmId: null, // when rematch flow is open, the film being rematched
+  pendingRematchFilmId: null,
 };
 
 function loadAdminCreds() {
-  admin.tmdbKey = localStorage.getItem('films_tmdb_key') || null;
-  admin.ghToken = localStorage.getItem('films_gh_token') || null;
+  admin.encryptedPAT = localStorage.getItem('films_encrypted_pat') || null;
 }
 
-function saveAdminCreds() {
-  if (admin.tmdbKey) localStorage.setItem('films_tmdb_key', admin.tmdbKey);
-  if (admin.ghToken) localStorage.setItem('films_gh_token', admin.ghToken);
+function saveEncryptedPAT(b64) {
+  localStorage.setItem('films_encrypted_pat', b64);
+  admin.encryptedPAT = b64;
 }
 
 function clearAdminCreds() {
-  localStorage.removeItem('films_tmdb_key');
-  localStorage.removeItem('films_gh_token');
-  admin.tmdbKey = null;
+  localStorage.removeItem('films_encrypted_pat');
+  admin.encryptedPAT = null;
   admin.ghToken = null;
+}
+
+// --------------- CRYPTO HELPERS ---------------
+// Encrypt PAT with user's code via PBKDF2 + AES-GCM. The encrypted blob can
+// safely sit in localStorage — without the code, it's unrecoverable.
+async function deriveKey(password, salt) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 150000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function encryptWithCode(plaintext, code) {
+  const enc = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(code, salt);
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
+  // Combine salt + iv + ciphertext, base64 encode
+  const combined = new Uint8Array(salt.byteLength + iv.byteLength + ct.byteLength);
+  combined.set(salt, 0);
+  combined.set(iv, salt.byteLength);
+  combined.set(new Uint8Array(ct), salt.byteLength + iv.byteLength);
+  let bin = '';
+  for (let i = 0; i < combined.length; i++) bin += String.fromCharCode(combined[i]);
+  return btoa(bin);
+}
+
+async function decryptWithCode(encryptedB64, code) {
+  const bin = atob(encryptedB64);
+  const combined = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) combined[i] = bin.charCodeAt(i);
+  const salt = combined.slice(0, 16);
+  const iv = combined.slice(16, 28);
+  const ct = combined.slice(28);
+  const key = await deriveKey(code, salt);
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+  return new TextDecoder().decode(pt);
 }
 
 // ----------------- TMDB --------------------
@@ -2900,11 +2988,79 @@ function tmdbImgUrl(path, size = 'w342') { return path ? TMDB_IMG + '/' + size +
 
 async function tmdbSearch(query) {
   if (!query) return [];
-  const url = `${TMDB_BASE}/search/multi?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&query=${encodeURIComponent(query)}&page=1&include_adult=false`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('TMDB search ' + r.status);
-  const data = await r.json();
-  return (data.results || []).filter(it => it.media_type === 'movie' || it.media_type === 'tv');
+
+  // Parse trailing year hint: "Play 2019" → query="Play", year=2019
+  let year = null;
+  const yearMatch = query.match(/\s+(19\d{2}|20\d{2})\s*$/);
+  if (yearMatch) {
+    year = parseInt(yearMatch[1], 10);
+    query = query.slice(0, yearMatch.index).trim();
+  }
+
+  // Fetch 2 pages of /search/multi for broader coverage
+  const fetchPage = async (page) => {
+    const url = `${TMDB_BASE}/search/multi?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('TMDB search ' + r.status);
+    return (await r.json()).results || [];
+  };
+  const [p1, p2] = await Promise.all([fetchPage(1), fetchPage(2).catch(() => [])]);
+  let all = [...p1, ...p2];
+
+  // Separate by type
+  const films = all.filter(it => it.media_type === 'movie' || it.media_type === 'tv');
+  const persons = all.filter(it => it.media_type === 'person').slice(0, 2);
+
+  // For each person, fetch their top movies/TV and add (so searching "Marciano" works)
+  if (persons.length > 0) {
+    const personFilms = await Promise.all(persons.map(async (p) => {
+      try {
+        const url = `${TMDB_BASE}/person/${p.id}/combined_credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`;
+        const r = await fetch(url);
+        if (!r.ok) return [];
+        const d = await r.json();
+        // crew (e.g. directors) prioritized over cast
+        const crewRoles = (d.crew || []).filter(c => c.job === 'Director' || c.department === 'Directing');
+        const items = [...crewRoles, ...(d.cast || [])];
+        return items.map(it => ({
+          ...it,
+          media_type: it.media_type || 'movie',
+          _from_person: p.name,
+        }));
+      } catch { return []; }
+    }));
+    // Merge unique
+    const existingIds = new Set(films.map(f => f.media_type + '-' + f.id));
+    for (const list of personFilms) {
+      for (const it of list) {
+        const key = (it.media_type || 'movie') + '-' + it.id;
+        if (!existingIds.has(key)) {
+          films.push(it);
+          existingIds.add(key);
+        }
+      }
+    }
+  }
+
+  // Year filter
+  let result = films;
+  if (year) {
+    result = result.filter(f => {
+      const d = f.release_date || f.first_air_date || '';
+      return d.startsWith(String(year));
+    });
+  }
+
+  // Dedupe
+  const seen = new Set();
+  const deduped = [];
+  for (const f of result) {
+    const key = (f.media_type || 'movie') + '-' + f.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(f);
+  }
+  return deduped;
 }
 
 async function tmdbDetails(id, type) {
@@ -3042,21 +3198,43 @@ function showToast(msg, type = '') {
 }
 
 // ----------------- ADMIN SETUP --------------------
+
+function showAdminView(name) {
+  document.querySelectorAll('.admin-view').forEach(v => v.style.display = 'none');
+  document.getElementById('admin-view-' + name).style.display = '';
+  // Clear inline messages
+  document.querySelectorAll('.admin-err, .admin-ok').forEach(e => { e.textContent = ''; e.style.display = 'none'; });
+}
+
 function openAdminSetup() {
-  const backdrop = document.getElementById('admin-setup-backdrop');
-  const tmdbInput = document.getElementById('admin-tmdb-key');
-  const ghInput = document.getElementById('admin-gh-token');
-  tmdbInput.value = admin.tmdbKey || '';
-  ghInput.value = admin.ghToken || '';
-  document.getElementById('admin-error').style.display = 'none';
-  document.getElementById('admin-success').style.display = 'none';
-  document.getElementById('admin-disable-btn').style.display = admin.active ? '' : 'none';
   if (!REPO) {
-    document.getElementById('admin-error').textContent = 'admin disponible uniquement sur github pages (https://*.github.io/...)';
-    document.getElementById('admin-error').style.display = '';
-    document.getElementById('admin-activate-btn').disabled = true;
+    // No repo detected (running locally or in dev) — show setup but warn
+    showAdminView('setup');
+    const err = document.querySelector('#admin-view-setup .admin-err');
+    err.textContent = 'admin disponible uniquement sur github pages (https://*.github.io/...)';
+    err.style.display = '';
+    document.getElementById('admin-setup-backdrop').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    return;
   }
-  backdrop.classList.add('open');
+
+  if (admin.active) {
+    showAdminView('manage');
+  } else if (admin.encryptedPAT) {
+    showAdminView('unlock');
+    setTimeout(() => {
+      const inp = document.getElementById('admin-unlock-code');
+      if (inp) { inp.value = ''; inp.focus(); }
+    }, 80);
+  } else {
+    showAdminView('setup');
+    document.getElementById('admin-setup-pat').value = '';
+    document.getElementById('admin-setup-code').value = '';
+    document.getElementById('admin-setup-code-confirm').value = '';
+    setTimeout(() => document.getElementById('admin-setup-pat').focus(), 80);
+  }
+
+  document.getElementById('admin-setup-backdrop').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
@@ -3065,66 +3243,131 @@ function closeAdminSetup() {
   document.body.style.overflow = '';
 }
 
-async function activateAdmin() {
-  const tmdbKey = document.getElementById('admin-tmdb-key').value.trim();
-  const ghToken = document.getElementById('admin-gh-token').value.trim();
-  const errBox = document.getElementById('admin-error');
-  const okBox = document.getElementById('admin-success');
-  const btn = document.getElementById('admin-activate-btn');
+// First-time setup: PAT + new code → encrypt and save
+async function setupAdmin() {
+  const errBox = document.querySelector('#admin-view-setup .admin-err');
+  const okBox = document.querySelector('#admin-view-setup .admin-ok');
+  const btn = document.getElementById('admin-setup-btn');
   errBox.style.display = 'none';
   okBox.style.display = 'none';
 
-  if (!tmdbKey || tmdbKey.length < 20) {
-    errBox.textContent = 'clé tmdb manquante ou trop courte';
+  const pat = document.getElementById('admin-setup-pat').value.trim();
+  const code = document.getElementById('admin-setup-code').value;
+  const codeConfirm = document.getElementById('admin-setup-code-confirm').value;
+
+  if (!pat || pat.length < 20) {
+    errBox.textContent = 'token github manquant ou trop court';
     errBox.style.display = ''; return;
   }
-  if (!ghToken || ghToken.length < 20) {
-    errBox.textContent = 'token github manquant';
+  if (!code || code.length < 4) {
+    errBox.textContent = 'code trop court (4 caractères minimum)';
+    errBox.style.display = ''; return;
+  }
+  if (code !== codeConfirm) {
+    errBox.textContent = 'les deux codes ne correspondent pas';
     errBox.style.display = ''; return;
   }
 
   btn.disabled = true;
-  btn.textContent = 'test en cours…';
-  admin.tmdbKey = tmdbKey;
-  admin.ghToken = ghToken;
+  btn.textContent = 'vérification du token…';
   try {
-    await tmdbTestKey(tmdbKey);
+    // First test the PAT works
+    admin.ghToken = pat;
     await ghTestToken();
-    // Fetch films.json SHA so we're ready to save later
+    // Then encrypt and save
+    btn.textContent = 'chiffrement…';
+    const encrypted = await encryptWithCode(pat, code);
+    saveEncryptedPAT(encrypted);
+    // Fetch SHA for first save
     const cur = await ghGetFile('films.json');
     admin.filmsSHA = cur.sha;
-    saveAdminCreds();
+    // Activate
     admin.active = true;
     document.body.classList.add('admin-mode');
     document.getElementById('nav-admin').classList.add('active');
     document.getElementById('nav-admin').textContent = '🔓';
-    document.getElementById('floating-add').style.display = '';
-    okBox.textContent = '✓ admin actif — tu peux fermer cette fenêtre';
+    okBox.textContent = '✓ admin actif — ton code est mémorisé. tu peux fermer cette fenêtre.';
     okBox.style.display = '';
-    document.getElementById('admin-disable-btn').style.display = '';
-    setTimeout(closeAdminSetup, 1200);
+    setTimeout(closeAdminSetup, 1600);
   } catch (e) {
-    errBox.textContent = e.message;
+    errBox.textContent = 'erreur : ' + e.message;
     errBox.style.display = '';
-    admin.tmdbKey = null;
     admin.ghToken = null;
   } finally {
     btn.disabled = false;
-    btn.textContent = 'tester et activer';
+    btn.textContent = 'activer';
   }
 }
 
+// Subsequent unlock: enter code → decrypt PAT
+async function unlockAdmin() {
+  const errBox = document.querySelector('#admin-view-unlock .admin-err');
+  const okBox = document.querySelector('#admin-view-unlock .admin-ok');
+  const btn = document.getElementById('admin-unlock-btn');
+  errBox.style.display = 'none';
+  okBox.style.display = 'none';
+
+  const code = document.getElementById('admin-unlock-code').value;
+  if (!code) {
+    errBox.textContent = 'entre ton code';
+    errBox.style.display = ''; return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'déchiffrement…';
+  try {
+    const pat = await decryptWithCode(admin.encryptedPAT, code);
+    admin.ghToken = pat;
+    btn.textContent = 'vérification du token…';
+    await ghTestToken();
+    // Fetch SHA
+    const cur = await ghGetFile('films.json');
+    admin.filmsSHA = cur.sha;
+    admin.active = true;
+    document.body.classList.add('admin-mode');
+    document.getElementById('nav-admin').classList.add('active');
+    document.getElementById('nav-admin').textContent = '🔓';
+    okBox.textContent = '✓ admin actif';
+    okBox.style.display = '';
+    setTimeout(closeAdminSetup, 800);
+  } catch (e) {
+    // Decrypt error or token invalid
+    if (e.name === 'OperationError' || (e.message && e.message.toLowerCase().includes('decrypt'))) {
+      errBox.textContent = 'code incorrect';
+    } else {
+      errBox.textContent = 'erreur : ' + e.message;
+    }
+    errBox.style.display = '';
+    admin.ghToken = null;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'déverrouiller';
+  }
+}
+
+// Lock: clear in-memory PAT but keep encrypted blob (so user can re-enter code)
+function lockAdmin() {
+  admin.active = false;
+  admin.ghToken = null;
+  admin.filmsSHA = null;
+  document.body.classList.remove('admin-mode');
+  document.getElementById('nav-admin').classList.remove('active');
+  document.getElementById('nav-admin').textContent = '🔒';
+  closeAdminSetup();
+  showToast('verrouillé');
+}
+
+// Full reset: clear encrypted blob too
 function disableAdmin() {
-  if (!confirm('déconnecter le mode admin ? les clés seront supprimées de ce navigateur.')) return;
+  if (!confirm('tout réinitialiser ? il faudra à nouveau saisir ton token github + choisir un nouveau code.')) return;
   clearAdminCreds();
   admin.active = false;
   admin.filmsSHA = null;
   document.body.classList.remove('admin-mode');
   document.getElementById('nav-admin').classList.remove('active');
   document.getElementById('nav-admin').textContent = '🔒';
-  document.getElementById('floating-add').style.display = 'none';
   closeAdminSetup();
-  showToast('admin déconnecté');
+  showToast('admin réinitialisé');
 }
 
 // ----------------- DATE HELPERS --------------------
@@ -3143,7 +3386,8 @@ function formatDateLabel(dv) {
 function buildYearOptions(selectEl) {
   selectEl.innerHTML = '<option value="">—</option>';
   const currentYear = new Date().getFullYear();
-  for (let y = currentYear + 1; y >= 1900; y--) {
+  // Year of viewing can't be in the future, and anything before 2022 falls in "avant 2022"
+  for (let y = currentYear; y >= 2022; y--) {
     const opt = document.createElement('option');
     opt.value = String(y);
     opt.textContent = String(y);
@@ -3359,7 +3603,6 @@ function renderEditForm(film) {
           <option value="Stremio" ${u.lieu === 'Stremio' ? 'selected' : ''}>Stremio</option>
           <option value="Disque dur" ${u.lieu === 'Disque dur' ? 'selected' : ''}>Disque dur</option>
           <option value="Autre" ${u.lieu === 'Autre' ? 'selected' : ''}>Autre</option>
-          <option value="À trouver" ${u.lieu === 'À trouver' ? 'selected' : ''}>À trouver</option>
         </select>
       </div>
 
@@ -3592,18 +3835,22 @@ async function confirmRematch(result) {
 }
 
 // ----------------- TMDB EXPLORER --------------------
-function openExplorer() {
+function openExplorer(prefillQuery) {
   if (!admin.tmdbKey) {
     document.getElementById('explorer-needs-key').style.display = '';
     document.getElementById('explorer-main').style.display = 'none';
   } else {
     document.getElementById('explorer-needs-key').style.display = 'none';
     document.getElementById('explorer-main').style.display = '';
-    document.getElementById('explorer-input').value = '';
+    document.getElementById('explorer-input').value = prefillQuery || '';
     document.getElementById('explorer-status').textContent = '';
     document.getElementById('explorer-results').innerHTML = '';
     document.getElementById('explorer-detail').style.display = 'none';
     document.getElementById('explorer-detail').innerHTML = '';
+    // If prefilled with non-trivial query, kick off search immediately
+    if (prefillQuery && prefillQuery.length >= 2) {
+      handleExplorerSearch(prefillQuery);
+    }
   }
   document.getElementById('explorer-backdrop').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -3877,21 +4124,26 @@ function wireEvents() {
   document.getElementById('admin-setup-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'admin-setup-backdrop') closeAdminSetup();
   });
-  document.getElementById('admin-activate-btn').addEventListener('click', activateAdmin);
+  // 3 views: setup / unlock / manage
+  document.getElementById('admin-setup-btn').addEventListener('click', setupAdmin);
+  document.getElementById('admin-unlock-btn').addEventListener('click', unlockAdmin);
+  document.getElementById('admin-lock-btn').addEventListener('click', lockAdmin);
   document.getElementById('admin-disable-btn').addEventListener('click', disableAdmin);
+  document.getElementById('admin-reset-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    disableAdmin();
+  });
   document.getElementById('admin-pat-help').addEventListener('click', (e) => {
     e.preventDefault();
     const h = document.getElementById('admin-help');
     h.style.display = h.style.display === 'none' ? '' : 'none';
   });
-
-  // Floating add button
-  document.getElementById('floating-add').addEventListener('click', () => {
-    if (!admin.active) {
-      openAdminSetup();
-      return;
-    }
-    openAddModal();
+  // Enter key submits setup/unlock
+  document.getElementById('admin-setup-code-confirm').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') setupAdmin();
+  });
+  document.getElementById('admin-unlock-code').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') unlockAdmin();
   });
 
   // Add modal
@@ -3939,8 +4191,11 @@ function wireEvents() {
     rematchSearchTimer = setTimeout(() => handleRematchSearch(e.target.value.trim()), 300);
   });
 
-  // Explorer
-  document.getElementById('nav-explorer').addEventListener('click', openExplorer);
+  // Explorer — opens from "→ tmdb" link in the filter bar
+  document.getElementById('search-tmdb-link').addEventListener('click', () => {
+    const q = document.getElementById('search').value.trim();
+    openExplorer(q);
+  });
   document.getElementById('explorer-close').addEventListener('click', closeExplorer);
   document.getElementById('explorer-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'explorer-backdrop') closeExplorer();
@@ -3979,24 +4234,8 @@ loadAdminCreds();
 wireEvents();
 loadFilms();
 
-// Auto-activate admin if creds previously saved
-(async function tryAutoAdmin() {
-  if (admin.tmdbKey && admin.ghToken && REPO) {
-    try {
-      await tmdbTestKey(admin.tmdbKey);
-      await ghTestToken();
-      admin.active = true;
-      document.body.classList.add('admin-mode');
-      document.getElementById('nav-admin').classList.add('active');
-      document.getElementById('nav-admin').textContent = '🔓';
-      document.getElementById('floating-add').style.display = '';
-      // We'll fetch SHA on first save lazily, no need to do it now
-    } catch (e) {
-      // Silently fail — user can re-activate via the admin button
-      console.warn('Auto-admin failed:', e.message);
-    }
-  }
-})();
+// Admin no longer auto-activates: user enters their code each session via the 🔒 button.
+// If localStorage has an encrypted PAT, the 🔒 click will show the "unlock with code" view.
 
 </script>
 </body>
