@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T12:24:19.052Z",
-  "count": 531,
+  "generated_at": "2026-05-20T12:24:43.340Z",
+  "count": 530,
   "films": [
     {
       "id": "movie-547258",
@@ -7799,38 +7799,6 @@
       },
       "source": {
         "csv_title": "Tout Simplement Noir"
-      }
-    },
-    {
-      "id": "ghost-oazl25g7",
-      "tmdb_id": null,
-      "type": null,
-      "title": "Play",
-      "original_title": null,
-      "year": null,
-      "director": null,
-      "cast": [],
-      "runtime": null,
-      "genres": [
-        "Comédie romantique"
-      ],
-      "poster": null,
-      "synopsis": null,
-      "tmdb_rating": null,
-      "user": {
-        "statut": "vu",
-        "rating": 6,
-        "favorite": true,
-        "lieu": "Disque dur",
-        "date_vue": "before-2022",
-        "date_vue_label": "avant 2022",
-        "csv_genres": [
-          "Comédie romantique"
-        ]
-      },
-      "source": {
-        "csv_title": "Play",
-        "unmatched": true
       }
     },
     {
