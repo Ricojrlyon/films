@@ -1,8 +1,49 @@
 {
   "version": 1,
-  "generated_at": "2026-05-19T12:51:04.432Z",
-  "count": 525,
+  "generated_at": "2026-05-20T07:08:57.714Z",
+  "count": 526,
   "films": [
+    {
+      "id": "movie-1297842",
+      "tmdb_id": 1297842,
+      "type": "movie",
+      "title": "GOAT : Rêver plus haut",
+      "original_title": "GOAT",
+      "year": 2026,
+      "release_date": "2026-02-11",
+      "director": "Tyree Dillihay",
+      "cast": [
+        "Caleb McLaughlin",
+        "Gabrielle Union",
+        "Stephen Curry",
+        "Aaron Pierre",
+        "Nicola Coughlan"
+      ],
+      "runtime": 100,
+      "genres": [
+        "Animation",
+        "Comédie",
+        "Familial"
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/9wwbYnU3HfAYqdjbFMhy2a8HYvr.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/tq3h43fZy0H80vzf47MAY7R9Mxo.jpg",
+      "synopsis": "Will est un petit bouc avec de grands rêves. Lorsqu'il décroche une chance inespérée de rejoindre la ligue professionnelle de \"roarball\", un sport ultra-intense réservé aux bêtes les plus rapides et féroces, il entend bien saisir l’opportunité. Problème : ses nouveaux coéquipiers ne sont pas vraiment ravis d'avoir un \"petit\" dans l'équipe. Mais Will est prêt à tout pour changer les règles du jeu.",
+      "tmdb_rating": 8.113,
+      "imdb_id": "tt27613895",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-20T07:08:57.469Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-451945",
       "tmdb_id": 451945,
