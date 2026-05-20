@@ -1,8 +1,48 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T12:25:57.637Z",
-  "count": 531,
+  "generated_at": "2026-05-20T12:26:22.215Z",
+  "count": 532,
   "films": [
+    {
+      "id": "movie-972119",
+      "tmdb_id": 972119,
+      "type": "movie",
+      "title": "Making Of",
+      "original_title": "Making Of",
+      "year": 2024,
+      "release_date": "2024-01-10",
+      "director": "Cédric Kahn",
+      "cast": [
+        "Denis Podalydès",
+        "Jonathan Cohen",
+        "Stefan Crepon",
+        "Souheila Yacoub",
+        "Emmanuelle Bercot"
+      ],
+      "runtime": 119,
+      "genres": [
+        "Comédie",
+        "Drame"
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/sQHjqFdDeIQUfYxU5JcyQFWQr7N.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/sIfjszR9RhjgzvfzV5AvQfvjVlg.jpg",
+      "synopsis": "Simon, réalisateur aguerri, débute le tournage d’un film racontant le combat d’ouvriers pour sauver leur usine. Mais entre les magouilles de son producteur, des acteurs incontrôlables et des techniciens à cran, il est vite dépassé par les événements. Abandonné par ses financiers, Simon doit affronter un conflit social avec sa propre équipe. Dans ce tournage infernal, son seul allié est le jeune figurant à qui il a confié la réalisation du making of.",
+      "tmdb_rating": 5.7,
+      "imdb_id": "tt25650046",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-20T12:26:18.909Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-382811",
       "tmdb_id": 382811,
