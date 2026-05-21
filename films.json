@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:27:51.856Z",
+  "generated_at": "2026-05-21T12:28:26.779Z",
   "count": 536,
   "films": [
     {
@@ -11625,7 +11625,7 @@
       "imdb_id": "tt16968450",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2025-04",
@@ -11638,7 +11638,9 @@
       },
       "source": {
         "csv_title": "La merveilleuse histoire de Henry Sugar"
-      }
+      },
+      "country": "USA",
+      "trailer": "https://www.youtube.com/watch?v=Hqnpsn5SGfs"
     },
     {
       "id": "movie-1018634",
