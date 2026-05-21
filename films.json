@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T07:36:00.139Z",
+  "generated_at": "2026-05-21T07:36:29.102Z",
   "count": 536,
   "films": [
     {
@@ -10189,8 +10189,8 @@
       "imdb_id": "tt22667880",
       "user": {
         "statut": "vu",
-        "rating": 4,
-        "favorite": false,
+        "rating": 6,
+        "favorite": true,
         "lieu": "Autre",
         "date_vue": "2025-09",
         "date_vue_label": "Septembre 2025",
@@ -10200,7 +10200,8 @@
       },
       "source": {
         "csv_title": "L'Enfant, la Taupe, le Renard et le Cheval"
-      }
+      },
+      "country": "United Kingdom"
     },
     {
       "id": "movie-1054867",
