@@ -379,7 +379,12 @@ body {
 .card .rating-badge .star { color: var(--warm); }
 .card .rating-badge.favorite .star { color: white; }
 
-/* "à voir" overlay */
+/* "à voir" overlay — slightly muted */
+.card.to-watch {
+  opacity: 0.85;
+  transition: opacity 0.18s, transform 0.18s;
+}
+.card.to-watch:hover { opacity: 1; }
 .card.to-watch::after {
   content: '';
   position: absolute;
@@ -2782,18 +2787,19 @@ function openModal(f, opts) {
     bg.style.background = 'var(--bg-elev)';
   }
 
-  // Ratings: user (1-6, stars primary) and TMDB (0-10)
+  // Ratings: user (stars on /6 scale, but display value as /10 for comparison with TMDB) and TMDB (0-10)
   const rating = f.user?.rating;
   const fav = !!f.user?.favorite;
   const userRatingHtml = (rating && !tmdbOnly) ? (() => {
     const visualStars = fav
       ? '❤'
       : '★'.repeat(rating) + '<span style="color:rgba(255,255,255,0.12)">★</span>'.repeat(6 - rating);
+    const ratingIn10 = (rating * 10 / 6).toFixed(1);
     return `
       <div class="rating-cell ${fav ? 'fav' : ''}">
         <div class="rating-cell-label">ta note</div>
         <div class="rating-cell-stars-big ${fav ? 'fav' : ''}">${visualStars}</div>
-        <div class="rating-cell-footnote">${rating}<span class="denominator"> / 6</span></div>
+        <div class="rating-cell-footnote">${ratingIn10}<span class="denominator"> / 10</span></div>
       </div>`;
   })() : '';
 
@@ -2830,6 +2836,7 @@ function openModal(f, opts) {
   // Meta line
   const metaParts = [];
   if (f.year) metaParts.push(f.year);
+  if (f.country) metaParts.push(f.country);
   if (f.runtime) metaParts.push(f.runtime + ' min');
   if (f.type === 'tv') metaParts.push('série');
 
@@ -2904,6 +2911,11 @@ function openModal(f, opts) {
 
   document.getElementById('modal-backdrop').classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // Lazy-fetch country if missing (existing films from initial migration didn't have it)
+  if (!f.country && f.tmdb_id && f.type) {
+    enrichFilmCountry(f);
+  }
 }
 
 async function addTmdbFilmToCollection(film, statut) {
@@ -3678,6 +3690,32 @@ async function tmdbBrowse(category) {
 }
 
 // Build a full film object from TMDB detail data (movie or tv)
+// ISO 3166-1 alpha-2 → French country names (for TV "origin_country" which gives codes)
+const ISO_TO_COUNTRY = {
+  AR: 'Argentine', AT: 'Autriche', AU: 'Australie', BE: 'Belgique', BR: 'Brésil',
+  CA: 'Canada', CH: 'Suisse', CN: 'Chine', CO: 'Colombie', CZ: 'Tchéquie',
+  DE: 'Allemagne', DK: 'Danemark', EG: 'Égypte', ES: 'Espagne', FI: 'Finlande',
+  FR: 'France', GB: 'Royaume-Uni', GE: 'Géorgie', GR: 'Grèce', HK: 'Hong Kong',
+  HR: 'Croatie', HU: 'Hongrie', ID: 'Indonésie', IE: 'Irlande', IL: 'Israël',
+  IN: 'Inde', IR: 'Iran', IS: 'Islande', IT: 'Italie', JP: 'Japon',
+  KR: 'Corée du Sud', LB: 'Liban', LU: 'Luxembourg', MA: 'Maroc', MX: 'Mexique',
+  NL: 'Pays-Bas', NO: 'Norvège', NZ: 'Nouvelle-Zélande', PH: 'Philippines', PL: 'Pologne',
+  PT: 'Portugal', RO: 'Roumanie', RS: 'Serbie', RU: 'Russie', SA: 'Arabie saoudite',
+  SE: 'Suède', SG: 'Singapour', TH: 'Thaïlande', TN: 'Tunisie', TR: 'Turquie',
+  TW: 'Taïwan', UA: 'Ukraine', US: 'États-Unis', VN: 'Vietnam', ZA: 'Afrique du Sud',
+};
+
+function extractCountryFromTmdbDetail(detail) {
+  if (detail.production_countries && detail.production_countries.length > 0) {
+    return detail.production_countries[0].name;
+  }
+  if (detail.origin_country && detail.origin_country.length > 0) {
+    const code = detail.origin_country[0];
+    return ISO_TO_COUNTRY[code] || code;
+  }
+  return null;
+}
+
 function buildFilmFromTmdb(detail, type, csvTitle = null) {
   let director = null;
   let cast = [];
@@ -3705,6 +3743,7 @@ function buildFilmFromTmdb(detail, type, csvTitle = null) {
     cast: cast,
     runtime: type === 'movie' ? (detail.runtime || null) : (Array.isArray(detail.episode_run_time) && detail.episode_run_time[0]) || null,
     genres: genres,
+    country: extractCountryFromTmdbDetail(detail),
     poster: detail.poster_path ? tmdbImgUrl(detail.poster_path, 'w500') : null,
     backdrop: detail.backdrop_path ? tmdbImgUrl(detail.backdrop_path, 'w1280') : null,
     synopsis: detail.overview || null,
@@ -3712,6 +3751,33 @@ function buildFilmFromTmdb(detail, type, csvTitle = null) {
     imdb_id: (detail.external_ids && detail.external_ids.imdb_id) || detail.imdb_id || null,
     source: csvTitle ? { csv_title: csvTitle } : { added_via: 'admin', added_at: new Date().toISOString() },
   };
+}
+
+// Lazy-fetch country for an existing film that doesn't have it stored.
+// Cached in memory on the film object; will be persisted next time admin saves.
+async function enrichFilmCountry(film) {
+  if (film.country || !film.tmdb_id || film._countryFetching) return;
+  film._countryFetching = true;
+  try {
+    const path = film.type === 'tv' ? 'tv' : 'movie';
+    const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(TMDB_KEY)}&language=fr-FR`;
+    const r = await fetch(url);
+    if (!r.ok) return;
+    const detail = await r.json();
+    const country = extractCountryFromTmdbDetail(detail);
+    if (country) {
+      film.country = country;
+      // If modal still showing this film, re-render to show country
+      const modal = document.getElementById('modal-backdrop');
+      if (modal && modal.classList.contains('open')) {
+        const titleEl = document.querySelector('.modal-title');
+        if (titleEl && titleEl.textContent === (film.title || 'sans titre')) {
+          openModal(film);
+        }
+      }
+    }
+  } catch {}
+  delete film._countryFetching;
 }
 
 // ----------------- GITHUB --------------------
