@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:54:27.650Z",
+  "generated_at": "2026-05-21T12:55:08.170Z",
   "count": 533,
   "films": [
     {
@@ -20940,7 +20940,9 @@
       },
       "source": {
         "csv_title": "Les Cobayes"
-      }
+      },
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=laW1I-WvFPg"
     },
     {
       "id": "movie-877957",
@@ -20971,7 +20973,7 @@
       "imdb_id": "tt15494038",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2022",
@@ -20984,7 +20986,9 @@
       },
       "source": {
         "csv_title": "Les Murs Vagabonds"
-      }
+      },
+      "country": "Japan",
+      "trailer": "https://www.youtube.com/watch?v=lWkXT6HxKjg"
     },
     {
       "id": "movie-399019",
