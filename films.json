@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:35:08.103Z",
-  "count": 535,
+  "generated_at": "2026-05-21T12:36:15.945Z",
+  "count": 534,
   "films": [
     {
       "id": "movie-324857",
@@ -10787,7 +10787,9 @@
       },
       "source": {
         "csv_title": "A Normal Family"
-      }
+      },
+      "country": "South Korea",
+      "trailer": "https://www.youtube.com/watch?v=o8zKDkPszBg"
     },
     {
       "id": "movie-682012",
@@ -15479,38 +15481,6 @@
       },
       "source": {
         "csv_title": "Godzilla minus one"
-      }
-    },
-    {
-      "id": "ghost-8odpbzss",
-      "tmdb_id": null,
-      "type": null,
-      "title": "Making of",
-      "original_title": null,
-      "year": null,
-      "director": null,
-      "cast": [],
-      "runtime": null,
-      "genres": [
-        "Comédie dramatique"
-      ],
-      "poster": null,
-      "synopsis": null,
-      "tmdb_rating": null,
-      "user": {
-        "statut": "vu",
-        "rating": 4,
-        "favorite": false,
-        "lieu": "Cinéma",
-        "date_vue": "2024-01",
-        "date_vue_label": "Janvier 2024",
-        "csv_genres": [
-          "Comédie dramatique"
-        ]
-      },
-      "source": {
-        "csv_title": "Making of",
-        "unmatched": true
       }
     },
     {
