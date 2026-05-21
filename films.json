@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:43:06.563Z",
+  "generated_at": "2026-05-21T12:43:25.576Z",
   "count": 533,
   "films": [
     {
@@ -18981,7 +18981,7 @@
       "imdb_id": "tt26440921",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2023-04",
@@ -18992,7 +18992,9 @@
       },
       "source": {
         "csv_title": "Bonne Conduite"
-      }
+      },
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=JQgHPYMbAKk"
     },
     {
       "id": "movie-502356",
