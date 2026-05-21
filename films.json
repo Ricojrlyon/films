@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:30:47.971Z",
+  "generated_at": "2026-05-21T12:32:09.498Z",
   "count": 536,
   "films": [
     {
@@ -1994,11 +1994,11 @@
       "imdb_id": "tt17009348",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 2,
         "favorite": false,
-        "lieu": "Disque dur",
-        "date_vue": "before-2022",
-        "date_vue_label": "avant 2022",
+        "lieu": "Autre",
+        "date_vue": "2024-05",
+        "date_vue_label": "Mai 2024",
         "csv_genres": [
           "Drame"
         ]
@@ -14227,7 +14227,9 @@
       },
       "source": {
         "csv_title": "Dogman (Luc Besson)"
-      }
+      },
+      "country": "France · USA",
+      "trailer": "https://www.youtube.com/watch?v=HgDLUREgLbs"
     },
     {
       "id": "movie-972118",
