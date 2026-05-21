@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:41:53.769Z",
+  "generated_at": "2026-05-21T12:42:22.244Z",
   "count": 533,
   "films": [
     {
@@ -18343,7 +18343,7 @@
       "imdb_id": "tt1109624",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2023-06",
@@ -18355,7 +18355,9 @@
       },
       "source": {
         "csv_title": "Paddington 1"
-      }
+      },
+      "country": "France · UK",
+      "trailer": "https://www.youtube.com/watch?v=iAiMhMSebeU"
     },
     {
       "id": "movie-346648",
