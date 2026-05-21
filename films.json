@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:55:08.170Z",
+  "generated_at": "2026-05-21T12:55:15.232Z",
   "count": 533,
   "films": [
     {
@@ -21061,7 +21061,7 @@
       "imdb_id": "tt7175992",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2022",
@@ -21073,7 +21073,9 @@
       },
       "source": {
         "csv_title": "L’Heure de la Sortie"
-      }
+      },
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=o38tzw-seBk"
     },
     {
       "id": "movie-504585",
