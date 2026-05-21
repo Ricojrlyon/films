@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:39:50.823Z",
-  "count": 534,
+  "generated_at": "2026-05-21T12:40:19.462Z",
+  "count": 533,
   "films": [
     {
       "id": "movie-324857",
@@ -17468,38 +17468,6 @@
       },
       "source": {
         "csv_title": "Gran Turismo"
-      }
-    },
-    {
-      "id": "ghost-kxl6uwlg",
-      "tmdb_id": null,
-      "type": null,
-      "title": "Youth",
-      "original_title": null,
-      "year": null,
-      "director": null,
-      "cast": [],
-      "runtime": null,
-      "genres": [
-        "Drame"
-      ],
-      "poster": null,
-      "synopsis": null,
-      "tmdb_rating": null,
-      "user": {
-        "statut": "vu",
-        "rating": 4,
-        "favorite": false,
-        "lieu": "Disque dur",
-        "date_vue": "2023-08",
-        "date_vue_label": "Août 2023",
-        "csv_genres": [
-          "Drame"
-        ]
-      },
-      "source": {
-        "csv_title": "Youth",
-        "unmatched": true
       }
     },
     {
