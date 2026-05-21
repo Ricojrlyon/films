@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:56:42.313Z",
-  "count": 533,
+  "generated_at": "2026-05-21T12:57:27.191Z",
+  "count": 532,
   "films": [
     {
       "id": "movie-324857",
@@ -21896,38 +21896,6 @@
       }
     },
     {
-      "id": "ghost-di3v81u3",
-      "tmdb_id": null,
-      "type": null,
-      "title": "France",
-      "original_title": null,
-      "year": null,
-      "director": null,
-      "cast": [],
-      "runtime": null,
-      "genres": [
-        "Comédie dramatique"
-      ],
-      "poster": null,
-      "synopsis": null,
-      "tmdb_rating": null,
-      "user": {
-        "statut": "vu",
-        "rating": 3,
-        "favorite": false,
-        "lieu": "Disque dur",
-        "date_vue": "2022",
-        "date_vue_label": "2022",
-        "csv_genres": [
-          "Comédie dramatique"
-        ]
-      },
-      "source": {
-        "csv_title": "France",
-        "unmatched": true
-      }
-    },
-    {
       "id": "movie-964960",
       "tmdb_id": 964960,
       "type": "movie",
@@ -22008,7 +21976,9 @@
       },
       "source": {
         "csv_title": "FLCL (Fooly Cooly)"
-      }
+      },
+      "country": "Japan · USA",
+      "trailer": "https://www.youtube.com/watch?v=B2NRfAHfFM8"
     },
     {
       "id": "movie-581734",
