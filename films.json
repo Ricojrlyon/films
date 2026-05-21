@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:54:11.845Z",
+  "generated_at": "2026-05-21T12:54:27.650Z",
   "count": 533,
   "films": [
     {
@@ -20721,7 +20721,7 @@
       "imdb_id": "tt7286456",
       "user": {
         "statut": "vu",
-        "rating": 5,
+        "rating": 4,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2022",
@@ -20732,7 +20732,9 @@
       },
       "source": {
         "csv_title": "Joker"
-      }
+      },
+      "country": "Canada · USA",
+      "trailer": "https://www.youtube.com/watch?v=_LUWnjT3iks"
     },
     {
       "id": "movie-595975",
