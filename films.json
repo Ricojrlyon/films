@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T07:34:13.949Z",
+  "generated_at": "2026-05-21T07:34:18.394Z",
   "count": 536,
   "films": [
     {
@@ -8572,7 +8572,7 @@
       "imdb_id": "tt31176520",
       "user": {
         "statut": "vu",
-        "rating": 1,
+        "rating": 2,
         "favorite": false,
         "lieu": "Stremio",
         "date_vue": "2026-02",
