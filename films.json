@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:53:32.882Z",
+  "generated_at": "2026-05-21T12:53:46.207Z",
   "count": 533,
   "films": [
     {
@@ -20168,7 +20168,7 @@
       "imdb_id": "tt11417856",
       "user": {
         "statut": "vu",
-        "rating": 5,
+        "rating": 4,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2022",
@@ -20181,7 +20181,9 @@
       },
       "source": {
         "csv_title": "Le Roi Cerf"
-      }
+      },
+      "country": "Japan",
+      "trailer": "https://www.youtube.com/watch?v=whRYWupTLUo"
     },
     {
       "id": "movie-852438",
