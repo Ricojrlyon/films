@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T13:00:16.082Z",
+  "generated_at": "2026-05-21T13:00:53.022Z",
   "count": 532,
   "films": [
     {
@@ -2382,7 +2382,7 @@
       "imdb_id": "tt0093058",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "before-2022",
@@ -2394,7 +2394,9 @@
       },
       "source": {
         "csv_title": "Full Metal Jacket"
-      }
+      },
+      "country": "UK · USA",
+      "trailer": "https://www.youtube.com/watch?v=Ldxda5cqQh4"
     },
     {
       "id": "movie-419430",
