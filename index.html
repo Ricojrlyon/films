@@ -1400,7 +1400,7 @@ body {
 }
 
 /* Discover tab — same shape as other tabs but visually distinct */
-.tab-discover {
+.tab-discover, .tab-reco {
   border-color: var(--rule);
   color: var(--ink-soft);
 }
@@ -1410,7 +1410,137 @@ body {
   font-weight: 700;
   color: var(--warm);
 }
-.tab-discover:hover { color: var(--warm); border-color: var(--warm); }
+.tab-reco::before {
+  content: '✨';
+  margin-right: 4px;
+  font-size: 11px;
+}
+.tab-discover:hover, .tab-reco:hover { color: var(--warm); border-color: var(--warm); }
+.tab-discover.active::before, .tab-reco.active::before { color: var(--bg); }
+
+/* Collection controls (search + filter button) — hidden in discover/reco views */
+.collection-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+/* View headers (discover, reco) */
+.view-header {
+  margin-bottom: 16px;
+}
+.discover-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.discover-search-wrap {
+  position: relative;
+  max-width: 100%;
+}
+.discover-search-wrap .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-mute);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  pointer-events: none;
+}
+.discover-search-wrap .search-input {
+  width: 100%;
+  padding: 9px 14px 9px 36px;
+}
+
+.reco-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  background: var(--bg-elev);
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+}
+.reco-context {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  flex: 1;
+}
+.reco-context strong { color: var(--warm); }
+.reco-refresh {
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  color: var(--ink-soft);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.reco-refresh:hover { color: var(--warm); border-color: var(--warm); }
+.reco-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* TMDB-only actions in modal */
+.tmdb-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+.tmdb-action {
+  background: var(--warm);
+  color: var(--bg);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tmdb-action:hover:not(:disabled) { background: var(--ink); }
+.tmdb-action:disabled { opacity: 0.5; cursor: not-allowed; }
+.tmdb-action.ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule-strong);
+}
+.tmdb-action.ghost:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-soft); }
+
+/* TMDB card styling (discover/reco views) */
+.card.tmdb-card {
+  cursor: pointer;
+}
+.card.tmdb-card .card-poster::after {
+  /* Indicator if in collection */
+  content: '';
+}
+.card.tmdb-card.in-collection .card-poster::after {
+  content: '✓ dans ma collec';
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: var(--green);
+  color: var(--bg);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
 .search-result.in-collection {
   border-color: var(--green);
   opacity: 0.7;
@@ -1633,19 +1763,42 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   <main class="collection-page" id="collection-page">
     <div class="filter-bar">
       <div class="tabs" id="status-tabs">
-        <button class="tab active" data-status="a_voir">à voir<span class="count" id="count-a_voir">0</span></button>
-        <button class="tab" data-status="vu">vus<span class="count" id="count-vu">0</span></button>
-        <button class="tab tab-discover" id="tab-discover">découvrir</button>
+        <button class="tab active" data-view="a_voir">à voir<span class="count" id="count-a_voir">0</span></button>
+        <button class="tab" data-view="vu">vus<span class="count" id="count-vu">0</span></button>
+        <button class="tab tab-discover" data-view="discover">découvrir</button>
+        <button class="tab tab-reco" data-view="reco">reco</button>
       </div>
-      <div class="search-wrap">
+      <div class="collection-controls" id="collection-controls">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input class="search-input" id="search" type="text" placeholder="rechercher un titre, un·e réal…">
+        </div>
+        <button class="filter-toggle" id="filter-toggle">
+          <span>filtres</span>
+          <span class="badge" id="filter-badge" style="display:none;">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- DISCOVER VIEW HEADER (hidden by default) -->
+    <div class="view-header discover-header" id="discover-header" style="display: none;">
+      <div class="explorer-categories" id="discover-categories">
+        <button class="explorer-cat active" data-cat="now_playing">au cinéma</button>
+        <button class="explorer-cat" data-cat="trending">tendances</button>
+        <button class="explorer-cat" data-cat="popular">populaires</button>
+        <button class="explorer-cat" data-cat="upcoming">prochainement</button>
+        <button class="explorer-cat" data-cat="top_rated">mieux notés</button>
+      </div>
+      <div class="discover-search-wrap">
         <span class="search-icon">⌕</span>
-        <input class="search-input" id="search" type="text" placeholder="rechercher un titre, un·e réal…">
-        <button class="search-tmdb-link" id="search-tmdb-link" title="rechercher sur tmdb">→ tmdb</button>
+        <input class="search-input" id="discover-search" type="text" placeholder="ou cherche un film, une série, un·e réal…">
       </div>
-      <button class="filter-toggle" id="filter-toggle">
-        <span>filtres</span>
-        <span class="badge" id="filter-badge" style="display:none;">0</span>
-      </button>
+    </div>
+
+    <!-- RECO VIEW HEADER (hidden by default) -->
+    <div class="view-header reco-header" id="reco-header" style="display: none;">
+      <div class="reco-context" id="reco-context">analyse de tes goûts…</div>
+      <button class="reco-refresh" id="reco-refresh" title="régénérer le pool de recommandations">↻ actualiser</button>
     </div>
 
     <div class="filter-panel" id="filter-panel">
@@ -1692,7 +1845,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
       </div>
     </div>
 
-    <div class="results-header">
+    <div class="results-header" id="results-header">
       <div class="results-count"><strong id="result-count">0</strong>résultat(s)</div>
     </div>
 
@@ -1964,42 +2117,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   </article>
 </div>
 
-<!-- ============== TMDB EXPLORER MODAL ============== -->
-<div class="modal-backdrop admin-modal-backdrop" id="explorer-backdrop">
-  <article class="modal admin-modal explorer-modal">
-    <button class="modal-close" id="explorer-close" aria-label="fermer">✕</button>
-    <div class="admin-modal-body">
-      <h2 class="admin-modal-title">découvrir / explorer tmdb</h2>
-
-      <div id="explorer-needs-key" style="display: none;">
-        <div class="error-inline">
-          la clé tmdb n'est pas configurée. va dans le code source du site pour la renseigner (constante <code>TMDB_KEY</code>).
-        </div>
-      </div>
-
-      <div id="explorer-main">
-        <!-- Category pills: browse mode -->
-        <div class="explorer-categories" id="explorer-categories">
-          <button class="explorer-cat active" data-cat="trending">tendances</button>
-          <button class="explorer-cat" data-cat="now_playing">au cinéma</button>
-          <button class="explorer-cat" data-cat="popular">populaires</button>
-          <button class="explorer-cat" data-cat="upcoming">prochainement</button>
-          <button class="explorer-cat" data-cat="top_rated">mieux notés</button>
-        </div>
-
-        <div class="field" style="margin-top: 16px;">
-          <label>ou cherche un film, une série, un·e réalisateur·rice</label>
-          <input type="text" id="explorer-input" placeholder="titre, nom…" autocomplete="off">
-          <div class="note" id="explorer-status"></div>
-        </div>
-
-        <div id="explorer-results" class="search-results"></div>
-        <div id="explorer-detail" style="display: none;"></div>
-      </div>
-    </div>
-  </article>
-</div>
-
 <!-- ============== TOAST ============== -->
 <div class="toast" id="toast"></div>
 
@@ -2017,18 +2134,26 @@ const TAB_SORT_DEFAULTS = {
 const state = {
   films: [],
   filtered: [],
+  view: 'a_voir',           // 'a_voir' | 'vu' | 'discover' | 'reco'
   filters: {
-    status: 'a_voir',     // default: à voir
+    status: 'a_voir',       // shadows view for filtering logic
     search: '',
     genre: '',
     lieu: '',
     decade: '',
     yearvu: '',
-    ratings: new Set(),    // multi-select set of 1..6 (empty = all)
+    ratings: new Set(),
   },
   sort: TAB_SORT_DEFAULTS.a_voir,
   page: 1,
   pageSize: 60,
+  // Discover view
+  discoverCategory: 'now_playing',
+  discoverCache: {},       // { category: [items] } — session cache
+  discoverSearchTimer: null,
+  // Reco view
+  recoPool: null,           // full ranked candidates
+  recoDisplayed: null,      // current month's selection
 };
 
 // ============================================================
@@ -2295,11 +2420,340 @@ function buildCard(f) {
 }
 
 // ============================================================
+// VIEW MANAGEMENT (à voir / vus / discover / reco)
+// ============================================================
+function setView(view) {
+  state.view = view;
+  // Update tab active states
+  document.querySelectorAll('#status-tabs .tab').forEach(x => x.classList.remove('active'));
+  const activeTab = document.querySelector(`#status-tabs .tab[data-view="${view}"]`);
+  if (activeTab) activeTab.classList.add('active');
+
+  const isCollection = (view === 'a_voir' || view === 'vu');
+  const isDiscover = view === 'discover';
+  const isReco = view === 'reco';
+
+  // Show/hide UI per view
+  document.getElementById('collection-controls').style.display = isCollection ? '' : 'none';
+  document.getElementById('filter-panel').classList.remove('open');
+  document.getElementById('discover-header').style.display = isDiscover ? '' : 'none';
+  document.getElementById('reco-header').style.display = isReco ? '' : 'none';
+
+  // Trigger view-specific render
+  if (isCollection) {
+    state.filters.status = view;
+    state.sort = TAB_SORT_DEFAULTS[view] || 'date_vue_desc';
+    document.getElementById('sort').value = state.sort;
+    applyFilters();
+  } else if (isDiscover) {
+    fetchAndRenderDiscover(state.discoverCategory);
+  } else if (isReco) {
+    fetchAndRenderReco();
+  }
+}
+
+// ============================================================
+// DISCOVER VIEW
+// ============================================================
+async function fetchAndRenderDiscover(category) {
+  state.discoverCategory = category;
+  // Update active pill
+  document.querySelectorAll('#discover-categories .explorer-cat').forEach(p => p.classList.toggle('active', p.dataset.cat === category));
+
+  const grid = document.getElementById('grid');
+  const countEl = document.getElementById('result-count');
+  const resultsHeader = document.getElementById('results-header');
+  resultsHeader.style.display = '';
+
+  // Session cache
+  if (state.discoverCache[category]) {
+    renderTmdbGrid(state.discoverCache[category]);
+    return;
+  }
+
+  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">chargement tmdb…</div>';
+  countEl.textContent = '…';
+  try {
+    const results = await tmdbBrowse(category);
+    state.discoverCache[category] = results;
+    renderTmdbGrid(results);
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur tmdb : ${escapeHtml(e.message)}</div>`;
+    countEl.textContent = '0';
+  }
+}
+
+async function handleDiscoverSearch(query) {
+  // Switch from category browse to search
+  const grid = document.getElementById('grid');
+  const countEl = document.getElementById('result-count');
+  if (!query || query.length < 2) {
+    // Re-load category
+    fetchAndRenderDiscover(state.discoverCategory);
+    return;
+  }
+  // Clear active pill while searching
+  document.querySelectorAll('#discover-categories .explorer-cat').forEach(p => p.classList.remove('active'));
+  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">recherche…</div>';
+  countEl.textContent = '…';
+  try {
+    const results = await tmdbSearch(query);
+    renderTmdbGrid(results.slice(0, 40));
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur tmdb : ${escapeHtml(e.message)}</div>`;
+    countEl.textContent = '0';
+  }
+}
+
+function renderTmdbGrid(items) {
+  const grid = document.getElementById('grid');
+  const countEl = document.getElementById('result-count');
+  const emptyEl = document.getElementById('empty');
+  const loadMoreEl = document.getElementById('load-more');
+  if (loadMoreEl) loadMoreEl.style.display = 'none';
+
+  grid.innerHTML = '';
+  if (!items || items.length === 0) {
+    countEl.textContent = '0';
+    emptyEl.style.display = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  countEl.textContent = items.length;
+  for (const item of items) {
+    grid.appendChild(buildTmdbCard(item));
+  }
+}
+
+function buildTmdbCard(item) {
+  const card = document.createElement('article');
+  card.className = 'card tmdb-card';
+  const id = (item.media_type || 'movie') + '-' + item.id;
+  const inCollection = state.films.some(f => f.id === id);
+  if (inCollection) card.classList.add('in-collection');
+
+  const poster = item.poster_path ? tmdbImgUrl(item.poster_path, 'w342') : null;
+  const year = (item.release_date || item.first_air_date || '').slice(0, 4) || '';
+
+  const posterDiv = document.createElement('div');
+  posterDiv.className = 'card-poster' + (poster ? '' : ' empty');
+  if (poster) posterDiv.style.backgroundImage = `url(${poster})`;
+  else posterDiv.textContent = "pas d'affiche";
+  card.appendChild(posterDiv);
+
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  meta.innerHTML = `
+    <div class="card-title">${escapeHtml(item.title || item.name || '')}</div>
+    <div class="card-year">${year}${item.media_type === 'tv' ? ' · série' : ''}</div>`;
+  card.appendChild(meta);
+
+  card.addEventListener('click', () => openTmdbItem(item));
+  return card;
+}
+
+// Open a TMDB item: route to local modal if in collection, else load + show as tmdb-only
+async function openTmdbItem(item) {
+  const id = (item.media_type || 'movie') + '-' + item.id;
+  const existing = state.films.find(f => f.id === id);
+  if (existing) {
+    openModal(existing);
+    return;
+  }
+  // Open modal with loading state
+  const body = document.getElementById('modal-body');
+  const bg = document.getElementById('modal-bg');
+  bg.style.backgroundImage = '';
+  body.innerHTML = '<div style="padding: 60px 20px; text-align: center; color: var(--ink-mute); font-style: italic;">chargement des détails…</div>';
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  try {
+    const detail = await tmdbDetails(item.id, item.media_type || 'movie');
+    const film = buildFilmFromTmdb(detail, item.media_type || 'movie');
+    openModal(film, { tmdbOnly: true });
+  } catch (e) {
+    body.innerHTML = `<div class="error-inline" style="margin: 20px;">erreur : ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+// ============================================================
+// RECO VIEW
+// ============================================================
+function currentMonthKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function pickRecoSources() {
+  const vus = state.films.filter(f => f.user?.statut === 'vu' && f.user?.rating && f.tmdb_id);
+
+  const now = new Date();
+  function ageInMonths(dv) {
+    if (!dv || dv.startsWith('before-')) return Infinity;
+    let date;
+    if (/^\d{4}-\d{2}$/.test(dv)) date = new Date(dv + '-01');
+    else if (/^\d{4}$/.test(dv)) date = new Date(dv + '-06-01');
+    else return Infinity;
+    return (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
+  }
+
+  // Try 4+ stars in last 6 months
+  let sources = vus.filter(f => f.user.rating >= 4 && ageInMonths(f.user.date_vue) <= 6);
+  if (sources.length >= 5) return { sources, criteria: '4+ étoiles vus dans les 6 derniers mois' };
+
+  // Expand to 3+ stars in last 6 months
+  sources = vus.filter(f => f.user.rating >= 3 && ageInMonths(f.user.date_vue) <= 6);
+  if (sources.length >= 5) return { sources, criteria: '3+ étoiles vus dans les 6 derniers mois' };
+
+  // Expand to 4+ in last 12 months
+  sources = vus.filter(f => f.user.rating >= 4 && ageInMonths(f.user.date_vue) <= 12);
+  if (sources.length >= 5) return { sources, criteria: '4+ étoiles vus dans les 12 derniers mois' };
+
+  // Fallback: all 4+ stars ever
+  sources = vus.filter(f => f.user.rating >= 4);
+  return { sources, criteria: '4+ étoiles (toutes périodes)' };
+}
+
+async function tmdbGetRecommendations(tmdbId, type) {
+  const path = type === 'tv' ? 'tv' : 'movie';
+  const url = `${TMDB_BASE}/${path}/${tmdbId}/recommendations?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&page=1`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return [];
+    const data = await r.json();
+    return (data.results || []).map(item => ({
+      ...item,
+      media_type: item.media_type || path,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function buildRecoPool(sources) {
+  const calls = sources.map(s => tmdbGetRecommendations(s.tmdb_id, s.type).then(items => ({ items, weight: s.user.rating / 6 })));
+  const results = await Promise.all(calls);
+  // Aggregate: score = sum of source weights
+  const scoreMap = new Map();
+  for (const { items, weight } of results) {
+    for (const item of items) {
+      const id = (item.media_type || 'movie') + '-' + item.id;
+      const existing = scoreMap.get(id);
+      if (existing) {
+        existing.score += weight;
+        existing.sources++;
+      } else {
+        scoreMap.set(id, { item, score: weight, sources: 1 });
+      }
+    }
+  }
+  // Filter out films already in collection
+  const inCollection = new Set(state.films.map(f => f.id));
+  const candidates = [...scoreMap.values()].filter(c => {
+    const id = (c.item.media_type || 'movie') + '-' + c.item.id;
+    return !inCollection.has(id);
+  });
+  // Sort by score desc
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates.slice(0, 80).map(c => c.item);
+}
+
+function monthlyRecoSubset(pool, count) {
+  if (pool.length === 0) return [];
+  const d = new Date();
+  const seed = d.getFullYear() * 12 + d.getMonth();
+  // Mulberry32-ish PRNG
+  let s = seed * 2654435761 | 0;
+  const random = () => {
+    s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, count);
+}
+
+async function fetchAndRenderReco(forceRefresh = false) {
+  const grid = document.getElementById('grid');
+  const countEl = document.getElementById('result-count');
+  const ctxEl = document.getElementById('reco-context');
+  const refreshBtn = document.getElementById('reco-refresh');
+  document.getElementById('results-header').style.display = '';
+
+  const { sources, criteria } = pickRecoSources();
+  if (sources.length === 0) {
+    ctxEl.innerHTML = "pas encore assez de films notés pour recommander. <strong>note quelques films d'abord</strong>.";
+    grid.innerHTML = '';
+    countEl.textContent = '0';
+    return;
+  }
+
+  const monthName = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'][new Date().getMonth()];
+  ctxEl.innerHTML = `<strong>${monthName} ${new Date().getFullYear()}</strong> · basé sur <strong>${sources.length} films</strong> (${criteria})`;
+
+  const cacheKey = 'films_reco_pool_' + currentMonthKey() + '_' + state.films.filter(f => f.user?.rating).length;
+
+  let pool = state.recoPool;
+  // Try localStorage cache
+  if (!pool && !forceRefresh) {
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) pool = JSON.parse(cached);
+    } catch {}
+  }
+
+  if (!pool || forceRefresh || pool.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">analyse de tes goûts… (' + sources.length + ' films à croiser)</div>';
+    countEl.textContent = '…';
+    refreshBtn.disabled = true;
+    try {
+      pool = await buildRecoPool(sources);
+      state.recoPool = pool;
+      // Save to localStorage
+      try { localStorage.setItem(cacheKey, JSON.stringify(pool)); } catch {}
+      // Clear older month caches (cleanup)
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('films_reco_pool_') && k !== cacheKey) {
+          localStorage.removeItem(k);
+        }
+      }
+    } catch (e) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur : ${escapeHtml(e.message)}</div>`;
+      countEl.textContent = '0';
+      refreshBtn.disabled = false;
+      return;
+    }
+    refreshBtn.disabled = false;
+  }
+
+  if (pool.length === 0) {
+    ctxEl.innerHTML += '<br><span style="color: var(--ink-mute); font-size: 12px;">tmdb n\'a rien à recommander à partir de ces films pour le moment.</span>';
+    grid.innerHTML = '';
+    countEl.textContent = '0';
+    return;
+  }
+
+  const recos = monthlyRecoSubset(pool, 24);
+  state.recoDisplayed = recos;
+  renderTmdbGrid(recos);
+}
+
+// ============================================================
 // DETAIL MODAL
 // ============================================================
-function openModal(f) {
+function openModal(f, opts) {
+  opts = opts || {};
+  const tmdbOnly = opts.tmdbOnly === true;
   const bg = document.getElementById('modal-bg');
   const body = document.getElementById('modal-body');
+  // Reset filter from any previous open
+  bg.style.filter = '';
 
   if (f.backdrop) {
     bg.style.backgroundImage = `url(${f.backdrop})`;
@@ -2313,7 +2767,7 @@ function openModal(f) {
   // Ratings: user (1-6, stars primary) and TMDB (0-10)
   const rating = f.user?.rating;
   const fav = !!f.user?.favorite;
-  const userRatingHtml = rating ? (() => {
+  const userRatingHtml = (rating && !tmdbOnly) ? (() => {
     const visualStars = fav
       ? '❤'
       : '★'.repeat(rating) + '<span style="color:rgba(255,255,255,0.12)">★</span>'.repeat(6 - rating);
@@ -2335,22 +2789,25 @@ function openModal(f) {
   const ratingsHtml = (userRatingHtml || tmdbRatingHtml)
     ? `<div class="ratings-row">${userRatingHtml}${tmdbRatingHtml}</div>` : '';
 
-  // Viewing card
-  const u = f.user || {};
-  const statusLabel = u.statut === 'a_voir' ? 'à voir' : 'vu';
-  let viewingText = '';
-  if (u.statut === 'vu') {
-    viewingText = `Vu en <strong>${escapeHtml(u.date_vue_label || '?')}</strong>`;
-    if (u.lieu) viewingText += ` au <strong>${escapeHtml(u.lieu)}</strong>`;
-  } else {
-    viewingText = 'à voir';
-    if (u.lieu) viewingText += ` · <strong>${escapeHtml(u.lieu)}</strong>`;
+  // Viewing card — only for collection films
+  let viewingHtml = '';
+  if (!tmdbOnly) {
+    const u = f.user || {};
+    const statusLabel = u.statut === 'a_voir' ? 'à voir' : 'vu';
+    let viewingText = '';
+    if (u.statut === 'vu') {
+      viewingText = `Vu en <strong>${escapeHtml(u.date_vue_label || '?')}</strong>`;
+      if (u.lieu) viewingText += ` au <strong>${escapeHtml(u.lieu)}</strong>`;
+    } else {
+      viewingText = 'à voir';
+      if (u.lieu) viewingText += ` · <strong>${escapeHtml(u.lieu)}</strong>`;
+    }
+    viewingHtml = `
+      <div class="viewing-card">
+        <div class="viewing-card-text">${viewingText}</div>
+        <div class="viewing-card-status ${u.statut}">${statusLabel}</div>
+      </div>`;
   }
-  const viewingHtml = `
-    <div class="viewing-card">
-      <div class="viewing-card-text">${viewingText}</div>
-      <div class="viewing-card-status ${u.statut}">${statusLabel}</div>
-    </div>`;
 
   // Meta line
   const metaParts = [];
@@ -2378,8 +2835,22 @@ function openModal(f) {
     <div class="modal-section-label">synopsis</div>
     <p class="synopsis">${escapeHtml(f.synopsis)}</p>` : '';
 
-  // Edit form (admin mode only)
-  const editFormHtml = admin.active ? renderEditForm(f) : '';
+  // TMDB-only mode: add action buttons or hint instead of edit form
+  let actionsHtml = '';
+  if (tmdbOnly) {
+    if (admin.active) {
+      actionsHtml = `
+        <div class="tmdb-actions">
+          <button class="tmdb-action" data-action="add_vu">+ ajouter comme déjà vu</button>
+          <button class="tmdb-action ghost" data-action="add_avoir">+ ajouter à voir</button>
+        </div>`;
+    } else {
+      actionsHtml = `<div style="margin-top: 24px; padding: 16px; background: var(--bg-elev); border-radius: 8px; text-align: center; font-size: 13px; color: var(--ink-mute); font-style: italic;">active le mode édition (🔒) pour ajouter ce film à ta collection.</div>`;
+    }
+  }
+
+  // Edit form (admin mode only, NOT tmdbOnly)
+  const editFormHtml = (admin.active && !tmdbOnly) ? renderEditForm(f) : '';
 
   body.innerHTML = `
     <div class="modal-head">
@@ -2396,14 +2867,67 @@ function openModal(f) {
     ${synopsisHtml}
     ${castHtml}
     ${links.length ? `<div class="ext-links">${links.join('')}</div>` : ''}
+    ${actionsHtml}
     ${editFormHtml}
   `;
 
+  // Wire tmdb-only action buttons
+  if (tmdbOnly && admin.active) {
+    document.querySelectorAll('.tmdb-action').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        addTmdbFilmToCollection(f, action === 'add_vu' ? 'vu' : 'a_voir');
+      });
+    });
+  }
+
   // If admin, wire up the edit form
-  if (admin.active) wireEditForm(f);
+  if (admin.active && !tmdbOnly) wireEditForm(f);
 
   document.getElementById('modal-backdrop').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+async function addTmdbFilmToCollection(film, statut) {
+  if (!admin.active) {
+    showToast('mode admin requis', 'error');
+    return;
+  }
+  // Build user data
+  film.user = {
+    statut: statut,
+    rating: null,
+    favorite: false,
+    lieu: null,
+    date_vue: null,
+    date_vue_label: null,
+    csv_genres: [],
+  };
+  // Disable buttons during save
+  document.querySelectorAll('.tmdb-action').forEach(b => b.disabled = true);
+  try {
+    state.films.unshift(film);
+    await saveFilmsToGithub('add: ' + film.title + ' (' + statut + ')');
+    initFilters();
+    renderStats();
+    // If currently in discover/reco view, refresh the cards (in-collection state)
+    if (state.view === 'discover') {
+      fetchAndRenderDiscover(state.discoverCategory);
+    } else if (state.view === 'reco' && state.recoDisplayed) {
+      renderTmdbGrid(state.recoDisplayed.filter(it => {
+        const id = (it.media_type || 'movie') + '-' + it.id;
+        return id !== film.id;
+      }));
+    }
+    closeModal();
+    showToast('✓ ajouté : ' + film.title, 'success');
+  } catch (e) {
+    // Rollback
+    const idx = state.films.findIndex(f => f.id === film.id);
+    if (idx >= 0) state.films.splice(idx, 1);
+    showToast('erreur : ' + e.message, 'error');
+    document.querySelectorAll('.tmdb-action').forEach(b => b.disabled = false);
+  }
 }
 
 function closeModal() {
@@ -3892,253 +4416,35 @@ async function confirmRematch(result) {
   }
 }
 
-// ----------------- TMDB EXPLORER --------------------
-// Explorer state
-const explorerState = { mode: 'browse', category: 'trending' };
-
-function openExplorer(opts) {
-  opts = opts || {};
-  const prefillQuery = typeof opts === 'string' ? opts : (opts.query || '');
-  const mode = opts.mode || (prefillQuery ? 'search' : 'browse');
-
-  if (!admin.tmdbKey) {
-    document.getElementById('explorer-needs-key').style.display = '';
-    document.getElementById('explorer-main').style.display = 'none';
-    document.getElementById('explorer-backdrop').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    return;
-  }
-
-  document.getElementById('explorer-needs-key').style.display = 'none';
-  document.getElementById('explorer-main').style.display = '';
-  document.getElementById('explorer-input').value = prefillQuery;
-  document.getElementById('explorer-status').textContent = '';
-  document.getElementById('explorer-detail').style.display = 'none';
-  document.getElementById('explorer-detail').innerHTML = '';
-
-  if (mode === 'search' && prefillQuery && prefillQuery.length >= 2) {
-    explorerState.mode = 'search';
-    handleExplorerSearch(prefillQuery);
-  } else {
-    explorerState.mode = 'browse';
-    // Reset category pills active state
-    document.querySelectorAll('.explorer-cat').forEach(p => p.classList.toggle('active', p.dataset.cat === explorerState.category));
-    loadExplorerCategory(explorerState.category);
-  }
-
-  document.getElementById('explorer-backdrop').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => {
-    const inp = document.getElementById('explorer-input');
-    if (inp && mode === 'search') inp.focus();
-  }, 100);
-}
-
-function closeExplorer() {
-  document.getElementById('explorer-backdrop').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-let explorerSearchTimer = null;
-async function handleExplorerSearch(query) {
-  const resultsEl = document.getElementById('explorer-results');
-  const statusEl = document.getElementById('explorer-status');
-  const detailEl = document.getElementById('explorer-detail');
-  detailEl.style.display = 'none';
-  detailEl.innerHTML = '';
-  if (!query || query.length < 2) {
-    // Empty search → switch back to browse mode if we have a category
-    if (explorerState.mode === 'search' && explorerState.category) {
-      explorerState.mode = 'browse';
-      loadExplorerCategory(explorerState.category);
-    } else {
-      resultsEl.innerHTML = '';
-      statusEl.textContent = '';
-    }
-    return;
-  }
-  explorerState.mode = 'search';
-  statusEl.textContent = 'recherche…';
-  try {
-    const results = await tmdbSearch(query);
-    statusEl.textContent = results.length + ' résultats';
-    renderExplorerResults(results.slice(0, 30));
-  } catch (e) {
-    statusEl.textContent = 'erreur : ' + e.message;
-  }
-}
-
-async function loadExplorerCategory(category) {
-  const resultsEl = document.getElementById('explorer-results');
-  const statusEl = document.getElementById('explorer-status');
-  const detailEl = document.getElementById('explorer-detail');
-  explorerState.category = category;
-  detailEl.style.display = 'none';
-  detailEl.innerHTML = '';
-  statusEl.textContent = 'chargement…';
-  resultsEl.innerHTML = '';
-  try {
-    const results = await tmdbBrowse(category);
-    statusEl.textContent = results.length + ' films';
-    renderExplorerResults(results);
-  } catch (e) {
-    statusEl.textContent = 'erreur : ' + e.message;
-  }
-}
-
-function renderExplorerResults(items) {
-  const resultsEl = document.getElementById('explorer-results');
-  resultsEl.innerHTML = '';
-  for (const r of items) {
-    const div = document.createElement('div');
-    div.className = 'search-result';
-    const year = (r.release_date || r.first_air_date || '').slice(0, 4) || '?';
-    const newId = (r.media_type || 'movie') + '-' + r.id;
-    const inCollection = state.films.some(f => f.id === newId);
-    div.innerHTML = `
-      <div class="search-result-poster" ${r.poster_path ? `style="background-image:url(${tmdbImgUrl(r.poster_path, 'w185')})"` : ''}></div>
-      <div class="search-result-title">${escapeHtml(r.title || r.name || '')}</div>
-      <div class="search-result-year">${year}</div>
-      <div class="search-result-type">${r.media_type === 'tv' ? 'série' : 'film'}${inCollection ? ' · dans ma collec' : ''}</div>
-    `;
-    if (inCollection) div.classList.add('in-collection');
-    div.addEventListener('click', () => showExplorerDetail({ id: r.id, media_type: r.media_type || 'movie' }));
-    resultsEl.appendChild(div);
-  }
-}
-
-async function showExplorerDetail(result) {
-  const detailEl = document.getElementById('explorer-detail');
-  detailEl.style.display = '';
-  detailEl.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--ink-mute);">chargement des détails…</div>';
-  setTimeout(() => detailEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-
-  try {
-    const detail = await tmdbDetails(result.id, result.media_type);
-    const film = buildFilmFromTmdb(detail, result.media_type);
-    const newId = film.id;
-    const existing = state.films.find(f => f.id === newId);
-
-    let actionsHtml = '';
-    if (existing) {
-      actionsHtml = `
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
-          <button class="explorer-action" id="explorer-open-collection">↗ voir dans ma collection</button>
-        </div>
-        <div style="margin-top: 8px; font-size: 12px; color: var(--green);">✓ déjà dans ta collection (${existing.user?.statut === 'vu' ? 'vu' : 'à voir'})</div>
-      `;
-    } else if (admin.active) {
-      actionsHtml = `
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
-          <button class="explorer-action" id="explorer-add-avoir">+ à ma liste à voir</button>
-          <button class="explorer-action ghost" id="explorer-add-vu">+ comme déjà vu</button>
-        </div>
-      `;
-    } else {
-      actionsHtml = `<div style="margin-top: 16px; font-size: 12px; color: var(--ink-mute); font-style: italic;">active le mode admin pour ajouter ce film à ta collection.</div>`;
-    }
-
-    const links = [];
-    if (film.imdb_id) links.push(`<a class="ext-link" href="https://www.imdb.com/title/${film.imdb_id}" target="_blank" rel="noopener">imdb ↗</a>`);
-    links.push(`<a class="ext-link" href="https://www.themoviedb.org/${film.type === 'tv' ? 'tv' : 'movie'}/${film.tmdb_id}" target="_blank" rel="noopener">tmdb ↗</a>`);
-
-    const meta = [];
-    if (film.year) meta.push(String(film.year));
-    if (film.runtime) meta.push(film.runtime + ' min');
-    if (film.type === 'tv') meta.push('série');
-    if (film.tmdb_rating) meta.push(film.tmdb_rating.toFixed(1) + '/10 tmdb');
-
-    detailEl.innerHTML = `
-      <div class="explorer-detail-card">
-        ${film.backdrop ? `<div class="explorer-backdrop" style="background-image:url(${film.backdrop})"></div>` : ''}
-        <div class="explorer-detail-body">
-          <div style="display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px;">
-            <div class="explorer-detail-poster ${film.poster ? '' : 'empty'}" ${film.poster ? `style="background-image:url(${film.poster})"` : ''}></div>
-            <div style="flex: 1; min-width: 0;">
-              <h3 style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 26px; margin: 0 0 4px; color: var(--ink);">${escapeHtml(film.title)}</h3>
-              ${film.original_title && film.original_title !== film.title ? `<div style="font-style: italic; color: var(--ink-mute); margin-bottom: 6px;">${escapeHtml(film.original_title)}</div>` : ''}
-              ${film.director ? `<div style="color: var(--ink-soft); font-size: 13px; margin-bottom: 4px;">par <strong style="color: var(--ink);">${escapeHtml(film.director)}</strong></div>` : ''}
-              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.04em;">${meta.map(escapeHtml).join(' · ')}</div>
-            </div>
-          </div>
-          ${film.synopsis ? `<p style="color: var(--ink-soft); line-height: 1.55; font-size: 14px;">${escapeHtml(film.synopsis)}</p>` : ''}
-          ${film.genres && film.genres.length ? `<div class="genres" style="margin: 12px 0;">${film.genres.map(g => `<span class="genre-pill">${escapeHtml(g)}</span>`).join('')}</div>` : ''}
-          ${film.cast && film.cast.length ? `
-            <div style="margin-top: 16px;">
-              <div class="modal-section-label">casting</div>
-              <div class="cast-list">${film.cast.map(c => `<div class="cast-item">${escapeHtml(c)}</div>`).join('')}</div>
-            </div>
-          ` : ''}
-          ${links.length ? `<div class="ext-links" style="margin-top: 16px;">${links.join('')}</div>` : ''}
-          ${actionsHtml}
-        </div>
-      </div>
-    `;
-
-    if (existing) {
-      document.getElementById('explorer-open-collection').addEventListener('click', () => {
-        closeExplorer();
-        openModal(existing);
-      });
-    } else if (admin.active) {
-      document.getElementById('explorer-add-avoir').addEventListener('click', () => addFromExplorer(film, 'a_voir'));
-      document.getElementById('explorer-add-vu').addEventListener('click', () => addFromExplorer(film, 'vu'));
-    }
-  } catch (e) {
-    detailEl.innerHTML = `<div class="error-inline">erreur : ${escapeHtml(e.message)}</div>`;
-  }
-}
-
-async function addFromExplorer(film, statut) {
-  if (!admin.active) { showToast('mode admin requis pour ajouter', 'error'); return; }
-  film.user = {
-    statut: statut,
-    rating: null,
-    favorite: false,
-    lieu: null,
-    date_vue: null,
-    date_vue_label: null,
-    csv_genres: [],
-  };
-  document.querySelectorAll('.explorer-action').forEach(b => b.disabled = true);
-  try {
-    state.films.unshift(film);
-    await saveFilmsToGithub('add (explorer): ' + film.title);
-    initFilters();
-    applyFilters();
-    renderStats();
-    showToast('✓ ajouté à "' + (statut === 'vu' ? 'vus' : 'à voir') + '" : ' + film.title, 'success');
-    // Refresh detail panel to show "déjà dans collec"
-    await showExplorerDetail({ id: film.tmdb_id, media_type: film.type });
-  } catch (e) {
-    showToast('erreur : ' + e.message, 'error');
-    const idx = state.films.findIndex(f => f.id === film.id);
-    if (idx >= 0) state.films.splice(idx, 1);
-    document.querySelectorAll('.explorer-action').forEach(b => b.disabled = false);
-  }
-}
-
 
 function wireEvents() {
-  // Status tabs — only à voir / vus. Discover is handled separately.
-  document.querySelectorAll('#status-tabs .tab[data-status]').forEach(t => {
-    t.addEventListener('click', () => {
-      document.querySelectorAll('#status-tabs .tab').forEach(x => x.classList.remove('active'));
-      t.classList.add('active');
-      const newStatus = t.dataset.status;
-      state.filters.status = newStatus;
-      const newSort = TAB_SORT_DEFAULTS[newStatus] || 'date_vue_desc';
-      state.sort = newSort;
-      document.getElementById('sort').value = newSort;
-      applyFilters();
-    });
-  });
-  // Discover tab opens the explorer in browse mode
-  document.getElementById('tab-discover').addEventListener('click', () => {
-    openExplorer({ mode: 'browse' });
+  // All tabs use setView()
+  document.querySelectorAll('#status-tabs .tab[data-view]').forEach(t => {
+    t.addEventListener('click', () => setView(t.dataset.view));
   });
 
-  // Search
+  // Discover category pills
+  document.querySelectorAll('#discover-categories .explorer-cat').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const discInput = document.getElementById('discover-search');
+      if (discInput) discInput.value = '';
+      fetchAndRenderDiscover(pill.dataset.cat);
+    });
+  });
+
+  // Discover search input
+  document.getElementById('discover-search').addEventListener('input', (e) => {
+    clearTimeout(state.discoverSearchTimer);
+    state.discoverSearchTimer = setTimeout(() => handleDiscoverSearch(e.target.value.trim()), 300);
+  });
+
+  // Reco refresh button
+  document.getElementById('reco-refresh').addEventListener('click', () => {
+    state.recoPool = null; // force rebuild
+    fetchAndRenderReco(true);
+  });
+
+  // Search (local collection)
   let searchTimer;
   document.getElementById('search').addEventListener('input', (e) => {
     clearTimeout(searchTimer);
@@ -4193,12 +4499,10 @@ function wireEvents() {
     state.filters = { status: 'a_voir', search: '', genre: '', lieu: '', decade: '', yearvu: '', ratings: new Set() };
     state.sort = TAB_SORT_DEFAULTS.a_voir;
     document.getElementById('search').value = '';
-    document.querySelectorAll('#status-tabs .tab').forEach(t => t.classList.remove('active'));
-    document.querySelector('#status-tabs .tab[data-status="a_voir"]').classList.add('active');
     Object.keys(filterIds).forEach(id => { document.getElementById(id).value = ''; });
     document.querySelectorAll('#rating-chips .rating-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('sort').value = TAB_SORT_DEFAULTS.a_voir;
-    applyFilters();
+    setView('a_voir');
   });
 
   // Load more
@@ -4298,38 +4602,12 @@ function wireEvents() {
     rematchSearchTimer = setTimeout(() => handleRematchSearch(e.target.value.trim()), 300);
   });
 
-  // Explorer — opens from "→ tmdb" link in the filter bar
-  document.getElementById('search-tmdb-link').addEventListener('click', () => {
-    const q = document.getElementById('search').value.trim();
-    openExplorer({ query: q, mode: q ? 'search' : 'browse' });
-  });
-  document.getElementById('explorer-close').addEventListener('click', closeExplorer);
-  document.getElementById('explorer-backdrop').addEventListener('click', (e) => {
-    if (e.target.id === 'explorer-backdrop') closeExplorer();
-  });
-  document.getElementById('explorer-input').addEventListener('input', (e) => {
-    clearTimeout(explorerSearchTimer);
-    explorerSearchTimer = setTimeout(() => handleExplorerSearch(e.target.value.trim()), 300);
-  });
-  // Category pills
-  document.querySelectorAll('.explorer-cat').forEach(pill => {
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('.explorer-cat').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      // Clear search input — we're in browse mode now
-      document.getElementById('explorer-input').value = '';
-      explorerState.mode = 'browse';
-      loadExplorerCategory(pill.dataset.cat);
-    });
-  });
-
-  // Escape closes any open admin modal too
+  // Escape closes any open admin modal
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     if (document.getElementById('admin-setup-backdrop').classList.contains('open')) closeAdminSetup();
     if (document.getElementById('add-modal-backdrop').classList.contains('open')) closeAddModal();
     if (document.getElementById('rematch-backdrop').classList.contains('open')) closeRematchModal();
-    if (document.getElementById('explorer-backdrop').classList.contains('open')) closeExplorer();
   });
 }
 
