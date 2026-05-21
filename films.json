@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:43:25.576Z",
+  "generated_at": "2026-05-21T12:52:53.146Z",
   "count": 533,
   "films": [
     {
@@ -19407,7 +19407,7 @@
       "imdb_id": "tt14208870",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2023-03",
@@ -19418,7 +19418,9 @@
       },
       "source": {
         "csv_title": "The Fabelmans"
-      }
+      },
+      "country": "USA",
+      "trailer": "https://www.youtube.com/watch?v=He4maFN1wGQ"
     },
     {
       "id": "movie-977506",
