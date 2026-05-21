@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:57:37.526Z",
+  "generated_at": "2026-05-21T12:58:23.467Z",
   "count": 532,
   "films": [
     {
@@ -817,7 +817,7 @@
       "imdb_id": "tt7715270",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "before-2022",
@@ -829,7 +829,9 @@
       },
       "source": {
         "csv_title": "Adoration"
-      }
+      },
+      "trailer": "https://www.youtube.com/watch?v=gxyb0y3QPRw",
+      "country": "France · Belgium"
     },
     {
       "id": "movie-73",
