@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T13:01:07.901Z",
+  "generated_at": "2026-05-21T13:01:20.025Z",
   "count": 532,
   "films": [
     {
@@ -2762,7 +2762,7 @@
       "imdb_id": "tt0462335",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "before-2022",
@@ -2773,7 +2773,9 @@
       },
       "source": {
         "csv_title": "High Rise"
-      }
+      },
+      "country": "UK · Belgium · Northern Ireland",
+      "trailer": "https://www.youtube.com/watch?v=h2o70l4CAv4"
     },
     {
       "id": "movie-21057",
