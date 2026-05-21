@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:37:37.104Z",
+  "generated_at": "2026-05-21T12:37:52.935Z",
   "count": 534,
   "films": [
     {
@@ -16315,7 +16315,7 @@
       "imdb_id": "tt2906216",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Autre",
         "date_vue": "2023-10",
@@ -16327,7 +16327,9 @@
       },
       "source": {
         "csv_title": "Donjons & Dragons"
-      }
+      },
+      "country": "Canada · USA",
+      "trailer": "https://www.youtube.com/watch?v=Cp-qzSnUMyQ"
     },
     {
       "id": "movie-480647",
