@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:53:26.214Z",
+  "generated_at": "2026-05-21T12:53:32.882Z",
   "count": 533,
   "films": [
     {
@@ -19957,7 +19957,7 @@
       "imdb_id": "tt14962428",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 1,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2023-01",
@@ -19968,7 +19968,9 @@
       },
       "source": {
         "csv_title": "L’Année du Requin"
-      }
+      },
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=nz7ssftxw4I"
     },
     {
       "id": "movie-807862",
