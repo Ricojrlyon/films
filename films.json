@@ -1,8 +1,48 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T12:26:43.582Z",
-  "count": 532,
+  "generated_at": "2026-05-21T07:03:21.037Z",
+  "count": 533,
   "films": [
+    {
+      "id": "movie-773",
+      "tmdb_id": 773,
+      "type": "movie",
+      "title": "Little Miss Sunshine",
+      "original_title": "Little Miss Sunshine",
+      "year": 2006,
+      "release_date": "2006-07-26",
+      "director": "Valerie Faris",
+      "cast": [
+        "Greg Kinnear",
+        "Toni Collette",
+        "Steve Carell",
+        "Paul Dano",
+        "Abigail Breslin"
+      ],
+      "runtime": 102,
+      "genres": [
+        "Comédie",
+        "Drame"
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/pUPR2pgiVfWMkHcE0SqaE4skDl9.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/yE376O0gMgUE7wX1PQ9bbTPVvFq.jpg",
+      "synopsis": "L’histoire des Hoover. Le père, Richard, tente désespérément de vendre son « Parcours vers le succès en 9 étapes ». La mère, Sheryl, tente de dissimuler les travers de son frère, spécialiste suicidaire de Proust fraîchement sorti de l’hôpital après avoir été congédié par son amant. Les enfants Hoover ne sont pas non plus dépourvus de rêves improbables : la fille de 7 ans, Olive, se rêve en reine de beauté, tandis que son frère Dwayne a fait vœu de silence jusqu’à son entrée à l’Air Force Academy. Quand Olive décroche une invitation à concourir pour le très sélectif titre de Little Miss Sunshine en Californie, toute la famille décide de faire corps derrière elle. Les voilà donc entassés dans leur van Volkswagen rouillé : ils mettent le cap vers l’ouest et entament un voyage tragi‐comique de trois jours qui les mettra aux prises avec des événements inattendus…",
+      "tmdb_rating": 7.693,
+      "imdb_id": "tt0449059",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-21T07:03:17.828Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-972119",
       "tmdb_id": 972119,
