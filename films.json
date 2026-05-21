@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:39:19.304Z",
+  "generated_at": "2026-05-21T12:39:50.823Z",
   "count": 534,
   "films": [
     {
@@ -17247,7 +17247,7 @@
       "imdb_id": "tt1291150",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2023-08",
@@ -17259,7 +17259,9 @@
       },
       "source": {
         "csv_title": "Les tortues ninjas"
-      }
+      },
+      "country": "USA",
+      "trailer": "https://www.youtube.com/watch?v=aka3_33dPCw"
     },
     {
       "id": "movie-958854",
