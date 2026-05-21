@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:28:26.779Z",
+  "generated_at": "2026-05-21T12:28:54.552Z",
   "count": 536,
   "films": [
     {
@@ -12053,7 +12053,7 @@
       "imdb_id": "tt12299608",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2025-03",
@@ -12064,7 +12064,9 @@
       },
       "source": {
         "csv_title": "Mickey 17"
-      }
+      },
+      "country": "USA · UK",
+      "trailer": "https://www.youtube.com/watch?v=9nflOgxkU_c"
     },
     {
       "id": "movie-1013850",
