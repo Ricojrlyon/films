@@ -379,14 +379,7 @@ body {
 .card .rating-badge .star { color: var(--warm); }
 .card .rating-badge.favorite .star { color: white; }
 
-/* "à voir" overlay */
-.card.to-watch::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(22, 31, 37, 0.4);
-  pointer-events: none;
-}
+/* à voir cards: no visual distinction on the poster itself; the "à voir" badge label is enough */
 .card.to-watch .a-voir-badge {
   position: absolute;
   bottom: 8px;
