@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:28:54.552Z",
+  "generated_at": "2026-05-21T12:29:49.835Z",
   "count": 536,
   "films": [
     {
@@ -12857,7 +12857,7 @@
       "imdb_id": "tt30056829",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Autre",
         "date_vue": "2024-12",
@@ -12868,7 +12868,9 @@
       },
       "source": {
         "csv_title": "Je ne me laisserai plus faire (arte)"
-      }
+      },
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=kvWQW9gFR8U"
     },
     {
       "id": "tv-94605",
