@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:34:25.580Z",
+  "generated_at": "2026-05-21T12:34:52.765Z",
   "count": 536,
   "films": [
     {
@@ -401,7 +401,7 @@
       },
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 4,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2024-02",
