@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T13:01:20.025Z",
+  "generated_at": "2026-05-21T13:03:54.346Z",
   "count": 532,
   "films": [
     {
@@ -4316,32 +4316,37 @@
       }
     },
     {
-      "id": "tv-58791",
-      "tmdb_id": 58791,
-      "type": "tv",
+      "id": "movie-658156",
+      "tmdb_id": 658156,
+      "type": "movie",
       "title": "Lucky",
       "original_title": "Lucky",
-      "year": 2007,
-      "release_date": "2007-11-04",
-      "director": null,
+      "year": 2020,
+      "release_date": "2020-02-26",
+      "director": "Olivier Van Hoofstadt",
       "cast": [
-        "Gautam Rode",
-        "Anang Desai",
-        "Gyan Prakash Sharma",
-        "Navni Parihar",
-        "Banwarilal Jhol"
+        "Michaël Youn",
+        "Florence Foresti",
+        "Alban Ivanov",
+        "François Berléand",
+        "Yoann Blanc"
       ],
-      "runtime": null,
+      "runtime": 90,
       "genres": [
-        "Action & Adventure",
-        "Familial",
-        "Kids"
+        "Comédie"
       ],
-      "poster": "https://image.tmdb.org/t/p/w500/8VvQG3XmpBJxJTpVnNKjXqnDRpP.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/gghDpVs6KoYpbgplhi6UTTDQcdp.jpg",
-      "synopsis": null,
-      "tmdb_rating": null,
-      "imdb_id": null,
+      "country": "France · Belgium",
+      "poster": "https://image.tmdb.org/t/p/w500/ryoR3h9nJ2ymZa0j8aUravCkHDM.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/hHlpASGiTZKp5FT2NY05YRaR3Sb.jpg",
+      "synopsis": "Pour s’en sortir financièrement, Willy et son pote Tony, endettés de naissance, ont une idée de génie : voler un chien de la brigade des stups. Mais, les choses ne se passent pas tout à fait comme ils l’avaient prévu. La seule solution : s’associer avec Caro, une flic totalement corrompue.",
+      "tmdb_rating": 4.7,
+      "imdb_id": "tt10966156",
+      "original_language": "fr",
+      "trailer": "https://www.youtube.com/watch?v=CIAWn49EIzg",
+      "source": {
+        "csv_title": "Lucky",
+        "rematched_at": "2026-05-21T13:03:54.346Z"
+      },
       "user": {
         "statut": "vu",
         "rating": 3,
@@ -4352,9 +4357,6 @@
         "csv_genres": [
           "Comédie"
         ]
-      },
-      "source": {
-        "csv_title": "Lucky"
       }
     },
     {
