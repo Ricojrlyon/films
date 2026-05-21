@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:41:43.252Z",
+  "generated_at": "2026-05-21T12:41:53.769Z",
   "count": 533,
   "films": [
     {
@@ -18093,7 +18093,7 @@
       "imdb_id": "tt1517268",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2023-07",
@@ -18104,7 +18104,9 @@
       },
       "source": {
         "csv_title": "Barbie"
-      }
+      },
+      "country": "UK · USA",
+      "trailer": "https://www.youtube.com/watch?v=yK1rMPQ2jBw"
     },
     {
       "id": "movie-872585",
