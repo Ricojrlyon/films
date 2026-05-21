@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:29:49.835Z",
+  "generated_at": "2026-05-21T12:30:47.971Z",
   "count": 536,
   "films": [
     {
@@ -13163,7 +13163,9 @@
       },
       "source": {
         "csv_title": "The substance"
-      }
+      },
+      "country": "France · UK · USA",
+      "trailer": "https://www.youtube.com/watch?v=LbOqfmP-Pb8"
     },
     {
       "id": "movie-930564",
@@ -13237,7 +13239,7 @@
       "imdb_id": "tt17279496",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2024-10",
@@ -13249,7 +13251,9 @@
       },
       "source": {
         "csv_title": "Civil war"
-      }
+      },
+      "country": "Finland · UK · USA",
+      "trailer": "https://www.youtube.com/watch?v=2P2YQQHaWaU"
     },
     {
       "id": "movie-1114749",
