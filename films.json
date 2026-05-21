@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T07:35:20.161Z",
+  "generated_at": "2026-05-21T07:36:00.139Z",
   "count": 536,
   "films": [
     {
@@ -9598,7 +9598,7 @@
       "imdb_id": "tt9243804",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Stremio",
         "date_vue": "2025-12",
@@ -9611,7 +9611,8 @@
       },
       "source": {
         "csv_title": "The Green Knight"
-      }
+      },
+      "country": "Canada"
     },
     {
       "id": "movie-912520",
