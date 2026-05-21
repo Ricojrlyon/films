@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:52:53.146Z",
+  "generated_at": "2026-05-21T12:53:26.214Z",
   "count": 533,
   "films": [
     {
@@ -19867,7 +19867,7 @@
       "imdb_id": "tt14860210",
       "user": {
         "statut": "vu",
-        "rating": 5,
+        "rating": 4,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2023-01",
@@ -19881,7 +19881,9 @@
       },
       "source": {
         "csv_title": "Tirailleurs"
-      }
+      },
+      "country": "France · Senegal",
+      "trailer": "https://www.youtube.com/watch?v=7VMY0nf2fDM"
     },
     {
       "id": "movie-490132",
