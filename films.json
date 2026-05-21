@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:55:35.444Z",
+  "generated_at": "2026-05-21T12:55:40.755Z",
   "count": 533,
   "films": [
     {
@@ -21369,7 +21369,7 @@
       "imdb_id": "tt10590506",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2022",
@@ -21380,7 +21380,9 @@
       },
       "source": {
         "csv_title": "Profession du Père"
-      }
+      },
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=iS1Pv2GTI2g"
     },
     {
       "id": "movie-8051",
