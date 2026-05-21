@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:33:17.059Z",
+  "generated_at": "2026-05-21T12:34:25.580Z",
   "count": 536,
   "films": [
     {
@@ -404,10 +404,12 @@
         "rating": 3,
         "favorite": false,
         "lieu": "Cinéma",
-        "date_vue": "2022",
-        "date_vue_label": "2022",
+        "date_vue": "2024-02",
+        "date_vue_label": "Février 2024",
         "csv_genres": []
-      }
+      },
+      "country": "Japan",
+      "trailer": "https://www.youtube.com/watch?v=tgUNyWHONYE"
     },
     {
       "id": "movie-582913",
