@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:34:52.765Z",
-  "count": 536,
+  "generated_at": "2026-05-21T12:35:08.103Z",
+  "count": 535,
   "films": [
     {
       "id": "movie-324857",
@@ -15134,38 +15134,6 @@
       },
       "source": {
         "csv_title": "When the light breaks"
-      }
-    },
-    {
-      "id": "ghost-qjq1zr15",
-      "tmdb_id": null,
-      "type": null,
-      "title": "A man",
-      "original_title": null,
-      "year": null,
-      "director": null,
-      "cast": [],
-      "runtime": null,
-      "genres": [
-        "Drame"
-      ],
-      "poster": null,
-      "synopsis": null,
-      "tmdb_rating": null,
-      "user": {
-        "statut": "vu",
-        "rating": 4,
-        "favorite": false,
-        "lieu": "Cinéma",
-        "date_vue": "2024-02",
-        "date_vue_label": "Février 2024",
-        "csv_genres": [
-          "Drame"
-        ]
-      },
-      "source": {
-        "csv_title": "A man",
-        "unmatched": true
       }
     },
     {
