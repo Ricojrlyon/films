@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:37:19.264Z",
+  "generated_at": "2026-05-21T12:37:37.104Z",
   "count": 534,
   "films": [
     {
@@ -16188,7 +16188,7 @@
       "imdb_id": "tt2076822",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2023-10",
@@ -16200,7 +16200,9 @@
       },
       "source": {
         "csv_title": "Chaos Walking"
-      }
+      },
+      "country": "USA · Canada · Hong Kong · Luxembourg",
+      "trailer": "https://www.youtube.com/watch?v=e86BAQ1MiMg"
     },
     {
       "id": "movie-103",
