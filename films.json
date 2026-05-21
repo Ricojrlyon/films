@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:53:46.207Z",
+  "generated_at": "2026-05-21T12:53:56.638Z",
   "count": 533,
   "films": [
     {
@@ -20382,7 +20382,7 @@
       "imdb_id": "tt14542254",
       "user": {
         "statut": "vu",
-        "rating": 5,
+        "rating": 4,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2022",
@@ -20394,7 +20394,9 @@
       },
       "source": {
         "csv_title": "Novembre"
-      }
+      },
+      "country": "France · Belgium",
+      "trailer": "https://www.youtube.com/watch?v=J6sEwKbMdHw"
     },
     {
       "id": "movie-538675",
