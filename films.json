@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T07:30:41.579Z",
+  "generated_at": "2026-05-21T07:30:58.112Z",
   "count": 535,
   "films": [
     {
@@ -18432,8 +18432,8 @@
       "imdb_id": "tt9362722",
       "user": {
         "statut": "vu",
-        "rating": 6,
-        "favorite": true,
+        "rating": 5,
+        "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2023-06",
         "date_vue_label": "Juin 2023",
@@ -18445,7 +18445,8 @@
       },
       "source": {
         "csv_title": "Spider-Man: Across the Spider-Verse"
-      }
+      },
+      "country": "United States of America"
     },
     {
       "id": "movie-298618",
