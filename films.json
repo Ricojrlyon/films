@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:58:36.833Z",
+  "generated_at": "2026-05-21T13:00:16.082Z",
   "count": 532,
   "films": [
     {
@@ -1210,7 +1210,9 @@
       },
       "source": {
         "csv_title": "Brigsby Bear"
-      }
+      },
+      "country": "USA",
+      "trailer": "https://www.youtube.com/watch?v=InqSiQENDYY"
     },
     {
       "id": "movie-310",
@@ -2100,32 +2102,37 @@
       }
     },
     {
-      "id": "movie-817451",
-      "tmdb_id": 817451,
+      "id": "movie-421452",
+      "tmdb_id": 421452,
       "type": "movie",
       "title": "Espèces menacées",
-      "original_title": "Endangered Species",
-      "year": 2021,
-      "release_date": "2021-05-27",
-      "director": "MJ Bassett",
+      "original_title": "Espèces menacées",
+      "year": 2017,
+      "release_date": "2017-09-27",
+      "director": "Gilles Bourdos",
       "cast": [
-        "Rebecca Romijn",
-        "Philip Winchester",
-        "Isabel Bassett",
-        "Michael Johnston",
-        "Chris Fisher"
+        "Alice Isaaz",
+        "Éric Elmosnino",
+        "Grégory Gadebois",
+        "Vincent Rottiers",
+        "Suzanne Clément"
       ],
-      "runtime": 102,
+      "runtime": 105,
       "genres": [
-        "Thriller",
-        "Action",
-        "Aventure"
+        "Drame"
       ],
-      "poster": "https://image.tmdb.org/t/p/w500/qmcwVcuzOXOFXDjKwQjrWhjYiKj.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/A0xW7GgeFQoQmPOn7HcHkBQ5nlb.jpg",
-      "synopsis": "Une riche famille américaine voyage dans les vastes étendues sauvages africaines du Kenya dans l'espoir de vacances de rêve. Mais lorsque leur véhicule de safari est attaqué par un rhinocéros protégeant son bébé, la famille se retrouve à des kilomètres de la moindre aide et leurs vacances de rêve se transforment en une lutte cauchemardesque pour survivre dans un monde où ils sont au bas de la chaîne alimentaire.",
-      "tmdb_rating": 5.716,
-      "imdb_id": "tt13863334",
+      "country": "France · Belgium",
+      "poster": "https://image.tmdb.org/t/p/w500/mQGhLaAS9dy88Gl3LuqEnIw46EJ.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/veUROBYQZSWrhW61y5GTbi0Klao.jpg",
+      "synopsis": "Trois destins familiaux entrelacés. Joséphine et Tomas viennent de se marier dans l’allégresse. Mais bientôt, derrière le bonheur solaire des époux, les parents de Joséphine vont découvrir une réalité plus sombre. Mélanie, elle, annonce à ses parents qu’elle attend un bébé mais le père de l’enfant n’a pas du tout le profil du gendre idéal ! De son côté, Anthony, étudiant lunaire et malheureux en amour, va devoir prendre en charge sa mère, devenue soudainement incontrôlable.",
+      "tmdb_rating": 6.512,
+      "imdb_id": "tt5539466",
+      "original_language": "fr",
+      "trailer": "https://www.youtube.com/watch?v=gpiAfyloJm4",
+      "source": {
+        "csv_title": "Espèces Menacées",
+        "rematched_at": "2026-05-21T13:00:16.082Z"
+      },
       "user": {
         "statut": "vu",
         "rating": 4,
@@ -2136,9 +2143,6 @@
         "csv_genres": [
           "Drame"
         ]
-      },
-      "source": {
-        "csv_title": "Espèces Menacées"
       }
     },
     {
