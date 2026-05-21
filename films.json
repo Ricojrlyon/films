@@ -1,8 +1,50 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T07:03:43.498Z",
-  "count": 533,
+  "generated_at": "2026-05-21T07:28:40.308Z",
+  "count": 534,
   "films": [
+    {
+      "id": "movie-157336",
+      "tmdb_id": 157336,
+      "type": "movie",
+      "title": "Interstellar",
+      "original_title": "Interstellar",
+      "year": 2014,
+      "release_date": "2014-11-05",
+      "director": "Christopher Nolan",
+      "cast": [
+        "Matthew McConaughey",
+        "Anne Hathaway",
+        "Michael Caine",
+        "Jessica Chastain",
+        "Casey Affleck"
+      ],
+      "runtime": 169,
+      "genres": [
+        "Aventure",
+        "Drame",
+        "Science-Fiction"
+      ],
+      "country": "United Kingdom",
+      "poster": "https://image.tmdb.org/t/p/w500/1pnigkWWy8W032o9TKDneBa3eVK.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/2ssWTSVklAEc98frZUQhgtGHx7s.jpg",
+      "synopsis": "Dans un futur proche, face à une Terre exsangue, un groupe d’explorateurs utilise un vaisseau interstellaire pour franchir un trou de ver permettant de parcourir des distances jusque‐là infranchissables. Leur but : trouver un nouveau foyer pour l’humanité.",
+      "tmdb_rating": 8.474,
+      "imdb_id": "tt0816692",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-21T07:28:38.029Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-773",
       "tmdb_id": 773,
@@ -8066,7 +8108,8 @@
       },
       "source": {
         "csv_title": "La maison des femmes"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-391713",
@@ -8107,7 +8150,8 @@
       },
       "source": {
         "csv_title": "Ladybird"
-      }
+      },
+      "country": "United States of America"
     },
     {
       "id": "movie-1266791",
@@ -8147,7 +8191,8 @@
       },
       "source": {
         "csv_title": "Alter Ego"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1317149",
@@ -8189,7 +8234,8 @@
       },
       "source": {
         "csv_title": "I Swear (Plus fort que moi)"
-      }
+      },
+      "country": "United Kingdom"
     },
     {
       "id": "movie-1168719",
@@ -8232,7 +8278,8 @@
       },
       "source": {
         "csv_title": "Silent Friend"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-639988",
@@ -8275,7 +8322,8 @@
       },
       "source": {
         "csv_title": "No other choice"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-1376415",
@@ -8319,7 +8367,8 @@
       },
       "source": {
         "csv_title": "L'Affaire Bojarski"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1318335",
@@ -8362,7 +8411,8 @@
       },
       "source": {
         "csv_title": "Les Rayons et les Ombres"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-2767",
@@ -8404,7 +8454,8 @@
       },
       "source": {
         "csv_title": "Les amants du Pont Neuf"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-648878",
@@ -8448,7 +8499,8 @@
       },
       "source": {
         "csv_title": "Eddington"
-      }
+      },
+      "country": "United States of America"
     },
     {
       "id": "movie-1001030",
@@ -8489,7 +8541,8 @@
       },
       "source": {
         "csv_title": "Différente"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1096642",
@@ -8529,7 +8582,8 @@
       },
       "source": {
         "csv_title": "L’attachement"
-      }
+      },
+      "country": "Belgium"
     },
     {
       "id": "movie-1254808",
@@ -8615,7 +8669,8 @@
       },
       "source": {
         "csv_title": "L’inconnu de la grande arche"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1259983",
@@ -8657,7 +8712,8 @@
       },
       "source": {
         "csv_title": "Gourou"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1317288",
@@ -8740,7 +8796,8 @@
       },
       "source": {
         "csv_title": "Alpha"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1137350",
@@ -8825,7 +8882,8 @@
       },
       "source": {
         "csv_title": "Le rêve américain"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1352310",
@@ -8866,7 +8924,8 @@
       },
       "source": {
         "csv_title": "Avignon"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-798286",
@@ -8909,7 +8968,8 @@
       },
       "source": {
         "csv_title": "Beau is afraid"
-      }
+      },
+      "country": "United States of America"
     },
     {
       "id": "movie-1151272",
@@ -8950,7 +9010,8 @@
       },
       "source": {
         "csv_title": "Sirat"
-      }
+      },
+      "country": "Spain"
     },
     {
       "id": "movie-383807",
@@ -8990,7 +9051,8 @@
       },
       "source": {
         "csv_title": "Réparer les vivants"
-      }
+      },
+      "country": "Belgium"
     },
     {
       "id": "movie-1062722",
@@ -9034,7 +9096,8 @@
       },
       "source": {
         "csv_title": "Frankenstein"
-      }
+      },
+      "country": "United States of America"
     },
     {
       "id": "movie-1480382",
@@ -9075,7 +9138,8 @@
       },
       "source": {
         "csv_title": "La voix de Hind Rajab"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1205648",
@@ -9117,7 +9181,8 @@
       },
       "source": {
         "csv_title": "Le roi soleil"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1233506",
@@ -9160,7 +9225,8 @@
       },
       "source": {
         "csv_title": "L’homme qui rétrécit"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1178464",
@@ -9200,7 +9266,8 @@
       },
       "source": {
         "csv_title": "Cassandre"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1221061",
@@ -22079,7 +22146,8 @@
       },
       "source": {
         "csv_title": "A pied d'oeuvre"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1019871",
