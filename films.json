@@ -1,8 +1,54 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T07:38:58.391Z",
-  "count": 536,
+  "generated_at": "2026-05-21T12:15:19.282Z",
+  "count": 537,
   "films": [
+    {
+      "id": "movie-1226863",
+      "tmdb_id": 1226863,
+      "type": "movie",
+      "title": "Super Mario Galaxy, le film",
+      "original_title": "The Super Mario Galaxy Movie",
+      "year": 2026,
+      "release_date": "2026-04-01",
+      "director": "Aaron Horvath",
+      "cast": [
+        "Chris Pratt",
+        "Anya Taylor-Joy",
+        "Charlie Day",
+        "Jack Black",
+        "Donald Glover"
+      ],
+      "runtime": 100,
+      "genres": [
+        "Familial",
+        "Comédie",
+        "Aventure",
+        "Fantastique",
+        "Animation"
+      ],
+      "country": "Japan · USA",
+      "poster": "https://image.tmdb.org/t/p/w500/aSQktALDmbunDbwkuZbZFMEWVFr.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/9Z2uDYXqJrlmePznQQJhL6d92Rq.jpg",
+      "synopsis": "Mario et Luigi gèrent les tracas du royaume Champignon, se lient d'amitié avec Yoshi, tentent de réhabiliter mini-Bowser et se préparent pour l'anniversaire de Peach. Mais quand un appel à l'aide arrive de l'autre bout de la galaxie, l'équipe part découvrir des mondes nouveaux, des menaces inattendues et des personnages emblématiques, comme Rosalina et Bowser Jr.",
+      "tmdb_rating": 7.421,
+      "imdb_id": "tt28650488",
+      "original_language": "en",
+      "trailer": "https://www.youtube.com/watch?v=wOhwellmCFo",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-21T12:15:05.973Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-324857",
       "tmdb_id": 324857,
@@ -22239,7 +22285,8 @@
       "source": {
         "csv_title": "A pied d'oeuvre"
       },
-      "country": "France"
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=Gifr5NrMeBk"
     },
     {
       "id": "movie-1019871",
