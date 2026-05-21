@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:36:15.945Z",
+  "generated_at": "2026-05-21T12:37:19.264Z",
   "count": 534,
   "films": [
     {
@@ -16016,7 +16016,7 @@
       "imdb_id": "tt6587046",
       "user": {
         "statut": "vu",
-        "rating": 5,
+        "rating": 4,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2023-11",
@@ -16030,7 +16030,9 @@
       },
       "source": {
         "csv_title": "Le garçon et le héron"
-      }
+      },
+      "country": "Japan",
+      "trailer": "https://www.youtube.com/watch?v=Q2aTi0BQXek"
     },
     {
       "id": "movie-586810",
