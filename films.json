@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:55:40.755Z",
+  "generated_at": "2026-05-21T12:56:01.346Z",
   "count": 533,
   "films": [
     {
@@ -21427,22 +21427,39 @@
       }
     },
     {
-      "id": "movie-676595",
-      "tmdb_id": 676595,
+      "id": "movie-619264",
+      "tmdb_id": 619264,
       "type": "movie",
-      "title": "The Platform",
-      "original_title": "The Platform",
-      "year": 2001,
-      "release_date": "2001-01-01",
-      "director": "Robin Walters",
-      "cast": [],
-      "runtime": 4,
-      "genres": [],
-      "poster": "https://image.tmdb.org/t/p/w500/8gUU0Zq414RNZrvNW842UhTDwtC.jpg",
-      "backdrop": null,
-      "synopsis": null,
-      "tmdb_rating": 7.75,
-      "imdb_id": "tt0317990",
+      "title": "La Plateforme",
+      "original_title": "El hoyo",
+      "year": 2019,
+      "release_date": "2019-11-08",
+      "director": "Galder Gaztelu-Urrutia",
+      "cast": [
+        "Ivan Massagué",
+        "Antonia San Juan",
+        "Zorion Eguileor",
+        "Emilio Buale",
+        "Alexandra Masangkay"
+      ],
+      "runtime": 95,
+      "genres": [
+        "Drame",
+        "Science-Fiction",
+        "Thriller"
+      ],
+      "country": "Spain",
+      "poster": "https://image.tmdb.org/t/p/w500/4of8zxtc8zVL4yfFPg0Xggux9lm.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/3tkDMNfM2YuIAJlvGO6rfIzAnfG.jpg",
+      "synopsis": "Une plateforme de nourriture descend d'étage en étage pour ravitailler les résidents d'une tour. Ceux du dessus se gavent, affamant ceux du dessous. La révolte gronde.",
+      "tmdb_rating": 6.97,
+      "imdb_id": "tt8228288",
+      "original_language": "es",
+      "trailer": "https://www.youtube.com/watch?v=pUXw0bbtHS0",
+      "source": {
+        "csv_title": "The Platform",
+        "rematched_at": "2026-05-21T12:56:01.346Z"
+      },
       "user": {
         "statut": "vu",
         "rating": 4,
@@ -21453,9 +21470,6 @@
         "csv_genres": [
           "Thriller"
         ]
-      },
-      "source": {
-        "csv_title": "The Platform"
       }
     },
     {
