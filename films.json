@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:40:45.966Z",
+  "generated_at": "2026-05-21T12:41:16.555Z",
   "count": 533,
   "films": [
     {
@@ -17877,7 +17877,7 @@
       "imdb_id": "tt3774694",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2023-07",
@@ -17889,7 +17889,9 @@
       },
       "source": {
         "csv_title": "Love"
-      }
+      },
+      "country": "France · Belgium · Brazil",
+      "trailer": "https://www.youtube.com/watch?v=VE6JgargIiY"
     },
     {
       "id": "movie-1500779",
