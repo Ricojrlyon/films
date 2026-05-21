@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T13:18:41.353Z",
+  "generated_at": "2026-05-21T13:19:09.832Z",
   "count": 530,
   "films": [
     {
@@ -21878,8 +21878,8 @@
         "rating": 2,
         "favorite": false,
         "lieu": "Cinéma",
-        "date_vue": null,
-        "date_vue_label": "Novembre",
+        "date_vue": "2023-11",
+        "date_vue_label": "Novembre 2023",
         "csv_genres": [
           "Drame",
           "Romance"
@@ -21887,7 +21887,9 @@
       },
       "source": {
         "csv_title": "La passion de Dodin Bouffant"
-      }
+      },
+      "country": "France · Belgium",
+      "trailer": "https://www.youtube.com/watch?v=Ag_KaIQ5_TE"
     },
     {
       "id": "tv-5895",
