@@ -2287,7 +2287,8 @@ function fillSelect(id, items) {
 // ============================================================
 // FILTERING + SORTING
 // ============================================================
-function applyFilters() {
+function applyFilters(opts) {
+  opts = opts || {};
   const f = state.filters;
   let list = state.films.slice();
 
@@ -2326,7 +2327,7 @@ function applyFilters() {
   sortList(list, state.sort);
 
   state.filtered = list;
-  state.page = 1;
+  if (!opts.preservePage) state.page = 1;
   renderGrid();
   updateFilterBadge();
 }
@@ -4533,7 +4534,7 @@ async function submitAddForm() {
 
     // Refresh views
     initFilters();
-    applyFilters();
+    applyFilters({ preservePage: true });
     renderStats();
     closeAddModal();
     showToast('✓ ajouté : ' + film.title, 'success');
@@ -4701,7 +4702,7 @@ async function saveEditedFilm(filmId) {
     state.films[filmIndex].user = newUser;
     await saveFilmsToGithub('edit: ' + film.title);
     initFilters();
-    applyFilters();
+    applyFilters({ preservePage: true });
     renderStats();
     closeModal();
     showToast('✓ ' + film.title + ' mis à jour', 'success');
@@ -4722,7 +4723,7 @@ async function deleteFilm(film) {
     state.films.splice(idx, 1);
     await saveFilmsToGithub('delete: ' + film.title);
     initFilters();
-    applyFilters();
+    applyFilters({ preservePage: true });
     renderStats();
     closeModal();
     showToast('✓ supprimé : ' + film.title, 'success');
@@ -4804,7 +4805,7 @@ async function confirmRematch(result) {
     statusEl.textContent = 'enregistrement…';
     await saveFilmsToGithub('rematch: ' + oldFilm.title + ' → ' + newFilm.title);
     initFilters();
-    applyFilters();
+    applyFilters({ preservePage: true });
     renderStats();
     closeRematchModal();
     closeModal();
