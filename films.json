@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:55:19.808Z",
+  "generated_at": "2026-05-21T12:55:24.086Z",
   "count": 533,
   "films": [
     {
@@ -21194,7 +21194,7 @@
       "imdb_id": "tt7131622",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2022",
@@ -21206,7 +21206,9 @@
       },
       "source": {
         "csv_title": "Once Upon a Time… In Hollywood"
-      }
+      },
+      "country": "China · UK · USA",
+      "trailer": "https://www.youtube.com/watch?v=RbMJJHCH5oc"
     },
     {
       "id": "movie-496243",
