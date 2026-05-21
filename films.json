@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:41:16.555Z",
+  "generated_at": "2026-05-21T12:41:43.252Z",
   "count": 533,
   "films": [
     {
@@ -18046,7 +18046,7 @@
       "imdb_id": "tt15789038",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2023-07",
@@ -18060,7 +18060,9 @@
       },
       "source": {
         "csv_title": "Élémentaire"
-      }
+      },
+      "country": "USA",
+      "trailer": "https://www.youtube.com/watch?v=C_oyIKvo5_A"
     },
     {
       "id": "movie-346698",
