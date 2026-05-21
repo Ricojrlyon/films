@@ -379,12 +379,7 @@ body {
 .card .rating-badge .star { color: var(--warm); }
 .card .rating-badge.favorite .star { color: white; }
 
-/* "à voir" overlay — slightly muted */
-.card.to-watch {
-  opacity: 0.85;
-  transition: opacity 0.18s, transform 0.18s;
-}
-.card.to-watch:hover { opacity: 1; }
+/* "à voir" overlay */
 .card.to-watch::after {
   content: '';
   position: absolute;
@@ -748,6 +743,15 @@ body {
   transition: all 0.15s;
 }
 .ext-link:hover { color: var(--warm); border-color: var(--warm); }
+.ext-link.trailer-link {
+  background: rgba(212, 165, 116, 0.12);
+  border-color: var(--warm);
+  color: var(--warm);
+}
+.ext-link.trailer-link:hover {
+  background: var(--warm);
+  color: var(--bg);
+}
 
 /* ============================================================
    STATS PAGE
@@ -1528,6 +1532,30 @@ body {
   border: 1px solid var(--rule-strong);
 }
 .tmdb-action.ghost:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-soft); }
+.tmdb-add-form-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+}
+.tmdb-add-form-section .edit-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--green);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tmdb-add-form-section .edit-section-title::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  display: inline-block;
+}
 
 /* TMDB card styling (discover/reco views) */
 .card.tmdb-card {
@@ -1910,6 +1938,16 @@ button:focus-visible, input:focus-visible, select:focus-visible {
       <h3 class="chart-title">genre × note</h3>
       <div class="chart-subtitle">heatmap — chaque case montre le nombre de films</div>
       <div id="heatmap"></div>
+    </div>
+
+    <div class="chart-section">
+      <h3 class="chart-title">par origine</h3>
+      <div class="chart-subtitle">distribution par pays · <span id="origin-coverage"></span></div>
+      <div id="origin-chart"></div>
+      <div id="origin-enrich-wrap" style="margin-top: 16px; display: none;">
+        <button class="reco-refresh" id="origin-enrich-btn">↻ enrichir les pays manquants</button>
+        <span id="origin-enrich-status" style="margin-left: 12px; color: var(--ink-mute); font-size: 12px;"></span>
+      </div>
     </div>
 
     <div class="chart-section">
@@ -2519,8 +2557,8 @@ function renderTmdbGrid(items) {
   const grid = document.getElementById('grid');
   const countEl = document.getElementById('result-count');
   const emptyEl = document.getElementById('empty');
-  const loadMoreEl = document.getElementById('load-more');
-  if (loadMoreEl) loadMoreEl.style.display = 'none';
+  const loadMoreWrap = document.getElementById('load-more-wrap');
+  if (loadMoreWrap) loadMoreWrap.style.display = 'none';
 
   grid.innerHTML = '';
   if (!items || items.length === 0) {
@@ -2656,17 +2694,21 @@ async function tmdbGetRecommendations(tmdbId, type) {
 async function buildRecoPool(sources) {
   const calls = sources.map(s => tmdbGetRecommendations(s.tmdb_id, s.type).then(items => ({ items, weight: s.user.rating / 6 })));
   const results = await Promise.all(calls);
-  // Aggregate: score = sum of source weights
+  // Aggregate: score = sum of source weights, with language diversity adjustment
   const scoreMap = new Map();
   for (const { items, weight } of results) {
     for (const item of items) {
       const id = (item.media_type || 'movie') + '-' + item.id;
+      // Diversity boost: penalize English (heavy in TMDB recommendations)
+      // 'en' films get ×0.6, all others ×1.0 — gives non-English films relative ~40% boost
+      const langMult = item.original_language === 'en' ? 0.6 : 1.0;
+      const adjScore = weight * langMult;
       const existing = scoreMap.get(id);
       if (existing) {
-        existing.score += weight;
+        existing.score += adjScore;
         existing.sources++;
       } else {
-        scoreMap.set(id, { item, score: weight, sources: 1 });
+        scoreMap.set(id, { item, score: adjScore, sources: 1 });
       }
     }
   }
@@ -2852,22 +2894,69 @@ function openModal(f, opts) {
 
   // External links
   const links = [];
+  if (f.trailer) links.push(`<a class="ext-link trailer-link" href="${f.trailer}" target="_blank" rel="noopener">▶ bande-annonce ↗</a>`);
   if (f.imdb_id) links.push(`<a class="ext-link" href="https://www.imdb.com/title/${f.imdb_id}" target="_blank" rel="noopener">imdb ↗</a>`);
   if (f.tmdb_id) links.push(`<a class="ext-link" href="https://www.themoviedb.org/${f.type === 'tv' ? 'tv' : 'movie'}/${f.tmdb_id}" target="_blank" rel="noopener">tmdb ↗</a>`);
+  if (f.title) links.push(`<a class="ext-link" href="https://www.allocine.fr/rechercher/?q=${encodeURIComponent(f.title)}" target="_blank" rel="noopener">allociné ↗</a>`);
 
   // Synopsis
   const synopsisHtml = f.synopsis ? `
     <div class="modal-section-label">synopsis</div>
     <p class="synopsis">${escapeHtml(f.synopsis)}</p>` : '';
 
-  // TMDB-only mode: add action buttons or hint instead of edit form
+  // TMDB-only mode: add action buttons (or expanded form) instead of edit form
   let actionsHtml = '';
   if (tmdbOnly) {
     if (admin.active) {
       actionsHtml = `
-        <div class="tmdb-actions">
-          <button class="tmdb-action" data-action="add_vu">+ ajouter comme déjà vu</button>
+        <div class="tmdb-actions" id="tmdb-actions">
+          <button class="tmdb-action" data-action="show_vu_form">+ ajouter comme déjà vu</button>
           <button class="tmdb-action ghost" data-action="add_avoir">+ ajouter à voir</button>
+        </div>
+        <div class="tmdb-add-form-section" id="tmdb-add-form-section" style="display: none;">
+          <div class="edit-section-title">ajouter aux vus</div>
+          <div class="edit-form">
+            <div class="field">
+              <label>note</label>
+              <div class="rating-chips" id="tmdb-add-rating-chips">
+                <button class="rating-chip" data-rating="1">1★</button>
+                <button class="rating-chip" data-rating="2">2★</button>
+                <button class="rating-chip" data-rating="3">3★</button>
+                <button class="rating-chip" data-rating="4">4★</button>
+                <button class="rating-chip" data-rating="5">5★</button>
+                <button class="rating-chip fav" data-rating="6">❤</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>lieu</label>
+              <select id="tmdb-add-lieu">
+                <option value="">—</option>
+                <option value="Cinéma">Cinéma</option>
+                <option value="Stremio">Stremio</option>
+                <option value="Disque dur">Disque dur</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>date vue</label>
+              <div style="display: flex; gap: 8px;">
+                <select id="tmdb-add-year" style="flex:1;"></select>
+                <select id="tmdb-add-month" style="flex:1;">
+                  <option value="">—</option>
+                  <option value="01">janvier</option><option value="02">février</option>
+                  <option value="03">mars</option><option value="04">avril</option>
+                  <option value="05">mai</option><option value="06">juin</option>
+                  <option value="07">juillet</option><option value="08">août</option>
+                  <option value="09">septembre</option><option value="10">octobre</option>
+                  <option value="11">novembre</option><option value="12">décembre</option>
+                </select>
+              </div>
+            </div>
+            <div class="edit-form-actions">
+              <button class="edit-save" id="tmdb-add-save">enregistrer</button>
+              <button class="ghost" id="tmdb-add-cancel" style="padding: 10px 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; cursor: pointer; border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-soft);">annuler</button>
+            </div>
+          </div>
         </div>`;
     } else {
       actionsHtml = `<div style="margin-top: 24px; padding: 16px; background: var(--bg-elev); border-radius: 8px; text-align: center; font-size: 13px; color: var(--ink-mute); font-style: italic;">active le mode édition (🔒) pour ajouter ce film à ta collection.</div>`;
@@ -2901,8 +2990,55 @@ function openModal(f, opts) {
     document.querySelectorAll('.tmdb-action').forEach(btn => {
       btn.addEventListener('click', () => {
         const action = btn.dataset.action;
-        addTmdbFilmToCollection(f, action === 'add_vu' ? 'vu' : 'a_voir');
+        if (action === 'add_avoir') {
+          addTmdbFilmToCollection(f, 'a_voir', null);
+        } else if (action === 'show_vu_form') {
+          // Toggle form visibility
+          document.getElementById('tmdb-actions').style.display = 'none';
+          document.getElementById('tmdb-add-form-section').style.display = '';
+          // Populate year select
+          buildYearOptions(document.getElementById('tmdb-add-year'));
+          // Default: current year, no month
+          const cy = new Date().getFullYear();
+          document.getElementById('tmdb-add-year').value = String(cy);
+        }
       });
+    });
+
+    // Rating chips (single-select)
+    document.querySelectorAll('#tmdb-add-rating-chips .rating-chip').forEach(c => {
+      c.addEventListener('click', () => {
+        const wasActive = c.classList.contains('active');
+        document.querySelectorAll('#tmdb-add-rating-chips .rating-chip').forEach(x => x.classList.remove('active'));
+        if (!wasActive) c.classList.add('active');
+      });
+    });
+
+    // Save: collect form values and add
+    document.getElementById('tmdb-add-save').addEventListener('click', () => {
+      const ratingBtn = document.querySelector('#tmdb-add-rating-chips .rating-chip.active');
+      const rating = ratingBtn ? parseInt(ratingBtn.dataset.rating, 10) : null;
+      const lieu = document.getElementById('tmdb-add-lieu').value || null;
+      const y = document.getElementById('tmdb-add-year').value;
+      const m = document.getElementById('tmdb-add-month').value;
+      let dateVue = null, dateLabel = null;
+      if (y === 'before-2022') { dateVue = 'before-2022'; dateLabel = 'avant 2022'; }
+      else if (y) { dateVue = m ? (y + '-' + m) : y; dateLabel = formatDateLabel(dateVue); }
+      const userData = {
+        statut: 'vu',
+        rating: rating,
+        favorite: rating === 6,
+        lieu: lieu,
+        date_vue: dateVue,
+        date_vue_label: dateLabel,
+        csv_genres: [],
+      };
+      addTmdbFilmToCollection(f, 'vu', userData);
+    });
+
+    document.getElementById('tmdb-add-cancel').addEventListener('click', () => {
+      document.getElementById('tmdb-actions').style.display = '';
+      document.getElementById('tmdb-add-form-section').style.display = 'none';
     });
   }
 
@@ -2916,15 +3052,28 @@ function openModal(f, opts) {
   if (!f.country && f.tmdb_id && f.type) {
     enrichFilmCountry(f);
   }
+  // Lazy-fetch trailer if not yet attempted
+  if (f.trailer === undefined && f.tmdb_id && f.type) {
+    enrichFilmTrailer(f);
+  }
 }
 
-async function addTmdbFilmToCollection(film, statut) {
+async function addTmdbFilmToCollection(film, statut, userData) {
   if (!admin.active) {
     showToast('mode admin requis', 'error');
     return;
   }
-  // Build user data
-  film.user = {
+  // Duplicate protection
+  const existing = state.films.find(f => f.id === film.id);
+  if (existing) {
+    showToast('ce film est déjà dans ta collection', 'error');
+    closeModal();
+    // Open the local fiche so user can edit it
+    setTimeout(() => openModal(existing), 100);
+    return;
+  }
+  // Build user data — use provided or defaults
+  film.user = userData || {
     statut: statut,
     rating: null,
     favorite: false,
@@ -2934,13 +3083,13 @@ async function addTmdbFilmToCollection(film, statut) {
     csv_genres: [],
   };
   // Disable buttons during save
-  document.querySelectorAll('.tmdb-action').forEach(b => b.disabled = true);
+  document.querySelectorAll('.tmdb-action, #tmdb-add-save, #tmdb-add-cancel').forEach(b => b.disabled = true);
   try {
     state.films.unshift(film);
     await saveFilmsToGithub('add: ' + film.title + ' (' + statut + ')');
     initFilters();
     renderStats();
-    // If currently in discover/reco view, refresh the cards (in-collection state)
+    // If currently in discover/reco view, refresh
     if (state.view === 'discover') {
       fetchAndRenderDiscover(state.discoverCategory);
     } else if (state.view === 'reco' && state.recoDisplayed) {
@@ -2956,7 +3105,7 @@ async function addTmdbFilmToCollection(film, statut) {
     const idx = state.films.findIndex(f => f.id === film.id);
     if (idx >= 0) state.films.splice(idx, 1);
     showToast('erreur : ' + e.message, 'error');
-    document.querySelectorAll('.tmdb-action').forEach(b => b.disabled = false);
+    document.querySelectorAll('.tmdb-action, #tmdb-add-save, #tmdb-add-cancel').forEach(b => b.disabled = false);
   }
 }
 
@@ -3060,6 +3209,7 @@ function renderStats() {
   renderRatingDist();
   renderGenreRatingChart();
   renderHeatmap();
+  renderOriginChart();
   renderGenreChart();
   renderDirectorChart();
   renderActorChart();
@@ -3212,6 +3362,108 @@ function renderHeatmap() {
     html += `</div>`;
   }
   root.innerHTML = html;
+}
+
+function renderOriginChart() {
+  const counts = new Map();
+  let knownCount = 0;
+  for (const f of state.films) {
+    if (!f.country) continue;
+    knownCount++;
+    // Split by " · " for co-productions and count each country
+    const parts = f.country.split(' · ').map(s => s.trim()).filter(Boolean);
+    for (const p of parts) {
+      counts.set(p, (counts.get(p) || 0) + 1);
+    }
+  }
+  const total = state.films.length;
+  const missing = total - knownCount;
+
+  // Coverage line
+  const coverageEl = document.getElementById('origin-coverage');
+  if (coverageEl) {
+    coverageEl.textContent = `${knownCount} / ${total} films analysés${missing > 0 ? ` · ${missing} sans pays` : ''}`;
+  }
+
+  // Show "enrich" button if many films are missing
+  const enrichWrap = document.getElementById('origin-enrich-wrap');
+  if (enrichWrap) {
+    enrichWrap.style.display = missing > 5 ? '' : 'none';
+  }
+
+  // Render bars (top 15)
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15);
+  const max = sorted.length ? sorted[0][1] : 1;
+  const root = document.getElementById('origin-chart');
+  if (!root) return;
+  if (sorted.length === 0) {
+    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic;">aucun pays connu pour le moment. clique "enrichir" pour récupérer ces données via tmdb.</div>';
+    return;
+  }
+  root.innerHTML = sorted.map(([country, n]) => `
+    <div class="bar-row">
+      <div class="bar-label">${escapeHtml(country)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n / max * 100).toFixed(1)}%"></div></div>
+      <div class="bar-value">${n}</div>
+    </div>`).join('');
+}
+
+// Bulk-enrich countries for all films missing it. Concurrency-limited.
+let bulkEnrichRunning = false;
+async function bulkEnrichCountries() {
+  if (bulkEnrichRunning) return;
+  bulkEnrichRunning = true;
+  const btn = document.getElementById('origin-enrich-btn');
+  const status = document.getElementById('origin-enrich-status');
+  btn.disabled = true;
+  const todo = state.films.filter(f => !f.country && f.tmdb_id && f.type);
+  let done = 0;
+  const total = todo.length;
+
+  // Process in concurrent batches of 5
+  const concurrency = 5;
+  let idx = 0;
+  async function worker() {
+    while (idx < todo.length) {
+      const i = idx++;
+      const film = todo[i];
+      try {
+        const path = film.type === 'tv' ? 'tv' : 'movie';
+        const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(TMDB_KEY)}&language=fr-FR`;
+        const r = await fetch(url);
+        if (r.ok) {
+          const detail = await r.json();
+          const country = extractCountryFromTmdbDetail(detail);
+          if (country) film.country = country;
+        }
+      } catch {}
+      done++;
+      status.textContent = `${done} / ${total}…`;
+      // Re-render every 25 films
+      if (done % 25 === 0) renderOriginChart();
+    }
+  }
+  const workers = [];
+  for (let k = 0; k < concurrency; k++) workers.push(worker());
+  await Promise.all(workers);
+
+  status.textContent = `${done} / ${total} terminé`;
+  renderOriginChart();
+
+  // Save to GitHub if admin active
+  if (admin.active) {
+    try {
+      status.textContent += ' · sauvegarde…';
+      await saveFilmsToGithub('enrich: countries for ' + done + ' films');
+      status.textContent = `✓ ${done} films enrichis et sauvegardés`;
+    } catch (e) {
+      status.textContent = '⚠ enrichi en mémoire mais pas sauvegardé : ' + e.message;
+    }
+  } else {
+    status.textContent += ' · (active l\'admin pour sauvegarder)';
+  }
+  btn.disabled = false;
+  bulkEnrichRunning = false;
 }
 
 function heatmapColor(intensity, isFav) {
@@ -3652,7 +3904,7 @@ async function tmdbSearch(query) {
 
 async function tmdbDetails(id, type) {
   const path = type === 'tv' ? 'tv' : 'movie';
-  const url = `${TMDB_BASE}/${path}/${id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,external_ids`;
+  const url = `${TMDB_BASE}/${path}/${id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,external_ids,videos&include_video_language=fr,en`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('TMDB details ' + r.status);
   return await r.json();
@@ -3695,25 +3947,43 @@ const ISO_TO_COUNTRY = {
   AR: 'Argentine', AT: 'Autriche', AU: 'Australie', BE: 'Belgique', BR: 'Brésil',
   CA: 'Canada', CH: 'Suisse', CN: 'Chine', CO: 'Colombie', CZ: 'Tchéquie',
   DE: 'Allemagne', DK: 'Danemark', EG: 'Égypte', ES: 'Espagne', FI: 'Finlande',
-  FR: 'France', GB: 'Royaume-Uni', GE: 'Géorgie', GR: 'Grèce', HK: 'Hong Kong',
+  FR: 'France', GB: 'UK', GE: 'Géorgie', GR: 'Grèce', HK: 'Hong Kong',
   HR: 'Croatie', HU: 'Hongrie', ID: 'Indonésie', IE: 'Irlande', IL: 'Israël',
   IN: 'Inde', IR: 'Iran', IS: 'Islande', IT: 'Italie', JP: 'Japon',
   KR: 'Corée du Sud', LB: 'Liban', LU: 'Luxembourg', MA: 'Maroc', MX: 'Mexique',
   NL: 'Pays-Bas', NO: 'Norvège', NZ: 'Nouvelle-Zélande', PH: 'Philippines', PL: 'Pologne',
   PT: 'Portugal', RO: 'Roumanie', RS: 'Serbie', RU: 'Russie', SA: 'Arabie saoudite',
   SE: 'Suède', SG: 'Singapour', TH: 'Thaïlande', TN: 'Tunisie', TR: 'Turquie',
-  TW: 'Taïwan', UA: 'Ukraine', US: 'États-Unis', VN: 'Vietnam', ZA: 'Afrique du Sud',
+  TW: 'Taïwan', UA: 'Ukraine', US: 'USA', VN: 'Vietnam', ZA: 'Afrique du Sud',
 };
 
+function shortenCountryName(name) {
+  if (!name) return name;
+  // English variants
+  if (name === 'United States of America' || name === 'United States') return 'USA';
+  if (name === 'United Kingdom') return 'UK';
+  // French variants (when TMDB returns FR localization)
+  if (name === "États-Unis d'Amérique" || name === 'États-Unis') return 'USA';
+  if (name === 'Royaume-Uni') return 'UK';
+  return name;
+}
+
 function extractCountryFromTmdbDetail(detail) {
+  // Get all countries
+  let countries = [];
   if (detail.production_countries && detail.production_countries.length > 0) {
-    return detail.production_countries[0].name;
+    countries = detail.production_countries.map(c => shortenCountryName(c.name));
+  } else if (detail.origin_country && detail.origin_country.length > 0) {
+    countries = detail.origin_country.map(code => ISO_TO_COUNTRY[code] || code);
   }
-  if (detail.origin_country && detail.origin_country.length > 0) {
-    const code = detail.origin_country[0];
-    return ISO_TO_COUNTRY[code] || code;
+  if (countries.length === 0) return null;
+  // Move France to the front if present (user is French, more relevant)
+  const franceIdx = countries.indexOf('France');
+  if (franceIdx > 0) {
+    countries.splice(franceIdx, 1);
+    countries.unshift('France');
   }
-  return null;
+  return countries.join(' · ');
 }
 
 function buildFilmFromTmdb(detail, type, csvTitle = null) {
@@ -3731,6 +4001,18 @@ function buildFilmFromTmdb(detail, type, csvTitle = null) {
   const release = detail.release_date || detail.first_air_date || '';
   const year = release ? parseInt(release.slice(0, 4), 10) : null;
   const genres = (detail.genres || []).map(g => g.name);
+  // Trailer extraction (if videos are in append_to_response)
+  let trailer = undefined;
+  if (detail.videos && detail.videos.results) {
+    const videos = detail.videos.results.filter(v => v.site === 'YouTube');
+    if (videos.length > 0) {
+      const score = v => (v.iso_639_1 === 'fr' ? 10 : 0) + (v.type === 'Trailer' ? 5 : 0) + (v.official ? 2 : 0) + (v.type === 'Teaser' ? 3 : 0);
+      videos.sort((a, b) => score(b) - score(a));
+      trailer = 'https://www.youtube.com/watch?v=' + videos[0].key;
+    } else {
+      trailer = null;
+    }
+  }
   return {
     id: type + '-' + detail.id,
     tmdb_id: detail.id,
@@ -3749,6 +4031,8 @@ function buildFilmFromTmdb(detail, type, csvTitle = null) {
     synopsis: detail.overview || null,
     tmdb_rating: detail.vote_average || null,
     imdb_id: (detail.external_ids && detail.external_ids.imdb_id) || detail.imdb_id || null,
+    original_language: detail.original_language || null,
+    trailer: trailer,
     source: csvTitle ? { csv_title: csvTitle } : { added_via: 'admin', added_at: new Date().toISOString() },
   };
 }
@@ -3767,17 +4051,54 @@ async function enrichFilmCountry(film) {
     const country = extractCountryFromTmdbDetail(detail);
     if (country) {
       film.country = country;
-      // If modal still showing this film, re-render to show country
-      const modal = document.getElementById('modal-backdrop');
-      if (modal && modal.classList.contains('open')) {
-        const titleEl = document.querySelector('.modal-title');
-        if (titleEl && titleEl.textContent === (film.title || 'sans titre')) {
-          openModal(film);
-        }
-      }
+      reRenderModalIfShowing(film);
     }
   } catch {}
   delete film._countryFetching;
+}
+
+// Lazy-fetch trailer URL (first YouTube trailer, prefer French)
+async function tmdbGetTrailer(tmdbId, type) {
+  const path = type === 'tv' ? 'tv' : 'movie';
+  const url = `${TMDB_BASE}/${path}/${tmdbId}/videos?api_key=${encodeURIComponent(TMDB_KEY)}&include_video_language=fr,en&language=fr-FR`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const data = await r.json();
+    const videos = (data.results || []).filter(v => v.site === 'YouTube');
+    if (videos.length === 0) return null;
+    // Priority: FR official trailer > FR any trailer > EN official trailer > EN any trailer > any YouTube video
+    const score = v => {
+      let s = 0;
+      if (v.iso_639_1 === 'fr') s += 10;
+      if (v.type === 'Trailer') s += 5;
+      if (v.official) s += 2;
+      if (v.type === 'Teaser') s += 3;
+      return s;
+    };
+    videos.sort((a, b) => score(b) - score(a));
+    return 'https://www.youtube.com/watch?v=' + videos[0].key;
+  } catch { return null; }
+}
+
+async function enrichFilmTrailer(film) {
+  if (film.trailer !== undefined || !film.tmdb_id || film._trailerFetching) return;
+  film._trailerFetching = true;
+  try {
+    const trailer = await tmdbGetTrailer(film.tmdb_id, film.type);
+    film.trailer = trailer; // null is a valid "no trailer found" result, so we cache it
+    if (trailer) reRenderModalIfShowing(film);
+  } catch {}
+  delete film._trailerFetching;
+}
+
+function reRenderModalIfShowing(film) {
+  const modal = document.getElementById('modal-backdrop');
+  if (!modal || !modal.classList.contains('open')) return;
+  const titleEl = document.querySelector('.modal-title');
+  if (titleEl && titleEl.textContent === (film.title || 'sans titre')) {
+    openModal(film);
+  }
 }
 
 // ----------------- GITHUB --------------------
@@ -4527,6 +4848,9 @@ function wireEvents() {
     state.recoPool = null; // force rebuild
     fetchAndRenderReco(true);
   });
+
+  // Stats: bulk enrich countries
+  document.getElementById('origin-enrich-btn').addEventListener('click', bulkEnrichCountries);
 
   // Search (local collection)
   let searchTimer;
