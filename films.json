@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:55:15.232Z",
+  "generated_at": "2026-05-21T12:55:19.808Z",
   "count": 533,
   "films": [
     {
@@ -21148,7 +21148,7 @@
       "imdb_id": "tt3967856",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2022",
@@ -21161,7 +21161,9 @@
       },
       "source": {
         "csv_title": "Okja"
-      }
+      },
+      "country": "South Korea · USA",
+      "trailer": "https://www.youtube.com/watch?v=rj76a-EY31k"
     },
     {
       "id": "movie-466272",
