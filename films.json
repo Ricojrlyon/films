@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:58:29.038Z",
+  "generated_at": "2026-05-21T12:58:36.833Z",
   "count": 532,
   "films": [
     {
@@ -987,7 +987,7 @@
       "imdb_id": "tt1568921",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "before-2022",
@@ -1000,7 +1000,9 @@
       },
       "source": {
         "csv_title": "Arrietty, Le Petit Monde des Chapardeurs"
-      }
+      },
+      "country": "France · Japan · USA",
+      "trailer": "https://www.youtube.com/watch?v=RYwYgH9uA_8"
     },
     {
       "id": "movie-336199",
