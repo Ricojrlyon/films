@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T13:00:58.018Z",
+  "generated_at": "2026-05-21T13:01:07.901Z",
   "count": 532,
   "films": [
     {
@@ -2679,7 +2679,7 @@
       "imdb_id": "tt4432006",
       "user": {
         "statut": "vu",
-        "rating": 2,
+        "rating": 1,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "before-2022",
@@ -2690,7 +2690,9 @@
       },
       "source": {
         "csv_title": "Hannah"
-      }
+      },
+      "country": "France · Italy · Belgium",
+      "trailer": "https://www.youtube.com/watch?v=J5mgXBMGbF4"
     },
     {
       "id": "movie-400148",
