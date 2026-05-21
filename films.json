@@ -1,8 +1,51 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T07:30:58.112Z",
-  "count": 535,
+  "generated_at": "2026-05-21T07:31:12.821Z",
+  "count": 536,
   "films": [
+    {
+      "id": "movie-324857",
+      "tmdb_id": 324857,
+      "type": "movie",
+      "title": "Spider-Man : New Generation",
+      "original_title": "Spider-Man: Into the Spider-Verse",
+      "year": 2018,
+      "release_date": "2018-12-06",
+      "director": "Bob Persichetti",
+      "cast": [
+        "Shameik Moore",
+        "Jake Johnson",
+        "Hailee Steinfeld",
+        "Mahershala Ali",
+        "Brian Tyree Henry"
+      ],
+      "runtime": 117,
+      "genres": [
+        "Animation",
+        "Action",
+        "Aventure",
+        "Science-Fiction"
+      ],
+      "country": "United States of America",
+      "poster": "https://image.tmdb.org/t/p/w500/7uPGS5CgvIjDcFUhw9HB9qYeDXf.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/8mnXR9rey5uQ08rZAvzojKWbDQS.jpg",
+      "synopsis": "Spider-Man : New Generation suit les aventures de Miles Morales, un adolescent afro-américain et portoricain qui vit à Brooklyn et s’efforce de s’intégrer dans son nouveau collège à Manhattan. Mais la vie de Miles se complique quand il se fait mordre par une araignée radioactive et se découvre des super-pouvoirs : il est désormais capable d’empoisonner ses adversaires, de se camoufler, de coller littéralement aux murs et aux plafonds ; son ouïe est démultipliée... Dans le même temps, le plus redoutable cerveau criminel de la ville, le Caïd, a mis au point un accélérateur de particules nucléaires capable d’ouvrir un portail sur d’autres univers. Son invention va provoquer l’arrivée de plusieurs autres versions de Spider-Man dans le monde de Miles, dont un Peter Parker plus âgé, Spider-Gwen, Spider-Man Noir, Spider-Cochon et Peni Parker, venue d’un dessin animé japonais.",
+      "tmdb_rating": 8.393,
+      "imdb_id": "tt4633694",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-21T07:31:09.493Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-539",
       "tmdb_id": 539,
