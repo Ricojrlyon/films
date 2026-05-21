@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:37:52.935Z",
+  "generated_at": "2026-05-21T12:38:21.500Z",
   "count": 534,
   "films": [
     {
@@ -16400,7 +16400,7 @@
       "imdb_id": "tt11858890",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Cinéma",
         "date_vue": "2023-10",
@@ -16411,7 +16411,9 @@
       },
       "source": {
         "csv_title": "The creator"
-      }
+      },
+      "country": "Canada · USA",
+      "trailer": "https://www.youtube.com/watch?v=nW3bhlCTVj4"
     },
     {
       "id": "movie-965791",
