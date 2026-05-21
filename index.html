@@ -764,6 +764,11 @@ body {
   border: 1px solid var(--rule);
   border-radius: 12px;
   padding: 20px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .stat-card-label {
   font-family: 'JetBrains Mono', monospace;
@@ -1523,23 +1528,23 @@ body {
 .card.tmdb-card {
   cursor: pointer;
 }
-.card.tmdb-card .card-poster::after {
-  /* Indicator if in collection */
-  content: '';
+.card.tmdb-card.in-collection .poster {
+  opacity: 0.65;
 }
-.card.tmdb-card.in-collection .card-poster::after {
-  content: '✓ dans ma collec';
+.tmdb-in-collec {
   position: absolute;
-  bottom: 8px;
+  top: 8px;
   left: 8px;
   background: var(--green);
   color: var(--bg);
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.04em;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 .search-result.in-collection {
   border-color: var(--green);
@@ -2526,29 +2531,42 @@ function renderTmdbGrid(items) {
 }
 
 function buildTmdbCard(item) {
-  const card = document.createElement('article');
+  const card = document.createElement('div');
   card.className = 'card tmdb-card';
+  card.tabIndex = 0;
   const id = (item.media_type || 'movie') + '-' + item.id;
   const inCollection = state.films.some(f => f.id === id);
   if (inCollection) card.classList.add('in-collection');
 
-  const poster = item.poster_path ? tmdbImgUrl(item.poster_path, 'w342') : null;
+  const posterUrl = item.poster_path ? tmdbImgUrl(item.poster_path, 'w342') : null;
   const year = (item.release_date || item.first_air_date || '').slice(0, 4) || '';
+  const title = item.title || item.name || '';
 
-  const posterDiv = document.createElement('div');
-  posterDiv.className = 'card-poster' + (poster ? '' : ' empty');
-  if (poster) posterDiv.style.backgroundImage = `url(${poster})`;
-  else posterDiv.textContent = "pas d'affiche";
-  card.appendChild(posterDiv);
+  const poster = document.createElement('div');
+  poster.className = 'poster' + (posterUrl ? '' : ' empty');
+  if (posterUrl) poster.style.backgroundImage = `url(${posterUrl})`;
+  else poster.textContent = title;
+  card.appendChild(poster);
+
+  // "in collection" badge (only on tmdb-card variant)
+  if (inCollection) {
+    const tag = document.createElement('div');
+    tag.className = 'tmdb-in-collec';
+    tag.textContent = '✓ dans ma collec';
+    card.appendChild(tag);
+  }
 
   const meta = document.createElement('div');
-  meta.className = 'card-meta';
+  meta.className = 'meta';
   meta.innerHTML = `
-    <div class="card-title">${escapeHtml(item.title || item.name || '')}</div>
+    <p class="card-title">${escapeHtml(title)}</p>
     <div class="card-year">${year}${item.media_type === 'tv' ? ' · série' : ''}</div>`;
   card.appendChild(meta);
 
   card.addEventListener('click', () => openTmdbItem(item));
+  card.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTmdbItem(item); }
+  });
   return card;
 }
 
