@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:56:08.030Z",
+  "generated_at": "2026-05-21T12:56:42.313Z",
   "count": 533,
   "films": [
     {
@@ -21756,7 +21756,7 @@
       "imdb_id": "tt19841734",
       "user": {
         "statut": "vu",
-        "rating": 5,
+        "rating": 4,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2022",
@@ -21767,7 +21767,9 @@
       },
       "source": {
         "csv_title": "L’Innocent"
-      }
+      },
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=fPIEpTc64Vw"
     },
     {
       "id": "movie-833417",
