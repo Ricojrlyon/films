@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:40:19.462Z",
+  "generated_at": "2026-05-21T12:40:45.966Z",
   "count": 533,
   "films": [
     {
@@ -17584,7 +17584,7 @@
       "imdb_id": "tt4844140",
       "user": {
         "statut": "vu",
-        "rating": 4,
+        "rating": 3,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2023-07",
@@ -17596,7 +17596,9 @@
       },
       "source": {
         "csv_title": "Gang Kelly"
-      }
+      },
+      "country": "France · Australia · UK",
+      "trailer": "https://www.youtube.com/watch?v=yFrXxXcw89E"
     },
     {
       "id": "movie-726888",
