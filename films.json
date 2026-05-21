@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T12:38:21.500Z",
+  "generated_at": "2026-05-21T12:39:19.304Z",
   "count": 534,
   "films": [
     {
@@ -16577,7 +16577,9 @@
       },
       "source": {
         "csv_title": "Une Révision"
-      }
+      },
+      "country": "Canada",
+      "trailer": "https://www.youtube.com/watch?v=S_thlz7Fi_Y"
     },
     {
       "id": "movie-911345",
@@ -16946,7 +16948,7 @@
       "imdb_id": "tt1935859",
       "user": {
         "statut": "vu",
-        "rating": 3,
+        "rating": 2,
         "favorite": false,
         "lieu": "Disque dur",
         "date_vue": "2023-08",
@@ -16958,7 +16960,9 @@
       },
       "source": {
         "csv_title": "Miss Peregrine et Les Enfants Particuliers"
-      }
+      },
+      "country": "USA · UK · Belgium · Canada",
+      "trailer": "https://www.youtube.com/watch?v=n2W8JddwcuI"
     },
     {
       "id": "movie-376867",
