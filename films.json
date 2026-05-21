@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T13:18:03.779Z",
+  "generated_at": "2026-05-21T13:18:41.353Z",
   "count": 530,
   "films": [
     {
@@ -21920,8 +21920,8 @@
         "rating": 5,
         "favorite": false,
         "lieu": "Autre",
-        "date_vue": null,
-        "date_vue_label": "Ocotbre 2024",
+        "date_vue": "2025-09",
+        "date_vue_label": "Septembre 2025",
         "csv_genres": [
           "Animation"
         ]
