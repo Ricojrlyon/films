@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T07:03:21.037Z",
+  "generated_at": "2026-05-21T07:03:43.498Z",
   "count": 533,
   "films": [
     {
@@ -35,11 +35,11 @@
       },
       "user": {
         "statut": "vu",
-        "rating": null,
+        "rating": 5,
         "favorite": false,
-        "lieu": null,
-        "date_vue": null,
-        "date_vue_label": null,
+        "lieu": "Autre",
+        "date_vue": "before-2022",
+        "date_vue_label": "avant 2022",
         "csv_genres": []
       }
     },
