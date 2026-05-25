@@ -1,8 +1,50 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T13:19:09.832Z",
-  "count": 530,
+  "generated_at": "2026-05-25T14:04:12.559Z",
+  "count": 531,
   "films": [
+    {
+      "id": "movie-712150",
+      "tmdb_id": 712150,
+      "type": "movie",
+      "title": "Le Discours",
+      "original_title": "Le Discours",
+      "year": 2020,
+      "release_date": "2020-09-01",
+      "director": "Laurent Tirard",
+      "cast": [
+        "Benjamin Lavernhe",
+        "Sara Giraudeau",
+        "Kyan Khojandi",
+        "Julia Piaton",
+        "François Morel"
+      ],
+      "runtime": 88,
+      "genres": [
+        "Comédie"
+      ],
+      "country": "France",
+      "poster": "https://image.tmdb.org/t/p/w500/eVmMOVKYau6HmoF5AEUabePDNmU.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/w3sqSIZDQLthCPpOCkcN5CkLRYM.jpg",
+      "synopsis": "Coincé à un repas de famille qui lui donne des envies de meurtre, Adrien attend. Il attend que Sonia réponde à son sms et mette fin à la « pause » qu’elle lui fait subir depuis un mois. Et voilà que Ludo, son futur beau-frère, lui demande de faire un « petit » discours pour le mariage ! Adrien panique. Mais si ce discours était finalement la meilleure chose qui puisse lui arriver ?",
+      "tmdb_rating": 6.3,
+      "imdb_id": "tt12105554",
+      "original_language": "fr",
+      "trailer": "https://www.youtube.com/watch?v=W4l6l53oZRA",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-05-25T14:04:00.121Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": 4,
+        "favorite": false,
+        "lieu": "Autre",
+        "date_vue": "before-2022",
+        "date_vue_label": "avant 2022",
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-324857",
       "tmdb_id": 324857,
