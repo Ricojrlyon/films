@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-06-02T19:04:41.823Z",
+  "generated_at": "2026-06-02T19:04:59.892Z",
   "count": 531,
   "films": [
     {
@@ -8191,7 +8191,8 @@
       "source": {
         "csv_title": "La maison des femmes"
       },
-      "country": "France"
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=yAwvKg9T47Q"
     },
     {
       "id": "movie-391713",
@@ -22319,8 +22320,8 @@
         "rating": 2,
         "favorite": false,
         "lieu": "Stremio",
-        "date_vue": "2026-05",
-        "date_vue_label": "Mai 2026",
+        "date_vue": "2026-06",
+        "date_vue_label": "Juin 2026",
         "csv_genres": []
       },
       "source": {
