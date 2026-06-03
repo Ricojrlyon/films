@@ -1,8 +1,50 @@
 {
   "version": 1,
-  "generated_at": "2026-06-02T19:04:59.892Z",
-  "count": 531,
+  "generated_at": "2026-06-03T07:49:17.674Z",
+  "count": 532,
   "films": [
+    {
+      "id": "movie-1074074",
+      "tmdb_id": 1074074,
+      "type": "movie",
+      "title": "L'Être Aimé",
+      "original_title": "El ser querido",
+      "year": 2026,
+      "release_date": "2026-05-16",
+      "director": "Rodrigo Sorogoyen",
+      "cast": [
+        "Javier Bardem",
+        "Victoria Luengo",
+        "Melina Matthews",
+        "Marina Foïs",
+        "Malena Villa"
+      ],
+      "runtime": 135,
+      "genres": [
+        "Drame"
+      ],
+      "country": "France · Spain",
+      "poster": "https://image.tmdb.org/t/p/w500/n0MSgpiIUfgnMalt76RrNIs1jJR.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/7jdH0I7Vf3HtjFTIuoxvkjLwT4C.jpg",
+      "synopsis": "Réalisateur mondialement célèbre, Esteban Martínez revient en Espagne pour tourner son nouveau film. Il en offre le rôle principal à une jeune actrice inconnue, sa fille, qu’il n’a pas vue depuis treize ans. La jeune femme accepte cette formidable opportunité, mais sait qu’à l’occasion de ce tournage, elle va se confronter à un homme qu’elle n’a jamais pu considérer comme un père. Le poids du passé menace de rouvrir leurs blessures.",
+      "tmdb_rating": 7.292,
+      "imdb_id": "tt33451014",
+      "original_language": "es",
+      "trailer": "https://www.youtube.com/watch?v=WJ5V0BDG6V0",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-06-03T07:49:14.871Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-712150",
       "tmdb_id": 712150,
