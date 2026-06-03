@@ -1,8 +1,53 @@
 {
   "version": 1,
-  "generated_at": "2026-06-03T07:49:17.674Z",
-  "count": 532,
+  "generated_at": "2026-06-03T07:50:55.984Z",
+  "count": 533,
   "films": [
+    {
+      "id": "movie-1432547",
+      "tmdb_id": 1432547,
+      "type": "movie",
+      "title": "ALL YOU NEED IS KILL",
+      "original_title": "ALL YOU NEED IS KILL",
+      "year": 2026,
+      "release_date": "2026-01-09",
+      "director": "秋本賢一郎",
+      "cast": [
+        "見上愛",
+        "Natsuki Hanae",
+        "Kana Hanazawa",
+        "ヒコロヒー",
+        "もう中学生"
+      ],
+      "runtime": 86,
+      "genres": [
+        "Animation",
+        "Action",
+        "Mystère",
+        "Science-Fiction"
+      ],
+      "country": "Japan",
+      "poster": "https://image.tmdb.org/t/p/w500/xrFvl82TgWYnQ7T0ZA52RLeZS1N.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/4YWX4mRcIFxxtKGJaBlLPhuTMtx.jpg",
+      "synopsis": "Lorsqu’une gigantesque fleur extraterrestre appelée « Darol » éclate de manière inattendue, provoquant une catastrophe mortelle et libérant des créatures monstrueuses qui déciment la population japonaise, Rita est prise dans la tourmente… et trouve la mort. Mais elle se réveille. Et encore. Prise dans une boucle temporelle sans fin, Rita doit faire face au traumatisme et à la répétition de la mort jusqu’à ce qu’elle croise le chemin de Keiji, un jeune homme timide piégé dans le même cycle. Ensemble, ils se battent pour briser cette boucle et trouver un sens au chaos qui les entoure.",
+      "tmdb_rating": 6.429,
+      "imdb_id": "tt36148135",
+      "original_language": "ja",
+      "trailer": "https://www.youtube.com/watch?v=V7R8DjEKcBU",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-06-03T07:50:52.036Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1074074",
       "tmdb_id": 1074074,
