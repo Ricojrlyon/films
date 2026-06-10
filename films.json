@@ -1,8 +1,51 @@
 {
   "version": 1,
-  "generated_at": "2026-06-03T07:50:55.984Z",
-  "count": 533,
+  "generated_at": "2026-06-10T14:30:14.507Z",
+  "count": 534,
   "films": [
+    {
+      "id": "movie-1337592",
+      "tmdb_id": 1337592,
+      "type": "movie",
+      "title": "Eruption",
+      "original_title": "Erupcja",
+      "year": 2026,
+      "release_date": "2026-04-17",
+      "director": "Pete Ohs",
+      "cast": [
+        "Charli xcx",
+        "Lena Góra",
+        "Will Madden",
+        "Jeremy O. Harris",
+        "Agata Trzebuchowska"
+      ],
+      "runtime": 71,
+      "genres": [
+        "Drame",
+        "Comédie"
+      ],
+      "country": "USA",
+      "poster": "https://image.tmdb.org/t/p/w500/1OMiyrpkZvu5YmWbPBtwDQHZsu1.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/usppBDmtfuDCXgotXbxEc3Uav2q.jpg",
+      "synopsis": "Nel est une jeune femme qui mène une vie épanouie à Varsovie comme fleuriste. Mais la venue de son ancienne amie britannique Bethany, en visite avec son nouveau petit ami, fait ressurgir une connexion profonde et complexe entre elles qui va troubler son quotidien.",
+      "tmdb_rating": 6.4,
+      "imdb_id": "tt33712666",
+      "original_language": "en",
+      "trailer": "https://www.youtube.com/watch?v=WBcVLP8DW5k",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-06-10T14:30:11.905Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1432547",
       "tmdb_id": 1432547,
@@ -257,7 +300,8 @@
         "date_vue": "before-2022",
         "date_vue_label": "avant 2022",
         "csv_genres": []
-      }
+      },
+      "trailer": "https://www.youtube.com/watch?v=kTGDxqUowq4"
     },
     {
       "id": "movie-773",
