@@ -1,8 +1,50 @@
 {
   "version": 1,
-  "generated_at": "2026-06-10T14:30:14.507Z",
-  "count": 534,
+  "generated_at": "2026-06-10T14:32:17.129Z",
+  "count": 535,
   "films": [
+    {
+      "id": "movie-1668499",
+      "tmdb_id": 1668499,
+      "type": "movie",
+      "title": "Le Vertige",
+      "original_title": "Le Vertige",
+      "year": 2026,
+      "release_date": "2026-06-10",
+      "director": "Quentin Dupieux",
+      "cast": [
+        "Alain Chabat",
+        "Jonathan Cohen",
+        "Anaïs Demoustier",
+        "Jean-Marie Winling",
+        "Quentin Dupieux"
+      ],
+      "runtime": 67,
+      "genres": [
+        "Animation"
+      ],
+      "country": "France",
+      "poster": "https://image.tmdb.org/t/p/w500/qO8nc3cSjzGduaC0deh8gBRKK9Z.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/hMKAPLiacrrqRXlHGMyyIosfjzr.jpg",
+      "synopsis": "Jacques se rend chez son ami Bruno pour lui annoncer une nouvelle importante : l’humanité toute entière vit dans une simulation…",
+      "tmdb_rating": null,
+      "imdb_id": "tt42575634",
+      "original_language": "fr",
+      "trailer": "https://www.youtube.com/watch?v=_LHZIviMEm4",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-06-10T14:32:16.036Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1337592",
       "tmdb_id": 1337592,
