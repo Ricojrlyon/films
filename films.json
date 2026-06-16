@@ -1,8 +1,51 @@
 {
   "version": 1,
-  "generated_at": "2026-06-16T08:35:33.007Z",
-  "count": 537,
+  "generated_at": "2026-06-16T08:38:46.158Z",
+  "count": 538,
   "films": [
+    {
+      "id": "movie-1280738",
+      "tmdb_id": 1280738,
+      "type": "movie",
+      "title": "The Furious",
+      "original_title": "火遮眼",
+      "year": 2026,
+      "release_date": "2026-06-10",
+      "director": "谷垣健治",
+      "cast": [
+        "Xie Miao",
+        "Joe Taslim",
+        "杨恩又",
+        "Yayan Ruhian",
+        "ฉันทธนิสา ตัง"
+      ],
+      "runtime": 113,
+      "genres": [
+        "Action",
+        "Crime"
+      ],
+      "country": "Hong Kong · USA · China",
+      "poster": "https://image.tmdb.org/t/p/w500/94rNmtdyclSnO3OOnVBW2Isy9r0.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/ew3EqF9VLTxmK64OsHT7p7lr4wT.jpg",
+      "synopsis": "Après l’enlèvement de sa fille par un réseau criminel et face à l’inaction de la police, Wang Wei se lance dans une traque implacable pour la retrouver. Son seul allié, Navin, est un journaliste tenace dont la femme a mystérieusement disparu. Unis par un même désir de vengeance, ces deux hommes que tout oppose affrontent les ravisseurs dans un face-à-face explosif mêlant arts martiaux et justice sans merci.",
+      "tmdb_rating": 7.983,
+      "imdb_id": "tt33311069",
+      "original_language": "en",
+      "trailer": "https://www.youtube.com/watch?v=gkyp5UTeQMU",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-06-16T08:38:44.558Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1083381",
       "tmdb_id": 1083381,
