@@ -1,8 +1,52 @@
 {
   "version": 1,
-  "generated_at": "2026-06-16T08:35:27.259Z",
-  "count": 536,
+  "generated_at": "2026-06-16T08:35:33.007Z",
+  "count": 537,
   "films": [
+    {
+      "id": "movie-1083381",
+      "tmdb_id": 1083381,
+      "type": "movie",
+      "title": "Backrooms",
+      "original_title": "Backrooms",
+      "year": 2026,
+      "release_date": "2026-05-27",
+      "director": "Kane Parsons",
+      "cast": [
+        "Chiwetel Ejiofor",
+        "Renate Reinsve",
+        "Mark Duplass",
+        "Finn Bennett",
+        "Lukita Maxwell"
+      ],
+      "runtime": 105,
+      "genres": [
+        "Horreur",
+        "Mystère",
+        "Science-Fiction"
+      ],
+      "country": "USA · Canada",
+      "poster": "https://image.tmdb.org/t/p/w500/thQQ3BBBhGDtWm3UTtabhyDJd8U.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/oUozq2XHWifwAVOoS1qHU0qfXqM.jpg",
+      "synopsis": "Une étrange porte apparaît dans le sous-sol d'un magasin de meubles.",
+      "tmdb_rating": 6.9,
+      "imdb_id": "tt26657236",
+      "original_language": "en",
+      "trailer": "https://www.youtube.com/watch?v=mTPEEk55gZo",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-06-16T08:35:31.880Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1339713",
       "tmdb_id": 1339713,
