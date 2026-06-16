@@ -1,8 +1,50 @@
 {
   "version": 1,
-  "generated_at": "2026-06-16T08:38:46.158Z",
-  "count": 538,
+  "generated_at": "2026-06-16T08:40:22.465Z",
+  "count": 539,
   "films": [
+    {
+      "id": "movie-1363387",
+      "tmdb_id": 1363387,
+      "type": "movie",
+      "title": "Saccharine",
+      "original_title": "Saccharine",
+      "year": 2026,
+      "release_date": "2026-05-22",
+      "director": "Natalie Erika James",
+      "cast": [
+        "Midori Francis",
+        "Danielle Macdonald",
+        "Madeleine Madden",
+        "Joseph Baldwin",
+        "Robert Taylor"
+      ],
+      "runtime": 112,
+      "genres": [
+        "Horreur"
+      ],
+      "country": "Australia · Finland · USA",
+      "poster": "https://image.tmdb.org/t/p/w500/73xAtmZh1oOMKoGtGdzsvPNswmD.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/7NUx7bQAD4lo9yMDbprvIblhWo2.jpg",
+      "synopsis": "Une étudiante en médecine mal dans son corps se met à consommer une étrange gélule pour perdre du poids, libérant une force surnaturelle qui envahit de plus en plus son quotidien.",
+      "tmdb_rating": 6.147,
+      "imdb_id": "tt35050712",
+      "original_language": "en",
+      "trailer": "https://www.youtube.com/watch?v=uIY13LD3RUY",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-06-16T08:40:19.018Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1280738",
       "tmdb_id": 1280738,
