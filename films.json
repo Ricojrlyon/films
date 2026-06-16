@@ -1,8 +1,51 @@
 {
   "version": 1,
-  "generated_at": "2026-06-13T18:02:15.306Z",
-  "count": 535,
+  "generated_at": "2026-06-16T08:35:27.259Z",
+  "count": 536,
   "films": [
+    {
+      "id": "movie-1339713",
+      "tmdb_id": 1339713,
+      "type": "movie",
+      "title": "Obsession",
+      "original_title": "Obsession",
+      "year": 2026,
+      "release_date": "2026-05-13",
+      "director": "Curry Barker",
+      "cast": [
+        "Michael Johnston",
+        "Inde Navarrette",
+        "Cooper Tomlinson",
+        "Megan Lawless",
+        "Andy Richter"
+      ],
+      "runtime": 108,
+      "genres": [
+        "Horreur",
+        "Thriller"
+      ],
+      "country": "USA · UK",
+      "poster": "https://image.tmdb.org/t/p/w500/mDCR1frpUvGfIKksuM440VLb7X9.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/4k99kV4R1bbbrsnjR205v91Xbin.jpg",
+      "synopsis": "Et si vous pouviez réaliser votre rêve le plus fou ? Un jeune introverti met la main sur un objet magique capable d’exaucer n’importe quel souhait. Son crush de toujours tombe alors raide dingue de lui… jusqu’à l’obsession la plus totale. Faites attention à ce que vous souhaitez !",
+      "tmdb_rating": 7.9,
+      "imdb_id": "tt37287335",
+      "original_language": "en",
+      "trailer": "https://www.youtube.com/watch?v=eM4P03Zw9C4",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-06-16T08:35:24.877Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1668499",
       "tmdb_id": 1668499,
