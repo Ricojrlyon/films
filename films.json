@@ -1,8 +1,51 @@
 {
   "version": 1,
-  "generated_at": "2026-06-23T18:37:10.417Z",
-  "count": 540,
+  "generated_at": "2026-07-04T14:57:23.925Z",
+  "count": 541,
   "films": [
+    {
+      "id": "movie-9606",
+      "tmdb_id": 9606,
+      "type": "movie",
+      "title": "Metropolis",
+      "original_title": "メトロポリス",
+      "year": 2001,
+      "release_date": "2001-05-26",
+      "director": "Rintaro",
+      "cast": [
+        "井元由香",
+        "岡田浩暉",
+        "富田耕生",
+        "Kei Kobayashi",
+        "Rikako Aikawa"
+      ],
+      "runtime": 113,
+      "genres": [
+        "Animation",
+        "Science-Fiction"
+      ],
+      "country": "Japan",
+      "poster": "https://image.tmdb.org/t/p/w500/khe6EOCXccR3jLWu0lij050S4XU.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/1FBByew9RnXQ2HFqf7b6EWkyzTP.jpg",
+      "synopsis": "À Metropolis, une cité futuriste, humains et robots cohabitent, mais vivent dans des espaces bien délimités… Dans une atmosphère baignée par la musique de jazz, cette cité est le théâtre d'une enquête de police menée par un inspecteur japonais et son jeune neveu, Kenichi, au sujet d'un savant accusé de trafic d'organes, le docteur Laugthon, et qui va s'avérer être au service de l'homme le plus puissant de la ville. Celui-ci utilise les services du savant pour créer un robot ultra-moderne, ayant l'apparence d'une petite fille, Tima. Ce robot est la clé d'une arme secrète destinée à lui assurer la domination du monde, la Ziggurat, une haute tour à l'image de la tour de Babel, conçue pour égaler Dieu.",
+      "tmdb_rating": 7.151,
+      "imdb_id": "tt0293416",
+      "original_language": "ja",
+      "trailer": "https://www.youtube.com/watch?v=m28qXxnp2GI",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-07-04T14:56:52.456Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": 4,
+        "favorite": false,
+        "lieu": "Cinéma",
+        "date_vue": "2026-07",
+        "date_vue_label": "Juillet 2026",
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1061798",
       "tmdb_id": 1061798,
