@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-07T10:44:04.812Z",
+  "generated_at": "2026-07-07T19:15:25.563Z",
   "count": 543,
   "films": [
     {
@@ -423,12 +423,12 @@
         "added_at": "2026-06-10T14:30:11.905Z"
       },
       "user": {
-        "statut": "a_voir",
-        "rating": null,
+        "statut": "vu",
+        "rating": 3,
         "favorite": false,
-        "lieu": null,
-        "date_vue": null,
-        "date_vue_label": null,
+        "lieu": "Cinéma",
+        "date_vue": "2026-07",
+        "date_vue_label": "Juillet 2026",
         "csv_genres": []
       }
     },
