@@ -1,8 +1,51 @@
 {
   "version": 1,
-  "generated_at": "2026-07-07T10:43:24.167Z",
-  "count": 542,
+  "generated_at": "2026-07-07T10:44:04.812Z",
+  "count": 543,
   "films": [
+    {
+      "id": "movie-843093",
+      "tmdb_id": 843093,
+      "type": "movie",
+      "title": "Plus que jamais",
+      "original_title": "Plus que jamais",
+      "year": 2022,
+      "release_date": "2022-11-16",
+      "director": "Emily Atef",
+      "cast": [
+        "Vicky Krieps",
+        "Gaspard Ulliel",
+        "Bjørn Floberg",
+        "Sophie Langevin",
+        "Valérie Bodson"
+      ],
+      "runtime": 123,
+      "genres": [
+        "Drame",
+        "Romance"
+      ],
+      "country": "France · Germany · Luxembourg · Norway",
+      "poster": "https://image.tmdb.org/t/p/w500/hqG5ktjtt1AtHb76rV0glutmrTL.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/rYhfAah0o7ZNklrTsKW3lStKUaW.jpg",
+      "synopsis": "Hélène et Mathieu sont heureux ensemble depuis de nombreuses années. Le lien qui les unit est profond. Confrontée à une décision existentielle, Hélène part seule en Norvège pour chercher la paix et éprouver la force de leur amour.",
+      "tmdb_rating": 6.436,
+      "imdb_id": "tt14275050",
+      "original_language": "fr",
+      "trailer": "https://www.youtube.com/watch?v=kOYr8yEFPRQ",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-07-07T10:43:41.283Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-852427",
       "tmdb_id": 852427,
