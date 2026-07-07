@@ -1,8 +1,51 @@
 {
   "version": 1,
-  "generated_at": "2026-07-04T14:59:30.786Z",
-  "count": 541,
+  "generated_at": "2026-07-07T10:43:24.167Z",
+  "count": 542,
   "films": [
+    {
+      "id": "movie-852427",
+      "tmdb_id": 852427,
+      "type": "movie",
+      "title": "Kompromat",
+      "original_title": "Kompromat",
+      "year": 2022,
+      "release_date": "2022-09-07",
+      "director": "Jérôme Salle",
+      "cast": [
+        "Gilles Lellouche",
+        "Joanna Kulig",
+        "Mikhail Gorevoy",
+        "Sasha Piltsin",
+        "Mikhail Safronov"
+      ],
+      "runtime": 127,
+      "genres": [
+        "Thriller",
+        "Drame"
+      ],
+      "country": "France · USA",
+      "poster": "https://image.tmdb.org/t/p/w500/2gOkXQ0SoQSLb6p5KYFUxQIYliJ.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/xp6ZNacNFf9GmJe648fUqfbdyph.jpg",
+      "synopsis": "Russie, 2017. Mathieu Roussel est arrêté et incarcéré sous les yeux de sa fille. Expatrié français, il est victime d’un « kompromat », de faux documents compromettants utilisés par les services secrets russes pour nuire à un ennemi de l’État. Menacé d’une peine de prison à vie, il ne lui reste qu’une option : s’évader et rejoindre la France par ses propres moyens…",
+      "tmdb_rating": 6.3,
+      "imdb_id": "tt13349892",
+      "original_language": "fr",
+      "trailer": "https://www.youtube.com/watch?v=IbwOfbYxe3I",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-07-07T10:24:28.378Z"
+      },
+      "user": {
+        "statut": "vu",
+        "rating": 3,
+        "favorite": false,
+        "lieu": "Cinéma",
+        "date_vue": "2022",
+        "date_vue_label": "2022",
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-9606",
       "tmdb_id": 9606,
