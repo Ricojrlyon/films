@@ -859,6 +859,32 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
 .stat-card.accent .stat-card-value { color: var(--warm); }
 .stat-card.hot .stat-card-value { color: var(--hot); }
 
+/* Year-in-progress sub-stat inside each main stat card */
+.stat-card-year {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+.stat-card-year-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+}
+.stat-card-year-value {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink-soft);
+  line-height: 1;
+}
+
 .chart-section {
   background: var(--bg-elev);
   border: 1px solid var(--rule);
@@ -3257,37 +3283,60 @@ function renderStats() {
     }
   }
 
+  // ── Current-year stats ─────────────────────────────────────
+  const CY = String(new Date().getFullYear()); // e.g. "2026"
+  const vusThisYear = vus.filter(f => (f.user?.date_vue || '').startsWith(CY));
+  const cyHours = Math.round(vusThisYear.reduce((s, f) => s + (f.runtime || 0), 0) / 60);
+  const cyRated = vusThisYear.filter(f => f.user?.rating);
+  const cyAvgRating = cyRated.length
+    ? (cyRated.reduce((s, f) => s + f.user.rating, 0) / cyRated.length)
+    : 0;
+  const cyFavorites = vusThisYear.filter(f => f.user?.favorite).length;
+  const cyDirs = new Set(vusThisYear.filter(f => f.director).map(f => f.director));
+
+  const yearSub = (label, value) => `
+    <div class="stat-card-year">
+      <span class="stat-card-year-label">${CY}</span>
+      <span class="stat-card-year-value">${value}</span>
+    </div>`;
+
   // Number cards
   document.getElementById('stats-numbers').innerHTML = `
     <div class="stat-card">
       <div class="stat-card-label">films vus</div>
       <div class="stat-card-value">${vus.length}</div>
       <div class="stat-card-detail">${films.length - vus.length} à voir</div>
+      ${yearSub(CY, vusThisYear.length)}
     </div>
     <div class="stat-card accent">
       <div class="stat-card-label">temps cumulé</div>
       <div class="stat-card-value">${totalHours.toLocaleString('fr-FR')}h</div>
       <div class="stat-card-detail">soit ${totalDays} jours</div>
+      ${yearSub(CY, cyHours + 'h')}
     </div>
     <div class="stat-card">
       <div class="stat-card-label">note moyenne</div>
       <div class="stat-card-value">${avgRating.toFixed(1)}<span style="font-size:0.5em; color: var(--ink-mute)">/6</span></div>
       <div class="stat-card-detail">sur ${rated.length} films notés</div>
+      ${cyRated.length ? yearSub(CY, cyAvgRating.toFixed(1) + '/6') : ''}
     </div>
     <div class="stat-card hot">
       <div class="stat-card-label">coups de cœur</div>
       <div class="stat-card-value">${favorites}</div>
       <div class="stat-card-detail">${(favorites * 100 / Math.max(1, vus.length)).toFixed(0)}% des vus</div>
+      ${yearSub(CY, cyFavorites)}
     </div>
     <div class="stat-card">
       <div class="stat-card-label">films par an</div>
       <div class="stat-card-value">${avgPerYear}</div>
       <div class="stat-card-detail">moyenne (années complètes)</div>
+      ${yearSub(CY, vusThisYear.length + ' vus')}
     </div>
     <div class="stat-card">
       <div class="stat-card-label">réalisateurs</div>
       <div class="stat-card-value">${directors.size}</div>
       <div class="stat-card-detail">distincts</div>
+      ${yearSub(CY, cyDirs.size + ' distincts')}
     </div>
   `;
 
@@ -3785,40 +3834,91 @@ function renderGenderBalance() {
     bar('acteur · actrice principal·e', leadM, leadF, leadU, leadTotal);
 }
 
+/** Fetch the best available Latin name for a TMDB person by their ID.
+ *  Falls back to `also_known_as` when the default `name` is still non-Latin.
+ *  Uses the English-language endpoint for maximum romanisation coverage. */
+async function fetchLatinNameById(personId) {
+  try {
+    const r = await fetch(
+      `${TMDB_BASE}/person/${personId}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=en-US`
+    );
+    if (!r.ok) return null;
+    const p = await r.json();
+    if (p.name && !hasCjk(p.name)) return p.name;
+    for (const aka of (p.also_known_as || [])) {
+      if (aka && !hasCjk(aka)) return aka;
+    }
+  } catch (_) { /* skip */ }
+  return null;
+}
+
 async function enrichGender() {
   if (!admin.active || !admin.tmdbKey) return;
   const btn = document.getElementById('gender-enrich-btn');
   const status = document.getElementById('gender-enrich-status');
-  const toEnrich = state.films.filter(f => f.tmdb_id && f.type === 'movie' && (!f.director_gender || !f.cast_genders));
+  const toEnrich = state.films.filter(
+    f => f.tmdb_id && f.type === 'movie' && (!f.director_gender || !f.cast_genders)
+  );
   if (!toEnrich.length) { status.textContent = 'rien à enrichir.'; return; }
   btn.disabled = true;
   let done = 0;
   status.textContent = `0 / ${toEnrich.length}…`;
+
   for (const f of toEnrich) {
     try {
-      const r = await fetch(`${TMDB_BASE}/movie/${f.tmdb_id}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
-      if (!r.ok) continue;
+      // 1. Fetch credits (gender + name data)
+      const r = await fetch(
+        `${TMDB_BASE}/movie/${f.tmdb_id}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`
+      );
+      if (!r.ok) { done++; continue; }
       const data = await r.json();
       const dir = (data.crew || []).find(c => c.job === 'Director');
       if (dir) f.director_gender = dir.gender || 0;
       const rawCast = (data.cast || []).slice(0, 5);
       f.cast_genders = rawCast.map(c => c.gender || 0);
-      // Also fix CJK names if present
-      if (dir && hasCjk(f.director)) f.director = bestPersonName(dir);
+
+      // 2. Fix non-Latin director name
+      if (dir && hasCjk(f.director || '')) {
+        let latinName = bestPersonName(dir);
+        if (hasCjk(latinName) && dir.id) {
+          // Still non-Latin → fetch person endpoint for English name
+          await new Promise(res => setTimeout(res, 300));
+          latinName = (await fetchLatinNameById(dir.id)) || latinName;
+        }
+        if (!hasCjk(latinName)) f.director = latinName;
+      }
+
+      // 3. Fix non-Latin cast names
       const oldCast = f.cast || [];
-      f.cast = rawCast.map((c, i) => (hasCjk(oldCast[i] || '')) ? bestPersonName(c) : (oldCast[i] || bestPersonName(c)));
-    } catch (e) { /* skip */ }
+      const newCast = [];
+      for (let i = 0; i < rawCast.length; i++) {
+        const orig = oldCast[i] || '';
+        if (hasCjk(orig)) {
+          let latinName = bestPersonName(rawCast[i]);
+          if (hasCjk(latinName) && rawCast[i].id) {
+            await new Promise(res => setTimeout(res, 300));
+            latinName = (await fetchLatinNameById(rawCast[i].id)) || latinName;
+          }
+          newCast.push(hasCjk(latinName) ? orig : latinName);
+        } else {
+          newCast.push(orig || bestPersonName(rawCast[i]));
+        }
+      }
+      f.cast = newCast;
+    } catch (_) { /* skip */ }
+
     done++;
     if (done % 5 === 0) status.textContent = `${done} / ${toEnrich.length}…`;
     await new Promise(res => setTimeout(res, 300));
   }
+
   status.textContent = `${done} films enrichis. Sauvegarde…`;
   try {
-    await saveFilmsToGithub('enrichi: données de genre');
+    await saveFilmsToGithub('enrichi: données de genre + noms latinisés');
     renderStats();
     status.textContent = `✓ ${done} films enrichis et sauvegardés.`;
-  } catch(e) {
-    status.textContent = `enrichissement ok mais erreur de sauvegarde: ${e.message}`;
+  } catch (e) {
+    status.textContent = `enrichissement ok mais erreur sauvegarde : ${e.message}`;
   }
   btn.disabled = false;
 }
@@ -3868,10 +3968,13 @@ function openModalFromCard(filmId) {
 // HELPERS
 // ============================================================
 
-/** Detect CJK / East-Asian Unicode blocks in a string. */
+/** Detect characters from non-Latin scripts that cannot be read by a
+ *  Western audience: CJK (Chinese/Japanese/Korean hanzi), Hiragana,
+ *  Katakana, Korean Hangul, Thai. Does NOT catch extended Latin
+ *  (Vietnamese diacritics, French accents, etc.) — those are fine. */
 function hasCjk(s) {
   if (!s) return false;
-  return /[\u3000-\u9fff\ua000-\ua4ff\uf900-\ufaff\uff00-\uffef\u4e00-\u9fff\u3400-\u4dbf]/u.test(s);
+  return /[\u3000-\u9fff\u3040-\u30ff\uac00-\ud7ff\uf900-\ufaff\u0e00-\u0e7f]/u.test(s);
 }
 
 /** Prefer the non-CJK variant of a TMDB person name.
