@@ -2034,6 +2034,12 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     </div>
 
     <div class="chart-section">
+      <h3 class="chart-title">carte du monde</h3>
+      <div class="chart-subtitle">films par pays de production · survole un pays pour le détail</div>
+      <div id="world-map-chart"></div>
+    </div>
+
+    <div class="chart-section">
       <h3 class="chart-title">top genres</h3>
       <div class="chart-subtitle">10 genres les plus représentés</div>
       <div id="genre-chart"></div>
@@ -2273,6 +2279,8 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 <!-- ============== TOAST ============== -->
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js" defer></script>
 <script>
 'use strict';
 
@@ -2806,7 +2814,16 @@ async function tmdbGetRecommendations(tmdbId, type) {
 }
 
 async function buildRecoPool(sources) {
-  const calls = sources.map(s => tmdbGetRecommendations(s.tmdb_id, s.type).then(items => ({ items, weight: s.user.rating / 6 })));
+  const calls = sources.map(s => {
+    // Slight boost for female-directed source films (director_gender === 1 in TMDB convention).
+    // Using 1.35× means recommendations seeded from films by female directors
+    // are weighted ~35% more, gently tilting the pool without forcing it.
+    const dirBoost = s.director_gender === 1 ? 1.35 : 1.0;
+    return tmdbGetRecommendations(s.tmdb_id, s.type).then(items => ({
+      items,
+      weight: (s.user.rating / 6) * dirBoost,
+    }));
+  });
   const results = await Promise.all(calls);
   // Aggregate: score = sum of source weights, with language diversity adjustment
   const scoreMap = new Map();
@@ -3346,6 +3363,7 @@ function renderStats() {
   renderGenreRatingChart();
   renderHeatmap();
   renderOriginChart();
+  renderWorldMap();
   renderGenreChart();
   renderDirectorChart();
   renderActorChart();
@@ -3642,6 +3660,126 @@ function renderRatingDist() {
     bar.innerHTML = `<span class="rating-bar-count">${counts[i]}</span>`;
     root.appendChild(bar);
   }
+}
+
+async function renderWorldMap() {
+  const root = document.getElementById('world-map-chart');
+  if (!root) return;
+
+  // Build French country name → film count
+  const counts = new Map();
+  for (const f of state.films) {
+    if (!f.country) continue;
+    f.country.split(' · ').map(s => s.trim()).filter(Boolean).forEach(p => {
+      counts.set(p, (counts.get(p) || 0) + 1);
+    });
+  }
+  if (counts.size === 0) {
+    root.innerHTML = '<div style="color:var(--ink-mute);font-style:italic;font-size:13px;">aucun pays connu — enrichis les pays manquants d\'abord.</div>';
+    return;
+  }
+
+  // Reverse of ISO_TO_COUNTRY: French name → ISO alpha-2
+  const COUNTRY_TO_ISO2 = {};
+  for (const [iso2, name] of Object.entries(ISO_TO_COUNTRY)) COUNTRY_TO_ISO2[name] = iso2;
+  COUNTRY_TO_ISO2['USA'] = 'US'; COUNTRY_TO_ISO2['UK'] = 'GB';
+
+  // ISO alpha-2 → ISO numeric (used by TopoJSON world-atlas)
+  const ISO2_NUM = {
+    AR:32, AT:40, AU:36, BE:56, BR:76, CA:124, CH:756, CN:156, CO:170, CZ:203,
+    DE:276, DK:208, EG:818, ES:724, FI:246, FR:250, GB:826, GE:268, GR:300, HK:344,
+    HR:191, HU:348, ID:360, IE:372, IL:376, IN:356, IR:364, IS:352, IT:380, JP:392,
+    KR:410, LB:422, LU:442, MA:504, MX:484, NL:528, NO:578, NZ:554, PH:608, PL:616,
+    PT:620, RO:642, RS:688, RU:643, SA:682, SE:752, SG:702, TH:764, TN:788, TR:792,
+    TW:158, UA:804, US:840, VN:704, ZA:710,
+  };
+
+  // Build numeric id → {count, name}
+  const byNum = new Map();
+  for (const [name, count] of counts.entries()) {
+    const iso2 = COUNTRY_TO_ISO2[name];
+    const num = iso2 && ISO2_NUM[iso2];
+    if (num) byNum.set(num, { count, name });
+  }
+
+  root.innerHTML = '<div style="color:var(--ink-mute);font-size:12px;text-align:center;padding:16px;">chargement…</div>';
+
+  // Load world TopoJSON (Natural Earth 110m)
+  let world;
+  try {
+    const r = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    world = await r.json();
+  } catch {
+    root.innerHTML = '<div style="color:var(--ink-mute);font-style:italic;font-size:13px;">carte indisponible (connexion requise).</div>';
+    return;
+  }
+
+  // Check D3/TopoJSON are loaded
+  if (typeof d3 === 'undefined' || typeof topojson === 'undefined') {
+    root.innerHTML = '<div style="color:var(--ink-mute);font-style:italic;font-size:13px;">D3 non chargé — réessaie dans quelques secondes.</div>';
+    return;
+  }
+
+  const W = root.getBoundingClientRect().width || 700;
+  const H = Math.round(W * 0.5);
+  const maxCount = Math.max(...[...byNum.values()].map(v => v.count), 1);
+
+  // Warm beige palette: unfilled → light bg, filled → warm tan
+  const colorScale = d3.scaleSequentialLog(d => d3.interpolate('#243038', '#d4a574')(d))
+    .domain([1, maxCount]);
+
+  root.innerHTML = '';
+  const svg = d3.select(root).append('svg')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .style('width', '100%').style('height', 'auto').style('display', 'block');
+
+  const projection = d3.geoNaturalEarth1()
+    .scale(W / 6.3).translate([W / 2, H / 2]);
+  const path = d3.geoPath().projection(projection);
+
+  const countries = topojson.feature(world, world.objects.countries);
+
+  // Shared tooltip element
+  let tip = document.getElementById('_wmap_tip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = '_wmap_tip';
+    tip.style.cssText = 'position:fixed;pointer-events:none;display:none;z-index:9999;' +
+      'background:var(--bg-elev);border:1px solid var(--rule);border-radius:6px;' +
+      'padding:6px 10px;font-family:JetBrains Mono,monospace;font-size:11px;color:var(--ink)';
+    document.body.appendChild(tip);
+  }
+
+  svg.append('g').selectAll('path')
+    .data(countries.features)
+    .join('path')
+    .attr('d', path)
+    .attr('fill', d => {
+      const v = byNum.get(+d.id);
+      return v ? colorScale(v.count) : '#1c272f';
+    })
+    .attr('stroke', '#0e1418').attr('stroke-width', 0.4)
+    .on('mousemove', function(event, d) {
+      const v = byNum.get(+d.id);
+      if (!v) { tip.style.display = 'none'; return; }
+      tip.textContent = `${v.name}  ·  ${v.count} film${v.count > 1 ? 's' : ''}`;
+      tip.style.display = '';
+      tip.style.left = (event.clientX + 14) + 'px';
+      tip.style.top = (event.clientY - 30) + 'px';
+    })
+    .on('mouseleave', () => tip.style.display = 'none');
+
+  // Color scale legend
+  const legW = 120, legH = 7;
+  const defs = svg.append('defs');
+  const grad = defs.append('linearGradient').attr('id', 'wmap-grad');
+  grad.append('stop').attr('offset', '0%').attr('stop-color', '#243038');
+  grad.append('stop').attr('offset', '100%').attr('stop-color', '#d4a574');
+  const leg = svg.append('g').attr('transform', `translate(${W - legW - 12},${H - 24})`);
+  leg.append('rect').attr('width', legW).attr('height', legH).attr('rx', 2).attr('fill', 'url(#wmap-grad)');
+  const legStyle = 'font-family:JetBrains Mono,monospace;font-size:9px;fill:#5e6973';
+  leg.append('text').attr('y', legH + 9).attr('style', legStyle).text('0');
+  leg.append('text').attr('x', legW).attr('y', legH + 9).attr('text-anchor', 'end').attr('style', legStyle).text(maxCount + ' films');
 }
 
 function renderGenreChart() {
