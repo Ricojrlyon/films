@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T09:00:32.219Z",
+  "generated_at": "2026-07-08T09:16:06.874Z",
   "count": 546,
   "films": [
     {
@@ -44,7 +44,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-1432073",
@@ -86,7 +94,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        0,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1418811",
@@ -130,7 +146,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        0,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-843093",
@@ -173,7 +197,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-852427",
@@ -216,7 +248,15 @@
         "date_vue": "2022",
         "date_vue_label": "2022",
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-9606",
@@ -259,7 +299,15 @@
         "date_vue": "2026-07",
         "date_vue_label": "Juillet 2026",
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1061798",
@@ -302,7 +350,15 @@
         "date_vue": "2026-06",
         "date_vue_label": "Juin 2026",
         "csv_genres": []
-      }
+      },
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1363387",
@@ -344,7 +400,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-1280738",
@@ -358,7 +422,7 @@
       "cast": [
         "Xie Miao",
         "Joe Taslim",
-        "杨恩又",
+        "Yang Enyou",
         "Yayan Ruhian",
         "ฉันทธนิสา ตัง"
       ],
@@ -387,7 +451,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1083381",
@@ -431,7 +503,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1339713",
@@ -474,7 +554,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1668499",
@@ -516,7 +604,15 @@
         "date_vue": "2026-06",
         "date_vue_label": "Juin 2026",
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-1337592",
@@ -559,7 +655,15 @@
         "date_vue": "2026-07",
         "date_vue_label": "Juillet 2026",
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1432547",
@@ -604,7 +708,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1074074",
@@ -646,7 +758,15 @@
         "date_vue": null,
         "date_vue_label": null,
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-712150",
@@ -688,7 +808,15 @@
         "date_vue": "before-2022",
         "date_vue_label": "avant 2022",
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-324857",
@@ -731,7 +859,15 @@
         "date_vue": "before-2022",
         "date_vue_label": "avant 2022",
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-539",
@@ -773,7 +909,15 @@
         "date_vue": "before-2022",
         "date_vue_label": "avant 2022",
         "csv_genres": []
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-157336",
@@ -816,7 +960,15 @@
         "date_vue_label": "avant 2022",
         "csv_genres": []
       },
-      "trailer": "https://www.youtube.com/watch?v=kTGDxqUowq4"
+      "trailer": "https://www.youtube.com/watch?v=kTGDxqUowq4",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-773",
@@ -857,7 +1009,15 @@
         "date_vue_label": "avant 2022",
         "csv_genres": []
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-972119",
@@ -898,7 +1058,15 @@
         "date_vue_label": "Janvier 2024",
         "csv_genres": []
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-382811",
@@ -937,7 +1105,13 @@
         "date_vue_label": "avant 2022",
         "csv_genres": []
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-547258",
@@ -977,7 +1151,15 @@
         "date_vue_label": "avant 2022",
         "csv_genres": []
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-602334",
@@ -1019,7 +1201,15 @@
         "csv_genres": []
       },
       "country": "France · Belgium · Italy · Germany",
-      "trailer": "https://www.youtube.com/watch?v=vB3B0fajLYk"
+      "trailer": "https://www.youtube.com/watch?v=vB3B0fajLYk",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-310593",
@@ -1061,7 +1251,15 @@
         "date_vue_label": "avant 2022",
         "csv_genres": []
       },
-      "country": "France · Italy · UK · Switzerland"
+      "country": "France · Italy · UK · Switzerland",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-869886",
@@ -1104,7 +1302,15 @@
         "csv_genres": []
       },
       "country": "Japan",
-      "trailer": "https://www.youtube.com/watch?v=tgUNyWHONYE"
+      "trailer": "https://www.youtube.com/watch?v=tgUNyWHONYE",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-582913",
@@ -1147,7 +1353,15 @@
         "date_vue_label": "avant 2022",
         "csv_genres": []
       },
-      "country": "France · Belgium · Luxembourg"
+      "country": "France · Belgium · Luxembourg",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-1297842",
@@ -1189,7 +1403,15 @@
         "date_vue_label": "Mai 2026",
         "csv_genres": []
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-451945",
@@ -1230,7 +1452,15 @@
       "source": {
         "csv_title": "120 Battements par minute"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-19913",
@@ -1274,7 +1504,15 @@
       "source": {
         "csv_title": "500 Days of Summer"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-530915",
@@ -1318,7 +1556,15 @@
       "source": {
         "csv_title": "1917"
       },
-      "country": "USA · UK · Spain · India"
+      "country": "USA · UK · Spain · India",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-62",
@@ -1362,7 +1608,15 @@
       "source": {
         "csv_title": "2001 l’Odyssée de l’Espace"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-340837",
@@ -1405,7 +1659,15 @@
       "source": {
         "csv_title": "A Cure For Life"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-428449",
@@ -1448,7 +1710,15 @@
       "source": {
         "csv_title": "A Ghost Story"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-651881",
@@ -1490,7 +1760,15 @@
       "source": {
         "csv_title": "Adieu Les Cons"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-487631",
@@ -1533,7 +1811,15 @@
         "csv_title": "Adoration"
       },
       "trailer": "https://www.youtube.com/watch?v=gxyb0y3QPRw",
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-73",
@@ -1574,7 +1860,15 @@
       "source": {
         "csv_title": "American History X"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1359",
@@ -1618,7 +1912,15 @@
       "source": {
         "csv_title": "American Psycho"
       },
-      "country": "Canada · USA"
+      "country": "Canada · USA",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-28",
@@ -1661,7 +1963,15 @@
       "source": {
         "csv_title": "Apocalypse Now"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-51739",
@@ -1707,7 +2017,15 @@
         "csv_title": "Arrietty, Le Petit Monde des Chapardeurs"
       },
       "country": "France · Japan · USA",
-      "trailer": "https://www.youtube.com/watch?v=RYwYgH9uA_8"
+      "trailer": "https://www.youtube.com/watch?v=RYwYgH9uA_8",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-336199",
@@ -1749,7 +2067,15 @@
       "source": {
         "csv_title": "Asphalte"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-474331",
@@ -1790,7 +2116,15 @@
       "source": {
         "csv_title": "Au Poste"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-430424",
@@ -1834,7 +2168,15 @@
       "source": {
         "csv_title": "Au Revoir Là Haut"
       },
-      "country": "France · Canada"
+      "country": "France · Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-78",
@@ -1878,7 +2220,15 @@
       "source": {
         "csv_title": "Blade Runner"
       },
-      "country": "USA · Hong Kong · UK"
+      "country": "USA · Hong Kong · UK",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-403431",
@@ -1921,7 +2271,15 @@
         "csv_title": "Brigsby Bear"
       },
       "country": "USA",
-      "trailer": "https://www.youtube.com/watch?v=InqSiQENDYY"
+      "trailer": "https://www.youtube.com/watch?v=InqSiQENDYY",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-310",
@@ -1963,7 +2321,15 @@
       "source": {
         "csv_title": "Bruce Tout Puissant"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-613370",
@@ -2007,7 +2373,15 @@
       "source": {
         "csv_title": "Brutus VS Cesar"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-398818",
@@ -2050,7 +2424,15 @@
       "source": {
         "csv_title": "Call Me By Your Name"
       },
-      "country": "France · Brazil · Italy · USA"
+      "country": "France · Brazil · Italy · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-467679",
@@ -2092,7 +2474,15 @@
       "source": {
         "csv_title": "Carnivores"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-544404",
@@ -2135,7 +2525,15 @@
       "source": {
         "csv_title": "Celle Que Vous Croyez"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-582895",
@@ -2178,7 +2576,15 @@
       "source": {
         "csv_title": "Chanson Douce"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-467414",
@@ -2221,7 +2627,15 @@
       "source": {
         "csv_title": "Chien"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-369778",
@@ -2264,7 +2678,15 @@
       "source": {
         "csv_title": "Chocolat"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-507076",
@@ -2309,7 +2731,15 @@
       "source": {
         "csv_title": "Climax"
       },
-      "country": "France · Belgium · USA"
+      "country": "France · Belgium · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-354912",
@@ -2355,7 +2785,15 @@
       "source": {
         "csv_title": "Coco"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-339967",
@@ -2399,7 +2837,15 @@
       "source": {
         "csv_title": "Colossal"
       },
-      "country": "Canada · South Korea · Spain · USA"
+      "country": "Canada · South Korea · Spain · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-366564",
@@ -2440,7 +2886,15 @@
       "source": {
         "csv_title": "Comment C’est Loin"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-570128",
@@ -2481,7 +2935,15 @@
       "source": {
         "csv_title": "Convoi Exceptionnel"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-487616",
@@ -2525,7 +2987,15 @@
       "source": {
         "csv_title": "Curiosa"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-477489",
@@ -2569,7 +3039,15 @@
       "source": {
         "csv_title": "Dans La Brume"
       },
-      "country": "France · Canada"
+      "country": "France · Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-396535",
@@ -2615,7 +3093,15 @@
       "source": {
         "csv_title": "Dernier Train Pour Busan"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-583268",
@@ -2659,7 +3145,15 @@
       "source": {
         "csv_title": "Deux Moi"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-613349",
@@ -2700,7 +3194,15 @@
       "source": {
         "csv_title": "Docteur ?"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-944401",
@@ -2743,7 +3245,15 @@
       "source": {
         "csv_title": "Dogman"
       },
-      "country": "France · USA"
+      "country": "France · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-580175",
@@ -2785,7 +3295,15 @@
       "source": {
         "csv_title": "Drunk"
       },
-      "country": "Denmark · Netherlands · Sweden"
+      "country": "Denmark · Netherlands · Sweden",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-519106",
@@ -2829,7 +3347,15 @@
       "source": {
         "csv_title": "En Liberté"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-421452",
@@ -2873,7 +3399,15 @@
         "csv_genres": [
           "Drame"
         ]
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-659959",
@@ -2916,7 +3450,15 @@
       "source": {
         "csv_title": "Eté 85"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-38",
@@ -2960,7 +3502,15 @@
       "source": {
         "csv_title": "Eternal Sunshine Of The Spotless Mind"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-459974",
@@ -3002,7 +3552,14 @@
       "source": {
         "csv_title": "Everything Beautiful is Far Away"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-550",
@@ -3044,7 +3601,15 @@
       "source": {
         "csv_title": "Fight Club"
       },
-      "country": "Germany · USA"
+      "country": "Germany · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-539892",
@@ -3087,7 +3652,15 @@
       "source": {
         "csv_title": "Freaks"
       },
-      "country": "Canada · USA"
+      "country": "Canada · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-600",
@@ -3131,7 +3704,15 @@
         "csv_title": "Full Metal Jacket"
       },
       "country": "UK · USA",
-      "trailer": "https://www.youtube.com/watch?v=Ldxda5cqQh4"
+      "trailer": "https://www.youtube.com/watch?v=Ldxda5cqQh4",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-419430",
@@ -3175,7 +3756,15 @@
       "source": {
         "csv_title": "Get Out"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-450465",
@@ -3219,7 +3808,15 @@
         "csv_title": "Glass"
       },
       "country": "USA",
-      "trailer": "https://www.youtube.com/watch?v=3qPW4uaDPOE"
+      "trailer": "https://www.youtube.com/watch?v=3qPW4uaDPOE",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-393519",
@@ -3261,7 +3858,15 @@
       "source": {
         "csv_title": "Grave"
       },
-      "country": "France · Belgium · USA"
+      "country": "France · Belgium · USA",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-489170",
@@ -3302,7 +3907,15 @@
       "source": {
         "csv_title": "Gueule d’Ange"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-457335",
@@ -3346,7 +3959,15 @@
       "source": {
         "csv_title": "Guns Akimbo"
       },
-      "country": "Belgium · Germany · New Zealand · UK · USA · Austria · Australia"
+      "country": "Belgium · Germany · New Zealand · UK · USA · Austria · Australia",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-7453",
@@ -3390,7 +4011,15 @@
       "source": {
         "csv_title": "H2G2 - Le Guide du Voyageur Intergalactique"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-468287",
@@ -3432,7 +4061,15 @@
         "csv_title": "Hannah"
       },
       "country": "France · Italy · Belgium",
-      "trailer": "https://www.youtube.com/watch?v=J5mgXBMGbF4"
+      "trailer": "https://www.youtube.com/watch?v=J5mgXBMGbF4",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-400148",
@@ -3474,7 +4111,15 @@
       "source": {
         "csv_title": "Hibou"
       },
-      "country": "France · Canada"
+      "country": "France · Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        0,
+        1
+      ]
     },
     {
       "id": "movie-254302",
@@ -3516,7 +4161,15 @@
         "csv_title": "High Rise"
       },
       "country": "UK · Belgium · Northern Ireland",
-      "trailer": "https://www.youtube.com/watch?v=h2o70l4CAv4"
+      "trailer": "https://www.youtube.com/watch?v=h2o70l4CAv4",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-21057",
@@ -3560,7 +4213,15 @@
       "source": {
         "csv_title": "Je Peux Entendre l’Océan"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-500840",
@@ -3604,7 +4265,15 @@
       "source": {
         "csv_title": "Je Veux Juste En Finir"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-515001",
@@ -3648,7 +4317,15 @@
       "source": {
         "csv_title": "Jojo Rabbit"
       },
-      "country": "New Zealand · USA"
+      "country": "New Zealand · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-338189",
@@ -3689,7 +4366,15 @@
       "source": {
         "csv_title": "Juste La Fin Du Monde"
       },
-      "country": "France · Canada"
+      "country": "France · Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-16859",
@@ -3733,7 +4418,15 @@
       "source": {
         "csv_title": "Kiki La Petite Sorcière"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-438348",
@@ -3775,7 +4468,15 @@
       "source": {
         "csv_title": "Knock"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-83389",
@@ -3818,7 +4519,15 @@
       "source": {
         "csv_title": "La Colline Aux Coquelicots"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-537655",
@@ -3863,7 +4572,15 @@
       "source": {
         "csv_title": "La Fameuse Invasion des Ours en Sicile"
       },
-      "country": "France · Italy"
+      "country": "France · Italy",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-474298",
@@ -3904,7 +4621,15 @@
       "source": {
         "csv_title": "La Fête est Finie"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-392142",
@@ -3948,7 +4673,15 @@
       "source": {
         "csv_title": "La Folle Histoire de Max et Léon"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-654862",
@@ -3989,7 +4722,15 @@
       "source": {
         "csv_title": "La Forêt de Mon Père"
       },
-      "country": "France · Belgium · Switzerland"
+      "country": "France · Belgium · Switzerland",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-313369",
@@ -4034,7 +4775,15 @@
       "source": {
         "csv_title": "La La Land"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-457955",
@@ -4077,7 +4826,15 @@
       "source": {
         "csv_title": "La Nuit a Dévoré Le Monde"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-517468",
@@ -4118,7 +4875,15 @@
       "source": {
         "csv_title": "La Vérité"
       },
-      "country": "France · Japan · Switzerland"
+      "country": "France · Japan · Switzerland",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-637",
@@ -4161,7 +4926,15 @@
       "source": {
         "csv_title": "La Vie Est Belle"
       },
-      "country": "Italy"
+      "country": "Italy",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-484468",
@@ -4205,7 +4978,15 @@
       "source": {
         "csv_title": "Le Chant du Loup"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-4935",
@@ -4219,7 +5000,7 @@
       "cast": [
         "Chieko Baisho",
         "Takuya Kimura",
-        "美輪明宏",
+        "Akihiro Miwa",
         "我修院達也",
         "Ryunosuke Kamiki"
       ],
@@ -4250,7 +5031,15 @@
       "source": {
         "csv_title": "Le Château Ambulant"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-10515",
@@ -4297,7 +5086,15 @@
       "source": {
         "csv_title": "Le Château Dans Le Ciel"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-194",
@@ -4339,7 +5136,15 @@
       "source": {
         "csv_title": "Le Fabuleux Destin d’Amélie Poulain"
       },
-      "country": "France · Germany"
+      "country": "France · Germany",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-453191",
@@ -4383,7 +5188,15 @@
       "source": {
         "csv_title": "Le Grand Méchant Renard et Autres Contes"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        0,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1417",
@@ -4427,7 +5240,15 @@
       "source": {
         "csv_title": "Le Labyrinthe de Pan"
       },
-      "country": "Mexico · Spain · USA"
+      "country": "Mexico · Spain · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-437739",
@@ -4469,7 +5290,15 @@
       "source": {
         "csv_title": "Le Manoir"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-504603",
@@ -4512,7 +5341,15 @@
       "source": {
         "csv_title": "Le Monde Est à Toi"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-416186",
@@ -4557,7 +5394,15 @@
       "source": {
         "csv_title": "Le Redoutable"
       },
-      "country": "France · Myanmar"
+      "country": "France · Myanmar",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-420818",
@@ -4601,7 +5446,15 @@
       "source": {
         "csv_title": "Le Roi Lion"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-15370",
@@ -4648,7 +5501,15 @@
       "source": {
         "csv_title": "Le Royaume des Chats"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-2013",
@@ -4690,7 +5551,15 @@
       "source": {
         "csv_title": "Le Scaphandre et Le Papillon"
       },
-      "country": "France · USA"
+      "country": "France · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-12477",
@@ -4734,7 +5603,15 @@
       "source": {
         "csv_title": "Le Tombeau des Lucioles"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-149870",
@@ -4779,7 +5656,15 @@
       "source": {
         "csv_title": "Le Vent Se Lève"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-129",
@@ -4824,7 +5709,15 @@
       "source": {
         "csv_title": "Le Voyage de Chihiro"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-37933",
@@ -4869,7 +5762,15 @@
       "source": {
         "csv_title": "Les Contes de Terremer"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-568160",
@@ -4915,7 +5816,15 @@
       "source": {
         "csv_title": "Les Enfants du Temps"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-474444",
@@ -4960,7 +5869,15 @@
       "source": {
         "csv_title": "Les Garçons Sauvages"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-586863",
@@ -5003,7 +5920,15 @@
       "source": {
         "csv_title": "Les Misérables"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-268523",
@@ -5044,7 +5969,15 @@
       "source": {
         "csv_title": "Libre et Assoupi"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-399174",
@@ -5089,7 +6022,15 @@
       "source": {
         "csv_title": "L’île Aux Chiens"
       },
-      "country": "USA · Germany"
+      "country": "USA · Germany",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-658156",
@@ -5133,7 +6074,15 @@
         "csv_genres": [
           "Comédie"
         ]
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-431937",
@@ -5177,7 +6126,15 @@
       "source": {
         "csv_title": "M. et Mme. Adelman"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-9659",
@@ -5222,7 +6179,15 @@
       "source": {
         "csv_title": "Mad Max 1"
       },
-      "country": "Australia"
+      "country": "Australia",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-8810",
@@ -5267,7 +6232,15 @@
       "source": {
         "csv_title": "Mad Max 2 - Le Défi"
       },
-      "country": "Australia"
+      "country": "Australia",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-9355",
@@ -5311,7 +6284,15 @@
       "source": {
         "csv_title": "Mad Max 3 - Au-Delà du Dôme du Tonnerre"
       },
-      "country": "Australia"
+      "country": "Australia",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-76341",
@@ -5355,7 +6336,15 @@
       "source": {
         "csv_title": "Mad Max : Fury Road"
       },
-      "country": "Australia · USA"
+      "country": "Australia · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-376166",
@@ -5398,7 +6387,15 @@
       "source": {
         "csv_title": "Mal de Pierres"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-696",
@@ -5442,7 +6439,15 @@
       "source": {
         "csv_title": "Manhattan"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-492188",
@@ -5484,7 +6489,15 @@
       "source": {
         "csv_title": "Marriage Story"
       },
-      "country": "UK"
+      "country": "UK",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-519141",
@@ -5527,7 +6540,15 @@
       "source": {
         "csv_title": "Matthias et Maxime"
       },
-      "country": "Canada"
+      "country": "Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-498249",
@@ -5569,7 +6590,15 @@
       "source": {
         "csv_title": "Mauvaises Herbes"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-62215",
@@ -5612,7 +6641,15 @@
       "source": {
         "csv_title": "Melancholia"
       },
-      "country": "France · Denmark · Germany · Sweden"
+      "country": "France · Denmark · Germany · Sweden",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-530385",
@@ -5656,7 +6693,15 @@
       "source": {
         "csv_title": "Midsommar"
       },
-      "country": "Sweden · USA"
+      "country": "Sweden · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-265177",
@@ -5697,7 +6742,15 @@
       "source": {
         "csv_title": "Mommy"
       },
-      "country": "Canada"
+      "country": "Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-536506",
@@ -5739,7 +6792,15 @@
       "source": {
         "csv_title": "Mon Chien Stupide"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-451646",
@@ -5782,7 +6843,15 @@
       "source": {
         "csv_title": "Mon Garçon"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-329805",
@@ -5825,7 +6894,15 @@
       "source": {
         "csv_title": "Mon Roi"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-8392",
@@ -5870,7 +6947,15 @@
       "source": {
         "csv_title": "Mon Voisin Totoro"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-83666",
@@ -5914,7 +6999,15 @@
       "source": {
         "csv_title": "Moonrise Kingdom"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-10818",
@@ -5957,7 +7050,15 @@
       "source": {
         "csv_title": "Naissance des Pieuvres"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        0,
+        1
+      ]
     },
     {
       "id": "movie-81",
@@ -6002,7 +7103,15 @@
       "source": {
         "csv_title": "Nausicaa de la Vallée du Vent"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-42188",
@@ -6046,7 +7155,15 @@
       "source": {
         "csv_title": "Never Let Me Go"
       },
-      "country": "UK"
+      "country": "UK",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-2517",
@@ -6087,7 +7204,15 @@
       "source": {
         "csv_title": "Nobody Knows"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-582886",
@@ -6128,7 +7253,15 @@
       "source": {
         "csv_title": "Notre Dame"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-496285",
@@ -6169,7 +7302,15 @@
       "source": {
         "csv_title": "Nuit de Grève"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-440086",
@@ -6212,7 +7353,15 @@
       "source": {
         "csv_title": "Occidental"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        0,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-185",
@@ -6254,7 +7403,15 @@
       "source": {
         "csv_title": "Orange Mecanique"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-9800",
@@ -6295,7 +7452,15 @@
       "source": {
         "csv_title": "Philadelphia"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-374464",
@@ -6341,7 +7506,15 @@
       "source": {
         "csv_title": "Planetarium"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-15283",
@@ -6385,7 +7558,15 @@
       "source": {
         "csv_title": "Pompoko"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-12429",
@@ -6430,7 +7611,15 @@
       "source": {
         "csv_title": "Ponyo sur la Falaise"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-11621",
@@ -6475,7 +7664,15 @@
       "source": {
         "csv_title": "Porco Rosso"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-329865",
@@ -6519,7 +7716,15 @@
       "source": {
         "csv_title": "Premier Contact"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-128",
@@ -6534,7 +7739,7 @@
         "Yōji Matsuda",
         "石田ゆり子",
         "田中裕子",
-        "小林薫",
+        "Kaoru Kobayashi",
         "Masahiko Nishimura"
       ],
       "runtime": 135,
@@ -6564,7 +7769,15 @@
       "source": {
         "csv_title": "Princesse Mononoke"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-450179",
@@ -6606,7 +7819,15 @@
       "source": {
         "csv_title": "Problemos"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        0,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-478860",
@@ -6648,7 +7869,15 @@
       "source": {
         "csv_title": "Proxima"
       },
-      "country": "France · Germany"
+      "country": "France · Germany",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-680",
@@ -6692,7 +7921,15 @@
       "source": {
         "csv_title": "Pulp Fiction"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-397722",
@@ -6734,7 +7971,15 @@
       "source": {
         "csv_title": "Pur Sang"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-404368",
@@ -6781,7 +8026,15 @@
       "source": {
         "csv_title": "Ralph 2.0"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-333339",
@@ -6825,7 +8078,15 @@
       "source": {
         "csv_title": "Ready Player One"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-338967",
@@ -6868,7 +8129,15 @@
       "source": {
         "csv_title": "Retour à Zombieland"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-382589",
@@ -6910,7 +8179,15 @@
       "source": {
         "csv_title": "Rock’n Roll"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-518496",
@@ -6949,7 +8226,15 @@
       "source": {
         "csv_title": "Sauvage"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-613319",
@@ -6988,7 +8273,15 @@
       "source": {
         "csv_title": "Selfie"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-518671",
@@ -7032,7 +8325,15 @@
       "source": {
         "csv_title": "Shéhérazade"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-694",
@@ -7074,7 +8375,15 @@
       "source": {
         "csv_title": "Shining"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-37797",
@@ -7119,7 +8428,15 @@
       "source": {
         "csv_title": "Si Tu Tends l’Oreille"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-470818",
@@ -7160,7 +8477,15 @@
       "source": {
         "csv_title": "Si Tu Voyais Son Coeur"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "tv-79680",
@@ -7249,7 +8574,15 @@
       "source": {
         "csv_title": "Soul"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-242828",
@@ -7294,7 +8627,15 @@
       "source": {
         "csv_title": "Souvenirs de Marnie"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-381288",
@@ -7337,7 +8678,15 @@
       "source": {
         "csv_title": "Split"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-49084",
@@ -7379,7 +8728,15 @@
       "source": {
         "csv_title": "Steak"
       },
-      "country": "France · Canada"
+      "country": "France · Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-49020",
@@ -7423,7 +8780,15 @@
       "source": {
         "csv_title": "Submarine"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-586461",
@@ -7467,7 +8832,15 @@
       "source": {
         "csv_title": "Swallow"
       },
-      "country": "France · USA"
+      "country": "France · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-347031",
@@ -7512,7 +8885,15 @@
       "source": {
         "csv_title": "Swiss Army Man"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-720272",
@@ -7555,7 +8936,15 @@
       "source": {
         "csv_title": "Terrible Jungle"
       },
-      "country": "France · Belgium · Switzerland"
+      "country": "France · Belgium · Switzerland",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-291984",
@@ -7596,7 +8985,15 @@
       "source": {
         "csv_title": "The Death And Life of John F. Donovan"
       },
-      "country": "Canada · UK"
+      "country": "Canada · UK",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-146015",
@@ -7640,7 +9037,15 @@
       "source": {
         "csv_title": "The Double"
       },
-      "country": "UK"
+      "country": "UK",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1381",
@@ -7686,7 +9091,15 @@
       "source": {
         "csv_title": "The Fountain"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-290098",
@@ -7731,7 +9144,15 @@
       "source": {
         "csv_title": "The Handmaiden"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-503919",
@@ -7774,7 +9195,15 @@
       "source": {
         "csv_title": "The Lighthouse"
       },
-      "country": "Brazil · USA"
+      "country": "Brazil · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-301365",
@@ -7815,7 +9244,15 @@
       "source": {
         "csv_title": "The Neon Demon"
       },
-      "country": "France · USA · Denmark · Belgium"
+      "country": "France · USA · Denmark · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-94329",
@@ -7858,7 +9295,15 @@
       "source": {
         "csv_title": "The Raid"
       },
-      "country": "France · Indonesia · USA"
+      "country": "France · Indonesia · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-399055",
@@ -7902,7 +9347,15 @@
       "source": {
         "csv_title": "The Shape of Water"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-401246",
@@ -7943,7 +9396,15 @@
       "source": {
         "csv_title": "The Square"
       },
-      "country": "France · Denmark · Germany · Sweden · USA"
+      "country": "France · Denmark · Germany · Sweden · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-293670",
@@ -7986,7 +9447,15 @@
       "source": {
         "csv_title": "The Strangers"
       },
-      "country": "South Korea · USA"
+      "country": "South Korea · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-8967",
@@ -8029,7 +9498,15 @@
       "source": {
         "csv_title": "The Tree of Life"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-37165",
@@ -8071,7 +9548,15 @@
       "source": {
         "csv_title": "The Truman Show"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-440472",
@@ -8113,7 +9598,15 @@
       "source": {
         "csv_title": "The Upside"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-20766",
@@ -8156,7 +9649,15 @@
       "source": {
         "csv_title": "The Road"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-401898",
@@ -8201,7 +9702,15 @@
       "source": {
         "csv_title": "Thelma"
       },
-      "country": "France · Denmark · Norway · Sweden"
+      "country": "France · Denmark · Norway · Sweden",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-550158",
@@ -8244,7 +9753,15 @@
       "source": {
         "csv_title": "Toute Ressemblance"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-596860",
@@ -8287,7 +9804,15 @@
       "source": {
         "csv_title": "Tu Mérites un Amour"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-475930",
@@ -8332,7 +9857,15 @@
       "source": {
         "csv_title": "Un couteau Dans le Coeur"
       },
-      "country": "France · Switzerland · Mexico"
+      "country": "France · Switzerland · Mexico",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-475303",
@@ -8375,7 +9908,15 @@
       "source": {
         "csv_title": "Un Jour de Pluie à New York"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-473033",
@@ -8419,7 +9960,15 @@
       "source": {
         "csv_title": "Uncut Gems"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-505192",
@@ -8462,7 +10011,15 @@
       "source": {
         "csv_title": "Une Affaire de Famille"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-600479",
@@ -8507,7 +10064,15 @@
       "source": {
         "csv_title": "Une Sirène à Paris"
       },
-      "country": "France · Belgium · Macedonia · USA"
+      "country": "France · Belgium · Macedonia · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-339964",
@@ -8552,7 +10117,15 @@
       "source": {
         "csv_title": "Valerian And The Cities of a Thousand Planets"
       },
-      "country": "France · Germany · United Arab Emirates · USA · Belgium · China"
+      "country": "France · Germany · United Arab Emirates · USA · Belgium · China",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "tv-75603",
@@ -8634,7 +10207,15 @@
       "source": {
         "csv_title": "Visages Villages"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        0,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-458305",
@@ -8677,7 +10258,15 @@
       "source": {
         "csv_title": "Vivarium"
       },
-      "country": "Belgium · Denmark · Ireland · USA"
+      "country": "Belgium · Denmark · Ireland · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-510",
@@ -8718,7 +10307,15 @@
       "source": {
         "csv_title": "Vol Au-Dessus d’un Nid de Coucou"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-553084",
@@ -8759,7 +10356,15 @@
       "source": {
         "csv_title": "Vous Êtes Jeunes, Vous Êtes Beaux"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-79707",
@@ -8805,7 +10410,15 @@
       "source": {
         "csv_title": "Voyage Vers Agartha"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-570258",
@@ -8847,7 +10460,15 @@
       "source": {
         "csv_title": "Yves"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-103328",
@@ -8890,7 +10511,15 @@
       "source": {
         "csv_title": "Holy Motors"
       },
-      "country": "France · Germany"
+      "country": "France · Germany",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-679989",
@@ -8931,7 +10560,15 @@
       "source": {
         "csv_title": "Tout Simplement Noir"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-20829",
@@ -8973,7 +10610,15 @@
       "source": {
         "csv_title": "Funny People"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1318417",
@@ -9015,7 +10660,15 @@
         "csv_title": "La maison des femmes"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=yAwvKg9T47Q"
+      "trailer": "https://www.youtube.com/watch?v=yAwvKg9T47Q",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-391713",
@@ -9057,7 +10710,15 @@
       "source": {
         "csv_title": "Ladybird"
       },
-      "country": "United States of America"
+      "country": "United States of America",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1266791",
@@ -9098,7 +10759,15 @@
       "source": {
         "csv_title": "Alter Ego"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1317149",
@@ -9141,7 +10810,15 @@
       "source": {
         "csv_title": "I Swear (Plus fort que moi)"
       },
-      "country": "United Kingdom"
+      "country": "United Kingdom",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1168719",
@@ -9185,7 +10862,15 @@
       "source": {
         "csv_title": "Silent Friend"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-639988",
@@ -9229,7 +10914,15 @@
       "source": {
         "csv_title": "No other choice"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1376415",
@@ -9274,7 +10967,15 @@
       "source": {
         "csv_title": "L'Affaire Bojarski"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1318335",
@@ -9318,7 +11019,15 @@
       "source": {
         "csv_title": "Les Rayons et les Ombres"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-2767",
@@ -9361,7 +11070,15 @@
       "source": {
         "csv_title": "Les amants du Pont Neuf"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-648878",
@@ -9406,7 +11123,15 @@
       "source": {
         "csv_title": "Eddington"
       },
-      "country": "United States of America"
+      "country": "United States of America",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1001030",
@@ -9448,7 +11173,15 @@
       "source": {
         "csv_title": "Différente"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        0,
+        1
+      ]
     },
     {
       "id": "movie-1096642",
@@ -9489,7 +11222,15 @@
       "source": {
         "csv_title": "L’attachement"
       },
-      "country": "Belgium"
+      "country": "Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1254808",
@@ -9534,7 +11275,15 @@
       "source": {
         "csv_title": "Nouvelle vague"
       },
-      "country": "France · USA"
+      "country": "France · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-1290424",
@@ -9577,7 +11326,15 @@
       "source": {
         "csv_title": "L’inconnu de la grande arche"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1259983",
@@ -9620,7 +11377,15 @@
       "source": {
         "csv_title": "Gourou"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1317288",
@@ -9662,7 +11427,15 @@
       "source": {
         "csv_title": "Marty supreme"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1284460",
@@ -9705,7 +11478,15 @@
       "source": {
         "csv_title": "Alpha"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1137350",
@@ -9750,7 +11531,15 @@
       "source": {
         "csv_title": "The Phoenician Scheme"
       },
-      "country": "USA · Germany"
+      "country": "USA · Germany",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1365378",
@@ -9792,7 +11581,15 @@
       "source": {
         "csv_title": "Le rêve américain"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1352310",
@@ -9834,7 +11631,15 @@
       "source": {
         "csv_title": "Avignon"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-798286",
@@ -9878,7 +11683,15 @@
       "source": {
         "csv_title": "Beau is afraid"
       },
-      "country": "United States of America"
+      "country": "United States of America",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1151272",
@@ -9920,7 +11733,15 @@
       "source": {
         "csv_title": "Sirat"
       },
-      "country": "Spain"
+      "country": "Spain",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-383807",
@@ -9961,7 +11782,15 @@
       "source": {
         "csv_title": "Réparer les vivants"
       },
-      "country": "Belgium"
+      "country": "Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1062722",
@@ -10006,7 +11835,15 @@
       "source": {
         "csv_title": "Frankenstein"
       },
-      "country": "United States of America"
+      "country": "United States of America",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1480382",
@@ -10048,7 +11885,15 @@
       "source": {
         "csv_title": "La voix de Hind Rajab"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1205648",
@@ -10091,7 +11936,15 @@
       "source": {
         "csv_title": "Le roi soleil"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1233506",
@@ -10135,7 +11988,15 @@
       "source": {
         "csv_title": "L’homme qui rétrécit"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-1178464",
@@ -10176,7 +12037,15 @@
       "source": {
         "csv_title": "Cassandre"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1221061",
@@ -10217,7 +12086,15 @@
       "source": {
         "csv_title": "Les échos du passé (Sound of Falling)"
       },
-      "country": "Germany"
+      "country": "Germany",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1114816",
@@ -10258,7 +12135,15 @@
       "source": {
         "csv_title": "L’arbre aux papillons d’or"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        0,
+        0,
+        0,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-933131",
@@ -10303,7 +12188,15 @@
       "source": {
         "csv_title": "Badland Hunters"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-734002",
@@ -10348,7 +12241,15 @@
       "source": {
         "csv_title": "La jeune fille et les paysans"
       },
-      "country": "Poland · Lithuania · Serbia"
+      "country": "Poland · Lithuania · Serbia",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-586940",
@@ -10394,7 +12295,15 @@
       "source": {
         "csv_title": "J’ai perdu mon corps"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        0,
+        1,
+        2,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-559907",
@@ -10439,7 +12348,15 @@
       "source": {
         "csv_title": "The Green Knight"
       },
-      "country": "Canada"
+      "country": "Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-912520",
@@ -10483,7 +12400,15 @@
       "source": {
         "csv_title": "Simple comme Sylvain"
       },
-      "country": "France · Canada"
+      "country": "France · Canada",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1000866",
@@ -10526,7 +12451,15 @@
       "source": {
         "csv_title": "En fanfare"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1003504",
@@ -10568,7 +12501,15 @@
       "source": {
         "csv_title": "On ira"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-334541",
@@ -10609,7 +12550,15 @@
       "source": {
         "csv_title": "Manchester by the sea"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-701387",
@@ -10654,7 +12603,15 @@
       "source": {
         "csv_title": "Bugonia"
       },
-      "country": "Ireland · South Korea · USA · Canada"
+      "country": "Ireland · South Korea · USA · Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-878608",
@@ -10697,7 +12654,15 @@
       "source": {
         "csv_title": "Resurrection"
       },
-      "country": "France · China"
+      "country": "France · China",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1249423",
@@ -10738,7 +12703,15 @@
       "source": {
         "csv_title": "Blackdog"
       },
-      "country": "China"
+      "country": "China",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1242372",
@@ -10783,7 +12756,15 @@
       "source": {
         "csv_title": "Escape from the 21st century"
       },
-      "country": "China"
+      "country": "China",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1221724",
@@ -10825,7 +12806,15 @@
       "source": {
         "csv_title": "Les rêveurs"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        0,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1429348",
@@ -10867,7 +12856,15 @@
       "source": {
         "csv_title": "L’étranger"
       },
-      "country": "France · Belgium · Morocco"
+      "country": "France · Belgium · Morocco",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-961077",
@@ -10909,7 +12906,15 @@
       "source": {
         "csv_title": "La petite dernière"
       },
-      "country": "France · Germany"
+      "country": "France · Germany",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        0,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-804370",
@@ -10953,7 +12958,15 @@
       "source": {
         "csv_title": "Arco"
       },
-      "country": "France · UK · USA"
+      "country": "France · UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        0,
+        2,
+        0,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1456349",
@@ -10998,7 +13011,15 @@
       "source": {
         "csv_title": "Un simple accident"
       },
-      "country": "France · Iran · Luxembourg"
+      "country": "France · Iran · Luxembourg",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-995133",
@@ -11041,7 +13062,14 @@
       "source": {
         "csv_title": "L'Enfant, la Taupe, le Renard et le Cheval"
       },
-      "country": "United Kingdom"
+      "country": "United Kingdom",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1054867",
@@ -11086,7 +13114,15 @@
       "source": {
         "csv_title": "Une bataille après l’autre"
       },
-      "country": "United States of America"
+      "country": "United States of America",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-912480",
@@ -11128,7 +13164,15 @@
       "source": {
         "csv_title": "Les chambres rouges"
       },
-      "country": "Canada"
+      "country": "Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1136867",
@@ -11170,7 +13214,15 @@
       "source": {
         "csv_title": "Materialists"
       },
-      "country": "USA · Finland"
+      "country": "USA · Finland",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1079310",
@@ -11212,7 +13264,15 @@
       "source": {
         "csv_title": "Vingt Dieux"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        0,
+        0,
+        1,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-170",
@@ -11257,7 +13317,15 @@
       "source": {
         "csv_title": "28 jours plus tard"
       },
-      "country": "UK"
+      "country": "UK",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1205515",
@@ -11299,7 +13367,15 @@
       "source": {
         "csv_title": "Sorry, baby"
       },
-      "country": "France · USA · Spain"
+      "country": "France · USA · Spain",
+      "director_gender": 3,
+      "cast_genders": [
+        3,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1367997",
@@ -11340,7 +13416,15 @@
       "source": {
         "csv_title": "Perla"
       },
-      "country": "Austria · Slovakia"
+      "country": "Austria · Slovakia",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        0,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-911430",
@@ -11382,7 +13466,15 @@
       "source": {
         "csv_title": "F1 le film"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-75233",
@@ -11423,7 +13515,15 @@
       "source": {
         "csv_title": "Oslo 31 août"
       },
-      "country": "Norway"
+      "country": "Norway",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1451105",
@@ -11465,7 +13565,15 @@
       "source": {
         "csv_title": "Thelma et Louise"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        0,
+        1
+      ]
     },
     {
       "id": "movie-666277",
@@ -11508,7 +13616,15 @@
       "source": {
         "csv_title": "Past lives"
       },
-      "country": "USA · South Korea"
+      "country": "USA · South Korea",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1001083",
@@ -11553,7 +13669,15 @@
       "source": {
         "csv_title": "Pendant ce temps sur Terre"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1158996",
@@ -11594,7 +13718,15 @@
       "source": {
         "csv_title": "L’histoire de Souleymane"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-973628",
@@ -11638,7 +13770,15 @@
         "csv_title": "A Normal Family"
       },
       "country": "South Korea",
-      "trailer": "https://www.youtube.com/watch?v=o8zKDkPszBg"
+      "trailer": "https://www.youtube.com/watch?v=o8zKDkPszBg",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-682012",
@@ -11681,7 +13821,15 @@
       "source": {
         "csv_title": "Amélie et la métaphysique des tubes"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        0,
+        0,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1106739",
@@ -11723,7 +13871,15 @@
       "source": {
         "csv_title": "Juré n2"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1477279",
@@ -11766,7 +13922,15 @@
       "source": {
         "csv_title": "I love Peru"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1061474",
@@ -11810,7 +13974,15 @@
       "source": {
         "csv_title": "Superman"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-842859",
@@ -11854,7 +14026,15 @@
       "source": {
         "csv_title": "La plus précieuse des marchandises"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-617126",
@@ -11898,7 +14078,15 @@
       "source": {
         "csv_title": "Les 4 Fantastiques"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1313144",
@@ -11939,7 +14127,15 @@
       "source": {
         "csv_title": "L’accident de piano"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1244244",
@@ -11986,7 +14182,15 @@
         "csv_title": "Cloud"
       },
       "country": "Japan",
-      "trailer": "https://www.youtube.com/watch?v=AOXkBPhMIz8"
+      "trailer": "https://www.youtube.com/watch?v=AOXkBPhMIz8",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1448353",
@@ -12030,7 +14234,15 @@
       "source": {
         "csv_title": "Detective Kien : The headless horror"
       },
-      "country": "Vietnam"
+      "country": "Vietnam",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1124566",
@@ -12071,7 +14283,15 @@
       "source": {
         "csv_title": "Valeur sentimentale"
       },
-      "country": "France · Turkey · Norway · Denmark · Sweden · Germany · UK"
+      "country": "France · Turkey · Norway · Denmark · Sweden · Germany · UK",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1114513",
@@ -12115,7 +14335,15 @@
       "source": {
         "csv_title": "Speak no evil (2024)"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1217484",
@@ -12159,7 +14387,15 @@
       "source": {
         "csv_title": "Joli Joli"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1210732",
@@ -12203,7 +14439,15 @@
         "csv_title": "Un ours dans le Jura"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=zfQfUoN6IwM"
+      "trailer": "https://www.youtube.com/watch?v=zfQfUoN6IwM",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "tv-122781",
@@ -12294,7 +14538,15 @@
       "source": {
         "csv_title": "Thunderbolts*"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1056648",
@@ -12336,7 +14588,15 @@
       "source": {
         "csv_title": "Le procès du chien"
       },
-      "country": "France · Switzerland"
+      "country": "France · Switzerland",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1261616",
@@ -12378,7 +14638,15 @@
       "source": {
         "csv_title": "Anges et cie"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1277884",
@@ -12421,7 +14689,15 @@
       "source": {
         "csv_title": "Partir un jour"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1235304",
@@ -12465,7 +14741,15 @@
       "source": {
         "csv_title": "La venue de l’avenir"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-923939",
@@ -12510,7 +14794,15 @@
         "csv_title": "La merveilleuse histoire de Henry Sugar"
       },
       "country": "USA",
-      "trailer": "https://www.youtube.com/watch?v=Hqnpsn5SGfs"
+      "trailer": "https://www.youtube.com/watch?v=Hqnpsn5SGfs",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1018634",
@@ -12554,7 +14846,15 @@
       "source": {
         "csv_title": "Roqya"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        0,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1029955",
@@ -12596,7 +14896,15 @@
       "source": {
         "csv_title": "Kinds of kindness"
       },
-      "country": "Ireland · UK · USA"
+      "country": "Ireland · UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-615453",
@@ -12642,7 +14950,15 @@
       "source": {
         "csv_title": "Ne Zha : birth of the demon child"
       },
-      "country": "China"
+      "country": "China",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-980477",
@@ -12689,7 +15005,15 @@
       "source": {
         "csv_title": "Ne Zha 2"
       },
-      "country": "China"
+      "country": "China",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1103621",
@@ -12730,7 +15054,15 @@
       "source": {
         "csv_title": "Comment devenir riche (grâce à sa grand-mère)"
       },
-      "country": "Thailand"
+      "country": "Thailand",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1000888",
@@ -12772,7 +15104,15 @@
       "source": {
         "csv_title": "Les pistolets en plastiques"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        0,
+        1
+      ]
     },
     {
       "id": "movie-1115379",
@@ -12815,7 +15155,15 @@
       "source": {
         "csv_title": "Only the river flows"
       },
-      "country": "China · Australia"
+      "country": "China · Australia",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1071064",
@@ -12857,7 +15205,15 @@
       "source": {
         "csv_title": "L’amour c’est surcoté"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-994108",
@@ -12901,7 +15257,15 @@
       "source": {
         "csv_title": "All of us strangers (Sans jamais nous connaitre)"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-696506",
@@ -12945,7 +15309,15 @@
         "csv_title": "Mickey 17"
       },
       "country": "USA · UK",
-      "trailer": "https://www.youtube.com/watch?v=9nflOgxkU_c"
+      "trailer": "https://www.youtube.com/watch?v=9nflOgxkU_c",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1013850",
@@ -12987,7 +15359,15 @@
       "source": {
         "csv_title": "A real pain"
       },
-      "country": "Poland · USA"
+      "country": "Poland · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1107215",
@@ -13029,7 +15409,15 @@
       "source": {
         "csv_title": "Ma mère, Dieu et Sylvie Vartan"
       },
-      "country": "France · Canada · USA"
+      "country": "France · Canada · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-426063",
@@ -13073,7 +15461,15 @@
       "source": {
         "csv_title": "Nosferatu"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1155281",
@@ -13118,7 +15514,15 @@
       "source": {
         "csv_title": "Creation of the Gods 2"
       },
-      "country": "China"
+      "country": "China",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1140535",
@@ -13162,7 +15566,15 @@
       "source": {
         "csv_title": "Presence"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-549509",
@@ -13203,7 +15615,15 @@
       "source": {
         "csv_title": "The Brutalist"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1235610",
@@ -13244,7 +15664,15 @@
       "source": {
         "csv_title": "Mercato"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1196470",
@@ -13290,7 +15718,15 @@
       "source": {
         "csv_title": "Survivre (2024)"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-4977",
@@ -13335,7 +15771,15 @@
       "source": {
         "csv_title": "Paprika"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1244492",
@@ -13378,7 +15822,15 @@
       "source": {
         "csv_title": "Look Back"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-974576",
@@ -13420,7 +15872,15 @@
       "source": {
         "csv_title": "Conclave"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-389868",
@@ -13466,7 +15926,15 @@
       "source": {
         "csv_title": "Seoul Station"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1040496",
@@ -13509,7 +15977,15 @@
       "source": {
         "csv_title": "Comme un lundi"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-983012",
@@ -13551,7 +16027,15 @@
       "source": {
         "csv_title": "Les trois fantastiques"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1026227",
@@ -13595,7 +16079,15 @@
       "source": {
         "csv_title": "Il reste encore demain"
       },
-      "country": "Italy"
+      "country": "Italy",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1072269",
@@ -13638,7 +16130,15 @@
       "source": {
         "csv_title": "Le successeur"
       },
-      "country": "France · Belgium · Canada"
+      "country": "France · Belgium · Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-794842",
@@ -13682,7 +16182,15 @@
       "source": {
         "csv_title": "Chronique d'une liaison passagère"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1103678",
@@ -13723,7 +16231,15 @@
       "source": {
         "csv_title": "Leurs enfants après eux"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1145479",
@@ -13767,7 +16283,15 @@
         "csv_title": "Je ne me laisserai plus faire (arte)"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=kvWQW9gFR8U"
+      "trailer": "https://www.youtube.com/watch?v=kvWQW9gFR8U",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "tv-94605",
@@ -13853,7 +16377,15 @@
       "source": {
         "csv_title": "C’est pas moi"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-795775",
@@ -13896,7 +16428,15 @@
       "source": {
         "csv_title": "Le monde après nous"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-823219",
@@ -13936,7 +16476,9 @@
       "source": {
         "csv_title": "Flow"
       },
-      "country": "France · Latvia · Belgium"
+      "country": "France · Latvia · Belgium",
+      "director_gender": 2,
+      "cast_genders": []
     },
     {
       "id": "movie-1137245",
@@ -13980,7 +16522,15 @@
       "source": {
         "csv_title": "Trois amies"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1064213",
@@ -14023,7 +16573,15 @@
       "source": {
         "csv_title": "Anora"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-933260",
@@ -14068,7 +16626,15 @@
         "csv_title": "The substance"
       },
       "country": "France · UK · USA",
-      "trailer": "https://www.youtube.com/watch?v=LbOqfmP-Pb8"
+      "trailer": "https://www.youtube.com/watch?v=LbOqfmP-Pb8",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-930564",
@@ -14112,7 +16678,15 @@
       "source": {
         "csv_title": "Saltburn"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-929590",
@@ -14157,7 +16731,15 @@
         "csv_title": "Civil war"
       },
       "country": "Finland · UK · USA",
-      "trailer": "https://www.youtube.com/watch?v=2P2YQQHaWaU"
+      "trailer": "https://www.youtube.com/watch?v=2P2YQQHaWaU",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1114749",
@@ -14198,7 +16780,15 @@
       "source": {
         "csv_title": "L’esprit Coubertin"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        0,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1126692",
@@ -14241,7 +16831,15 @@
       "source": {
         "csv_title": "Ni chaines ni maitres"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        0,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1063574",
@@ -14284,7 +16882,15 @@
       "source": {
         "csv_title": "Miséricorde"
       },
-      "country": "France · Portugal · Spain"
+      "country": "France · Portugal · Spain",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1001684",
@@ -14327,7 +16933,15 @@
       "source": {
         "csv_title": "Niki"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-889737",
@@ -14370,7 +16984,15 @@
       "source": {
         "csv_title": "Joker : folie à deux"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-959604",
@@ -14415,7 +17037,15 @@
       "source": {
         "csv_title": "L'amour ouf"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1102938",
@@ -14457,7 +17087,15 @@
       "source": {
         "csv_title": "Le roman de Jim"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1001311",
@@ -14499,7 +17137,15 @@
       "source": {
         "csv_title": "Sous la Seine"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1023922",
@@ -14541,7 +17187,15 @@
       "source": {
         "csv_title": "Maxxxine"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1001274",
@@ -14584,7 +17238,15 @@
       "source": {
         "csv_title": "La nuit se traîne"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-929831",
@@ -14630,7 +17292,15 @@
       "source": {
         "csv_title": "L’empire"
       },
-      "country": "France · Belgium · Germany · Italy · Portugal"
+      "country": "France · Belgium · Germany · Italy · Portugal",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-1084736",
@@ -14674,7 +17344,15 @@
       "source": {
         "csv_title": "Le comte de Monte-Christo"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-856289",
@@ -14719,7 +17397,15 @@
       "source": {
         "csv_title": "Creation of the gods 1"
       },
-      "country": "China"
+      "country": "China",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-729854",
@@ -14763,7 +17449,15 @@
       "source": {
         "csv_title": "Concrete Utopia"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-839369",
@@ -14804,7 +17498,15 @@
       "source": {
         "csv_title": "May December"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-786892",
@@ -14849,7 +17551,15 @@
       "source": {
         "csv_title": "Furiosa : une saga Mad Max"
       },
-      "country": "Australia · USA"
+      "country": "Australia · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1152014",
@@ -14891,7 +17601,15 @@
       "source": {
         "csv_title": "Un p’tit truc en plus"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-9323",
@@ -14935,7 +17653,15 @@
       "source": {
         "csv_title": "Ghost in the shell"
       },
-      "country": "Japan · UK"
+      "country": "Japan · UK",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1158416",
@@ -14978,7 +17704,15 @@
       "source": {
         "csv_title": "En attendant la nuit"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 0,
+      "cast_genders": [
+        0,
+        1,
+        2,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-948549",
@@ -15022,7 +17756,15 @@
       "source": {
         "csv_title": "Love lies bleeding"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1022789",
@@ -15066,7 +17808,15 @@
       "source": {
         "csv_title": "Vice Versa 2"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-49049",
@@ -15110,7 +17860,15 @@
       "source": {
         "csv_title": "Dredd"
       },
-      "country": "South Africa · UK · USA · India"
+      "country": "South Africa · UK · USA · India",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-944401",
@@ -15155,7 +17913,15 @@
         "csv_title": "Dogman (Luc Besson)"
       },
       "country": "France · USA",
-      "trailer": "https://www.youtube.com/watch?v=HgDLUREgLbs"
+      "trailer": "https://www.youtube.com/watch?v=HgDLUREgLbs",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-972118",
@@ -15199,7 +17965,15 @@
       "source": {
         "csv_title": "Le Procès Goldman"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-942881",
@@ -15246,7 +18020,15 @@
       "source": {
         "csv_title": "Le château solitaire dans le miroir"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-680531",
@@ -15291,7 +18073,15 @@
       "source": {
         "csv_title": "Le bal des folles"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-965890",
@@ -15336,7 +18126,15 @@
       "source": {
         "csv_title": "Vincent doit mourir"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-523936",
@@ -15381,7 +18179,15 @@
       "source": {
         "csv_title": "Méandre"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-960044",
@@ -15424,7 +18230,15 @@
       "source": {
         "csv_title": "Une affaire d'honneur"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-753342",
@@ -15468,7 +18282,15 @@
       "source": {
         "csv_title": "Napoléon"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1161108",
@@ -15511,7 +18333,15 @@
         "csv_title": "Le deuxième acte"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=7aiYYA7o6_0"
+      "trailer": "https://www.youtube.com/watch?v=7aiYYA7o6_0",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-937287",
@@ -15555,7 +18385,15 @@
         "csv_title": "Challengers"
       },
       "country": "Italy · USA",
-      "trailer": "https://www.youtube.com/watch?v=mwo4Sg_0g78"
+      "trailer": "https://www.youtube.com/watch?v=mwo4Sg_0g78",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-859235",
@@ -15599,7 +18437,15 @@
       "source": {
         "csv_title": "Coup de chance"
       },
-      "country": "France · UK · USA"
+      "country": "France · UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1011985",
@@ -15647,7 +18493,15 @@
       "source": {
         "csv_title": "Kung Fu Panda 4"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1216452",
@@ -15688,7 +18542,15 @@
       "source": {
         "csv_title": "Heureux gagnants"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-964877",
@@ -15730,7 +18592,15 @@
       "source": {
         "csv_title": "Nous, Les Leroy"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-560016",
@@ -15772,7 +18642,15 @@
       "source": {
         "csv_title": "Monkey Man"
       },
-      "country": "Canada · Singapore · USA"
+      "country": "Canada · Singapore · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-667717",
@@ -15820,7 +18698,15 @@
       "source": {
         "csv_title": "Le royaume des abysses"
       },
-      "country": "China"
+      "country": "China",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        0,
+        1
+      ]
     },
     {
       "id": "movie-693134",
@@ -15864,7 +18750,15 @@
       "source": {
         "csv_title": "Dune 2"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-989224",
@@ -15906,7 +18800,15 @@
       "source": {
         "csv_title": "Toni, en famille"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-467244",
@@ -15949,7 +18851,15 @@
       "source": {
         "csv_title": "The Zone of Interest"
       },
-      "country": "USA · Poland · UK"
+      "country": "USA · Poland · UK",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-957608",
@@ -15992,7 +18902,15 @@
       "source": {
         "csv_title": "Chien de la casse"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1045770",
@@ -16036,7 +18954,15 @@
       "source": {
         "csv_title": "Daaaaaali !"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1257407",
@@ -16077,7 +19003,15 @@
       "source": {
         "csv_title": "When the light breaks"
       },
-      "country": "France · Croatia · Iceland · Netherlands"
+      "country": "France · Croatia · Iceland · Netherlands",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        0,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-782",
@@ -16123,7 +19057,15 @@
       "source": {
         "csv_title": "Bienvenue à Gattaca"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-852046",
@@ -16169,7 +19111,15 @@
       "source": {
         "csv_title": "Athena"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-747188",
@@ -16212,7 +19162,15 @@
       "source": {
         "csv_title": "Asteroid City"
       },
-      "country": "USA · Germany"
+      "country": "USA · Germany",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-787699",
@@ -16255,7 +19213,15 @@
       "source": {
         "csv_title": "Wonka"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-845111",
@@ -16300,7 +19266,15 @@
       "source": {
         "csv_title": "Les Trois Mousquetaires : Milady"
       },
-      "country": "France · Germany · Spain · Belgium"
+      "country": "France · Germany · Spain · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-1063879",
@@ -16342,7 +19316,15 @@
       "source": {
         "csv_title": "Vermines"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-792307",
@@ -16386,7 +19368,15 @@
       "source": {
         "csv_title": "Pauvres créatures / Poor thing"
       },
-      "country": "Ireland · UK · USA"
+      "country": "Ireland · UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-940721",
@@ -16430,7 +19420,15 @@
       "source": {
         "csv_title": "Godzilla minus one"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-995767",
@@ -16473,7 +19471,15 @@
       "source": {
         "csv_title": "Omar la fraise"
       },
-      "country": "France · Algeria"
+      "country": "France · Algeria",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        0,
+        0,
+        0
+      ]
     },
     {
       "id": "movie-194662",
@@ -16516,7 +19522,15 @@
       "source": {
         "csv_title": "Birdman"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-487558",
@@ -16561,7 +19575,15 @@
       "source": {
         "csv_title": "Blackkklansman"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-949903",
@@ -16605,7 +19627,15 @@
       "source": {
         "csv_title": "Apaches"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-38142",
@@ -16650,7 +19680,15 @@
       "source": {
         "csv_title": "5 centimètres par seconde"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-976893",
@@ -16691,7 +19729,15 @@
       "source": {
         "csv_title": "Perfect days"
       },
-      "country": "Germany · Japan"
+      "country": "Germany · Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-978035",
@@ -16732,7 +19778,15 @@
       "source": {
         "csv_title": "Bâtiment 5"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-843843",
@@ -16772,7 +19826,12 @@
       "source": {
         "csv_title": "Soudain seuls"
       },
-      "country": "France · Belgium · Iceland"
+      "country": "France · Belgium · Iceland",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1
+      ]
     },
     {
       "id": "movie-381283",
@@ -16815,7 +19874,15 @@
       "source": {
         "csv_title": "Mother !"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-976830",
@@ -16859,7 +19926,15 @@
       "source": {
         "csv_title": "Gueules noires"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-962309",
@@ -16900,7 +19975,15 @@
       "source": {
         "csv_title": "Second Tour"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-466420",
@@ -16946,7 +20029,15 @@
       "source": {
         "csv_title": "Killers of the flower moon"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        3,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-508883",
@@ -16993,7 +20084,15 @@
         "csv_title": "Le garçon et le héron"
       },
       "country": "Japan",
-      "trailer": "https://www.youtube.com/watch?v=Q2aTi0BQXek"
+      "trailer": "https://www.youtube.com/watch?v=Q2aTi0BQXek",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-586810",
@@ -17037,7 +20136,15 @@
       "source": {
         "csv_title": "Mars express"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1001245",
@@ -17078,7 +20185,15 @@
       "source": {
         "csv_title": "La Vénus d'argent"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-16306",
@@ -17121,7 +20236,15 @@
       "source": {
         "csv_title": "La Planète Sauvage"
       },
-      "country": "France · Czechoslovakia"
+      "country": "France · Czechoslovakia",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        0,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-412656",
@@ -17166,7 +20289,15 @@
         "csv_title": "Chaos Walking"
       },
       "country": "USA · Canada · Hong Kong · Luxembourg",
-      "trailer": "https://www.youtube.com/watch?v=e86BAQ1MiMg"
+      "trailer": "https://www.youtube.com/watch?v=e86BAQ1MiMg",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-103",
@@ -17209,7 +20340,15 @@
       "source": {
         "csv_title": "Taxi Driver"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-965150",
@@ -17250,7 +20389,15 @@
       "source": {
         "csv_title": "Aftersun"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-493529",
@@ -17295,7 +20442,15 @@
         "csv_title": "Donjons & Dragons"
       },
       "country": "Canada · USA",
-      "trailer": "https://www.youtube.com/watch?v=Cp-qzSnUMyQ"
+      "trailer": "https://www.youtube.com/watch?v=Cp-qzSnUMyQ",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-480647",
@@ -17336,7 +20491,15 @@
       "source": {
         "csv_title": "Le portrait interdit"
       },
-      "country": "France · China"
+      "country": "France · China",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-670292",
@@ -17380,7 +20543,15 @@
         "csv_title": "The creator"
       },
       "country": "Canada · USA",
-      "trailer": "https://www.youtube.com/watch?v=nW3bhlCTVj4"
+      "trailer": "https://www.youtube.com/watch?v=nW3bhlCTVj4",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-965791",
@@ -17421,7 +20592,15 @@
       "source": {
         "csv_title": "Une année difficile"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-943134",
@@ -17465,7 +20644,15 @@
       "source": {
         "csv_title": "Le règne animal"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-925943",
@@ -17507,7 +20694,15 @@
       "source": {
         "csv_title": "Saint Omer"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-863442",
@@ -17549,7 +20744,15 @@
         "csv_title": "Une Révision"
       },
       "country": "Canada",
-      "trailer": "https://www.youtube.com/watch?v=S_thlz7Fi_Y"
+      "trailer": "https://www.youtube.com/watch?v=S_thlz7Fi_Y",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-911345",
@@ -17594,7 +20797,15 @@
       "source": {
         "csv_title": "Viking"
       },
-      "country": "Canada"
+      "country": "Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-308266",
@@ -17637,7 +20848,15 @@
       "source": {
         "csv_title": "War Dogs"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-715253",
@@ -17680,7 +20899,15 @@
       "source": {
         "csv_title": "Phantom"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-818721",
@@ -17722,7 +20949,15 @@
       "source": {
         "csv_title": "Visions"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-915935",
@@ -17765,7 +21000,15 @@
       "source": {
         "csv_title": "Anatomie d'une chute"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-888003",
@@ -17808,7 +21051,15 @@
       "source": {
         "csv_title": "Le livre des solutions"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-934506",
@@ -17850,7 +21101,15 @@
       "source": {
         "csv_title": "Un Métier Sérieux"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-4553",
@@ -17893,7 +21152,15 @@
       "source": {
         "csv_title": "The Machinist"
       },
-      "country": "Spain"
+      "country": "Spain",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-283366",
@@ -17940,7 +21207,15 @@
         "csv_title": "Miss Peregrine et Les Enfants Particuliers"
       },
       "country": "USA · UK · Belgium · Canada",
-      "trailer": "https://www.youtube.com/watch?v=n2W8JddwcuI"
+      "trailer": "https://www.youtube.com/watch?v=n2W8JddwcuI",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-376867",
@@ -17981,7 +21256,15 @@
       "source": {
         "csv_title": "Moonlight"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        3,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-712123",
@@ -18026,7 +21309,15 @@
       "source": {
         "csv_title": "Teddy"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        0,
+        1,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-585831",
@@ -18070,7 +21361,15 @@
       "source": {
         "csv_title": "The Bad Guys"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-180299",
@@ -18113,7 +21412,15 @@
       "source": {
         "csv_title": "The Raid 2"
       },
-      "country": "Indonesia · USA"
+      "country": "Indonesia · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1110358",
@@ -18156,7 +21463,15 @@
       "source": {
         "csv_title": "Yannick"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-783675",
@@ -18199,7 +21514,15 @@
       "source": {
         "csv_title": "The first Slam Dunk"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-98566",
@@ -18245,7 +21568,15 @@
         "csv_title": "Les tortues ninjas"
       },
       "country": "USA",
-      "trailer": "https://www.youtube.com/watch?v=aka3_33dPCw"
+      "trailer": "https://www.youtube.com/watch?v=aka3_33dPCw",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-958854",
@@ -18287,7 +21618,15 @@
       "source": {
         "csv_title": "Sur la branche"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-985617",
@@ -18329,7 +21668,15 @@
       "source": {
         "csv_title": "Reality"
       },
-      "country": "USA · UK"
+      "country": "USA · UK",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-565770",
@@ -18373,7 +21720,15 @@
       "source": {
         "csv_title": "Blue Beetle"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-989593",
@@ -18414,7 +21769,15 @@
       "source": {
         "csv_title": "La voie royale"
       },
-      "country": "France · Switzerland"
+      "country": "France · Switzerland",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-980489",
@@ -18457,7 +21820,15 @@
       "source": {
         "csv_title": "Gran Turismo"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-258363",
@@ -18499,7 +21870,15 @@
       "source": {
         "csv_title": "Desierto"
       },
-      "country": "France · Mexico · USA"
+      "country": "France · Mexico · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-13",
@@ -18543,7 +21922,15 @@
       "source": {
         "csv_title": "Forrest Gump"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-501395",
@@ -18589,7 +21976,15 @@
         "csv_title": "Gang Kelly"
       },
       "country": "France · Australia · UK",
-      "trailer": "https://www.youtube.com/watch?v=yFrXxXcw89E"
+      "trailer": "https://www.youtube.com/watch?v=yFrXxXcw89E",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-726888",
@@ -18632,7 +22027,15 @@
       "source": {
         "csv_title": "Heartbeast (Pulse)"
       },
-      "country": "France · Finland · Germany"
+      "country": "France · Finland · Germany",
+      "director_gender": 1,
+      "cast_genders": [
+        3,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-781099",
@@ -18673,7 +22076,15 @@
       "source": {
         "csv_title": "Inexorable"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-979",
@@ -18717,7 +22128,15 @@
       "source": {
         "csv_title": "Irréversible"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-669654",
@@ -18758,7 +22177,15 @@
       "source": {
         "csv_title": "La Ruche"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-927944",
@@ -18800,7 +22227,15 @@
       "source": {
         "csv_title": "Le Soleil de Trop Près"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-820697",
@@ -18844,7 +22279,15 @@
       "source": {
         "csv_title": "Les Cinq Diables"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        0,
+        0,
+        1
+      ]
     },
     {
       "id": "movie-292431",
@@ -18888,7 +22331,15 @@
         "csv_title": "Love"
       },
       "country": "France · Belgium · Brazil",
-      "trailer": "https://www.youtube.com/watch?v=VE6JgargIiY"
+      "trailer": "https://www.youtube.com/watch?v=VE6JgargIiY",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1500779",
@@ -18928,7 +22379,12 @@
       "source": {
         "csv_title": "Lux Aeterna"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        0,
+        0
+      ]
     },
     {
       "id": "movie-712124",
@@ -18971,7 +22427,15 @@
       "source": {
         "csv_title": "Médecin de Nuit"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-508479",
@@ -19013,7 +22477,15 @@
       "source": {
         "csv_title": "De l’Or Pour Les Chiens"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        0,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-976573",
@@ -19062,7 +22534,15 @@
         "csv_title": "Élémentaire"
       },
       "country": "USA",
-      "trailer": "https://www.youtube.com/watch?v=C_oyIKvo5_A"
+      "trailer": "https://www.youtube.com/watch?v=C_oyIKvo5_A",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-346698",
@@ -19106,7 +22586,15 @@
         "csv_title": "Barbie"
       },
       "country": "UK · USA",
-      "trailer": "https://www.youtube.com/watch?v=yK1rMPQ2jBw"
+      "trailer": "https://www.youtube.com/watch?v=yK1rMPQ2jBw",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-872585",
@@ -19148,7 +22636,15 @@
       "source": {
         "csv_title": "Oppenheimer"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-901121",
@@ -19190,7 +22686,15 @@
       "source": {
         "csv_title": "Ca tourne à Seoul !"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1000079",
@@ -19232,7 +22736,15 @@
       "source": {
         "csv_title": "Pourquoi tu souris ?"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-691214",
@@ -19274,7 +22786,15 @@
       "source": {
         "csv_title": "Pacifiction"
       },
-      "country": "France · French Polynesia · Germany · Portugal · Spain"
+      "country": "France · French Polynesia · Germany · Portugal · Spain",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-843",
@@ -19317,7 +22837,15 @@
       "source": {
         "csv_title": "In The Mood For Love"
       },
-      "country": "France · Hong Kong"
+      "country": "France · Hong Kong",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-116149",
@@ -19362,7 +22890,15 @@
         "csv_title": "Paddington 1"
       },
       "country": "France · UK",
-      "trailer": "https://www.youtube.com/watch?v=iAiMhMSebeU"
+      "trailer": "https://www.youtube.com/watch?v=iAiMhMSebeU",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-346648",
@@ -19407,7 +22943,15 @@
         "csv_title": "Paddington 2"
       },
       "country": "France · UK",
-      "trailer": "https://www.youtube.com/watch?v=kUMDzEpE_ok"
+      "trailer": "https://www.youtube.com/watch?v=kUMDzEpE_ok",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-569094",
@@ -19453,7 +22997,15 @@
       "source": {
         "csv_title": "Spider-Man: Across the Spider-Verse"
       },
-      "country": "United States of America"
+      "country": "United States of America",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-298618",
@@ -19497,7 +23049,15 @@
       "source": {
         "csv_title": "Flash"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        3,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-447365",
@@ -19542,7 +23102,15 @@
       "source": {
         "csv_title": "Les gardiens de la galaxie 3"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-959092",
@@ -19585,7 +23153,15 @@
       "source": {
         "csv_title": "Farang"
       },
-      "country": "France · Thailand"
+      "country": "France · Thailand",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-952701",
@@ -19626,7 +23202,15 @@
       "source": {
         "csv_title": "Retour à Seoul"
       },
-      "country": "France · Belgium · Cambodia · Germany · Romania · South Korea"
+      "country": "France · Belgium · Cambodia · Germany · Romania · South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-958161",
@@ -19670,7 +23254,15 @@
       "source": {
         "csv_title": "La Dernière Reine"
       },
-      "country": "France · Algeria · Qatar · Saudi Arabia · Taiwan"
+      "country": "France · Algeria · Qatar · Saudi Arabia · Taiwan",
+      "director_gender": 2,
+      "cast_genders": [
+        0,
+        2,
+        2,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-923344",
@@ -19713,7 +23305,15 @@
       "source": {
         "csv_title": "About Kim Sohee"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-957606",
@@ -19754,7 +23354,15 @@
       "source": {
         "csv_title": "Le Jeune Imame"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        0,
+        0,
+        0,
+        1
+      ]
     },
     {
       "id": "movie-331482",
@@ -19797,7 +23405,15 @@
       "source": {
         "csv_title": "Les Filles du Dr March"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-788030",
@@ -19839,7 +23455,15 @@
       "source": {
         "csv_title": "Umami"
       },
-      "country": "France · Japan"
+      "country": "France · Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-545611",
@@ -19884,7 +23508,15 @@
       "source": {
         "csv_title": "Everything Everywhere All at Once"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-888082",
@@ -19926,7 +23558,15 @@
         "csv_title": "Sur les Chemins Noirs"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=9KTOLsuFUBQ"
+      "trailer": "https://www.youtube.com/watch?v=9KTOLsuFUBQ",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1000492",
@@ -19967,7 +23607,15 @@
       "source": {
         "csv_title": "Je Verrai Toujours Vos Visages"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-974561",
@@ -20010,7 +23658,15 @@
         "csv_title": "Bonne Conduite"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=JQgHPYMbAKk"
+      "trailer": "https://www.youtube.com/watch?v=JQgHPYMbAKk",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-502356",
@@ -20057,7 +23713,15 @@
       "source": {
         "csv_title": "Super Mario Bros"
       },
-      "country": "Japan · USA"
+      "country": "Japan · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-796185",
@@ -20102,7 +23766,15 @@
       "source": {
         "csv_title": "Les Trois Mousquetaires"
       },
-      "country": "France · Belgium · Germany · Spain"
+      "country": "France · Belgium · Germany · Spain",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-916224",
@@ -20148,7 +23820,15 @@
       "source": {
         "csv_title": "Suzume"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-984307",
@@ -20189,7 +23869,15 @@
       "source": {
         "csv_title": "Les Complices"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1009116",
@@ -20231,7 +23919,15 @@
       "source": {
         "csv_title": "Une Histoire d’Amour"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-605886",
@@ -20275,7 +23971,15 @@
       "source": {
         "csv_title": "Misanthrope"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-674324",
@@ -20318,7 +24022,15 @@
       "source": {
         "csv_title": "The Banshees of Inisherin"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-497828",
@@ -20361,7 +24073,15 @@
       "source": {
         "csv_title": "Triangle of Sadness (Sans Filtres)"
       },
-      "country": "France · Denmark · Germany · Greece · Mexico · Sweden · Switzerland · Turkey · UK · USA"
+      "country": "France · Denmark · Germany · Greece · Mexico · Sweden · Switzerland · Turkey · UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-967585",
@@ -20403,7 +24123,15 @@
       "source": {
         "csv_title": "Alibi . com 2"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-804095",
@@ -20445,7 +24173,15 @@
         "csv_title": "The Fabelmans"
       },
       "country": "USA",
-      "trailer": "https://www.youtube.com/watch?v=He4maFN1wGQ"
+      "trailer": "https://www.youtube.com/watch?v=He4maFN1wGQ",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-977506",
@@ -20490,7 +24226,15 @@
       "source": {
         "csv_title": "Mon Crime"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-785084",
@@ -20531,7 +24275,15 @@
       "source": {
         "csv_title": "The Whale"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-944306",
@@ -20573,7 +24325,15 @@
       "source": {
         "csv_title": "En Plein Feu"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        0,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-800301",
@@ -20615,7 +24375,15 @@
       "source": {
         "csv_title": "Et l’Amour Dans Tout ça ?"
       },
-      "country": "France · UK"
+      "country": "France · UK",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-926893",
@@ -20656,7 +24424,15 @@
       "source": {
         "csv_title": "Houria"
       },
-      "country": "France · Algeria"
+      "country": "France · Algeria",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-603692",
@@ -20699,7 +24475,15 @@
       "source": {
         "csv_title": "John Wick 4"
       },
-      "country": "Germany · USA"
+      "country": "Germany · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-989672",
@@ -20742,7 +24526,15 @@
       "source": {
         "csv_title": "L’amour et les forêts"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-925714",
@@ -20786,7 +24578,15 @@
       "source": {
         "csv_title": "La Syndicaliste"
       },
-      "country": "France · Germany"
+      "country": "France · Germany",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-615777",
@@ -20829,7 +24629,15 @@
       "source": {
         "csv_title": "Babylon"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-586393",
@@ -20871,7 +24679,15 @@
       "source": {
         "csv_title": "La famille Asada"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-967874",
@@ -20918,7 +24734,15 @@
         "csv_title": "Tirailleurs"
       },
       "country": "France · Senegal",
-      "trailer": "https://www.youtube.com/watch?v=7VMY0nf2fDM"
+      "trailer": "https://www.youtube.com/watch?v=7VMY0nf2fDM",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        0
+      ]
     },
     {
       "id": "movie-490132",
@@ -20962,7 +24786,15 @@
       "source": {
         "csv_title": "Green Book"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-833384",
@@ -21006,7 +24838,15 @@
         "csv_title": "L’Année du Requin"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=nz7ssftxw4I"
+      "trailer": "https://www.youtube.com/watch?v=nz7ssftxw4I",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-807862",
@@ -21048,7 +24888,15 @@
       "source": {
         "csv_title": "Peter Von Kant"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-438631",
@@ -21091,7 +24939,15 @@
       "source": {
         "csv_title": "Dune"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-811596",
@@ -21133,7 +24989,15 @@
       "source": {
         "csv_title": "Notre-Dame Brûle"
       },
-      "country": "France · Italy"
+      "country": "France · Italy",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-771077",
@@ -21176,7 +25040,15 @@
       "source": {
         "csv_title": "En Corps"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-633844",
@@ -21223,7 +25095,15 @@
         "csv_title": "Le Roi Cerf"
       },
       "country": "Japan",
-      "trailer": "https://www.youtube.com/watch?v=whRYWupTLUo"
+      "trailer": "https://www.youtube.com/watch?v=whRYWupTLUo",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-852438",
@@ -21266,7 +25146,15 @@
       "source": {
         "csv_title": "Coupez !"
       },
-      "country": "France · Japan · USA · UK"
+      "country": "France · Japan · USA · UK",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-735697",
@@ -21309,7 +25197,15 @@
       "source": {
         "csv_title": "Incroyable Mais Vrai"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-682507",
@@ -21352,7 +25248,15 @@
       "source": {
         "csv_title": "Là Où Chantent Les Ecrevisses"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-810389",
@@ -21395,7 +25299,15 @@
       "source": {
         "csv_title": "Le Visiteur du Futur"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        0,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-823951",
@@ -21440,7 +25352,15 @@
         "csv_title": "Novembre"
       },
       "country": "France · Belgium",
-      "trailer": "https://www.youtube.com/watch?v=J6sEwKbMdHw"
+      "trailer": "https://www.youtube.com/watch?v=J6sEwKbMdHw",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-538675",
@@ -21483,7 +25403,15 @@
       "source": {
         "csv_title": "Bêtes Blondes"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        0,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-637534",
@@ -21528,7 +25456,15 @@
         "csv_title": "Bac Nord"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=iyVLnChTs8w"
+      "trailer": "https://www.youtube.com/watch?v=iyVLnChTs8w",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-335984",
@@ -21571,7 +25507,15 @@
       "source": {
         "csv_title": "Blade Runner 2049"
       },
-      "country": "Canada · UK · USA"
+      "country": "Canada · UK · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-487437",
@@ -21613,7 +25557,15 @@
       "source": {
         "csv_title": "Blanche Comme Neige"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-712178",
@@ -21655,7 +25607,15 @@
       "source": {
         "csv_title": "Gagarine"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        0,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-661229",
@@ -21697,7 +25657,15 @@
       "source": {
         "csv_title": "Garçon Chiffon"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-471506",
@@ -21740,7 +25708,15 @@
       "source": {
         "csv_title": "Greta"
       },
-      "country": "USA · Ireland · South Korea · Hong Kong"
+      "country": "USA · Ireland · South Korea · Hong Kong",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-475557",
@@ -21784,7 +25760,15 @@
         "csv_title": "Joker"
       },
       "country": "Canada · USA",
-      "trailer": "https://www.youtube.com/watch?v=_LUWnjT3iks"
+      "trailer": "https://www.youtube.com/watch?v=_LUWnjT3iks",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-595975",
@@ -21827,7 +25811,15 @@
       "source": {
         "csv_title": "La Belle Epoque"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-585093",
@@ -21869,7 +25861,15 @@
       "source": {
         "csv_title": "L’Angle Mort"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 0,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-572509",
@@ -21911,7 +25911,15 @@
       "source": {
         "csv_title": "Le Rire"
       },
-      "country": "Canada"
+      "country": "Canada",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-661935",
@@ -21954,7 +25962,15 @@
       "source": {
         "csv_title": "Les Choses qu’on Dit, Les Choses qu’on Fait"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-737413",
@@ -21996,7 +26012,15 @@
         "csv_title": "Les Cobayes"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=laW1I-WvFPg"
+      "trailer": "https://www.youtube.com/watch?v=laW1I-WvFPg",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-877957",
@@ -22042,7 +26066,15 @@
         "csv_title": "Les Murs Vagabonds"
       },
       "country": "Japan",
-      "trailer": "https://www.youtube.com/watch?v=lWkXT6HxKjg"
+      "trailer": "https://www.youtube.com/watch?v=lWkXT6HxKjg",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-399019",
@@ -22085,7 +26117,15 @@
       "source": {
         "csv_title": "Les Proies"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-475928",
@@ -22130,7 +26170,15 @@
         "csv_title": "L’Heure de la Sortie"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=o38tzw-seBk"
+      "trailer": "https://www.youtube.com/watch?v=o38tzw-seBk",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-504585",
@@ -22173,7 +26221,15 @@
       "source": {
         "csv_title": "Little Joe"
       },
-      "country": "Austria · Germany · UK"
+      "country": "Austria · Germany · UK",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-387426",
@@ -22219,7 +26275,15 @@
         "csv_title": "Okja"
       },
       "country": "South Korea · USA",
-      "trailer": "https://www.youtube.com/watch?v=rj76a-EY31k"
+      "trailer": "https://www.youtube.com/watch?v=rj76a-EY31k",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-466272",
@@ -22264,7 +26328,15 @@
         "csv_title": "Once Upon a Time… In Hollywood"
       },
       "country": "China · UK · USA",
-      "trailer": "https://www.youtube.com/watch?v=RbMJJHCH5oc"
+      "trailer": "https://www.youtube.com/watch?v=RbMJJHCH5oc",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-496243",
@@ -22309,7 +26381,15 @@
       "source": {
         "csv_title": "Parasite"
       },
-      "country": "South Korea"
+      "country": "South Korea",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-581392",
@@ -22355,7 +26435,15 @@
         "csv_title": "Peninsula"
       },
       "country": "South Korea",
-      "trailer": "https://www.youtube.com/watch?v=9l0sxIyNP0w"
+      "trailer": "https://www.youtube.com/watch?v=9l0sxIyNP0w",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-531428",
@@ -22398,7 +26486,15 @@
       "source": {
         "csv_title": "Portrait de la Jeune Fille en Feu"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-749087",
@@ -22440,7 +26536,15 @@
         "csv_title": "Profession du Père"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=iS1Pv2GTI2g"
+      "trailer": "https://www.youtube.com/watch?v=iS1Pv2GTI2g",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        0,
+        2
+      ]
     },
     {
       "id": "movie-8051",
@@ -22483,7 +26587,15 @@
       "source": {
         "csv_title": "Punch Drunk Love"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-619264",
@@ -22529,7 +26641,15 @@
         "csv_genres": [
           "Thriller"
         ]
-      }
+      },
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-281957",
@@ -22572,7 +26692,15 @@
       "source": {
         "csv_title": "The Revenant"
       },
-      "country": "Canada · Hong Kong · Taiwan · USA"
+      "country": "Canada · Hong Kong · Taiwan · USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-244786",
@@ -22615,7 +26743,15 @@
       "source": {
         "csv_title": "Whiplash"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-372058",
@@ -22660,7 +26796,15 @@
       "source": {
         "csv_title": "Your Name"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-660000",
@@ -22704,7 +26848,15 @@
       "source": {
         "csv_title": "Illusions Perdues"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-424277",
@@ -22747,7 +26899,15 @@
       "source": {
         "csv_title": "Annette"
       },
-      "country": "France · Belgium · Germany · Greece · Japan · Mexico · Switzerland"
+      "country": "France · Belgium · Germany · Greece · Japan · Mexico · Switzerland",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-925102",
@@ -22790,7 +26950,15 @@
       "source": {
         "csv_title": "La Nuit du 12"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-919573",
@@ -22834,7 +27002,15 @@
         "csv_title": "L’Innocent"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=fPIEpTc64Vw"
+      "trailer": "https://www.youtube.com/watch?v=fPIEpTc64Vw",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-833417",
@@ -22875,7 +27051,15 @@
       "source": {
         "csv_title": "A Plein Temps"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-848685",
@@ -22918,7 +27102,15 @@
       "source": {
         "csv_title": "As Bestas"
       },
-      "country": "France · Spain"
+      "country": "France · Spain",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-851303",
@@ -22961,7 +27153,15 @@
       "source": {
         "csv_title": "En attendant Bojangles"
       },
-      "country": "France · Belgium"
+      "country": "France · Belgium",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
     },
     {
       "id": "movie-964960",
@@ -23005,7 +27205,15 @@
         "csv_title": "La passion de Dodin Bouffant"
       },
       "country": "France · Belgium",
-      "trailer": "https://www.youtube.com/watch?v=Ag_KaIQ5_TE"
+      "trailer": "https://www.youtube.com/watch?v=Ag_KaIQ5_TE",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "tv-5895",
@@ -23087,7 +27295,15 @@
       "source": {
         "csv_title": "Nomadland"
       },
-      "country": "USA"
+      "country": "USA",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-858024",
@@ -23128,7 +27344,15 @@
       "source": {
         "csv_title": "Hamnet"
       },
-      "country": "UK · USA"
+      "country": "UK · USA",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1159206",
@@ -23168,7 +27392,15 @@
       "source": {
         "csv_title": "Father Mother Sister Brother"
       },
-      "country": "France · USA · Ireland · Italy · Germany · UK"
+      "country": "France · USA · Ireland · Italy · Germany · UK",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1290436",
@@ -23208,7 +27440,15 @@
         "csv_title": "Ma frère"
       },
       "country": "France",
-      "trailer": "https://www.youtube.com/watch?v=53BgM9euEOQ"
+      "trailer": "https://www.youtube.com/watch?v=53BgM9euEOQ",
+      "director_gender": 0,
+      "cast_genders": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ]
     },
     {
       "id": "movie-1294698",
@@ -23248,7 +27488,15 @@
       "source": {
         "csv_title": "Dossier 137"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1430820",
@@ -23287,7 +27535,15 @@
       "source": {
         "csv_title": "A pied d'oeuvre"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 1,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1019871",
@@ -23327,7 +27583,15 @@
       "source": {
         "csv_title": "Little Trouble Girls"
       },
-      "country": "Croatia · Slovenia · Serbia · Italy"
+      "country": "Croatia · Slovenia · Serbia · Italy",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-1278263",
@@ -23368,7 +27632,15 @@
       "source": {
         "csv_title": "Les graines du figuier sauvage"
       },
-      "country": "France · Germany"
+      "country": "France · Germany",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-16642",
@@ -23409,7 +27681,15 @@
         "csv_title": "Les moissons du ciel"
       },
       "country": "USA",
-      "trailer": "https://www.youtube.com/watch?v=CQthI9l2BYk"
+      "trailer": "https://www.youtube.com/watch?v=CQthI9l2BYk",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1018",
@@ -23451,7 +27731,15 @@
         "csv_title": "Mulholland Drive"
       },
       "country": "France · USA",
-      "trailer": "https://www.youtube.com/watch?v=LCBBCJ-uXKQ"
+      "trailer": "https://www.youtube.com/watch?v=LCBBCJ-uXKQ",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
     },
     {
       "id": "movie-1182861",
@@ -23490,7 +27778,15 @@
       "source": {
         "csv_title": "Romeria"
       },
-      "country": "Spain · Germany"
+      "country": "Spain · Germany",
+      "director_gender": 1,
+      "cast_genders": [
+        1,
+        2,
+        2,
+        1,
+        0
+      ]
     },
     {
       "id": "movie-1432817",
@@ -23529,7 +27825,15 @@
       "source": {
         "csv_title": "Mi Amor"
       },
-      "country": "France"
+      "country": "France",
+      "director_gender": 2,
+      "cast_genders": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "movie-1170215",
@@ -23571,7 +27875,15 @@
       "source": {
         "csv_title": "Junk World"
       },
-      "country": "Japan"
+      "country": "Japan",
+      "director_gender": 2,
+      "cast_genders": [
+        2,
+        0,
+        0,
+        0,
+        0
+      ]
     }
   ]
 }
