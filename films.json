@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T09:40:24.384Z",
+  "generated_at": "2026-07-08T09:54:37.427Z",
   "count": 546,
   "films": [
     {
@@ -112,13 +112,13 @@
       "original_title": "지느러미",
       "year": 2026,
       "release_date": "2026-07-08",
-      "director": "박세영",
+      "director": "Park Sye-young",
       "cast": [
-        "연예지",
-        "김푸름",
-        "고우",
-        "정영도",
-        "맹주원"
+        "Yeon Ye-ji",
+        "Kim Pureum",
+        "Goh-Woo",
+        "Jeong Young-do",
+        "Maeng Joo-one"
       ],
       "runtime": 85,
       "genres": [
@@ -268,9 +268,9 @@
       "release_date": "2001-05-26",
       "director": "Rintaro",
       "cast": [
-        "井元由香",
-        "岡田浩暉",
-        "富田耕生",
+        "Yuka Imoto",
+        "Kohki Okada",
+        "Kosei Tomita",
         "Kei Kobayashi",
         "Rikako Aikawa"
       ],
@@ -418,13 +418,13 @@
       "original_title": "火遮眼",
       "year": 2026,
       "release_date": "2026-06-10",
-      "director": "谷垣健治",
+      "director": "Kenji Tanigaki",
       "cast": [
         "Xie Miao",
         "Joe Taslim",
         "Yang Enyou",
         "Yayan Ruhian",
-        "ฉันทธนิสา ตัง"
+        "JeeJa Yanin"
       ],
       "runtime": 113,
       "genres": [
@@ -673,13 +673,13 @@
       "original_title": "ALL YOU NEED IS KILL",
       "year": 2026,
       "release_date": "2026-01-09",
-      "director": "秋本賢一郎",
+      "director": "Kenichiro Akimoto",
       "cast": [
-        "見上愛",
+        "Ai Mikami",
         "Natsuki Hanae",
         "Kana Hanazawa",
-        "ヒコロヒー",
-        "もう中学生"
+        "Hiccorohee",
+        "Mo Chugakusei"
       ],
       "runtime": 86,
       "genres": [
@@ -1269,12 +1269,12 @@
       "original_title": "ある男",
       "year": 2022,
       "release_date": "2022-11-18",
-      "director": "石川慶",
+      "director": "Kei Ishikawa",
       "cast": [
-        "妻夫木聡",
+        "Satoshi Tsumabuki",
         "Sakura Ando",
         "Masataka Kubota",
-        "清野菜名",
+        "Nana Seino",
         "Hidekazu Mashima"
       ],
       "runtime": 121,
@@ -1983,7 +1983,7 @@
       "release_date": "2010-07-16",
       "director": "Hiromasa Yonebayashi",
       "cast": [
-        "志田未来",
+        "Mirai Shida",
         "Ryunosuke Kamiki",
         "Tomokazu Miura",
         "Keiko Takeshita",
@@ -4179,13 +4179,13 @@
       "original_title": "海がきこえる",
       "year": 1993,
       "release_date": "1993-10-09",
-      "director": "望月智充",
+      "director": "Tomomi Mochizuki",
       "cast": [
         "Nobuo Tobita",
-        "坂本洋子",
+        "Yoko Sakamoto",
         "Toshihiko Seki",
-        "天野由梨",
-        "荒木香衣"
+        "Yuri Amano",
+        "Kae Araki"
       ],
       "runtime": 72,
       "genres": [
@@ -4390,7 +4390,7 @@
         "Rei Sakuma",
         "Kappei Yamaguchi",
         "Keiko Toda",
-        "信澤三惠子"
+        "Mieko Nobusawa"
       ],
       "runtime": 102,
       "genres": [
@@ -4488,10 +4488,10 @@
       "release_date": "2011-07-16",
       "director": "Goro Miyazaki",
       "cast": [
-        "長澤まさみ",
-        "岡田准一",
+        "Masami Nagasawa",
+        "Junichi Okada",
         "Keiko Takeshita",
-        "石田ゆり子",
+        "Yuriko Ishida",
         "Rumi Hiiragi"
       ],
       "runtime": 91,
@@ -5001,7 +5001,7 @@
         "Chieko Baisho",
         "Takuya Kimura",
         "Akihiro Miwa",
-        "我修院達也",
+        "Tatsuya Gashuin",
         "Ryunosuke Kamiki"
       ],
       "runtime": 119,
@@ -5051,11 +5051,11 @@
       "release_date": "1986-08-02",
       "director": "Hayao Miyazaki",
       "cast": [
-        "よこざわけい子",
+        "Keiko Yokozawa",
         "Mayumi Tanaka",
         "Minori Terada",
-        "初井言榮",
-        "常田富士男"
+        "Kotoe Hatsui",
+        "Fujio Tokita"
       ],
       "runtime": 124,
       "genres": [
@@ -5467,10 +5467,10 @@
       "director": "Hiroyuki Morita",
       "cast": [
         "Chizuru Ikewaki",
-        "袴田吉彦",
-        "前田亜季",
-        "渡辺哲",
-        "斉藤洋介"
+        "Yoshihiko Hakamada",
+        "Aki Maeda",
+        "Tetsu Watanabe",
+        "Yousuke Saito"
       ],
       "runtime": 75,
       "genres": [
@@ -5625,7 +5625,7 @@
       "cast": [
         "Hideaki Anno",
         "Hidetoshi Nishijima",
-        "瀧本美織",
+        "Miori Takimoto",
         "Masahiko Nishimura",
         "Stephen Alpert"
       ],
@@ -5679,8 +5679,8 @@
         "Rumi Hiiragi",
         "Miyu Irino",
         "Mari Natsuki",
-        "内藤剛志",
-        "沢口靖子"
+        "Takashi Naito",
+        "Yasuko Sawaguchi"
       ],
       "runtime": 126,
       "genres": [
@@ -5729,10 +5729,10 @@
       "release_date": "2006-07-29",
       "director": "Goro Miyazaki",
       "cast": [
-        "岡田准一",
-        "手嶌葵",
+        "Junichi Okada",
+        "Aoi Teshima",
         "Bunta Sugawara",
-        "田中裕子",
+        "Yuko Tanaka",
         "Teruyuki Kagawa"
       ],
       "runtime": 115,
@@ -6915,9 +6915,9 @@
       "director": "Hayao Miyazaki",
       "cast": [
         "Noriko Hidaka",
-        "坂本千夏",
-        "高木均",
-        "糸井重里",
+        "Chika Sakamoto",
+        "Hitoshi Takagi",
+        "Shigesato Itoi",
         "Sumi Shimamoto"
       ],
       "runtime": 87,
@@ -7072,7 +7072,7 @@
       "cast": [
         "Sumi Shimamoto",
         "Ichirō Nagai",
-        "納谷悟朗",
+        "Gorō Naya",
         "Yōji Matsuda",
         "Yoshiko Sakakibara"
       ],
@@ -7175,11 +7175,11 @@
       "release_date": "2004-08-07",
       "director": "Hirokazu Kore-eda",
       "cast": [
-        "柳楽優弥",
-        "北浦愛",
-        "木村飛影",
-        "清水萌々子",
-        "韓英恵"
+        "Yuya Yagira",
+        "Ayu Kitaura",
+        "Hiei Kimura",
+        "Momoko Shimizu",
+        "Hanae Kan"
       ],
       "runtime": 141,
       "genres": [
@@ -7526,11 +7526,11 @@
       "release_date": "1994-07-16",
       "director": "Isao Takahata",
       "cast": [
-        "野々村真",
-        "清川虹子",
-        "泉谷しげる",
-        "三木のり平",
-        "石田ゆり子"
+        "Makoto Nonomura",
+        "Nijiko Kiyokawa",
+        "Shigeru Izumiya",
+        "Norihei Miki",
+        "Yuriko Ishida"
       ],
       "runtime": 119,
       "genres": [
@@ -7580,9 +7580,9 @@
       "cast": [
         "Yuria Kozuki",
         "Hiroki Doi",
-        "所ジョージ",
-        "山口智子",
-        "天海祐希"
+        "George Tokoro",
+        "Tomoko Yamaguchi",
+        "Yuki Amami"
       ],
       "runtime": 100,
       "genres": [
@@ -7631,10 +7631,10 @@
       "release_date": "1992-07-18",
       "director": "Hayao Miyazaki",
       "cast": [
-        "森山周一郎",
-        "加藤登紀子",
+        "Shūichirō Moriyama",
+        "Tokiko Kato",
         "Bunshi Katsura Vi",
-        "上條恒彦",
+        "Tsunehiko Kamijô",
         "Akemi Okamura"
       ],
       "runtime": 93,
@@ -7737,8 +7737,8 @@
       "director": "Hayao Miyazaki",
       "cast": [
         "Yōji Matsuda",
-        "石田ゆり子",
-        "田中裕子",
+        "Yuriko Ishida",
+        "Yuko Tanaka",
         "Kaoru Kobayashi",
         "Masahiko Nishimura"
       ],
@@ -8395,10 +8395,10 @@
       "release_date": "1995-07-15",
       "director": "Yoshifumi Kondo",
       "cast": [
-        "本名陽子",
+        "Yoko Honna",
         "Issey Takahashi",
-        "立花隆",
-        "室井滋",
+        "Takashi Tachibana",
+        "Shigeru Muroi",
         "Minami Takayama"
       ],
       "runtime": 110,
@@ -8594,8 +8594,8 @@
       "release_date": "2014-07-19",
       "director": "Hiromasa Yonebayashi",
       "cast": [
-        "高月彩良",
-        "有村架純",
+        "Sara Takatsuki",
+        "Kasumi Arimura",
         "Nanako Matsushima",
         "Susumu Terajima",
         "Toshie Negishi"
@@ -9111,10 +9111,10 @@
       "release_date": "2016-06-01",
       "director": "Park Chan-Wook",
       "cast": [
-        "김민희",
+        "Kim Min-hee",
         "Kim Tae-ri",
         "Ha Jeong-Woo",
-        "조진웅",
+        "Cho Jin-woong",
         "Kim Hae-sook"
       ],
       "runtime": 145,
@@ -10379,7 +10379,7 @@
         "Hisako Kanemoto",
         "Kazuhiko Inoue",
         "Miyu Irino",
-        "日高里菜",
+        "Rina Hidaka",
         "Fumiko Orikasa"
       ],
       "runtime": 111,
@@ -11589,7 +11589,8 @@
         2,
         2,
         2
-      ]
+      ],
+      "trailer": "https://www.youtube.com/watch?v=X-wf0nW8E1Q"
     },
     {
       "id": "movie-1352310",
@@ -12157,7 +12158,7 @@
       "cast": [
         "Ma Dong-Seok",
         "Lee Jun-young",
-        "이희준",
+        "Lee Hee-jun",
         "Roh Jeong-eui",
         "Ahn Ji-hye"
       ],
@@ -12621,13 +12622,13 @@
       "original_title": "狂野时代",
       "year": 2025,
       "release_date": "2025-11-22",
-      "director": "毕赣",
+      "director": "Bi Gan",
       "cast": [
-        "易烊千玺",
+        "Jackson Yee",
         "Shu Qi",
-        "趙又廷",
-        "李庚希",
-        "黄觉"
+        "Mark Chao",
+        "Li Gengxi",
+        "Huang Jue"
       ],
       "runtime": 159,
       "genres": [
@@ -12672,13 +12673,13 @@
       "original_title": "狗阵",
       "year": 2024,
       "release_date": "2024-06-15",
-      "director": "管虎",
+      "director": "Guan Hu",
       "cast": [
-        "彭于晏",
-        "佟丽娅",
+        "Eddie Peng Yu-Yan",
+        "Tong Liya",
         "Jia Zhangke",
-        "周游",
-        "胡晓光"
+        "Zhou You",
+        "Hu Xiaoguang"
       ],
       "runtime": 110,
       "genres": [
@@ -13069,7 +13070,8 @@
         2,
         2,
         2
-      ]
+      ],
+      "trailer": "https://www.youtube.com/watch?v=AmksoeQQKOc"
     },
     {
       "id": "movie-1054867",
@@ -13588,8 +13590,8 @@
         "Greta Lee",
         "Teo Yoo",
         "John Magaro",
-        "문승아",
-        "임승민"
+        "Moon Seung-ah",
+        "Leem Seung-min"
       ],
       "runtime": 106,
       "genres": [
@@ -13736,12 +13738,12 @@
       "original_title": "보통의 가족",
       "year": 2024,
       "release_date": "2024-10-16",
-      "director": "허진호",
+      "director": "Hur Jin-ho",
       "cast": [
         "Sul Kyung-gu",
-        "장동건",
-        "김희애",
-        "수현",
+        "Jang Dong-gun",
+        "Kim Hee-ae",
+        "Claudia Kim",
         "Hong Ye-ji"
       ],
       "runtime": 116,
@@ -14914,13 +14916,13 @@
       "original_title": "哪吒之魔童降世",
       "year": 2019,
       "release_date": "2019-07-26",
-      "director": "饺子",
+      "director": "Jiao Zi",
       "cast": [
-        "吕艳婷",
-        "囧森瑟夫",
-        "瀚墨",
-        "陈浩",
-        "绿绮"
+        "Lu Yanting",
+        "Joseph",
+        "Han Mo",
+        "Chen Hao",
+        "Lu Qi"
       ],
       "runtime": 110,
       "genres": [
@@ -14968,13 +14970,13 @@
       "original_title": "哪吒之魔童闹海",
       "year": 2025,
       "release_date": "2025-01-29",
-      "director": "饺子",
+      "director": "Jiao Zi",
       "cast": [
-        "吕艳婷",
-        "囧森瑟夫",
-        "瀚墨",
-        "陈浩",
-        "绿绮"
+        "Lu Yanting",
+        "Joseph",
+        "Han Mo",
+        "Chen Hao",
+        "Lu Qi"
       ],
       "runtime": 144,
       "genres": [
@@ -15028,8 +15030,8 @@
         "Putthipong Assaratanakul",
         "Usha Seamkhum",
         "Sanya Kunakorn",
-        "สฤญรัตน์ โทมัส",
-        "พงศธร จงวิลาส"
+        "Sarinrat Thomas",
+        "Pongsatorn Jongwilas"
       ],
       "runtime": 126,
       "genres": [
@@ -15122,13 +15124,13 @@
       "original_title": "河边的错误",
       "year": 2023,
       "release_date": "2023-10-21",
-      "director": "魏书钧",
+      "director": "Wei Shujun",
       "cast": [
-        "朱一龙",
-        "曾美慧孜",
-        "侯天来",
-        "佟林楷",
-        "康春雷"
+        "Zhu Yilong",
+        "Chloe Maayan",
+        "Hou Tianlai",
+        "Tong Linkai",
+        "Kang Chunlei"
       ],
       "runtime": 106,
       "genres": [
@@ -15479,12 +15481,12 @@
       "original_title": "封神第二部：战火西岐",
       "year": 2025,
       "release_date": "2025-01-29",
-      "director": "乌尔善",
+      "director": "Wuershan",
       "cast": [
-        "黄渤",
-        "于适",
-        "那尔那茜",
-        "陈牧驰",
+        "Huang Bo",
+        "Yu Shi",
+        "Nashi",
+        "Chen Muchi",
         "Kris Phillips"
       ],
       "runtime": 145,
@@ -15739,8 +15741,8 @@
       "director": "Satoshi Kon",
       "cast": [
         "Megumi Hayashibara",
-        "江守徹",
-        "堀勝之祐",
+        "Tohru Emori",
+        "Katsunosuke Hori",
         "Tōru Furuya",
         "Akio Ōtsuka"
       ],
@@ -15793,9 +15795,9 @@
       "cast": [
         "Yumi Kawai",
         "Mizuki Yoshida",
-        "斉藤陽一郎",
-        "岡幸太",
-        "牧紅葉"
+        "Yoichiro Saito",
+        "Kota Oka",
+        "Kureha Maki"
       ],
       "runtime": 62,
       "genres": [
@@ -15944,11 +15946,11 @@
       "original_title": "MONDAYS／このタイムループ、上司に気づかせないと終わらない",
       "year": 2022,
       "release_date": "2022-10-14",
-      "director": "竹林亮",
+      "director": "Ryo Takebayashi",
       "cast": [
-        "円井わん",
-        "マキタスポーツ",
-        "長村航希",
+        "Wan Marui",
+        "Makita Sports",
+        "Kohki Osamura",
         "Yugo Mikawa",
         "Haruki Takano"
       ],
@@ -16702,7 +16704,7 @@
         "Wagner Moura",
         "Cailee Spaeny",
         "Stephen McKinley Henderson",
-        "李志傑"
+        "Nelson Lee"
       ],
       "runtime": 109,
       "genres": [
@@ -17362,12 +17364,12 @@
       "original_title": "封神第一部：朝歌风云",
       "year": 2023,
       "release_date": "2023-07-15",
-      "director": "乌尔善",
+      "director": "Wuershan",
       "cast": [
-        "于适",
+        "Yu Shi",
         "Kris Phillips",
-        "李雪健",
-        "黄渤",
+        "Li Xuejian",
+        "Huang Bo",
         "Нарана Эрдынеева"
       ],
       "runtime": 149,
@@ -17415,7 +17417,7 @@
       "original_title": "콘크리트 유토피아",
       "year": 2023,
       "release_date": "2023-08-09",
-      "director": "엄태화",
+      "director": "Um Tae-hwa",
       "cast": [
         "Lee Byung-hun",
         "Park Seo-jun",
@@ -17623,9 +17625,9 @@
       "cast": [
         "Atsuko Tanaka",
         "Akio Ōtsuka",
-        "家弓家正",
+        "Iemasa Kayumi",
         "Kōichi Yamadera",
-        "仲野裕"
+        "Yutaka Nakano"
       ],
       "runtime": 82,
       "genres": [
@@ -17983,13 +17985,13 @@
       "original_title": "かがみの孤城",
       "year": 2022,
       "release_date": "2022-12-23",
-      "director": "原恵一",
+      "director": "Keiichi Hara",
       "cast": [
         "Ami Touma",
         "Takumi Kitamura",
         "Sakura Kiryu",
         "Rihito Itagaki",
-        "横溝菜帆"
+        "Naho Yokomizo"
       ],
       "runtime": 116,
       "genres": [
@@ -18660,13 +18662,13 @@
       "original_title": "深海",
       "year": 2023,
       "release_date": "2023-01-22",
-      "director": "田晓鹏",
+      "director": "Tian Xiaopeng",
       "cast": [
         "Wang Ting Wen",
-        "蘇鑫",
+        "Su Xin",
         "Kuixing Teng",
         "Yang Ting",
-        "吉静"
+        "Jing Ji"
       ],
       "runtime": 112,
       "genres": [
@@ -19390,9 +19392,9 @@
       "cast": [
         "Ryunosuke Kamiki",
         "Minami Hamabe",
-        "山田裕貴",
+        "Yuki Yamada",
         "Munetaka Aoki",
-        "吉岡秀隆"
+        "Hidetaka Yoshioka"
       ],
       "runtime": 125,
       "genres": [
@@ -19647,11 +19649,11 @@
       "release_date": "2007-03-03",
       "director": "Makoto Shinkai",
       "cast": [
-        "水橋研二",
-        "近藤好美",
-        "花村怜美",
-        "水野理紗",
-        "尾上綾華"
+        "Kenji Mizuhashi",
+        "Yoshimi Kondou",
+        "Satomi Hanamura",
+        "Risa Mizuno",
+        "Ayaka Onoue"
       ],
       "runtime": 63,
       "genres": [
@@ -19703,8 +19705,8 @@
         "Kôji Yakusho",
         "Tokio Emoto",
         "Arisa Nakano",
-        "山田 葵",
-        "麻生祐未"
+        "Aoi Yamada",
+        "Yumi Aso"
       ],
       "runtime": 123,
       "genres": [
@@ -20051,7 +20053,7 @@
       "cast": [
         "Soma Santoki",
         "Masaki Suda",
-        "柴咲コウ",
+        "Ko Shibasaki",
         "Aimyon",
         "Yoshino Kimura"
       ],
@@ -20464,9 +20466,9 @@
       "cast": [
         "Fan Bingbing",
         "Melvil Poupaud",
-        "吴越",
-        "金士傑",
-        "黄觉"
+        "Wu Yue",
+        "King Shih-chieh",
+        "Huang Jue"
       ],
       "runtime": 103,
       "genres": [
@@ -20869,7 +20871,7 @@
       "director": "Lee Hae-Yeong",
       "cast": [
         "Sul Kyung-gu",
-        "이하늬",
+        "Lee Hanee",
         "Park So-dam",
         "Park Hae-soo",
         "Seo Hyeon-woo"
@@ -21481,12 +21483,12 @@
       "original_title": "THE FIRST SLAM DUNK",
       "year": 2022,
       "release_date": "2022-12-03",
-      "director": "井上雄彦",
+      "director": "Takehiko Inoue",
       "cast": [
-        "仲村宗悟",
-        "笠間淳",
+        "Shugo Nakamura",
+        "Jun Kasama",
         "Kenta Miyake",
-        "神尾晋一郎",
+        "Shinichiro Kamio",
         "Subaru Kimura"
       ],
       "runtime": 124,
@@ -22657,10 +22659,10 @@
       "director": "Kim Jee-woon",
       "cast": [
         "Song Kang-ho",
-        "임수정",
+        "Lim Soo-jung",
         "Oh Jung-se",
         "Jeon Yeo-bin",
-        "정수정"
+        "Krystal Jung"
       ],
       "runtime": 135,
       "genres": [
@@ -22808,9 +22810,9 @@
       "cast": [
         "Maggie Cheung",
         "Tony Leung Chiu-Wai",
-        "萧炳林",
-        "潘迪华",
-        "雷震"
+        "Siu Ping-Lam",
+        "Rebecca Pan",
+        "Kelly Lai Chen"
       ],
       "runtime": 98,
       "genres": [
@@ -23125,7 +23127,7 @@
         "Nassim Lyes",
         "Loryn Nounay",
         "Olivier Gourmet",
-        "วิทยา ปานศรีงาม",
+        "Vithaya Pansringarm",
         "Mehdi Hadim"
       ],
       "runtime": 99,
@@ -23276,9 +23278,9 @@
       "cast": [
         "Kim Si-eun",
         "Bae Doo-na",
-        "정회린",
-        "강현오",
-        "박우영"
+        "Jung Hoe-ryn",
+        "Kang Hyun-oh",
+        "Park Woo-young"
       ],
       "runtime": 135,
       "genres": [
@@ -23427,7 +23429,7 @@
       "cast": [
         "Gérard Depardieu",
         "Sandrine Bonnaire",
-        "長塚京三",
+        "Kyōzō Nagatsuka",
         "Rod Paradot",
         "Bastien Bouillon"
       ],
@@ -23786,9 +23788,9 @@
       "release_date": "2022-11-11",
       "director": "Makoto Shinkai",
       "cast": [
-        "原菜乃華",
-        "松村北斗",
-        "深津絵里",
+        "Nanoka Hara",
+        "Hokuto Matsumura",
+        "Eri Fukatsu",
         "Shōta Sometani",
         "Sairi Ito"
       ],
@@ -24647,10 +24649,10 @@
       "original_title": "浅田家！",
       "year": 2020,
       "release_date": "2020-10-02",
-      "director": "中野量太",
+      "director": "Ryota Nakano",
       "cast": [
-        "二宮和也",
-        "妻夫木聡",
+        "Kazunari Ninomiya",
+        "Satoshi Tsumabuki",
         "Haru Kuroki",
         "Masaki Suda",
         "Jun Fubuki"
@@ -25058,13 +25060,13 @@
       "original_title": "鹿の王 ユナと約束の旅",
       "year": 2021,
       "release_date": "2021-10-28",
-      "director": "宮地昌幸",
+      "director": "Masayuki Miyaji",
       "cast": [
-        "堤真一",
+        "Shinichi Tsutsumi",
         "Ryoma Takeuchi",
-        "杏",
+        "Anne Watanabe",
         "Hisui Kimura",
-        "阿部敦"
+        "Atsushi Abe"
       ],
       "runtime": 113,
       "genres": [
@@ -26034,9 +26036,9 @@
       "cast": [
         "Mutsumi Tamura",
         "Asami Seto",
-        "村瀬歩",
+        "Ayumu Murase",
         "Daiki Yamashita",
-        "小林由美子"
+        "Yumiko Kobayashi"
       ],
       "runtime": 120,
       "genres": [
@@ -26241,7 +26243,7 @@
       "release_date": "2017-06-28",
       "director": "Bong Joon-ho",
       "cast": [
-        "안서현",
+        "An Seo-hyun",
         "Tilda Swinton",
         "Paul Dano",
         "Steven Yeun",
@@ -26402,10 +26404,10 @@
       "director": "Yeon Sang-ho",
       "cast": [
         "Dong-won Gang",
-        "이정현",
+        "Lee Jung-hyun",
         "Re Lee",
         "Kwon Hae-hyo",
-        "김민재"
+        "Kim Min-jae"
       ],
       "runtime": 116,
       "genres": [
@@ -27843,9 +27845,9 @@
       "original_title": "JUNK WORLD",
       "year": 2025,
       "release_date": "2025-06-13",
-      "director": "堀貴秀",
+      "director": "Takahide Hori",
       "cast": [
-        "堀貴秀",
+        "Takahide Hori",
         "Ikuya Idota",
         "Atsuko Miyake",
         "Yuji Sugiyama",
