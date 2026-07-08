@@ -1,8 +1,52 @@
 {
   "version": 1,
-  "generated_at": "2026-07-07T19:15:25.563Z",
-  "count": 543,
+  "generated_at": "2026-07-08T08:50:44.055Z",
+  "count": 544,
   "films": [
+    {
+      "id": "movie-1418811",
+      "tmdb_id": 1418811,
+      "type": "movie",
+      "title": "The Fin",
+      "original_title": "지느러미",
+      "year": 2026,
+      "release_date": "2026-07-08",
+      "director": "박세영",
+      "cast": [
+        "연예지",
+        "김푸름",
+        "고우",
+        "정영도",
+        "맹주원"
+      ],
+      "runtime": 85,
+      "genres": [
+        "Fantastique",
+        "Science-Fiction",
+        "Thriller"
+      ],
+      "country": "South Korea · Germany · Qatar",
+      "poster": "https://image.tmdb.org/t/p/w500/l8VbUEuoUrrZ8vP2SXEP0ZSR85K.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/nmEC4cxuUVuWyzKMYzdCnLbhYw7.jpg",
+      "synopsis": "Dans une Corée ravagée par une catastrophe climatique, des mutants appelés Omégas sont pourchassés pour être exploités. Mia travaille dans un magasin de pêche clandestin fréquenté par les nostalgiques de cette activité désormais impossible. Lors d'un contrôle, Sujin, nouvelle employée du gouvernement remarque le comportement suspect de Mia. Elle s'immerge dans son univers souterrain, remettant alors en question sa foi en l'idéologie de l'Etat.",
+      "tmdb_rating": null,
+      "imdb_id": "tt37538626",
+      "original_language": "ko",
+      "trailer": "https://www.youtube.com/watch?v=mVy1IQXxTCM",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-07-08T08:50:42.221Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-843093",
       "tmdb_id": 843093,
@@ -22647,7 +22691,9 @@
       },
       "source": {
         "csv_title": "Ma frère"
-      }
+      },
+      "country": "France",
+      "trailer": "https://www.youtube.com/watch?v=53BgM9euEOQ"
     },
     {
       "id": "movie-1294698",
@@ -22885,7 +22931,9 @@
       },
       "source": {
         "csv_title": "Mulholland Drive"
-      }
+      },
+      "country": "France · USA",
+      "trailer": "https://www.youtube.com/watch?v=LCBBCJ-uXKQ"
     },
     {
       "id": "movie-1182861",
