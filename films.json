@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T09:16:06.874Z",
+  "generated_at": "2026-07-08T09:40:24.384Z",
   "count": 546,
   "films": [
     {
@@ -12723,11 +12723,11 @@
       "release_date": "2024-07-18",
       "director": "Li Yang",
       "cast": [
-        "张若昀",
-        "钟楚曦",
-        "宋洋",
-        "吴晓亮",
-        "朱颜曼滋"
+        "Zhang Ruoyun",
+        "Zhong Chuxi",
+        "Song Yang",
+        "Wu Xiaoliang",
+        "Zhu Yanmanzi"
       ],
       "runtime": 98,
       "genres": [
@@ -21330,10 +21330,10 @@
       "director": "Son Yong-ho",
       "cast": [
         "Ma Dong-Seok",
-        "김상중",
-        "김아중",
-        "장기용",
-        "박효준"
+        "Kim Sang-joong",
+        "Kim A-joong",
+        "Jang Ki-yong",
+        "Park Hyo-joon"
       ],
       "runtime": 110,
       "genres": [
