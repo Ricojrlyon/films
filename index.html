@@ -1879,7 +1879,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
         <button class="explorer-cat active" data-cat="now_playing">au cinéma</button>
         <button class="explorer-cat" data-cat="trending">tendances</button>
         <button class="explorer-cat" data-cat="upcoming">prochainement</button>
-        <button class="explorer-cat" data-cat="top_rated">mieux notés</button>
         <a class="explorer-cat lyon-link" id="lyon-cinema-link"
            href="https://www.allocine.fr/seance/ville-14028/"
            target="_blank" rel="noopener"
@@ -2593,8 +2592,8 @@ async function fetchAndRenderDiscover(category) {
   if (lyonLink) {
     lyonLink.style.display = (category === 'now_playing' || category === 'upcoming') ? '' : 'none';
     lyonLink.href = category === 'upcoming'
-      ? 'https://www.allocine.fr/film/agenda/sem-prochaine/cinema-14028/'
-      : 'https://www.allocine.fr/seance/ville-14028/';
+      ? 'https://www.allocine.fr/salle/cinema/ville-113315/'
+      : 'https://www.allocine.fr/salle/cinema/ville-113315/';
   }
 
   const grid = document.getElementById('grid');
@@ -3735,14 +3734,20 @@ function renderGenderBalance() {
   const root = document.getElementById('gender-balance');
   const enrichWrap = document.getElementById('gender-enrich-wrap');
 
-  // Count films with and without gender data
   const withDirGender = vus.filter(f => f.director_gender && f.director_gender > 0).length;
   const withCastGender = vus.filter(f => (f.cast_genders || []).some(g => g > 0)).length;
-  const needsEnrich = (vus.filter(f => f.director && (!f.director_gender || f.director_gender === 0)).length > 0);
+  const needsEnrich = vus.some(f => f.director && (!f.director_gender || f.director_gender === 0));
 
-  // Show enrich button in admin mode when data is missing
+  // Show enrich button whenever data is missing, admin mode controls whether the
+  // button actually does anything (checked inside enrichGender itself).
+  // MUST be before any early return.
   if (enrichWrap) {
-    enrichWrap.style.display = (admin.active && needsEnrich) ? '' : 'none';
+    enrichWrap.style.display = needsEnrich ? '' : 'none';
+  }
+
+  if (withDirGender === 0 && withCastGender === 0) {
+    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic; font-size: 13px;">active le mode édition (🔒) puis clique "↻ enrichir les données de genre" ci-dessous.</div>';
+    return;
   }
 
   // Director gender
@@ -3770,15 +3775,11 @@ function renderGenderBalance() {
           ${u > 0 ? `<div class="gender-balance-seg unknown" style="width:${pctU}%">${u}</div>` : ''}
         </div>
         <div class="gender-balance-legend">
-          <span>hommes ${pctM}%</span><span>femmes ${pctF}%</span>${u > 0 ? `<span>genre non renseigné ${pctU}%</span>` : ''}
+          <span>hommes ${pctM}%</span><span>femmes ${pctF}%</span>${u > 0 ? `<span>non renseigné ${pctU}%</span>` : ''}
         </div>
       </div>`;
   };
 
-  if (withDirGender === 0 && withCastGender === 0) {
-    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic; font-size: 13px;">clique sur "enrichir les données de genre" pour activer ces stats.</div>';
-    return;
-  }
   root.innerHTML =
     bar('réalisateur · réalisatrice', dirM, dirF, dirU, dirTotal) +
     bar('acteur · actrice principal·e', leadM, leadF, leadU, leadTotal);
@@ -3884,11 +3885,11 @@ function bestPersonName(person) {
   return name;
 }
 
-/** Return an AlloCiné search link for a person name, or plain text if CJK. */
+/** Return a TMDB search link for a person name, or plain text if CJK. */
 function nameLink(name) {
   if (!name) return '';
   if (hasCjk(name)) return escapeHtml(name); // CJK: display as-is, no link
-  const url = 'https://www.allocine.fr/rechercher/1/?q=' + encodeURIComponent(name);
+  const url = 'https://www.themoviedb.org/search/person?query=' + encodeURIComponent(name);
   return `<a href="${url}" target="_blank" rel="noopener" class="name-link">${escapeHtml(name)}</a>`;
 }
 
