@@ -1,8 +1,51 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T08:52:59.785Z",
-  "count": 545,
+  "generated_at": "2026-07-08T08:53:29.786Z",
+  "count": 546,
   "films": [
+    {
+      "id": "movie-1483319",
+      "tmdb_id": 1483319,
+      "type": "movie",
+      "title": "Shana",
+      "original_title": "Shana",
+      "year": 2026,
+      "release_date": "2026-06-17",
+      "director": "Lila Pinell",
+      "cast": [
+        "Eva Huault",
+        "Noémie Lvovsky",
+        "Inès Gherib",
+        "Anaïs Monah",
+        "Bettina de Van"
+      ],
+      "runtime": 80,
+      "genres": [
+        "Drame",
+        "Comédie"
+      ],
+      "country": "France",
+      "poster": "https://image.tmdb.org/t/p/w500/pXgr7YW8TKKOCigWM7VY7MB7bm3.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/3jR9RY0l9tuls0YrJjHm31f5g4T.jpg",
+      "synopsis": "Shana traverse les galères du quotidien avec une énergie débordante et le soutien de sa bande de copines. Lorsque sa grand-mère décède, elle hérite d’une bague censée protéger du mauvais œil. Shana a bien besoin de ce coup de pouce. D’autant qu’avec la sortie de prison de son compagnon toxique, les mésaventures s’accumulent !",
+      "tmdb_rating": 5.857,
+      "imdb_id": "tt39172310",
+      "original_language": "fr",
+      "trailer": "https://www.youtube.com/watch?v=8kMR1PIeO8M",
+      "source": {
+        "added_via": "admin",
+        "added_at": "2026-07-08T08:53:27.997Z"
+      },
+      "user": {
+        "statut": "a_voir",
+        "rating": null,
+        "favorite": false,
+        "lieu": null,
+        "date_vue": null,
+        "date_vue_label": null,
+        "csv_genres": []
+      }
+    },
     {
       "id": "movie-1432073",
       "tmdb_id": 1432073,
