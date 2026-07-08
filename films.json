@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T08:53:29.786Z",
+  "generated_at": "2026-07-08T09:00:32.219Z",
   "count": 546,
   "films": [
     {
@@ -856,7 +856,8 @@
         "date_vue": "before-2022",
         "date_vue_label": "avant 2022",
         "csv_genres": []
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-972119",
@@ -896,7 +897,8 @@
         "date_vue": "2024-01",
         "date_vue_label": "Janvier 2024",
         "csv_genres": []
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-382811",
@@ -934,7 +936,8 @@
         "date_vue": "before-2022",
         "date_vue_label": "avant 2022",
         "csv_genres": []
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-547258",
@@ -973,7 +976,8 @@
         "date_vue": "before-2022",
         "date_vue_label": "avant 2022",
         "csv_genres": []
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-602334",
@@ -1056,7 +1060,8 @@
         "date_vue": "before-2022",
         "date_vue_label": "avant 2022",
         "csv_genres": []
-      }
+      },
+      "country": "France · Italy · UK · Switzerland"
     },
     {
       "id": "movie-869886",
@@ -1141,7 +1146,8 @@
         "date_vue": "before-2022",
         "date_vue_label": "avant 2022",
         "csv_genres": []
-      }
+      },
+      "country": "France · Belgium · Luxembourg"
     },
     {
       "id": "movie-1297842",
@@ -1182,7 +1188,8 @@
         "date_vue": "2026-05",
         "date_vue_label": "Mai 2026",
         "csv_genres": []
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-451945",
@@ -1222,7 +1229,8 @@
       },
       "source": {
         "csv_title": "120 Battements par minute"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-19913",
@@ -1265,7 +1273,8 @@
       },
       "source": {
         "csv_title": "500 Days of Summer"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-530915",
@@ -1308,7 +1317,8 @@
       },
       "source": {
         "csv_title": "1917"
-      }
+      },
+      "country": "USA · UK · Spain · India"
     },
     {
       "id": "movie-62",
@@ -1351,7 +1361,8 @@
       },
       "source": {
         "csv_title": "2001 l’Odyssée de l’Espace"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-340837",
@@ -1393,7 +1404,8 @@
       },
       "source": {
         "csv_title": "A Cure For Life"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-428449",
@@ -1435,7 +1447,8 @@
       },
       "source": {
         "csv_title": "A Ghost Story"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-651881",
@@ -1476,7 +1489,8 @@
       },
       "source": {
         "csv_title": "Adieu Les Cons"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-487631",
@@ -1559,7 +1573,8 @@
       },
       "source": {
         "csv_title": "American History X"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1359",
@@ -1602,7 +1617,8 @@
       },
       "source": {
         "csv_title": "American Psycho"
-      }
+      },
+      "country": "Canada · USA"
     },
     {
       "id": "movie-28",
@@ -1644,7 +1660,8 @@
       },
       "source": {
         "csv_title": "Apocalypse Now"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-51739",
@@ -1731,7 +1748,8 @@
       },
       "source": {
         "csv_title": "Asphalte"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-474331",
@@ -1771,7 +1789,8 @@
       },
       "source": {
         "csv_title": "Au Poste"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-430424",
@@ -1814,7 +1833,8 @@
       },
       "source": {
         "csv_title": "Au Revoir Là Haut"
-      }
+      },
+      "country": "France · Canada"
     },
     {
       "id": "movie-78",
@@ -1857,7 +1877,8 @@
       },
       "source": {
         "csv_title": "Blade Runner"
-      }
+      },
+      "country": "USA · Hong Kong · UK"
     },
     {
       "id": "movie-403431",
@@ -1941,7 +1962,8 @@
       },
       "source": {
         "csv_title": "Bruce Tout Puissant"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-613370",
@@ -1984,7 +2006,8 @@
       },
       "source": {
         "csv_title": "Brutus VS Cesar"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-398818",
@@ -2026,7 +2049,8 @@
       },
       "source": {
         "csv_title": "Call Me By Your Name"
-      }
+      },
+      "country": "France · Brazil · Italy · USA"
     },
     {
       "id": "movie-467679",
@@ -2067,7 +2091,8 @@
       },
       "source": {
         "csv_title": "Carnivores"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-544404",
@@ -2109,7 +2134,8 @@
       },
       "source": {
         "csv_title": "Celle Que Vous Croyez"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-582895",
@@ -2151,7 +2177,8 @@
       },
       "source": {
         "csv_title": "Chanson Douce"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-467414",
@@ -2193,7 +2220,8 @@
       },
       "source": {
         "csv_title": "Chien"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-369778",
@@ -2235,7 +2263,8 @@
       },
       "source": {
         "csv_title": "Chocolat"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-507076",
@@ -2279,7 +2308,8 @@
       },
       "source": {
         "csv_title": "Climax"
-      }
+      },
+      "country": "France · Belgium · USA"
     },
     {
       "id": "movie-354912",
@@ -2324,7 +2354,8 @@
       },
       "source": {
         "csv_title": "Coco"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-339967",
@@ -2367,7 +2398,8 @@
       },
       "source": {
         "csv_title": "Colossal"
-      }
+      },
+      "country": "Canada · South Korea · Spain · USA"
     },
     {
       "id": "movie-366564",
@@ -2407,7 +2439,8 @@
       },
       "source": {
         "csv_title": "Comment C’est Loin"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-570128",
@@ -2447,7 +2480,8 @@
       },
       "source": {
         "csv_title": "Convoi Exceptionnel"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-487616",
@@ -2490,7 +2524,8 @@
       },
       "source": {
         "csv_title": "Curiosa"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-477489",
@@ -2533,7 +2568,8 @@
       },
       "source": {
         "csv_title": "Dans La Brume"
-      }
+      },
+      "country": "France · Canada"
     },
     {
       "id": "movie-396535",
@@ -2578,7 +2614,8 @@
       },
       "source": {
         "csv_title": "Dernier Train Pour Busan"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-583268",
@@ -2621,7 +2658,8 @@
       },
       "source": {
         "csv_title": "Deux Moi"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-613349",
@@ -2661,7 +2699,8 @@
       },
       "source": {
         "csv_title": "Docteur ?"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-944401",
@@ -2703,7 +2742,8 @@
       },
       "source": {
         "csv_title": "Dogman"
-      }
+      },
+      "country": "France · USA"
     },
     {
       "id": "movie-580175",
@@ -2744,7 +2784,8 @@
       },
       "source": {
         "csv_title": "Drunk"
-      }
+      },
+      "country": "Denmark · Netherlands · Sweden"
     },
     {
       "id": "movie-519106",
@@ -2787,7 +2828,8 @@
       },
       "source": {
         "csv_title": "En Liberté"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-421452",
@@ -2873,7 +2915,8 @@
       },
       "source": {
         "csv_title": "Eté 85"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-38",
@@ -2916,7 +2959,8 @@
       },
       "source": {
         "csv_title": "Eternal Sunshine Of The Spotless Mind"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-459974",
@@ -2957,7 +3001,8 @@
       },
       "source": {
         "csv_title": "Everything Beautiful is Far Away"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-550",
@@ -2998,7 +3043,8 @@
       },
       "source": {
         "csv_title": "Fight Club"
-      }
+      },
+      "country": "Germany · USA"
     },
     {
       "id": "movie-539892",
@@ -3040,7 +3086,8 @@
       },
       "source": {
         "csv_title": "Freaks"
-      }
+      },
+      "country": "Canada · USA"
     },
     {
       "id": "movie-600",
@@ -3127,7 +3174,8 @@
       },
       "source": {
         "csv_title": "Get Out"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-450465",
@@ -3212,7 +3260,8 @@
       },
       "source": {
         "csv_title": "Grave"
-      }
+      },
+      "country": "France · Belgium · USA"
     },
     {
       "id": "movie-489170",
@@ -3252,7 +3301,8 @@
       },
       "source": {
         "csv_title": "Gueule d’Ange"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-457335",
@@ -3295,7 +3345,8 @@
       },
       "source": {
         "csv_title": "Guns Akimbo"
-      }
+      },
+      "country": "Belgium · Germany · New Zealand · UK · USA · Austria · Australia"
     },
     {
       "id": "movie-7453",
@@ -3338,7 +3389,8 @@
       },
       "source": {
         "csv_title": "H2G2 - Le Guide du Voyageur Intergalactique"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-468287",
@@ -3421,7 +3473,8 @@
       },
       "source": {
         "csv_title": "Hibou"
-      }
+      },
+      "country": "France · Canada"
     },
     {
       "id": "movie-254302",
@@ -3506,7 +3559,8 @@
       },
       "source": {
         "csv_title": "Je Peux Entendre l’Océan"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-500840",
@@ -3549,7 +3603,8 @@
       },
       "source": {
         "csv_title": "Je Veux Juste En Finir"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-515001",
@@ -3592,7 +3647,8 @@
       },
       "source": {
         "csv_title": "Jojo Rabbit"
-      }
+      },
+      "country": "New Zealand · USA"
     },
     {
       "id": "movie-338189",
@@ -3632,7 +3688,8 @@
       },
       "source": {
         "csv_title": "Juste La Fin Du Monde"
-      }
+      },
+      "country": "France · Canada"
     },
     {
       "id": "movie-16859",
@@ -3675,7 +3732,8 @@
       },
       "source": {
         "csv_title": "Kiki La Petite Sorcière"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-438348",
@@ -3716,7 +3774,8 @@
       },
       "source": {
         "csv_title": "Knock"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-83389",
@@ -3758,7 +3817,8 @@
       },
       "source": {
         "csv_title": "La Colline Aux Coquelicots"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-537655",
@@ -3802,7 +3862,8 @@
       },
       "source": {
         "csv_title": "La Fameuse Invasion des Ours en Sicile"
-      }
+      },
+      "country": "France · Italy"
     },
     {
       "id": "movie-474298",
@@ -3842,7 +3903,8 @@
       },
       "source": {
         "csv_title": "La Fête est Finie"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-392142",
@@ -3885,7 +3947,8 @@
       },
       "source": {
         "csv_title": "La Folle Histoire de Max et Léon"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-654862",
@@ -3925,7 +3988,8 @@
       },
       "source": {
         "csv_title": "La Forêt de Mon Père"
-      }
+      },
+      "country": "France · Belgium · Switzerland"
     },
     {
       "id": "movie-313369",
@@ -3969,7 +4033,8 @@
       },
       "source": {
         "csv_title": "La La Land"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-457955",
@@ -4011,7 +4076,8 @@
       },
       "source": {
         "csv_title": "La Nuit a Dévoré Le Monde"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-517468",
@@ -4051,7 +4117,8 @@
       },
       "source": {
         "csv_title": "La Vérité"
-      }
+      },
+      "country": "France · Japan · Switzerland"
     },
     {
       "id": "movie-637",
@@ -4093,7 +4160,8 @@
       },
       "source": {
         "csv_title": "La Vie Est Belle"
-      }
+      },
+      "country": "Italy"
     },
     {
       "id": "movie-484468",
@@ -4136,7 +4204,8 @@
       },
       "source": {
         "csv_title": "Le Chant du Loup"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-4935",
@@ -4180,7 +4249,8 @@
       },
       "source": {
         "csv_title": "Le Château Ambulant"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-10515",
@@ -4226,7 +4296,8 @@
       },
       "source": {
         "csv_title": "Le Château Dans Le Ciel"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-194",
@@ -4267,7 +4338,8 @@
       },
       "source": {
         "csv_title": "Le Fabuleux Destin d’Amélie Poulain"
-      }
+      },
+      "country": "France · Germany"
     },
     {
       "id": "movie-453191",
@@ -4310,7 +4382,8 @@
       },
       "source": {
         "csv_title": "Le Grand Méchant Renard et Autres Contes"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-1417",
@@ -4353,7 +4426,8 @@
       },
       "source": {
         "csv_title": "Le Labyrinthe de Pan"
-      }
+      },
+      "country": "Mexico · Spain · USA"
     },
     {
       "id": "movie-437739",
@@ -4394,7 +4468,8 @@
       },
       "source": {
         "csv_title": "Le Manoir"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-504603",
@@ -4436,7 +4511,8 @@
       },
       "source": {
         "csv_title": "Le Monde Est à Toi"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-416186",
@@ -4480,7 +4556,8 @@
       },
       "source": {
         "csv_title": "Le Redoutable"
-      }
+      },
+      "country": "France · Myanmar"
     },
     {
       "id": "movie-420818",
@@ -4523,7 +4600,8 @@
       },
       "source": {
         "csv_title": "Le Roi Lion"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-15370",
@@ -4569,7 +4647,8 @@
       },
       "source": {
         "csv_title": "Le Royaume des Chats"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-2013",
@@ -4610,7 +4689,8 @@
       },
       "source": {
         "csv_title": "Le Scaphandre et Le Papillon"
-      }
+      },
+      "country": "France · USA"
     },
     {
       "id": "movie-12477",
@@ -4698,7 +4778,8 @@
       },
       "source": {
         "csv_title": "Le Vent Se Lève"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-129",
@@ -4742,7 +4823,8 @@
       },
       "source": {
         "csv_title": "Le Voyage de Chihiro"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-37933",
@@ -4786,7 +4868,8 @@
       },
       "source": {
         "csv_title": "Les Contes de Terremer"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-568160",
@@ -4831,7 +4914,8 @@
       },
       "source": {
         "csv_title": "Les Enfants du Temps"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-474444",
@@ -4875,7 +4959,8 @@
       },
       "source": {
         "csv_title": "Les Garçons Sauvages"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-586863",
@@ -4917,7 +5002,8 @@
       },
       "source": {
         "csv_title": "Les Misérables"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-268523",
@@ -4957,7 +5043,8 @@
       },
       "source": {
         "csv_title": "Libre et Assoupi"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-399174",
@@ -5001,7 +5088,8 @@
       },
       "source": {
         "csv_title": "L’île Aux Chiens"
-      }
+      },
+      "country": "USA · Germany"
     },
     {
       "id": "movie-658156",
@@ -5088,7 +5176,8 @@
       },
       "source": {
         "csv_title": "M. et Mme. Adelman"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-9659",
@@ -5132,7 +5221,8 @@
       },
       "source": {
         "csv_title": "Mad Max 1"
-      }
+      },
+      "country": "Australia"
     },
     {
       "id": "movie-8810",
@@ -5176,7 +5266,8 @@
       },
       "source": {
         "csv_title": "Mad Max 2 - Le Défi"
-      }
+      },
+      "country": "Australia"
     },
     {
       "id": "movie-9355",
@@ -5219,7 +5310,8 @@
       },
       "source": {
         "csv_title": "Mad Max 3 - Au-Delà du Dôme du Tonnerre"
-      }
+      },
+      "country": "Australia"
     },
     {
       "id": "movie-76341",
@@ -5262,7 +5354,8 @@
       },
       "source": {
         "csv_title": "Mad Max : Fury Road"
-      }
+      },
+      "country": "Australia · USA"
     },
     {
       "id": "movie-376166",
@@ -5304,7 +5397,8 @@
       },
       "source": {
         "csv_title": "Mal de Pierres"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-696",
@@ -5347,7 +5441,8 @@
       },
       "source": {
         "csv_title": "Manhattan"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-492188",
@@ -5388,7 +5483,8 @@
       },
       "source": {
         "csv_title": "Marriage Story"
-      }
+      },
+      "country": "UK"
     },
     {
       "id": "movie-519141",
@@ -5430,7 +5526,8 @@
       },
       "source": {
         "csv_title": "Matthias et Maxime"
-      }
+      },
+      "country": "Canada"
     },
     {
       "id": "movie-498249",
@@ -5471,7 +5568,8 @@
       },
       "source": {
         "csv_title": "Mauvaises Herbes"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-62215",
@@ -5513,7 +5611,8 @@
       },
       "source": {
         "csv_title": "Melancholia"
-      }
+      },
+      "country": "France · Denmark · Germany · Sweden"
     },
     {
       "id": "movie-530385",
@@ -5556,7 +5655,8 @@
       },
       "source": {
         "csv_title": "Midsommar"
-      }
+      },
+      "country": "Sweden · USA"
     },
     {
       "id": "movie-265177",
@@ -5596,7 +5696,8 @@
       },
       "source": {
         "csv_title": "Mommy"
-      }
+      },
+      "country": "Canada"
     },
     {
       "id": "movie-536506",
@@ -5637,7 +5738,8 @@
       },
       "source": {
         "csv_title": "Mon Chien Stupide"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-451646",
@@ -5679,7 +5781,8 @@
       },
       "source": {
         "csv_title": "Mon Garçon"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-329805",
@@ -5721,7 +5824,8 @@
       },
       "source": {
         "csv_title": "Mon Roi"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-8392",
@@ -5765,7 +5869,8 @@
       },
       "source": {
         "csv_title": "Mon Voisin Totoro"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-83666",
@@ -5808,7 +5913,8 @@
       },
       "source": {
         "csv_title": "Moonrise Kingdom"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-10818",
@@ -5850,7 +5956,8 @@
       },
       "source": {
         "csv_title": "Naissance des Pieuvres"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-81",
@@ -5894,7 +6001,8 @@
       },
       "source": {
         "csv_title": "Nausicaa de la Vallée du Vent"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-42188",
@@ -5937,7 +6045,8 @@
       },
       "source": {
         "csv_title": "Never Let Me Go"
-      }
+      },
+      "country": "UK"
     },
     {
       "id": "movie-2517",
@@ -5977,7 +6086,8 @@
       },
       "source": {
         "csv_title": "Nobody Knows"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-582886",
@@ -6017,7 +6127,8 @@
       },
       "source": {
         "csv_title": "Notre Dame"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-496285",
@@ -6057,7 +6168,8 @@
       },
       "source": {
         "csv_title": "Nuit de Grève"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-440086",
@@ -6099,7 +6211,8 @@
       },
       "source": {
         "csv_title": "Occidental"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-185",
@@ -6140,7 +6253,8 @@
       },
       "source": {
         "csv_title": "Orange Mecanique"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-9800",
@@ -6180,7 +6294,8 @@
       },
       "source": {
         "csv_title": "Philadelphia"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-374464",
@@ -6225,7 +6340,8 @@
       },
       "source": {
         "csv_title": "Planetarium"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-15283",
@@ -6268,7 +6384,8 @@
       },
       "source": {
         "csv_title": "Pompoko"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-12429",
@@ -6312,7 +6429,8 @@
       },
       "source": {
         "csv_title": "Ponyo sur la Falaise"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-11621",
@@ -6356,7 +6474,8 @@
       },
       "source": {
         "csv_title": "Porco Rosso"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-329865",
@@ -6399,7 +6518,8 @@
       },
       "source": {
         "csv_title": "Premier Contact"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-128",
@@ -6443,7 +6563,8 @@
       },
       "source": {
         "csv_title": "Princesse Mononoke"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-450179",
@@ -6484,7 +6605,8 @@
       },
       "source": {
         "csv_title": "Problemos"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-478860",
@@ -6525,7 +6647,8 @@
       },
       "source": {
         "csv_title": "Proxima"
-      }
+      },
+      "country": "France · Germany"
     },
     {
       "id": "movie-680",
@@ -6568,7 +6691,8 @@
       },
       "source": {
         "csv_title": "Pulp Fiction"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-397722",
@@ -6609,7 +6733,8 @@
       },
       "source": {
         "csv_title": "Pur Sang"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-404368",
@@ -6655,7 +6780,8 @@
       },
       "source": {
         "csv_title": "Ralph 2.0"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-333339",
@@ -6698,7 +6824,8 @@
       },
       "source": {
         "csv_title": "Ready Player One"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-338967",
@@ -6740,7 +6867,8 @@
       },
       "source": {
         "csv_title": "Retour à Zombieland"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-382589",
@@ -6781,7 +6909,8 @@
       },
       "source": {
         "csv_title": "Rock’n Roll"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-518496",
@@ -6819,7 +6948,8 @@
       },
       "source": {
         "csv_title": "Sauvage"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-613319",
@@ -6857,7 +6987,8 @@
       },
       "source": {
         "csv_title": "Selfie"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-518671",
@@ -6900,7 +7031,8 @@
       },
       "source": {
         "csv_title": "Shéhérazade"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-694",
@@ -6941,7 +7073,8 @@
       },
       "source": {
         "csv_title": "Shining"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-37797",
@@ -6985,7 +7118,8 @@
       },
       "source": {
         "csv_title": "Si Tu Tends l’Oreille"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-470818",
@@ -7025,7 +7159,8 @@
       },
       "source": {
         "csv_title": "Si Tu Voyais Son Coeur"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "tv-79680",
@@ -7066,7 +7201,8 @@
       },
       "source": {
         "csv_title": "Snowpiercer"
-      }
+      },
+      "country": "South Korea · USA"
     },
     {
       "id": "movie-508442",
@@ -7112,7 +7248,8 @@
       },
       "source": {
         "csv_title": "Soul"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-242828",
@@ -7156,7 +7293,8 @@
       },
       "source": {
         "csv_title": "Souvenirs de Marnie"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-381288",
@@ -7198,7 +7336,8 @@
       },
       "source": {
         "csv_title": "Split"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-49084",
@@ -7239,7 +7378,8 @@
       },
       "source": {
         "csv_title": "Steak"
-      }
+      },
+      "country": "France · Canada"
     },
     {
       "id": "movie-49020",
@@ -7282,7 +7422,8 @@
       },
       "source": {
         "csv_title": "Submarine"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-586461",
@@ -7325,7 +7466,8 @@
       },
       "source": {
         "csv_title": "Swallow"
-      }
+      },
+      "country": "France · USA"
     },
     {
       "id": "movie-347031",
@@ -7369,7 +7511,8 @@
       },
       "source": {
         "csv_title": "Swiss Army Man"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-720272",
@@ -7411,7 +7554,8 @@
       },
       "source": {
         "csv_title": "Terrible Jungle"
-      }
+      },
+      "country": "France · Belgium · Switzerland"
     },
     {
       "id": "movie-291984",
@@ -7451,7 +7595,8 @@
       },
       "source": {
         "csv_title": "The Death And Life of John F. Donovan"
-      }
+      },
+      "country": "Canada · UK"
     },
     {
       "id": "movie-146015",
@@ -7494,7 +7639,8 @@
       },
       "source": {
         "csv_title": "The Double"
-      }
+      },
+      "country": "UK"
     },
     {
       "id": "movie-1381",
@@ -7539,7 +7685,8 @@
       },
       "source": {
         "csv_title": "The Fountain"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-290098",
@@ -7583,7 +7730,8 @@
       },
       "source": {
         "csv_title": "The Handmaiden"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-503919",
@@ -7625,7 +7773,8 @@
       },
       "source": {
         "csv_title": "The Lighthouse"
-      }
+      },
+      "country": "Brazil · USA"
     },
     {
       "id": "movie-301365",
@@ -7665,7 +7814,8 @@
       },
       "source": {
         "csv_title": "The Neon Demon"
-      }
+      },
+      "country": "France · USA · Denmark · Belgium"
     },
     {
       "id": "movie-94329",
@@ -7707,7 +7857,8 @@
       },
       "source": {
         "csv_title": "The Raid"
-      }
+      },
+      "country": "France · Indonesia · USA"
     },
     {
       "id": "movie-399055",
@@ -7750,7 +7901,8 @@
       },
       "source": {
         "csv_title": "The Shape of Water"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-401246",
@@ -7790,7 +7942,8 @@
       },
       "source": {
         "csv_title": "The Square"
-      }
+      },
+      "country": "France · Denmark · Germany · Sweden · USA"
     },
     {
       "id": "movie-293670",
@@ -7832,7 +7985,8 @@
       },
       "source": {
         "csv_title": "The Strangers"
-      }
+      },
+      "country": "South Korea · USA"
     },
     {
       "id": "movie-8967",
@@ -7874,7 +8028,8 @@
       },
       "source": {
         "csv_title": "The Tree of Life"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-37165",
@@ -7915,7 +8070,8 @@
       },
       "source": {
         "csv_title": "The Truman Show"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-440472",
@@ -7956,7 +8112,8 @@
       },
       "source": {
         "csv_title": "The Upside"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-20766",
@@ -7998,7 +8155,8 @@
       },
       "source": {
         "csv_title": "The Road"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-401898",
@@ -8042,7 +8200,8 @@
       },
       "source": {
         "csv_title": "Thelma"
-      }
+      },
+      "country": "France · Denmark · Norway · Sweden"
     },
     {
       "id": "movie-550158",
@@ -8084,7 +8243,8 @@
       },
       "source": {
         "csv_title": "Toute Ressemblance"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-596860",
@@ -8126,7 +8286,8 @@
       },
       "source": {
         "csv_title": "Tu Mérites un Amour"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-475930",
@@ -8170,7 +8331,8 @@
       },
       "source": {
         "csv_title": "Un couteau Dans le Coeur"
-      }
+      },
+      "country": "France · Switzerland · Mexico"
     },
     {
       "id": "movie-475303",
@@ -8212,7 +8374,8 @@
       },
       "source": {
         "csv_title": "Un Jour de Pluie à New York"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-473033",
@@ -8255,7 +8418,8 @@
       },
       "source": {
         "csv_title": "Uncut Gems"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-505192",
@@ -8297,7 +8461,8 @@
       },
       "source": {
         "csv_title": "Une Affaire de Famille"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-600479",
@@ -8341,7 +8506,8 @@
       },
       "source": {
         "csv_title": "Une Sirène à Paris"
-      }
+      },
+      "country": "France · Belgium · Macedonia · USA"
     },
     {
       "id": "movie-339964",
@@ -8385,7 +8551,8 @@
       },
       "source": {
         "csv_title": "Valerian And The Cities of a Thousand Planets"
-      }
+      },
+      "country": "France · Germany · United Arab Emirates · USA · Belgium · China"
     },
     {
       "id": "tv-75603",
@@ -8425,7 +8592,8 @@
       },
       "source": {
         "csv_title": "Versus"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-451995",
@@ -8465,7 +8633,8 @@
       },
       "source": {
         "csv_title": "Visages Villages"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-458305",
@@ -8507,7 +8676,8 @@
       },
       "source": {
         "csv_title": "Vivarium"
-      }
+      },
+      "country": "Belgium · Denmark · Ireland · USA"
     },
     {
       "id": "movie-510",
@@ -8547,7 +8717,8 @@
       },
       "source": {
         "csv_title": "Vol Au-Dessus d’un Nid de Coucou"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-553084",
@@ -8587,7 +8758,8 @@
       },
       "source": {
         "csv_title": "Vous Êtes Jeunes, Vous Êtes Beaux"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-79707",
@@ -8632,7 +8804,8 @@
       },
       "source": {
         "csv_title": "Voyage Vers Agartha"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-570258",
@@ -8673,7 +8846,8 @@
       },
       "source": {
         "csv_title": "Yves"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-103328",
@@ -8715,7 +8889,8 @@
       },
       "source": {
         "csv_title": "Holy Motors"
-      }
+      },
+      "country": "France · Germany"
     },
     {
       "id": "movie-679989",
@@ -8755,7 +8930,8 @@
       },
       "source": {
         "csv_title": "Tout Simplement Noir"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-20829",
@@ -8796,7 +8972,8 @@
       },
       "source": {
         "csv_title": "Funny People"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1318417",
@@ -9356,7 +9533,8 @@
       },
       "source": {
         "csv_title": "Nouvelle vague"
-      }
+      },
+      "country": "France · USA"
     },
     {
       "id": "movie-1290424",
@@ -9483,7 +9661,8 @@
       },
       "source": {
         "csv_title": "Marty supreme"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1284460",
@@ -9570,7 +9749,8 @@
       },
       "source": {
         "csv_title": "The Phoenician Scheme"
-      }
+      },
+      "country": "USA · Germany"
     },
     {
       "id": "movie-1365378",
@@ -10036,7 +10216,8 @@
       },
       "source": {
         "csv_title": "Les échos du passé (Sound of Falling)"
-      }
+      },
+      "country": "Germany"
     },
     {
       "id": "movie-1114816",
@@ -10121,7 +10302,8 @@
       },
       "source": {
         "csv_title": "Badland Hunters"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-734002",
@@ -10165,7 +10347,8 @@
       },
       "source": {
         "csv_title": "La jeune fille et les paysans"
-      }
+      },
+      "country": "Poland · Lithuania · Serbia"
     },
     {
       "id": "movie-586940",
@@ -10210,7 +10393,8 @@
       },
       "source": {
         "csv_title": "J’ai perdu mon corps"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-559907",
@@ -10298,7 +10482,8 @@
       },
       "source": {
         "csv_title": "Simple comme Sylvain"
-      }
+      },
+      "country": "France · Canada"
     },
     {
       "id": "movie-1000866",
@@ -10340,7 +10525,8 @@
       },
       "source": {
         "csv_title": "En fanfare"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1003504",
@@ -10381,7 +10567,8 @@
       },
       "source": {
         "csv_title": "On ira"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-334541",
@@ -10421,7 +10608,8 @@
       },
       "source": {
         "csv_title": "Manchester by the sea"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-701387",
@@ -10465,7 +10653,8 @@
       },
       "source": {
         "csv_title": "Bugonia"
-      }
+      },
+      "country": "Ireland · South Korea · USA · Canada"
     },
     {
       "id": "movie-878608",
@@ -10507,7 +10696,8 @@
       },
       "source": {
         "csv_title": "Resurrection"
-      }
+      },
+      "country": "France · China"
     },
     {
       "id": "movie-1249423",
@@ -10547,7 +10737,8 @@
       },
       "source": {
         "csv_title": "Blackdog"
-      }
+      },
+      "country": "China"
     },
     {
       "id": "movie-1242372",
@@ -10591,7 +10782,8 @@
       },
       "source": {
         "csv_title": "Escape from the 21st century"
-      }
+      },
+      "country": "China"
     },
     {
       "id": "movie-1221724",
@@ -10632,7 +10824,8 @@
       },
       "source": {
         "csv_title": "Les rêveurs"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1429348",
@@ -10673,7 +10866,8 @@
       },
       "source": {
         "csv_title": "L’étranger"
-      }
+      },
+      "country": "France · Belgium · Morocco"
     },
     {
       "id": "movie-961077",
@@ -10714,7 +10908,8 @@
       },
       "source": {
         "csv_title": "La petite dernière"
-      }
+      },
+      "country": "France · Germany"
     },
     {
       "id": "movie-804370",
@@ -10757,7 +10952,8 @@
       },
       "source": {
         "csv_title": "Arco"
-      }
+      },
+      "country": "France · UK · USA"
     },
     {
       "id": "movie-1456349",
@@ -10801,7 +10997,8 @@
       },
       "source": {
         "csv_title": "Un simple accident"
-      }
+      },
+      "country": "France · Iran · Luxembourg"
     },
     {
       "id": "movie-995133",
@@ -10930,7 +11127,8 @@
       },
       "source": {
         "csv_title": "Les chambres rouges"
-      }
+      },
+      "country": "Canada"
     },
     {
       "id": "movie-1136867",
@@ -10971,7 +11169,8 @@
       },
       "source": {
         "csv_title": "Materialists"
-      }
+      },
+      "country": "USA · Finland"
     },
     {
       "id": "movie-1079310",
@@ -11012,7 +11211,8 @@
       },
       "source": {
         "csv_title": "Vingt Dieux"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-170",
@@ -11056,7 +11256,8 @@
       },
       "source": {
         "csv_title": "28 jours plus tard"
-      }
+      },
+      "country": "UK"
     },
     {
       "id": "movie-1205515",
@@ -11097,7 +11298,8 @@
       },
       "source": {
         "csv_title": "Sorry, baby"
-      }
+      },
+      "country": "France · USA · Spain"
     },
     {
       "id": "movie-1367997",
@@ -11137,7 +11339,8 @@
       },
       "source": {
         "csv_title": "Perla"
-      }
+      },
+      "country": "Austria · Slovakia"
     },
     {
       "id": "movie-911430",
@@ -11178,7 +11381,8 @@
       },
       "source": {
         "csv_title": "F1 le film"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-75233",
@@ -11260,7 +11464,8 @@
       },
       "source": {
         "csv_title": "Thelma et Louise"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-666277",
@@ -11302,7 +11507,8 @@
       },
       "source": {
         "csv_title": "Past lives"
-      }
+      },
+      "country": "USA · South Korea"
     },
     {
       "id": "movie-1001083",
@@ -11346,7 +11552,8 @@
       },
       "source": {
         "csv_title": "Pendant ce temps sur Terre"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-1158996",
@@ -11386,7 +11593,8 @@
       },
       "source": {
         "csv_title": "L’histoire de Souleymane"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-973628",
@@ -11472,7 +11680,8 @@
       },
       "source": {
         "csv_title": "Amélie et la métaphysique des tubes"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1106739",
@@ -11513,7 +11722,8 @@
       },
       "source": {
         "csv_title": "Juré n2"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1477279",
@@ -11555,7 +11765,8 @@
       },
       "source": {
         "csv_title": "I love Peru"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1061474",
@@ -11598,7 +11809,8 @@
       },
       "source": {
         "csv_title": "Superman"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-842859",
@@ -11641,7 +11853,8 @@
       },
       "source": {
         "csv_title": "La plus précieuse des marchandises"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-617126",
@@ -11684,7 +11897,8 @@
       },
       "source": {
         "csv_title": "Les 4 Fantastiques"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1313144",
@@ -11724,7 +11938,8 @@
       },
       "source": {
         "csv_title": "L’accident de piano"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1244244",
@@ -11814,7 +12029,8 @@
       },
       "source": {
         "csv_title": "Detective Kien : The headless horror"
-      }
+      },
+      "country": "Vietnam"
     },
     {
       "id": "movie-1124566",
@@ -11854,7 +12070,8 @@
       },
       "source": {
         "csv_title": "Valeur sentimentale"
-      }
+      },
+      "country": "France · Turkey · Norway · Denmark · Sweden · Germany · UK"
     },
     {
       "id": "movie-1114513",
@@ -11897,7 +12114,8 @@
       },
       "source": {
         "csv_title": "Speak no evil (2024)"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1217484",
@@ -11940,7 +12158,8 @@
       },
       "source": {
         "csv_title": "Joli Joli"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1210732",
@@ -12030,7 +12249,8 @@
       },
       "source": {
         "csv_title": "Astérix : Le combat des chefs"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-986056",
@@ -12073,7 +12293,8 @@
       },
       "source": {
         "csv_title": "Thunderbolts*"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1056648",
@@ -12114,7 +12335,8 @@
       },
       "source": {
         "csv_title": "Le procès du chien"
-      }
+      },
+      "country": "France · Switzerland"
     },
     {
       "id": "movie-1261616",
@@ -12155,7 +12377,8 @@
       },
       "source": {
         "csv_title": "Anges et cie"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1277884",
@@ -12197,7 +12420,8 @@
       },
       "source": {
         "csv_title": "Partir un jour"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1235304",
@@ -12240,7 +12464,8 @@
       },
       "source": {
         "csv_title": "La venue de l’avenir"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-923939",
@@ -12328,7 +12553,8 @@
       },
       "source": {
         "csv_title": "Roqya"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1029955",
@@ -12369,7 +12595,8 @@
       },
       "source": {
         "csv_title": "Kinds of kindness"
-      }
+      },
+      "country": "Ireland · UK · USA"
     },
     {
       "id": "movie-615453",
@@ -12414,7 +12641,8 @@
       },
       "source": {
         "csv_title": "Ne Zha : birth of the demon child"
-      }
+      },
+      "country": "China"
     },
     {
       "id": "movie-980477",
@@ -12460,7 +12688,8 @@
       },
       "source": {
         "csv_title": "Ne Zha 2"
-      }
+      },
+      "country": "China"
     },
     {
       "id": "movie-1103621",
@@ -12500,7 +12729,8 @@
       },
       "source": {
         "csv_title": "Comment devenir riche (grâce à sa grand-mère)"
-      }
+      },
+      "country": "Thailand"
     },
     {
       "id": "movie-1000888",
@@ -12541,7 +12771,8 @@
       },
       "source": {
         "csv_title": "Les pistolets en plastiques"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1115379",
@@ -12583,7 +12814,8 @@
       },
       "source": {
         "csv_title": "Only the river flows"
-      }
+      },
+      "country": "China · Australia"
     },
     {
       "id": "movie-1071064",
@@ -12624,7 +12856,8 @@
       },
       "source": {
         "csv_title": "L’amour c’est surcoté"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-994108",
@@ -12667,7 +12900,8 @@
       },
       "source": {
         "csv_title": "All of us strangers (Sans jamais nous connaitre)"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-696506",
@@ -12752,7 +12986,8 @@
       },
       "source": {
         "csv_title": "A real pain"
-      }
+      },
+      "country": "Poland · USA"
     },
     {
       "id": "movie-1107215",
@@ -12793,7 +13028,8 @@
       },
       "source": {
         "csv_title": "Ma mère, Dieu et Sylvie Vartan"
-      }
+      },
+      "country": "France · Canada · USA"
     },
     {
       "id": "movie-426063",
@@ -12836,7 +13072,8 @@
       },
       "source": {
         "csv_title": "Nosferatu"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1155281",
@@ -12880,7 +13117,8 @@
       },
       "source": {
         "csv_title": "Creation of the Gods 2"
-      }
+      },
+      "country": "China"
     },
     {
       "id": "movie-1140535",
@@ -12923,7 +13161,8 @@
       },
       "source": {
         "csv_title": "Presence"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-549509",
@@ -12963,7 +13202,8 @@
       },
       "source": {
         "csv_title": "The Brutalist"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-1235610",
@@ -13003,7 +13243,8 @@
       },
       "source": {
         "csv_title": "Mercato"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1196470",
@@ -13048,7 +13289,8 @@
       },
       "source": {
         "csv_title": "Survivre (2024)"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-4977",
@@ -13092,7 +13334,8 @@
       },
       "source": {
         "csv_title": "Paprika"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-1244492",
@@ -13134,7 +13377,8 @@
       },
       "source": {
         "csv_title": "Look Back"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-974576",
@@ -13175,7 +13419,8 @@
       },
       "source": {
         "csv_title": "Conclave"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-389868",
@@ -13220,7 +13465,8 @@
       },
       "source": {
         "csv_title": "Seoul Station"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-1040496",
@@ -13262,7 +13508,8 @@
       },
       "source": {
         "csv_title": "Comme un lundi"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-983012",
@@ -13303,7 +13550,8 @@
       },
       "source": {
         "csv_title": "Les trois fantastiques"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1026227",
@@ -13346,7 +13594,8 @@
       },
       "source": {
         "csv_title": "Il reste encore demain"
-      }
+      },
+      "country": "Italy"
     },
     {
       "id": "movie-1072269",
@@ -13388,7 +13637,8 @@
       },
       "source": {
         "csv_title": "Le successeur"
-      }
+      },
+      "country": "France · Belgium · Canada"
     },
     {
       "id": "movie-794842",
@@ -13431,7 +13681,8 @@
       },
       "source": {
         "csv_title": "Chronique d'une liaison passagère"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1103678",
@@ -13471,7 +13722,8 @@
       },
       "source": {
         "csv_title": "Leurs enfants après eux"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1145479",
@@ -13558,7 +13810,8 @@
       },
       "source": {
         "csv_title": "Arcane (série)"
-      }
+      },
+      "country": "France · USA"
     },
     {
       "id": "movie-1136987",
@@ -13599,7 +13852,8 @@
       },
       "source": {
         "csv_title": "C’est pas moi"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-795775",
@@ -13641,7 +13895,8 @@
       },
       "source": {
         "csv_title": "Le monde après nous"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-823219",
@@ -13680,7 +13935,8 @@
       },
       "source": {
         "csv_title": "Flow"
-      }
+      },
+      "country": "France · Latvia · Belgium"
     },
     {
       "id": "movie-1137245",
@@ -13723,7 +13979,8 @@
       },
       "source": {
         "csv_title": "Trois amies"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1064213",
@@ -13765,7 +14022,8 @@
       },
       "source": {
         "csv_title": "Anora"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-933260",
@@ -13853,7 +14111,8 @@
       },
       "source": {
         "csv_title": "Saltburn"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-929590",
@@ -13938,7 +14197,8 @@
       },
       "source": {
         "csv_title": "L’esprit Coubertin"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1126692",
@@ -13980,7 +14240,8 @@
       },
       "source": {
         "csv_title": "Ni chaines ni maitres"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1063574",
@@ -14022,7 +14283,8 @@
       },
       "source": {
         "csv_title": "Miséricorde"
-      }
+      },
+      "country": "France · Portugal · Spain"
     },
     {
       "id": "movie-1001684",
@@ -14064,7 +14326,8 @@
       },
       "source": {
         "csv_title": "Niki"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-889737",
@@ -14106,7 +14369,8 @@
       },
       "source": {
         "csv_title": "Joker : folie à deux"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-959604",
@@ -14150,7 +14414,8 @@
       },
       "source": {
         "csv_title": "L'amour ouf"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-1102938",
@@ -14191,7 +14456,8 @@
       },
       "source": {
         "csv_title": "Le roman de Jim"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1001311",
@@ -14232,7 +14498,8 @@
       },
       "source": {
         "csv_title": "Sous la Seine"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1023922",
@@ -14273,7 +14540,8 @@
       },
       "source": {
         "csv_title": "Maxxxine"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1001274",
@@ -14315,7 +14583,8 @@
       },
       "source": {
         "csv_title": "La nuit se traîne"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-929831",
@@ -14360,7 +14629,8 @@
       },
       "source": {
         "csv_title": "L’empire"
-      }
+      },
+      "country": "France · Belgium · Germany · Italy · Portugal"
     },
     {
       "id": "movie-1084736",
@@ -14403,7 +14673,8 @@
       },
       "source": {
         "csv_title": "Le comte de Monte-Christo"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-856289",
@@ -14447,7 +14718,8 @@
       },
       "source": {
         "csv_title": "Creation of the gods 1"
-      }
+      },
+      "country": "China"
     },
     {
       "id": "movie-729854",
@@ -14490,7 +14762,8 @@
       },
       "source": {
         "csv_title": "Concrete Utopia"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-839369",
@@ -14530,7 +14803,8 @@
       },
       "source": {
         "csv_title": "May December"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-786892",
@@ -14574,7 +14848,8 @@
       },
       "source": {
         "csv_title": "Furiosa : une saga Mad Max"
-      }
+      },
+      "country": "Australia · USA"
     },
     {
       "id": "movie-1152014",
@@ -14615,7 +14890,8 @@
       },
       "source": {
         "csv_title": "Un p’tit truc en plus"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-9323",
@@ -14658,7 +14934,8 @@
       },
       "source": {
         "csv_title": "Ghost in the shell"
-      }
+      },
+      "country": "Japan · UK"
     },
     {
       "id": "movie-1158416",
@@ -14700,7 +14977,8 @@
       },
       "source": {
         "csv_title": "En attendant la nuit"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-948549",
@@ -14743,7 +15021,8 @@
       },
       "source": {
         "csv_title": "Love lies bleeding"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-1022789",
@@ -14786,7 +15065,8 @@
       },
       "source": {
         "csv_title": "Vice Versa 2"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-49049",
@@ -14829,7 +15109,8 @@
       },
       "source": {
         "csv_title": "Dredd"
-      }
+      },
+      "country": "South Africa · UK · USA · India"
     },
     {
       "id": "movie-944401",
@@ -14917,7 +15198,8 @@
       },
       "source": {
         "csv_title": "Le Procès Goldman"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-942881",
@@ -14963,7 +15245,8 @@
       },
       "source": {
         "csv_title": "Le château solitaire dans le miroir"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-680531",
@@ -15007,7 +15290,8 @@
       },
       "source": {
         "csv_title": "Le bal des folles"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-965890",
@@ -15051,7 +15335,8 @@
       },
       "source": {
         "csv_title": "Vincent doit mourir"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-523936",
@@ -15095,7 +15380,8 @@
       },
       "source": {
         "csv_title": "Méandre"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-960044",
@@ -15137,7 +15423,8 @@
       },
       "source": {
         "csv_title": "Une affaire d'honneur"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-753342",
@@ -15180,7 +15467,8 @@
       },
       "source": {
         "csv_title": "Napoléon"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1161108",
@@ -15310,7 +15598,8 @@
       },
       "source": {
         "csv_title": "Coup de chance"
-      }
+      },
+      "country": "France · UK · USA"
     },
     {
       "id": "movie-1011985",
@@ -15357,7 +15646,8 @@
       },
       "source": {
         "csv_title": "Kung Fu Panda 4"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-1216452",
@@ -15397,7 +15687,8 @@
       },
       "source": {
         "csv_title": "Heureux gagnants"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-964877",
@@ -15438,7 +15729,8 @@
       },
       "source": {
         "csv_title": "Nous, Les Leroy"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-560016",
@@ -15479,7 +15771,8 @@
       },
       "source": {
         "csv_title": "Monkey Man"
-      }
+      },
+      "country": "Canada · Singapore · USA"
     },
     {
       "id": "movie-667717",
@@ -15526,7 +15819,8 @@
       },
       "source": {
         "csv_title": "Le royaume des abysses"
-      }
+      },
+      "country": "China"
     },
     {
       "id": "movie-693134",
@@ -15569,7 +15863,8 @@
       },
       "source": {
         "csv_title": "Dune 2"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-989224",
@@ -15610,7 +15905,8 @@
       },
       "source": {
         "csv_title": "Toni, en famille"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-467244",
@@ -15652,7 +15948,8 @@
       },
       "source": {
         "csv_title": "The Zone of Interest"
-      }
+      },
+      "country": "USA · Poland · UK"
     },
     {
       "id": "movie-957608",
@@ -15694,7 +15991,8 @@
       },
       "source": {
         "csv_title": "Chien de la casse"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1045770",
@@ -15737,7 +16035,8 @@
       },
       "source": {
         "csv_title": "Daaaaaali !"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1257407",
@@ -15777,7 +16076,8 @@
       },
       "source": {
         "csv_title": "When the light breaks"
-      }
+      },
+      "country": "France · Croatia · Iceland · Netherlands"
     },
     {
       "id": "movie-782",
@@ -15822,7 +16122,8 @@
       },
       "source": {
         "csv_title": "Bienvenue à Gattaca"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-852046",
@@ -15867,7 +16168,8 @@
       },
       "source": {
         "csv_title": "Athena"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-747188",
@@ -15909,7 +16211,8 @@
       },
       "source": {
         "csv_title": "Asteroid City"
-      }
+      },
+      "country": "USA · Germany"
     },
     {
       "id": "movie-787699",
@@ -15951,7 +16254,8 @@
       },
       "source": {
         "csv_title": "Wonka"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-845111",
@@ -15995,7 +16299,8 @@
       },
       "source": {
         "csv_title": "Les Trois Mousquetaires : Milady"
-      }
+      },
+      "country": "France · Germany · Spain · Belgium"
     },
     {
       "id": "movie-1063879",
@@ -16036,7 +16341,8 @@
       },
       "source": {
         "csv_title": "Vermines"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-792307",
@@ -16079,7 +16385,8 @@
       },
       "source": {
         "csv_title": "Pauvres créatures / Poor thing"
-      }
+      },
+      "country": "Ireland · UK · USA"
     },
     {
       "id": "movie-940721",
@@ -16122,7 +16429,8 @@
       },
       "source": {
         "csv_title": "Godzilla minus one"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-995767",
@@ -16164,7 +16472,8 @@
       },
       "source": {
         "csv_title": "Omar la fraise"
-      }
+      },
+      "country": "France · Algeria"
     },
     {
       "id": "movie-194662",
@@ -16206,7 +16515,8 @@
       },
       "source": {
         "csv_title": "Birdman"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-487558",
@@ -16250,7 +16560,8 @@
       },
       "source": {
         "csv_title": "Blackkklansman"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-949903",
@@ -16293,7 +16604,8 @@
       },
       "source": {
         "csv_title": "Apaches"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-38142",
@@ -16337,7 +16649,8 @@
       },
       "source": {
         "csv_title": "5 centimètres par seconde"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-976893",
@@ -16377,7 +16690,8 @@
       },
       "source": {
         "csv_title": "Perfect days"
-      }
+      },
+      "country": "Germany · Japan"
     },
     {
       "id": "movie-978035",
@@ -16417,7 +16731,8 @@
       },
       "source": {
         "csv_title": "Bâtiment 5"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-843843",
@@ -16456,7 +16771,8 @@
       },
       "source": {
         "csv_title": "Soudain seuls"
-      }
+      },
+      "country": "France · Belgium · Iceland"
     },
     {
       "id": "movie-381283",
@@ -16498,7 +16814,8 @@
       },
       "source": {
         "csv_title": "Mother !"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-976830",
@@ -16541,7 +16858,8 @@
       },
       "source": {
         "csv_title": "Gueules noires"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-962309",
@@ -16581,7 +16899,8 @@
       },
       "source": {
         "csv_title": "Second Tour"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-466420",
@@ -16626,7 +16945,8 @@
       },
       "source": {
         "csv_title": "Killers of the flower moon"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-508883",
@@ -16716,7 +17036,8 @@
       },
       "source": {
         "csv_title": "Mars express"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1001245",
@@ -16756,7 +17077,8 @@
       },
       "source": {
         "csv_title": "La Vénus d'argent"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-16306",
@@ -16798,7 +17120,8 @@
       },
       "source": {
         "csv_title": "La Planète Sauvage"
-      }
+      },
+      "country": "France · Czechoslovakia"
     },
     {
       "id": "movie-412656",
@@ -16885,7 +17208,8 @@
       },
       "source": {
         "csv_title": "Taxi Driver"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-965150",
@@ -16925,7 +17249,8 @@
       },
       "source": {
         "csv_title": "Aftersun"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-493529",
@@ -17010,7 +17335,8 @@
       },
       "source": {
         "csv_title": "Le portrait interdit"
-      }
+      },
+      "country": "France · China"
     },
     {
       "id": "movie-670292",
@@ -17094,7 +17420,8 @@
       },
       "source": {
         "csv_title": "Une année difficile"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-943134",
@@ -17137,7 +17464,8 @@
       },
       "source": {
         "csv_title": "Le règne animal"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-925943",
@@ -17178,7 +17506,8 @@
       },
       "source": {
         "csv_title": "Saint Omer"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-863442",
@@ -17264,7 +17593,8 @@
       },
       "source": {
         "csv_title": "Viking"
-      }
+      },
+      "country": "Canada"
     },
     {
       "id": "movie-308266",
@@ -17306,7 +17636,8 @@
       },
       "source": {
         "csv_title": "War Dogs"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-715253",
@@ -17348,7 +17679,8 @@
       },
       "source": {
         "csv_title": "Phantom"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-818721",
@@ -17389,7 +17721,8 @@
       },
       "source": {
         "csv_title": "Visions"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-915935",
@@ -17431,7 +17764,8 @@
       },
       "source": {
         "csv_title": "Anatomie d'une chute"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-888003",
@@ -17473,7 +17807,8 @@
       },
       "source": {
         "csv_title": "Le livre des solutions"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-934506",
@@ -17514,7 +17849,8 @@
       },
       "source": {
         "csv_title": "Un Métier Sérieux"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-4553",
@@ -17556,7 +17892,8 @@
       },
       "source": {
         "csv_title": "The Machinist"
-      }
+      },
+      "country": "Spain"
     },
     {
       "id": "movie-283366",
@@ -17643,7 +17980,8 @@
       },
       "source": {
         "csv_title": "Moonlight"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-712123",
@@ -17687,7 +18025,8 @@
       },
       "source": {
         "csv_title": "Teddy"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-585831",
@@ -17730,7 +18069,8 @@
       },
       "source": {
         "csv_title": "The Bad Guys"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-180299",
@@ -17772,7 +18112,8 @@
       },
       "source": {
         "csv_title": "The Raid 2"
-      }
+      },
+      "country": "Indonesia · USA"
     },
     {
       "id": "movie-1110358",
@@ -17814,7 +18155,8 @@
       },
       "source": {
         "csv_title": "Yannick"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-783675",
@@ -17856,7 +18198,8 @@
       },
       "source": {
         "csv_title": "The first Slam Dunk"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-98566",
@@ -17943,7 +18286,8 @@
       },
       "source": {
         "csv_title": "Sur la branche"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-985617",
@@ -17984,7 +18328,8 @@
       },
       "source": {
         "csv_title": "Reality"
-      }
+      },
+      "country": "USA · UK"
     },
     {
       "id": "movie-565770",
@@ -18027,7 +18372,8 @@
       },
       "source": {
         "csv_title": "Blue Beetle"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-989593",
@@ -18067,7 +18413,8 @@
       },
       "source": {
         "csv_title": "La voie royale"
-      }
+      },
+      "country": "France · Switzerland"
     },
     {
       "id": "movie-980489",
@@ -18109,7 +18456,8 @@
       },
       "source": {
         "csv_title": "Gran Turismo"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-258363",
@@ -18150,7 +18498,8 @@
       },
       "source": {
         "csv_title": "Desierto"
-      }
+      },
+      "country": "France · Mexico · USA"
     },
     {
       "id": "movie-13",
@@ -18193,7 +18542,8 @@
       },
       "source": {
         "csv_title": "Forrest Gump"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-501395",
@@ -18281,7 +18631,8 @@
       },
       "source": {
         "csv_title": "Heartbeast (Pulse)"
-      }
+      },
+      "country": "France · Finland · Germany"
     },
     {
       "id": "movie-781099",
@@ -18321,7 +18672,8 @@
       },
       "source": {
         "csv_title": "Inexorable"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-979",
@@ -18364,7 +18716,8 @@
       },
       "source": {
         "csv_title": "Irréversible"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-669654",
@@ -18404,7 +18757,8 @@
       },
       "source": {
         "csv_title": "La Ruche"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-927944",
@@ -18445,7 +18799,8 @@
       },
       "source": {
         "csv_title": "Le Soleil de Trop Près"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-820697",
@@ -18488,7 +18843,8 @@
       },
       "source": {
         "csv_title": "Les Cinq Diables"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-292431",
@@ -18571,7 +18927,8 @@
       },
       "source": {
         "csv_title": "Lux Aeterna"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-712124",
@@ -18613,7 +18970,8 @@
       },
       "source": {
         "csv_title": "Médecin de Nuit"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-508479",
@@ -18654,7 +19012,8 @@
       },
       "source": {
         "csv_title": "De l’Or Pour Les Chiens"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-976573",
@@ -18788,7 +19147,8 @@
       },
       "source": {
         "csv_title": "Oppenheimer"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-901121",
@@ -18829,7 +19189,8 @@
       },
       "source": {
         "csv_title": "Ca tourne à Seoul !"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-1000079",
@@ -18870,7 +19231,8 @@
       },
       "source": {
         "csv_title": "Pourquoi tu souris ?"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-691214",
@@ -18911,7 +19273,8 @@
       },
       "source": {
         "csv_title": "Pacifiction"
-      }
+      },
+      "country": "France · French Polynesia · Germany · Portugal · Spain"
     },
     {
       "id": "movie-843",
@@ -18953,7 +19316,8 @@
       },
       "source": {
         "csv_title": "In The Mood For Love"
-      }
+      },
+      "country": "France · Hong Kong"
     },
     {
       "id": "movie-116149",
@@ -19132,7 +19496,8 @@
       },
       "source": {
         "csv_title": "Flash"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-447365",
@@ -19176,7 +19541,8 @@
       },
       "source": {
         "csv_title": "Les gardiens de la galaxie 3"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-959092",
@@ -19218,7 +19584,8 @@
       },
       "source": {
         "csv_title": "Farang"
-      }
+      },
+      "country": "France · Thailand"
     },
     {
       "id": "movie-952701",
@@ -19258,7 +19625,8 @@
       },
       "source": {
         "csv_title": "Retour à Seoul"
-      }
+      },
+      "country": "France · Belgium · Cambodia · Germany · Romania · South Korea"
     },
     {
       "id": "movie-958161",
@@ -19301,7 +19669,8 @@
       },
       "source": {
         "csv_title": "La Dernière Reine"
-      }
+      },
+      "country": "France · Algeria · Qatar · Saudi Arabia · Taiwan"
     },
     {
       "id": "movie-923344",
@@ -19343,7 +19712,8 @@
       },
       "source": {
         "csv_title": "About Kim Sohee"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-957606",
@@ -19383,7 +19753,8 @@
       },
       "source": {
         "csv_title": "Le Jeune Imame"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-331482",
@@ -19425,7 +19796,8 @@
       },
       "source": {
         "csv_title": "Les Filles du Dr March"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-788030",
@@ -19466,7 +19838,8 @@
       },
       "source": {
         "csv_title": "Umami"
-      }
+      },
+      "country": "France · Japan"
     },
     {
       "id": "movie-545611",
@@ -19510,7 +19883,8 @@
       },
       "source": {
         "csv_title": "Everything Everywhere All at Once"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-888082",
@@ -19592,7 +19966,8 @@
       },
       "source": {
         "csv_title": "Je Verrai Toujours Vos Visages"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-974561",
@@ -19681,7 +20056,8 @@
       },
       "source": {
         "csv_title": "Super Mario Bros"
-      }
+      },
+      "country": "Japan · USA"
     },
     {
       "id": "movie-796185",
@@ -19725,7 +20101,8 @@
       },
       "source": {
         "csv_title": "Les Trois Mousquetaires"
-      }
+      },
+      "country": "France · Belgium · Germany · Spain"
     },
     {
       "id": "movie-916224",
@@ -19770,7 +20147,8 @@
       },
       "source": {
         "csv_title": "Suzume"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-984307",
@@ -19810,7 +20188,8 @@
       },
       "source": {
         "csv_title": "Les Complices"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-1009116",
@@ -19851,7 +20230,8 @@
       },
       "source": {
         "csv_title": "Une Histoire d’Amour"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-605886",
@@ -19894,7 +20274,8 @@
       },
       "source": {
         "csv_title": "Misanthrope"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-674324",
@@ -19936,7 +20317,8 @@
       },
       "source": {
         "csv_title": "The Banshees of Inisherin"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-497828",
@@ -19978,7 +20360,8 @@
       },
       "source": {
         "csv_title": "Triangle of Sadness (Sans Filtres)"
-      }
+      },
+      "country": "France · Denmark · Germany · Greece · Mexico · Sweden · Switzerland · Turkey · UK · USA"
     },
     {
       "id": "movie-967585",
@@ -20019,7 +20402,8 @@
       },
       "source": {
         "csv_title": "Alibi . com 2"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-804095",
@@ -20105,7 +20489,8 @@
       },
       "source": {
         "csv_title": "Mon Crime"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-785084",
@@ -20145,7 +20530,8 @@
       },
       "source": {
         "csv_title": "The Whale"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-944306",
@@ -20186,7 +20572,8 @@
       },
       "source": {
         "csv_title": "En Plein Feu"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-800301",
@@ -20227,7 +20614,8 @@
       },
       "source": {
         "csv_title": "Et l’Amour Dans Tout ça ?"
-      }
+      },
+      "country": "France · UK"
     },
     {
       "id": "movie-926893",
@@ -20267,7 +20655,8 @@
       },
       "source": {
         "csv_title": "Houria"
-      }
+      },
+      "country": "France · Algeria"
     },
     {
       "id": "movie-603692",
@@ -20309,7 +20698,8 @@
       },
       "source": {
         "csv_title": "John Wick 4"
-      }
+      },
+      "country": "Germany · USA"
     },
     {
       "id": "movie-989672",
@@ -20351,7 +20741,8 @@
       },
       "source": {
         "csv_title": "L’amour et les forêts"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-925714",
@@ -20394,7 +20785,8 @@
       },
       "source": {
         "csv_title": "La Syndicaliste"
-      }
+      },
+      "country": "France · Germany"
     },
     {
       "id": "movie-615777",
@@ -20436,7 +20828,8 @@
       },
       "source": {
         "csv_title": "Babylon"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-586393",
@@ -20477,7 +20870,8 @@
       },
       "source": {
         "csv_title": "La famille Asada"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-967874",
@@ -20567,7 +20961,8 @@
       },
       "source": {
         "csv_title": "Green Book"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-833384",
@@ -20652,7 +21047,8 @@
       },
       "source": {
         "csv_title": "Peter Von Kant"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-438631",
@@ -20694,7 +21090,8 @@
       },
       "source": {
         "csv_title": "Dune"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-811596",
@@ -20735,7 +21132,8 @@
       },
       "source": {
         "csv_title": "Notre-Dame Brûle"
-      }
+      },
+      "country": "France · Italy"
     },
     {
       "id": "movie-771077",
@@ -20777,7 +21175,8 @@
       },
       "source": {
         "csv_title": "En Corps"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-633844",
@@ -20866,7 +21265,8 @@
       },
       "source": {
         "csv_title": "Coupez !"
-      }
+      },
+      "country": "France · Japan · USA · UK"
     },
     {
       "id": "movie-735697",
@@ -20908,7 +21308,8 @@
       },
       "source": {
         "csv_title": "Incroyable Mais Vrai"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-682507",
@@ -20950,7 +21351,8 @@
       },
       "source": {
         "csv_title": "Là Où Chantent Les Ecrevisses"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-810389",
@@ -20992,7 +21394,8 @@
       },
       "source": {
         "csv_title": "Le Visiteur du Futur"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-823951",
@@ -21079,7 +21482,8 @@
       },
       "source": {
         "csv_title": "Bêtes Blondes"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-637534",
@@ -21166,7 +21570,8 @@
       },
       "source": {
         "csv_title": "Blade Runner 2049"
-      }
+      },
+      "country": "Canada · UK · USA"
     },
     {
       "id": "movie-487437",
@@ -21207,7 +21612,8 @@
       },
       "source": {
         "csv_title": "Blanche Comme Neige"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-712178",
@@ -21248,7 +21654,8 @@
       },
       "source": {
         "csv_title": "Gagarine"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-661229",
@@ -21289,7 +21696,8 @@
       },
       "source": {
         "csv_title": "Garçon Chiffon"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-471506",
@@ -21331,7 +21739,8 @@
       },
       "source": {
         "csv_title": "Greta"
-      }
+      },
+      "country": "USA · Ireland · South Korea · Hong Kong"
     },
     {
       "id": "movie-475557",
@@ -21417,7 +21826,8 @@
       },
       "source": {
         "csv_title": "La Belle Epoque"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-585093",
@@ -21458,7 +21868,8 @@
       },
       "source": {
         "csv_title": "L’Angle Mort"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-572509",
@@ -21499,7 +21910,8 @@
       },
       "source": {
         "csv_title": "Le Rire"
-      }
+      },
+      "country": "Canada"
     },
     {
       "id": "movie-661935",
@@ -21541,7 +21953,8 @@
       },
       "source": {
         "csv_title": "Les Choses qu’on Dit, Les Choses qu’on Fait"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-737413",
@@ -21671,7 +22084,8 @@
       },
       "source": {
         "csv_title": "Les Proies"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-475928",
@@ -21758,7 +22172,8 @@
       },
       "source": {
         "csv_title": "Little Joe"
-      }
+      },
+      "country": "Austria · Germany · UK"
     },
     {
       "id": "movie-387426",
@@ -21893,7 +22308,8 @@
       },
       "source": {
         "csv_title": "Parasite"
-      }
+      },
+      "country": "South Korea"
     },
     {
       "id": "movie-581392",
@@ -21981,7 +22397,8 @@
       },
       "source": {
         "csv_title": "Portrait de la Jeune Fille en Feu"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-749087",
@@ -22065,7 +22482,8 @@
       },
       "source": {
         "csv_title": "Punch Drunk Love"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-619264",
@@ -22153,7 +22571,8 @@
       },
       "source": {
         "csv_title": "The Revenant"
-      }
+      },
+      "country": "Canada · Hong Kong · Taiwan · USA"
     },
     {
       "id": "movie-244786",
@@ -22195,7 +22614,8 @@
       },
       "source": {
         "csv_title": "Whiplash"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-372058",
@@ -22239,7 +22659,8 @@
       },
       "source": {
         "csv_title": "Your Name"
-      }
+      },
+      "country": "Japan"
     },
     {
       "id": "movie-660000",
@@ -22282,7 +22703,8 @@
       },
       "source": {
         "csv_title": "Illusions Perdues"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-424277",
@@ -22324,7 +22746,8 @@
       },
       "source": {
         "csv_title": "Annette"
-      }
+      },
+      "country": "France · Belgium · Germany · Greece · Japan · Mexico · Switzerland"
     },
     {
       "id": "movie-925102",
@@ -22366,7 +22789,8 @@
       },
       "source": {
         "csv_title": "La Nuit du 12"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-919573",
@@ -22450,7 +22874,8 @@
       },
       "source": {
         "csv_title": "A Plein Temps"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-848685",
@@ -22492,7 +22917,8 @@
       },
       "source": {
         "csv_title": "As Bestas"
-      }
+      },
+      "country": "France · Spain"
     },
     {
       "id": "movie-851303",
@@ -22534,7 +22960,8 @@
       },
       "source": {
         "csv_title": "En attendant Bojangles"
-      }
+      },
+      "country": "France · Belgium"
     },
     {
       "id": "movie-964960",
@@ -22659,7 +23086,8 @@
       },
       "source": {
         "csv_title": "Nomadland"
-      }
+      },
+      "country": "USA"
     },
     {
       "id": "movie-858024",
@@ -22699,7 +23127,8 @@
       },
       "source": {
         "csv_title": "Hamnet"
-      }
+      },
+      "country": "UK · USA"
     },
     {
       "id": "movie-1159206",
@@ -22738,7 +23167,8 @@
       },
       "source": {
         "csv_title": "Father Mother Sister Brother"
-      }
+      },
+      "country": "France · USA · Ireland · Italy · Germany · UK"
     },
     {
       "id": "movie-1290436",
@@ -22817,7 +23247,8 @@
       },
       "source": {
         "csv_title": "Dossier 137"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1430820",
@@ -22895,7 +23326,8 @@
       },
       "source": {
         "csv_title": "Little Trouble Girls"
-      }
+      },
+      "country": "Croatia · Slovenia · Serbia · Italy"
     },
     {
       "id": "movie-1278263",
@@ -22935,7 +23367,8 @@
       },
       "source": {
         "csv_title": "Les graines du figuier sauvage"
-      }
+      },
+      "country": "France · Germany"
     },
     {
       "id": "movie-16642",
@@ -23056,7 +23489,8 @@
       },
       "source": {
         "csv_title": "Romeria"
-      }
+      },
+      "country": "Spain · Germany"
     },
     {
       "id": "movie-1432817",
@@ -23094,7 +23528,8 @@
       },
       "source": {
         "csv_title": "Mi Amor"
-      }
+      },
+      "country": "France"
     },
     {
       "id": "movie-1170215",
@@ -23135,7 +23570,8 @@
       },
       "source": {
         "csv_title": "Junk World"
-      }
+      },
+      "country": "Japan"
     }
   ]
 }
