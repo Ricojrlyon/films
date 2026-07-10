@@ -2314,7 +2314,8 @@ const state = {
 // ============================================================
 async function loadFilms() {
   try {
-    const r = await fetch('./films.json');
+    // Cache-buster : le CDN de GitHub Pages sert films.json avec ~10 min de cache
+    const r = await fetch('./films.json?t=' + Date.now());
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
     state.films = data.films || [];
@@ -2375,6 +2376,17 @@ function initFilters() {
     sorted.map(y => y.startsWith('before-')
       ? { value: y, label: 'avant ' + y.slice(7) }
       : { value: y, label: y }));
+
+  // fillSelect remet le DOM sur le placeholder : réappliquer les filtres actifs,
+  // sinon les selects affichent « tous » alors que la liste reste filtrée
+  const selMap = { 'filter-genre': 'genre', 'filter-lieu': 'lieu', 'filter-decade': 'decade', 'filter-yearvu': 'yearvu' };
+  Object.entries(selMap).forEach(([id, key]) => {
+    if (!state.filters[key]) return;
+    const sel = document.getElementById(id);
+    sel.value = String(state.filters[key]);
+    // Option disparue (ex. dernier film du genre supprimé) → désactiver le filtre
+    if (sel.value !== String(state.filters[key])) state.filters[key] = '';
+  });
 
   // Counts on status tabs
   document.getElementById('count-vu').textContent = state.films.filter(f => f.user?.statut === 'vu').length;
@@ -2638,14 +2650,20 @@ async function fetchAndRenderDiscover(category) {
   try {
     const results = await tmdbBrowse(category);
     state.discoverCache[category] = results;
+    // L'utilisateur a pu changer de vue pendant le fetch — ne pas écraser sa grille
+    if (state.view !== 'discover') return;
     renderTmdbGrid(results);
   } catch (e) {
+    if (state.view !== 'discover') return;
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur tmdb : ${escapeHtml(e.message)}</div>`;
     countEl.textContent = '0';
   }
 }
 
+let discoverSearchSeq = 0;
 async function handleDiscoverSearch(query) {
+  // Jeton de séquence : une réponse lente ne doit pas écraser celle d'une frappe plus récente
+  const seq = ++discoverSearchSeq;
   // Switch from category browse to search
   const grid = document.getElementById('grid');
   const countEl = document.getElementById('result-count');
@@ -2660,8 +2678,11 @@ async function handleDiscoverSearch(query) {
   countEl.textContent = '…';
   try {
     const results = await tmdbSearch(query);
+    // L'utilisateur a pu changer de vue ou relancer une recherche pendant le fetch
+    if (seq !== discoverSearchSeq || state.view !== 'discover') return;
     renderTmdbGrid(results.slice(0, 40));
   } catch (e) {
+    if (seq !== discoverSearchSeq || state.view !== 'discover') return;
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur tmdb : ${escapeHtml(e.message)}</div>`;
     countEl.textContent = '0';
   }
@@ -2744,9 +2765,12 @@ async function openTmdbItem(item) {
   document.body.style.overflow = 'hidden';
   try {
     const detail = await tmdbDetails(item.id, item.media_type || 'movie');
+    // L'utilisateur a pu fermer le modal pendant le chargement — ne pas le rouvrir
+    if (!document.getElementById('modal-backdrop').classList.contains('open')) return;
     const film = buildFilmFromTmdb(detail, item.media_type || 'movie');
     openModal(film, { tmdbOnly: true });
   } catch (e) {
+    if (!document.getElementById('modal-backdrop').classList.contains('open')) return;
     body.innerHTML = `<div class="error-inline" style="margin: 20px;">erreur : ${escapeHtml(e.message)}</div>`;
   }
 }
@@ -2909,21 +2933,26 @@ async function fetchAndRenderReco(forceRefresh = false) {
       state.recoPool = pool;
       // Save to localStorage
       try { localStorage.setItem(cacheKey, JSON.stringify(pool)); } catch {}
-      // Clear older month caches (cleanup)
+      // Clear older month caches (cleanup) — collecter d'abord : removeItem
+      // pendant l'itération par index décale les clés restantes et en saute
+      const stale = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('films_reco_pool_') && k !== cacheKey) {
-          localStorage.removeItem(k);
-        }
+        if (k && k.startsWith('films_reco_pool_') && k !== cacheKey) stale.push(k);
       }
+      stale.forEach(k => localStorage.removeItem(k));
     } catch (e) {
+      refreshBtn.disabled = false;
+      if (state.view !== 'reco') return;
       grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur : ${escapeHtml(e.message)}</div>`;
       countEl.textContent = '0';
-      refreshBtn.disabled = false;
       return;
     }
     refreshBtn.disabled = false;
   }
+
+  // L'utilisateur a pu changer de vue pendant le fetch — ne pas écraser sa grille
+  if (state.view !== 'reco') return;
 
   if (pool.length === 0) {
     ctxEl.innerHTML += '<br><span style="color: var(--ink-mute); font-size: 12px;">tmdb n\'a rien à recommander à partir de ces films pour le moment.</span>';
@@ -3220,10 +3249,13 @@ async function addTmdbFilmToCollection(film, statut, userData) {
     if (state.view === 'discover') {
       fetchAndRenderDiscover(state.discoverCategory);
     } else if (state.view === 'reco' && state.recoDisplayed) {
-      renderTmdbGrid(state.recoDisplayed.filter(it => {
+      // Réassigner (pas juste filtrer à la volée) : sinon le film ajouté
+      // réapparaît au prochain re-render de la liste
+      state.recoDisplayed = state.recoDisplayed.filter(it => {
         const id = (it.media_type || 'movie') + '-' + it.id;
         return id !== film.id;
-      }));
+      });
+      renderTmdbGrid(state.recoDisplayed);
     }
     closeModal();
     showToast('✓ ajouté : ' + film.title, 'success');
@@ -3259,8 +3291,8 @@ function renderStats() {
   const rated = vus.filter(f => f.user?.rating);
   const avgRating = rated.length ? (rated.reduce((s, f) => s + f.user.rating, 0) / rated.length) : 0;
 
-  // Favorites
-  const favorites = films.filter(f => f.user?.favorite).length;
+  // Favorites — vus uniquement, cohérent avec le libellé « % des vus » de la carte
+  const favorites = vus.filter(f => f.user?.favorite).length;
 
   // Films per year, find peak year
   const perYear = new Map();
@@ -3800,7 +3832,9 @@ function renderGenderBalance() {
 
   const withDirGender = vus.filter(f => f.director_gender && f.director_gender > 0).length;
   const withCastGender = vus.filter(f => (f.cast_genders || []).some(g => g > 0)).length;
-  const needsEnrich = vus.some(f => f.director && (!f.director_gender || f.director_gender === 0));
+  // Aligné sur le périmètre d'enrichGender (films uniquement, avec tmdb_id) :
+  // sinon des séries sans données de genre laissaient le bouton affiché à vie
+  const needsEnrich = vus.some(f => f.type === 'movie' && f.tmdb_id && f.director && (!f.director_gender || f.director_gender === 0));
 
   // Show enrich button whenever data is missing, admin mode controls whether the
   // button actually does anything (checked inside enrichGender itself).
@@ -4235,12 +4269,15 @@ async function tmdbBrowse(category) {
     fetch(baseUrl + '&page=2').then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] })),
   ]);
   const all = [...(p1.results || []), ...(p2.results || [])];
-  // Add media_type for movie-only endpoints (TMDB doesn't include it there)
-  const isTrending = category === 'trending';
-  return all.map(it => ({
-    ...it,
-    media_type: it.media_type || (isTrending ? 'movie' : 'movie'),
-  }));
+  // trending/all renvoie aussi des personnes — pas affichables comme films
+  // (pas de poster_path, et le clic requêterait /movie/{id_de_personne})
+  return all
+    .filter(it => it.media_type !== 'person')
+    .map(it => ({
+      ...it,
+      // Add media_type for movie-only endpoints (TMDB doesn't include it there)
+      media_type: it.media_type || 'movie',
+    }));
 }
 
 // Build a full film object from TMDB detail data (movie or tv)
@@ -4439,6 +4476,19 @@ async function ghGetFile(path) {
   return { content: decoded, sha: data.sha };
 }
 
+// Adopte le films.json lu via l'API GitHub (toujours à jour, contrairement au
+// CDN de Pages) pour que la session admin parte de l'état réellement persisté.
+function adoptFilmsFromApi(content) {
+  try {
+    const data = JSON.parse(content);
+    if (!data || !Array.isArray(data.films)) return;
+    state.films = data.films;
+    initFilters();
+    if (state.view === 'a_voir' || state.view === 'vu') applyFilters({ preservePage: true });
+    renderStats();
+  } catch { /* contenu vide ou invalide — on garde l'état chargé au boot */ }
+}
+
 async function ghPutFile(path, content, sha, message) {
   // Encode UTF-8 to base64
   const b64 = btoa(unescape(encodeURIComponent(content)));
@@ -4473,7 +4523,8 @@ async function saveFilmsToGithub(message) {
     count: state.films.length,
     films: state.films,
   };
-  const content = JSON.stringify(payload, null, 2);
+  // Compact : l'API GitHub Contents refuse de relire les fichiers > 1 Mo (le SHA devient irrécupérable)
+  const content = JSON.stringify(payload);
   try {
     const result = await ghPutFile('films.json', content, admin.filmsSHA, message);
     admin.filmsSHA = result.content.sha;
@@ -4579,9 +4630,11 @@ async function setupAdmin() {
     btn.textContent = 'chiffrement…';
     const encrypted = await encryptWithCode(pat, code);
     saveEncryptedPAT(encrypted);
-    // Fetch SHA for first save
+    // Fetch SHA for first save + resynchroniser l'état depuis l'API (le boot
+    // a pu charger une version périmée du CDN)
     const cur = await ghGetFile('films.json');
     admin.filmsSHA = cur.sha;
+    adoptFilmsFromApi(cur.content);
     // Activate
     admin.active = true;
     document.body.classList.add('admin-mode');
@@ -4621,9 +4674,11 @@ async function unlockAdmin() {
     admin.ghToken = pat;
     btn.textContent = 'vérification du token…';
     await ghTestToken();
-    // Fetch SHA
+    // Fetch SHA + resynchroniser l'état depuis l'API (le boot a pu charger
+    // une version périmée du CDN)
     const cur = await ghGetFile('films.json');
     admin.filmsSHA = cur.sha;
+    adoptFilmsFromApi(cur.content);
     admin.active = true;
     document.body.classList.add('admin-mode');
     document.getElementById('nav-admin').classList.add('active');
@@ -4737,7 +4792,10 @@ function closeAddModal() {
 }
 
 let addSearchTimer = null;
+let addSearchSeq = 0;
 async function handleAddSearch(query) {
+  // Jeton de séquence : une réponse lente ne doit pas écraser celle d'une frappe plus récente
+  const seq = ++addSearchSeq;
   const resultsEl = document.getElementById('add-results');
   const statusEl = document.getElementById('add-search-status');
   if (!query || query.length < 2) {
@@ -4748,6 +4806,7 @@ async function handleAddSearch(query) {
   statusEl.textContent = 'recherche…';
   try {
     const results = await tmdbSearch(query);
+    if (seq !== addSearchSeq) return;
     statusEl.textContent = results.length + ' résultats';
     resultsEl.innerHTML = '';
     for (const r of results.slice(0, 16)) {
@@ -4764,6 +4823,7 @@ async function handleAddSearch(query) {
       resultsEl.appendChild(div);
     }
   } catch (e) {
+    if (seq !== addSearchSeq) return;
     statusEl.textContent = 'erreur : ' + e.message;
   }
 }
@@ -5018,6 +5078,7 @@ async function saveEditedFilm(filmId) {
   const saveBtn = document.querySelector('.edit-form .edit-save');
   saveBtn.disabled = true;
   saveBtn.textContent = 'enregistrement…';
+  const prevUser = film.user;
   try {
     state.films[filmIndex].user = newUser;
     await saveFilmsToGithub('edit: ' + film.title);
@@ -5027,6 +5088,8 @@ async function saveEditedFilm(filmId) {
     closeModal();
     showToast('✓ ' + film.title + ' mis à jour', 'success');
   } catch (e) {
+    // Rollback : le save a échoué, films.json contient toujours les anciennes valeurs
+    state.films[filmIndex].user = prevUser;
     errEl.textContent = 'erreur : ' + e.message;
     errEl.style.display = '';
     saveBtn.disabled = false;
@@ -5039,6 +5102,7 @@ async function deleteFilm(film) {
   const idx = state.films.findIndex(f => f.id === film.id);
   if (idx === -1) return;
 
+  const removed = state.films[idx];
   try {
     state.films.splice(idx, 1);
     await saveFilmsToGithub('delete: ' + film.title);
@@ -5048,6 +5112,8 @@ async function deleteFilm(film) {
     closeModal();
     showToast('✓ supprimé : ' + film.title, 'success');
   } catch (e) {
+    // Rollback : films.json contient toujours le film, l'état local doit l'y remettre
+    state.films.splice(idx, 0, removed);
     showToast('erreur : ' + e.message, 'error');
   }
 }
@@ -5073,7 +5139,10 @@ function closeRematchModal() {
 }
 
 let rematchSearchTimer = null;
+let rematchSearchSeq = 0;
 async function handleRematchSearch(query) {
+  // Jeton de séquence : une réponse lente ne doit pas écraser celle d'une frappe plus récente
+  const seq = ++rematchSearchSeq;
   const resultsEl = document.getElementById('rematch-results');
   const statusEl = document.getElementById('rematch-status');
   if (!query || query.length < 2) {
@@ -5084,6 +5153,7 @@ async function handleRematchSearch(query) {
   statusEl.textContent = 'recherche…';
   try {
     const results = await tmdbSearch(query);
+    if (seq !== rematchSearchSeq) return;
     statusEl.textContent = results.length + ' résultats';
     resultsEl.innerHTML = '';
     for (const r of results.slice(0, 16)) {
@@ -5100,6 +5170,7 @@ async function handleRematchSearch(query) {
       resultsEl.appendChild(div);
     }
   } catch (e) {
+    if (seq !== rematchSearchSeq) return;
     statusEl.textContent = 'erreur : ' + e.message;
   }
 }
@@ -5131,6 +5202,8 @@ async function confirmRematch(result) {
     closeModal();
     showToast('✓ re-matché : ' + newFilm.title, 'success');
   } catch (e) {
+    // Rollback : le save a échoué, films.json contient toujours l'ancienne fiche
+    state.films[idx] = oldFilm;
     statusEl.textContent = 'erreur : ' + e.message;
   }
 }
@@ -5240,8 +5313,14 @@ function wireEvents() {
   document.getElementById('modal-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'modal-backdrop') closeModal();
   });
+  // Escape ferme uniquement la couche de modal la plus haute (le rematch
+  // s'ouvre au-dessus de la fiche film : ne pas tout fermer d'un coup)
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('rematch-backdrop').classList.contains('open')) { closeRematchModal(); return; }
+    if (document.getElementById('add-modal-backdrop').classList.contains('open')) { closeAddModal(); return; }
+    if (document.getElementById('admin-setup-backdrop').classList.contains('open')) { closeAdminSetup(); return; }
+    closeModal();
   });
 
   // Navigation
@@ -5324,14 +5403,6 @@ function wireEvents() {
   document.getElementById('rematch-input').addEventListener('input', (e) => {
     clearTimeout(rematchSearchTimer);
     rematchSearchTimer = setTimeout(() => handleRematchSearch(e.target.value.trim()), 300);
-  });
-
-  // Escape closes any open admin modal
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (document.getElementById('admin-setup-backdrop').classList.contains('open')) closeAdminSetup();
-    if (document.getElementById('add-modal-backdrop').classList.contains('open')) closeAddModal();
-    if (document.getElementById('rematch-backdrop').classList.contains('open')) closeRematchModal();
   });
 }
 
