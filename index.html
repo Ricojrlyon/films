@@ -3242,6 +3242,7 @@ async function addTmdbFilmToCollection(film, statut, userData) {
   document.querySelectorAll('.tmdb-action, #tmdb-add-save, #tmdb-add-cancel').forEach(b => b.disabled = true);
   try {
     state.films.unshift(film);
+    sessionChanges.added.add(film.id);
     await saveFilmsToGithub('add: ' + film.title + ' (' + statut + ')');
     initFilters();
     renderStats();
@@ -3263,6 +3264,7 @@ async function addTmdbFilmToCollection(film, statut, userData) {
     // Rollback
     const idx = state.films.findIndex(f => f.id === film.id);
     if (idx >= 0) state.films.splice(idx, 1);
+    sessionChanges.added.delete(film.id);
     showToast('erreur : ' + e.message, 'error');
     document.querySelectorAll('.tmdb-action, #tmdb-add-save, #tmdb-add-cancel').forEach(b => b.disabled = false);
   }
@@ -4510,6 +4512,49 @@ async function ghPutFile(path, content, sha, message) {
   return await r.json(); // contains content.sha for new version
 }
 
+// Suivi des changements de la session — la fusion au conflit 409 s'en sert
+// pour distinguer « ajouté/supprimé ici » de « supprimé/ajouté ailleurs »
+const sessionChanges = { added: new Set(), edited: new Set(), deleted: new Set() };
+
+// Fusion film par film avec la version distante. Politique :
+// · film touché dans cette session (ajouté/édité) → la version locale gagne
+// · film non touché ici → la version distante gagne (elle peut porter des
+//   modifs plus récentes d'un autre appareil ; sinon elles sont identiques)
+// · ajout distant → récupéré ; suppression distante → respectée sauf si
+//   le film a été ajouté ou édité ici ; suppression locale → respectée
+function mergeRemoteFilms(remoteFilms) {
+  const remoteById = new Map(remoteFilms.map(f => [f.id, f]));
+  const localById = new Map(state.films.map(f => [f.id, f]));
+  const touched = id => sessionChanges.added.has(id) || sessionChanges.edited.has(id);
+  const merged = [];
+  for (const f of state.films) {
+    const remote = remoteById.get(f.id);
+    if (remote) {
+      merged.push(touched(f.id) ? f : remote);
+    } else if (touched(f.id)) {
+      merged.push(f); // ajouté/édité ici : conserver malgré l'absence distante
+    }
+    // sinon : absent à distance et non touché ici → supprimé ailleurs, respecter
+  }
+  for (const rf of remoteFilms) {
+    // Présent à distance seulement, pas supprimé ici → ajouté ailleurs
+    // (ou manquant dans notre copie de boot) : récupérer
+    if (!localById.has(rf.id) && !sessionChanges.deleted.has(rf.id)) merged.push(rf);
+  }
+  return merged;
+}
+
+// Sérialisation compacte : l'API GitHub Contents refuse de relire les fichiers
+// > 1 Mo (le SHA deviendrait irrécupérable)
+function buildFilmsPayload() {
+  return JSON.stringify({
+    version: 1,
+    generated_at: new Date().toISOString(),
+    count: state.films.length,
+    films: state.films,
+  });
+}
+
 // Save current state.films to GitHub
 async function saveFilmsToGithub(message) {
   // Always refetch SHA first to avoid stale conflicts (lightweight)
@@ -4517,24 +4562,31 @@ async function saveFilmsToGithub(message) {
     const cur = await ghGetFile('films.json');
     admin.filmsSHA = cur.sha;
   }
-  const payload = {
-    version: 1,
-    generated_at: new Date().toISOString(),
-    count: state.films.length,
-    films: state.films,
-  };
-  // Compact : l'API GitHub Contents refuse de relire les fichiers > 1 Mo (le SHA devient irrécupérable)
-  const content = JSON.stringify(payload);
   try {
-    const result = await ghPutFile('films.json', content, admin.filmsSHA, message);
+    const result = await ghPutFile('films.json', buildFilmsPayload(), admin.filmsSHA, message);
     admin.filmsSHA = result.content.sha;
   } catch (e) {
-    // If conflict (409), refetch and retry once
+    // Conflit (409) : le fichier a changé depuis notre lecture (autre appareil).
+    // Fusionner film par film au lieu d'écraser, puis réessayer une fois.
     if (e.message.includes('409') || e.message.toLowerCase().includes('does not match')) {
       const cur = await ghGetFile('films.json');
       admin.filmsSHA = cur.sha;
-      const result = await ghPutFile('films.json', content, admin.filmsSHA, message);
+      let merged = false;
+      try {
+        const remoteData = JSON.parse(cur.content);
+        if (remoteData && Array.isArray(remoteData.films)) {
+          state.films = mergeRemoteFilms(remoteData.films);
+          merged = true;
+        }
+      } catch { /* contenu distant illisible → on pousse l'état local tel quel */ }
+      const result = await ghPutFile('films.json', buildFilmsPayload(), admin.filmsSHA, message);
       admin.filmsSHA = result.content.sha;
+      if (merged) {
+        // L'état peut avoir intégré des modifs distantes : rafraîchir l'affichage
+        initFilters();
+        if (state.view === 'a_voir' || state.view === 'vu') applyFilters({ preservePage: true });
+        renderStats();
+      }
     } else {
       throw e;
     }
@@ -4908,6 +4960,7 @@ async function submitAddForm() {
 
     // Add to state
     state.films.unshift(film);
+    sessionChanges.added.add(film.id);
 
     submitBtn.textContent = 'enregistrement sur github…';
     await saveFilmsToGithub('add: ' + film.title);
@@ -5081,6 +5134,9 @@ async function saveEditedFilm(filmId) {
   const prevUser = film.user;
   try {
     state.films[filmIndex].user = newUser;
+    // Trace l'édition pour la fusion 409 (on la laisse même si le save échoue :
+    // au pire un film survit à une suppression distante, jamais de perte)
+    sessionChanges.edited.add(filmId);
     await saveFilmsToGithub('edit: ' + film.title);
     initFilters();
     applyFilters({ preservePage: true });
@@ -5105,6 +5161,7 @@ async function deleteFilm(film) {
   const removed = state.films[idx];
   try {
     state.films.splice(idx, 1);
+    sessionChanges.deleted.add(film.id);
     await saveFilmsToGithub('delete: ' + film.title);
     initFilters();
     applyFilters({ preservePage: true });
@@ -5114,6 +5171,7 @@ async function deleteFilm(film) {
   } catch (e) {
     // Rollback : films.json contient toujours le film, l'état local doit l'y remettre
     state.films.splice(idx, 0, removed);
+    sessionChanges.deleted.delete(film.id);
     showToast('erreur : ' + e.message, 'error');
   }
 }
@@ -5192,6 +5250,14 @@ async function confirmRematch(result) {
     newFilm.user = oldFilm.user; // keep user data intact
     newFilm.source = { ...oldFilm.source, rematched_at: new Date().toISOString() };
     state.films[idx] = newFilm;
+    // Un rematch peut changer l'id (autre fiche TMDB) : pour la fusion 409,
+    // c'est une suppression de l'ancien + un ajout du nouveau
+    if (newFilm.id !== oldFilm.id) {
+      sessionChanges.deleted.add(oldFilm.id);
+      sessionChanges.added.add(newFilm.id);
+    } else {
+      sessionChanges.edited.add(newFilm.id);
+    }
 
     statusEl.textContent = 'enregistrement…';
     await saveFilmsToGithub('rematch: ' + oldFilm.title + ' → ' + newFilm.title);
