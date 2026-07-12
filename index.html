@@ -170,27 +170,6 @@ body {
   font-size: 12px;
   pointer-events: none;
 }
-.search-tmdb-link {
-  position: absolute;
-  right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: 1px solid var(--rule);
-  color: var(--ink-soft);
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.search-tmdb-link:hover {
-  color: var(--warm);
-  border-color: var(--warm);
-}
-
 .filter-toggle {
   background: transparent;
   border: 1px solid var(--rule);
@@ -1387,31 +1366,6 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   border-radius: 4px;
 }
 
-.selected-preview {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  background: var(--bg-elev);
-  padding: 12px;
-  border-radius: 8px;
-}
-.selected-preview-poster {
-  width: 60px;
-  aspect-ratio: 2/3;
-  background-size: cover;
-  background-position: center;
-  background-color: var(--bg);
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-.selected-preview-meta { flex: 1; }
-.selected-preview-title { font-weight: 600; color: var(--ink); margin-bottom: 2px; }
-.selected-preview-sub {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--ink-mute);
-}
-
 /* Radio buttons (segmented control style) */
 .radio-group { 
   display: inline-flex; 
@@ -1462,11 +1416,6 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
 }
 
 /* Explorer */
-.explorer-btn {
-  font-size: 14px;
-  padding: 6px 10px;
-  letter-spacing: 0;
-}
 .explorer-modal { max-width: 800px; }
 .explorer-categories {
   display: flex;
@@ -2185,74 +2134,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   </article>
 </div>
 
-<!-- ============== ADD / SEARCH MODAL ============== -->
-<div class="modal-backdrop admin-modal-backdrop" id="add-modal-backdrop">
-  <article class="modal admin-modal">
-    <button class="modal-close" id="add-modal-close" aria-label="fermer">✕</button>
-    <div class="admin-modal-body">
-      <h2 class="admin-modal-title">ajouter un film</h2>
-      <div class="field">
-        <label>recherche tmdb</label>
-        <input type="text" id="add-search-input" placeholder="titre, réalisateur…" autocomplete="off">
-        <div class="note" id="add-search-status"></div>
-      </div>
-      <div id="add-results" class="search-results"></div>
-      <div id="add-form" style="display: none;">
-        <hr style="border: none; border-top: 1px solid var(--rule); margin: 20px 0;">
-        <div id="add-selected-preview" style="margin-bottom: 20px;"></div>
-        <div class="field">
-          <label>statut</label>
-          <div class="radio-group" id="add-statut">
-            <button class="radio-btn active" data-value="a_voir">à voir</button>
-            <button class="radio-btn" data-value="vu">vu</button>
-          </div>
-        </div>
-        <div class="field" id="add-rating-field" style="display: none;">
-          <label>note</label>
-          <div class="rating-chips" id="add-rating-chips">
-            <button class="rating-chip" data-rating="1">1★</button>
-            <button class="rating-chip" data-rating="2">2★</button>
-            <button class="rating-chip" data-rating="3">3★</button>
-            <button class="rating-chip" data-rating="4">4★</button>
-            <button class="rating-chip" data-rating="5">5★</button>
-            <button class="rating-chip fav" data-rating="6">❤</button>
-          </div>
-        </div>
-        <div class="field" id="add-lieu-field" style="display: none;">
-          <label>lieu</label>
-          <select id="add-lieu">
-            <option value="">—</option>
-            <option value="Cinéma">Cinéma</option>
-            <option value="Stremio">Stremio</option>
-            <option value="Disque dur">Disque dur</option>
-            <option value="Autre">Autre</option>
-          </select>
-        </div>
-        <div class="field" id="add-date-field" style="display: none;">
-          <label>date vue</label>
-          <div style="display: flex; gap: 8px;">
-            <select id="add-date-year" style="flex: 1;"></select>
-            <select id="add-date-month" style="flex: 1;">
-              <option value="">—</option>
-              <option value="01">janvier</option><option value="02">février</option>
-              <option value="03">mars</option><option value="04">avril</option>
-              <option value="05">mai</option><option value="06">juin</option>
-              <option value="07">juillet</option><option value="08">août</option>
-              <option value="09">septembre</option><option value="10">octobre</option>
-              <option value="11">novembre</option><option value="12">décembre</option>
-            </select>
-          </div>
-        </div>
-        <div id="add-form-error" class="error-inline" style="display: none;"></div>
-        <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
-          <button id="add-submit-btn">ajouter à ma collection</button>
-          <button class="ghost" id="add-cancel-btn">annuler</button>
-        </div>
-      </div>
-    </div>
-  </article>
-</div>
-
 <!-- ============== REMATCH MODAL ============== -->
 <div class="modal-backdrop admin-modal-backdrop" id="rematch-backdrop">
   <article class="modal admin-modal">
@@ -2963,7 +2844,11 @@ async function fetchAndRenderReco(forceRefresh = false) {
   if (!pool && !forceRefresh) {
     try {
       const cached = localStorage.getItem(cacheKey);
-      if (cached) pool = JSON.parse(cached);
+      if (cached) {
+        pool = JSON.parse(cached);
+        // Hydrater la session : sinon chaque visite de l'onglet re-parse le JSON
+        state.recoPool = pool;
+      }
     } catch {}
   }
 
@@ -3406,7 +3291,7 @@ function renderStats() {
 
   const yearSub = (label, value) => `
     <div class="stat-card-year">
-      <span class="stat-card-year-label">${CY}</span>
+      <span class="stat-card-year-label">${label}</span>
       <span class="stat-card-year-value">${value}</span>
     </div>`;
 
@@ -3675,7 +3560,7 @@ async function bulkEnrichCountries() {
       const film = todo[i];
       try {
         const path = film.type === 'tv' ? 'tv' : 'movie';
-        const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(TMDB_KEY)}&language=fr-FR`;
+        const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`;
         const r = await fetch(url);
         if (r.ok) {
           const detail = await r.json();
@@ -4156,8 +4041,13 @@ function safeUrl(u) {
 // ADMIN MODE
 // ============================================================
 
-// Configuration: auto-detect repo from URL (GitHub Pages)
-const REPO = (function() {
+// Configuration: auto-detect repo from URL (GitHub Pages).
+// Sur un domaine custom, la détection par *.github.io ne fonctionne plus :
+// renseigner REPO_OVERRIDE, p. ex. { owner: 'moncompte', repo: 'films' }.
+const REPO_OVERRIDE = null;
+// Branche qui héberge films.json (lectures ET écritures API).
+const GH_BRANCH = 'main';
+const REPO = REPO_OVERRIDE || (function() {
   const host = window.location.hostname;
   const path = window.location.pathname;
   if (host.endsWith('.github.io')) {
@@ -4493,7 +4383,7 @@ async function enrichFilmCountry(film) {
   film._countryFetching = true;
   try {
     const path = film.type === 'tv' ? 'tv' : 'movie';
-    const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(TMDB_KEY)}&language=fr-FR`;
+    const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`;
     const r = await fetch(url);
     if (!r.ok) return;
     const detail = await r.json();
@@ -4509,7 +4399,7 @@ async function enrichFilmCountry(film) {
 // Lazy-fetch trailer URL (first YouTube trailer, prefer French)
 async function tmdbGetTrailer(tmdbId, type) {
   const path = type === 'tv' ? 'tv' : 'movie';
-  const url = `${TMDB_BASE}/${path}/${tmdbId}/videos?api_key=${encodeURIComponent(TMDB_KEY)}&include_video_language=fr,en&language=fr-FR`;
+  const url = `${TMDB_BASE}/${path}/${tmdbId}/videos?api_key=${encodeURIComponent(admin.tmdbKey)}&include_video_language=fr,en&language=fr-FR`;
   try {
     const r = await fetch(url);
     if (!r.ok) return null;
@@ -4562,7 +4452,7 @@ async function ghTestToken() {
 }
 
 async function ghGetFile(path) {
-  const r = await fetch(`https://api.github.com/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=main`, {
+  const r = await fetch(`https://api.github.com/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${encodeURIComponent(GH_BRANCH)}`, {
     headers: { 'Authorization': `token ${admin.ghToken}`, 'Accept': 'application/vnd.github+json' }
   });
   if (!r.ok) throw new Error('github get ' + r.status);
@@ -4590,7 +4480,9 @@ function adoptFilmsFromApi(content) {
 async function ghPutFile(path, content, sha, message) {
   // Encode UTF-8 to base64
   const b64 = btoa(unescape(encodeURIComponent(content)));
-  const body = { message, content: b64 };
+  // branch explicite : sans lui le PUT écrit sur la branche par défaut,
+  // qui peut différer de celle que ghGetFile lit (?ref=…)
+  const body = { message, content: b64, branch: GH_BRANCH };
   if (sha) body.sha = sha;
   const r = await fetch(`https://api.github.com/repos/${REPO.owner}/${REPO.repo}/contents/${path}`, {
     method: 'PUT',
@@ -4915,179 +4807,6 @@ function buildYearOptions(selectEl) {
   before.value = 'before-2022';
   before.textContent = 'avant 2022';
   selectEl.appendChild(before);
-}
-
-// ----------------- ADD MODAL --------------------
-const addState = { selected: null, statut: 'a_voir', rating: null, lieu: '', dateVue: null };
-
-function openAddModal() {
-  // Reset state
-  addState.selected = null;
-  addState.statut = 'a_voir';
-  addState.rating = null;
-  addState.lieu = '';
-  addState.dateVue = null;
-  document.getElementById('add-search-input').value = '';
-  document.getElementById('add-search-status').textContent = '';
-  document.getElementById('add-results').innerHTML = '';
-  document.getElementById('add-form').style.display = 'none';
-  document.getElementById('add-form-error').style.display = 'none';
-  document.getElementById('add-rating-field').style.display = 'none';
-  document.getElementById('add-lieu-field').style.display = 'none';
-  document.getElementById('add-date-field').style.display = 'none';
-  // Reset radio
-  document.querySelectorAll('#add-statut .radio-btn').forEach(b => b.classList.toggle('active', b.dataset.value === 'a_voir'));
-  // Reset rating chips
-  document.querySelectorAll('#add-rating-chips .rating-chip').forEach(c => c.classList.remove('active'));
-  document.getElementById('add-lieu').value = '';
-  buildYearOptions(document.getElementById('add-date-year'));
-  document.getElementById('add-date-month').value = '';
-
-  document.getElementById('add-modal-backdrop').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('add-search-input').focus(), 100);
-}
-
-function closeAddModal() {
-  document.getElementById('add-modal-backdrop').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-let addSearchTimer = null;
-let addSearchSeq = 0;
-async function handleAddSearch(query) {
-  // Jeton de séquence : une réponse lente ne doit pas écraser celle d'une frappe plus récente
-  const seq = ++addSearchSeq;
-  const resultsEl = document.getElementById('add-results');
-  const statusEl = document.getElementById('add-search-status');
-  if (!query || query.length < 2) {
-    resultsEl.innerHTML = '';
-    statusEl.textContent = '';
-    return;
-  }
-  statusEl.textContent = 'recherche…';
-  try {
-    const results = await tmdbSearch(query);
-    if (seq !== addSearchSeq) return;
-    statusEl.textContent = results.length + ' résultats';
-    resultsEl.innerHTML = '';
-    for (const r of results.slice(0, 16)) {
-      const div = document.createElement('div');
-      div.className = 'search-result';
-      const year = (r.release_date || r.first_air_date || '').slice(0, 4) || '?';
-      div.innerHTML = `
-        <div class="search-result-poster" ${r.poster_path ? `style="background-image:url(${safeUrl(tmdbImgUrl(r.poster_path, 'w185'))})"` : ''}></div>
-        <div class="search-result-title">${escapeHtml(r.title || r.name)}</div>
-        <div class="search-result-year">${year}</div>
-        <div class="search-result-type">${r.media_type === 'tv' ? 'série' : 'film'}</div>
-      `;
-      div.addEventListener('click', () => selectAddResult(r, div));
-      resultsEl.appendChild(div);
-    }
-  } catch (e) {
-    if (seq !== addSearchSeq) return;
-    statusEl.textContent = 'erreur : ' + e.message;
-  }
-}
-
-function selectAddResult(result, el) {
-  document.querySelectorAll('#add-results .search-result').forEach(s => s.classList.remove('selected'));
-  el.classList.add('selected');
-  addState.selected = result;
-  // Show form
-  document.getElementById('add-form').style.display = '';
-  const year = (result.release_date || result.first_air_date || '').slice(0, 4) || '?';
-  document.getElementById('add-selected-preview').innerHTML = `
-    <div class="selected-preview">
-      <div class="selected-preview-poster" ${result.poster_path ? `style="background-image:url(${safeUrl(tmdbImgUrl(result.poster_path, 'w185'))})"` : ''}></div>
-      <div class="selected-preview-meta">
-        <div class="selected-preview-title">${escapeHtml(result.title || result.name)}</div>
-        <div class="selected-preview-sub">${year} · ${result.media_type === 'tv' ? 'série' : 'film'}</div>
-      </div>
-    </div>
-  `;
-  updateAddFormVisibility();
-  // Scroll form into view
-  setTimeout(() => document.getElementById('add-form').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-}
-
-function updateAddFormVisibility() {
-  const isVu = addState.statut === 'vu';
-  document.getElementById('add-rating-field').style.display = isVu ? '' : 'none';
-  document.getElementById('add-lieu-field').style.display = isVu ? '' : 'none';
-  document.getElementById('add-date-field').style.display = isVu ? '' : 'none';
-}
-
-async function submitAddForm() {
-  const errEl = document.getElementById('add-form-error');
-  errEl.style.display = 'none';
-  if (!addState.selected) {
-    errEl.textContent = 'aucun film sélectionné';
-    errEl.style.display = '';
-    return;
-  }
-
-  // Check duplicate
-  const newId = addState.selected.media_type + '-' + addState.selected.id;
-  if (state.films.some(f => f.id === newId)) {
-    errEl.textContent = 'ce film est déjà dans ta collection.';
-    errEl.style.display = '';
-    return;
-  }
-
-  // Build user data
-  const isVu = addState.statut === 'vu';
-  let dateVue = null, dateLabel = null;
-  if (isVu) {
-    const y = document.getElementById('add-date-year').value;
-    const m = document.getElementById('add-date-month').value;
-    if (y === 'before-2022') {
-      dateVue = 'before-2022';
-      dateLabel = 'avant 2022';
-    } else if (y) {
-      dateVue = m ? (y + '-' + m) : y;
-      dateLabel = formatDateLabel(dateVue);
-    }
-  }
-  const userData = {
-    statut: isVu ? 'vu' : 'a_voir',
-    rating: isVu ? addState.rating : null,
-    favorite: addState.rating === 6,
-    lieu: document.getElementById('add-lieu').value || null,
-    date_vue: dateVue,
-    date_vue_label: dateLabel,
-    csv_genres: [],
-  };
-
-  const submitBtn = document.getElementById('add-submit-btn');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'récupération des détails…';
-  try {
-    // Fetch full TMDB details
-    const detail = await tmdbDetails(addState.selected.id, addState.selected.media_type);
-    const film = buildFilmFromTmdb(detail, addState.selected.media_type);
-    film.user = userData;
-
-    // Add to state
-    state.films.unshift(film);
-    sessionChanges.added.add(film.id);
-
-    submitBtn.textContent = 'enregistrement sur github…';
-    await saveFilmsToGithub('add: ' + film.title);
-
-    // Refresh views
-    initFilters();
-    applyFilters({ preservePage: true });
-    refreshStats();
-    closeAddModal();
-    showToast('✓ ajouté : ' + film.title, 'success');
-  } catch (e) {
-    errEl.textContent = 'erreur : ' + e.message;
-    errEl.style.display = '';
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'ajouter à ma collection';
-  }
 }
 
 // ----------------- EDIT FILM (within detail modal) --------------------
@@ -5499,7 +5218,6 @@ function wireEvents() {
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     if (document.getElementById('rematch-backdrop').classList.contains('open')) { closeRematchModal(); return; }
-    if (document.getElementById('add-modal-backdrop').classList.contains('open')) { closeAddModal(); return; }
     if (document.getElementById('admin-setup-backdrop').classList.contains('open')) { closeAdminSetup(); return; }
     closeModal();
   });
@@ -5540,41 +5258,6 @@ function wireEvents() {
   document.getElementById('admin-unlock-code').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') unlockAdmin();
   });
-
-  // Add modal
-  document.getElementById('add-modal-close').addEventListener('click', closeAddModal);
-  document.getElementById('add-cancel-btn').addEventListener('click', closeAddModal);
-  document.getElementById('add-modal-backdrop').addEventListener('click', (e) => {
-    if (e.target.id === 'add-modal-backdrop') closeAddModal();
-  });
-  document.getElementById('add-search-input').addEventListener('input', (e) => {
-    clearTimeout(addSearchTimer);
-    addSearchTimer = setTimeout(() => handleAddSearch(e.target.value.trim()), 300);
-  });
-  // statut radio
-  document.querySelectorAll('#add-statut .radio-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      document.querySelectorAll('#add-statut .radio-btn').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      addState.statut = b.dataset.value;
-      updateAddFormVisibility();
-    });
-  });
-  // rating chips (single-select)
-  document.querySelectorAll('#add-rating-chips .rating-chip').forEach(c => {
-    c.addEventListener('click', () => {
-      const r = parseInt(c.dataset.rating, 10);
-      const wasActive = c.classList.contains('active');
-      document.querySelectorAll('#add-rating-chips .rating-chip').forEach(x => x.classList.remove('active'));
-      if (!wasActive) {
-        c.classList.add('active');
-        addState.rating = r;
-      } else {
-        addState.rating = null;
-      }
-    });
-  });
-  document.getElementById('add-submit-btn').addEventListener('click', submitAddForm);
 
   // Rematch modal
   document.getElementById('rematch-close').addEventListener('click', closeRematchModal);
