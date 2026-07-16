@@ -2162,10 +2162,12 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 // ============================================================
 // STATE
 // ============================================================
-// Les deux onglets s'ouvrent dans l'ordre d'ajout, le plus récent d'abord :
-// chaque ajout se fait en tête du tableau, son ordre EST l'ordre d'ajout
+// « à voir » s'ouvre dans l'ordre d'ajout (le plus récent d'abord — chaque
+// ajout se fait en tête du tableau, son ordre EST l'ordre d'ajout).
+// « vus » reste sur la date de visionnage : les ~500 films de la migration
+// initiale ont tous été ajoutés d'un coup, leur ordre d'ajout ne veut rien dire.
 const TAB_SORT_DEFAULTS = {
-  vu: 'added_desc',
+  vu: 'date_vue_desc',
   a_voir: 'added_desc',
 };
 
