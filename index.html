@@ -1741,7 +1741,8 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   display: block;
   margin-bottom: 6px;
 }
-.edit-form select {
+.edit-form select,
+.edit-form input[type="number"] {
   background: var(--bg-elev);
   border: 1px solid var(--rule);
   color: var(--ink);
@@ -1902,6 +1903,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
       <div class="filter-group">
         <div class="filter-label">trier par</div>
         <select id="sort">
+          <option value="added_desc">date d'ajout (plus récent)</option>
           <option value="date_vue_desc">date vue (plus récent)</option>
           <option value="date_vue_asc">date vue (plus ancien)</option>
           <option value="rating_desc">note (meilleure)</option>
@@ -2160,9 +2162,11 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 // ============================================================
 // STATE
 // ============================================================
+// Les deux onglets s'ouvrent dans l'ordre d'ajout, le plus récent d'abord :
+// chaque ajout se fait en tête du tableau, son ordre EST l'ordre d'ajout
 const TAB_SORT_DEFAULTS = {
-  vu: 'date_vue_desc',
-  a_voir: 'year_desc',
+  vu: 'added_desc',
+  a_voir: 'added_desc',
 };
 
 const state = {
@@ -2353,6 +2357,13 @@ function sortList(list, sortKey) {
   };
 
   switch (sortKey) {
+    case 'added_desc': {
+      // L'ordre du tableau films.json est l'ordre d'ajout (insertion en tête) :
+      // index croissant = ajouté le plus récemment d'abord
+      const order = new Map(state.films.map((f, i) => [f.id, i]));
+      list.sort((a, b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity));
+      break;
+    }
     case 'date_vue_desc':
       list.sort((a, b) => dvKey(b).localeCompare(dvKey(a))); break;
     case 'date_vue_asc':
@@ -3025,7 +3036,7 @@ function openModal(f, opts) {
             <div class="field">
               <label>date vue</label>
               <div style="display: flex; gap: 8px;">
-                <select id="tmdb-add-year" style="flex:1;"></select>
+                <input type="number" id="tmdb-add-year" min="1900" max="2099" placeholder="année (ex. 2019)" style="flex:1;">
                 <select id="tmdb-add-month" style="flex:1;">
                   <option value="">—</option>
                   <option value="01">janvier</option><option value="02">février</option>
@@ -3081,11 +3092,8 @@ function openModal(f, opts) {
           // Toggle form visibility
           document.getElementById('tmdb-actions').style.display = 'none';
           document.getElementById('tmdb-add-form-section').style.display = '';
-          // Populate year select
-          buildYearOptions(document.getElementById('tmdb-add-year'));
           // Default: current year, no month
-          const cy = new Date().getFullYear();
-          document.getElementById('tmdb-add-year').value = String(cy);
+          document.getElementById('tmdb-add-year').value = String(new Date().getFullYear());
         }
       });
     });
@@ -3104,11 +3112,18 @@ function openModal(f, opts) {
       const ratingBtn = document.querySelector('#tmdb-add-rating-chips .rating-chip.active');
       const rating = ratingBtn ? parseInt(ratingBtn.dataset.rating, 10) : null;
       const lieu = document.getElementById('tmdb-add-lieu').value || null;
-      const y = document.getElementById('tmdb-add-year').value;
+      const y = document.getElementById('tmdb-add-year').value.trim();
       const m = document.getElementById('tmdb-add-month').value;
       let dateVue = null, dateLabel = null;
-      if (y === 'before-2022') { dateVue = 'before-2022'; dateLabel = 'avant 2022'; }
-      else if (y) { dateVue = m ? (y + '-' + m) : y; dateLabel = formatDateLabel(dateVue); }
+      if (y) {
+        const currentYear = new Date().getFullYear();
+        if (!/^\d{4}$/.test(y) || parseInt(y, 10) < 1900 || parseInt(y, 10) > currentYear) {
+          showToast('année invalide (4 chiffres, entre 1900 et ' + currentYear + ')', 'error');
+          return;
+        }
+        dateVue = m ? (y + '-' + m) : y;
+        dateLabel = formatDateLabel(dateVue);
+      }
       const userData = {
         statut: 'vu',
         rating: rating,
@@ -4524,12 +4539,15 @@ function mergeRemoteFilms(remoteFilms) {
     }
     // sinon : absent à distance et non touché ici → supprimé ailleurs, respecter
   }
+  const remoteAdds = [];
   for (const rf of remoteFilms) {
     // Présent à distance seulement, pas supprimé ici → ajouté ailleurs
     // (ou manquant dans notre copie de boot) : récupérer
-    if (!localById.has(rf.id) && !sessionChanges.deleted.has(rf.id)) merged.push(rf);
+    if (!localById.has(rf.id) && !sessionChanges.deleted.has(rf.id)) remoteAdds.push(rf);
   }
-  return merged;
+  // En tête, pas en queue : l'ordre du tableau est l'ordre d'ajout (plus
+  // récent d'abord) et ces films sont les ajouts les plus frais
+  return [...remoteAdds, ...merged];
 }
 
 // Sérialisation compacte : l'API GitHub Contents refuse de relire les fichiers
@@ -4793,22 +4811,6 @@ function formatDateLabel(dv) {
   return dv;
 }
 
-function buildYearOptions(selectEl) {
-  selectEl.innerHTML = '<option value="">—</option>';
-  const currentYear = new Date().getFullYear();
-  // Year of viewing can't be in the future, and anything before 2022 falls in "avant 2022"
-  for (let y = currentYear; y >= 2022; y--) {
-    const opt = document.createElement('option');
-    opt.value = String(y);
-    opt.textContent = String(y);
-    selectEl.appendChild(opt);
-  }
-  const before = document.createElement('option');
-  before.value = 'before-2022';
-  before.textContent = 'avant 2022';
-  selectEl.appendChild(before);
-}
-
 // ----------------- EDIT FILM (within detail modal) --------------------
 function renderEditForm(film) {
   // Returns HTML for the edit form
@@ -4852,7 +4854,7 @@ function renderEditForm(film) {
       <div class="field edit-vu-field" style="display: ${isVu ? '' : 'none'}">
         <label>date vue</label>
         <div style="display: flex; gap: 8px;">
-          <select data-field="year" id="edit-date-year" style="flex:1;"></select>
+          <input type="number" id="edit-date-year" min="1900" max="2099" placeholder="année (ex. 2019)" style="flex:1;">
           <select data-field="month" id="edit-date-month" style="flex:1;">
             <option value="">—</option>
             <option value="01">janvier</option><option value="02">février</option>
@@ -4863,6 +4865,7 @@ function renderEditForm(film) {
             <option value="11">novembre</option><option value="12">décembre</option>
           </select>
         </div>
+        ${(u.date_vue || '').startsWith('before-') ? `<div style="font-size: 11px; color: var(--ink-mute); margin-top: 6px;">date actuelle : « ${escapeHtml(u.date_vue_label || 'avant 2022')} » — conservée si l'année reste vide</div>` : ''}
       </div>
 
       <div class="edit-form-error error-inline" style="display: none;"></div>
@@ -4881,18 +4884,16 @@ function wireEditForm(film) {
   const yearSel = document.getElementById('edit-date-year');
   const monthSel = document.getElementById('edit-date-month');
   if (yearSel) {
-    buildYearOptions(yearSel);
     const dv = film.user?.date_vue || '';
-    if (dv.startsWith('before-')) {
-      yearSel.value = 'before-2022';
-      monthSel.value = '';
-    } else if (/^\d{4}-\d{2}$/.test(dv)) {
+    if (/^\d{4}-\d{2}$/.test(dv)) {
       yearSel.value = dv.slice(0, 4);
       monthSel.value = dv.slice(5, 7);
     } else if (/^\d{4}$/.test(dv)) {
       yearSel.value = dv;
       monthSel.value = '';
     }
+    // date « avant XXXX » : champ laissé vide — la date existante est
+    // conservée au save tant que l'année n'est pas renseignée
   }
 
   // Statut radio
@@ -4941,10 +4942,23 @@ async function saveEditedFilm(filmId) {
 
   let dateVue = null, dateLabel = null;
   if (isVu) {
-    const y = yearSel.value;
+    const y = yearSel.value.trim();
     const m = monthSel.value;
-    if (y === 'before-2022') { dateVue = 'before-2022'; dateLabel = 'avant 2022'; }
-    else if (y) { dateVue = m ? (y + '-' + m) : y; dateLabel = formatDateLabel(dateVue); }
+    const currentYear = new Date().getFullYear();
+    if (y) {
+      if (!/^\d{4}$/.test(y) || parseInt(y, 10) < 1900 || parseInt(y, 10) > currentYear) {
+        errEl.textContent = 'année invalide (4 chiffres, entre 1900 et ' + currentYear + ')';
+        errEl.style.display = '';
+        return;
+      }
+      dateVue = m ? (y + '-' + m) : y;
+      dateLabel = formatDateLabel(dateVue);
+    } else if ((film.user?.date_vue || '').startsWith('before-')) {
+      // Année laissée vide sur un film daté « avant XXXX » : conserver la
+      // date existante plutôt que de l'effacer silencieusement
+      dateVue = film.user.date_vue;
+      dateLabel = film.user.date_vue_label;
+    }
   }
 
   // Passage en « à voir » : conserver note/date/lieu (plus affichés mais pas
