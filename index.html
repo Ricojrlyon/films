@@ -1480,6 +1480,43 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   flex-direction: column;
   gap: 12px;
 }
+.discover-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.discover-filters select {
+  background: var(--bg-elev);
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+  max-width: 200px;
+}
+.discover-filters select:focus { border-color: var(--warm); }
+.discover-filters select.active { border-color: var(--warm); color: var(--warm); }
+.discover-filters select:disabled { opacity: 0.35; cursor: not-allowed; }
+.discover-hide-toggle {
+  background: var(--bg-elev);
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.discover-hide-toggle:hover { color: var(--ink); border-color: var(--ink-soft); }
+.discover-hide-toggle.active {
+  background: var(--warm);
+  border-color: var(--warm);
+  color: var(--bg);
+}
 .discover-search-wrap {
   position: relative;
   max-width: 100%;
@@ -1860,6 +1897,18 @@ button:focus-visible, input:focus-visible, select:focus-visible {
            target="_blank" rel="noopener"
            style="display: none; text-decoration: none;">à Lyon ↗</a>
       </div>
+      <div class="discover-filters" id="discover-filters">
+        <select id="discover-genre"><option value="">tous genres</option></select>
+        <select id="discover-country"><option value="">tous pays</option></select>
+        <select id="discover-decade" title="période — disponible sur « tendances »"><option value="">toutes périodes</option></select>
+        <select id="discover-sort">
+          <option value="popularity.desc">populaires</option>
+          <option value="vote_average.desc">mieux notés</option>
+          <option value="primary_release_date.desc">sorties récentes</option>
+        </select>
+        <button class="discover-hide-toggle" id="discover-hide-collection"
+                title="masquer les films déjà dans ma collection">masquer ma collec</button>
+      </div>
       <div class="discover-search-wrap">
         <span class="search-icon">⌕</span>
         <input class="search-input" id="discover-search" type="text" placeholder="ou cherche un film, une série, un·e réal…">
@@ -2189,8 +2238,10 @@ const state = {
   pageSize: 60,
   // Discover view
   discoverCategory: 'now_playing',
-  discoverCache: {},       // { category: [items] } — session cache
+  discoverFilters: { genre: '', country: '', decade: '', sort: 'popularity.desc', hideCollection: false },
+  discoverCache: {},       // { 'catégorie|genre|pays': [items] } — session cache
   discoverSearchTimer: null,
+  lastTmdbItems: null,      // dernière liste TMDB affichée (re-rendu du masquage sans refetch)
   // Reco view
   recoPool: null,           // full ranked candidates
   recoDisplayed: null,      // current month's selection
@@ -2539,6 +2590,7 @@ function setView(view) {
     document.getElementById('sort').value = state.sort;
     applyFilters();
   } else if (isDiscover) {
+    initDiscoverFilterOptions();
     fetchAndRenderDiscover(state.discoverCategory);
   } else if (isReco) {
     fetchAndRenderReco();
@@ -2548,10 +2600,81 @@ function setView(view) {
 // ============================================================
 // DISCOVER VIEW
 // ============================================================
+// Filtres effectifs pour une catégorie : la décennie ne s'applique que sur
+// « tendances » (les deux autres catégories imposent leur fenêtre de dates)
+function discoverEffectiveFilters(category) {
+  const f = state.discoverFilters;
+  return {
+    genre: f.genre || '',
+    country: f.country || '',
+    decade: category === 'trending' ? (f.decade || '') : '',
+    sort: f.sort || 'popularity.desc',
+  };
+}
+
+// Clé de cache/course : la même catégorie avec d'autres filtres est un
+// autre jeu de résultats
+function discoverCacheKey(category) {
+  const f = discoverEffectiveFilters(category);
+  return [category, f.genre, f.country, f.decade, f.sort].join('|');
+}
+
+// Options des filtres découvrir, remplies au premier passage dans la vue
+let discoverCountriesLoaded = false;
+let discoverGenresLoaded = false;
+async function initDiscoverFilterOptions() {
+  if (!discoverCountriesLoaded) {
+    discoverCountriesLoaded = true;
+    // Pays : la table ISO déjà utilisée pour les fiches, triée par nom
+    const csel = document.getElementById('discover-country');
+    Object.entries(ISO_TO_COUNTRY)
+      .sort((a, b) => a[1].localeCompare(b[1], 'fr'))
+      .forEach(([code, name]) => {
+        const o = document.createElement('option');
+        o.value = code;
+        o.textContent = name.toLowerCase();
+        csel.appendChild(o);
+      });
+    // Décennies (pertinentes sur « tendances » uniquement)
+    const dsel = document.getElementById('discover-decade');
+    for (let d = 2020; d >= 1950; d -= 10) {
+      const o = document.createElement('option');
+      o.value = String(d);
+      o.textContent = 'années ' + d;
+      dsel.appendChild(o);
+    }
+  }
+  if (!discoverGenresLoaded) {
+    try {
+      const r = await fetch(`${TMDB_BASE}/genre/movie/list?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+      if (!r.ok) return;
+      const genres = (await r.json()).genres || [];
+      const gsel = document.getElementById('discover-genre');
+      genres.forEach(g => {
+        const o = document.createElement('option');
+        o.value = g.id;
+        o.textContent = g.name.toLowerCase();
+        gsel.appendChild(o);
+      });
+      discoverGenresLoaded = true;
+    } catch { /* réseau — retenté au prochain passage dans la vue */ }
+  }
+}
+
 async function fetchAndRenderDiscover(category) {
   state.discoverCategory = category;
   // Update active pill
   document.querySelectorAll('#discover-categories .explorer-cat').forEach(p => p.classList.toggle('active', p.dataset.cat === category));
+  // La décennie n'a de sens que sur « tendances »
+  const decadeSel = document.getElementById('discover-decade');
+  if (decadeSel) decadeSel.disabled = category !== 'trending';
+  // Marquage visuel des filtres actifs
+  ['discover-genre', 'discover-country', 'discover-decade'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel) sel.classList.toggle('active', !!sel.value && !sel.disabled);
+  });
+  const sortSel = document.getElementById('discover-sort');
+  if (sortSel) sortSel.classList.toggle('active', sortSel.value !== 'popularity.desc');
   // Show "à Lyon" link only for cinema-related categories
   const lyonLink = document.getElementById('lyon-cinema-link');
   if (lyonLink) {
@@ -2567,22 +2690,23 @@ async function fetchAndRenderDiscover(category) {
   resultsHeader.style.display = '';
 
   // Session cache
-  if (state.discoverCache[category]) {
-    renderTmdbGrid(state.discoverCache[category]);
+  const cacheKey = discoverCacheKey(category);
+  if (state.discoverCache[cacheKey]) {
+    renderTmdbGrid(state.discoverCache[cacheKey]);
     return;
   }
 
   grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">chargement tmdb…</div>';
   countEl.textContent = '…';
   try {
-    const results = await tmdbBrowse(category);
-    state.discoverCache[category] = results;
-    // La vue OU la catégorie a pu changer pendant le fetch — ne pas écraser
-    // la grille (deux clics rapides de catégorie = réponses croisées)
-    if (state.view !== 'discover' || state.discoverCategory !== category) return;
+    const results = await tmdbBrowse(category, discoverEffectiveFilters(category));
+    state.discoverCache[cacheKey] = results;
+    // La vue, la catégorie OU les filtres ont pu changer pendant le fetch —
+    // ne pas écraser la grille (réponses croisées)
+    if (state.view !== 'discover' || cacheKey !== discoverCacheKey(state.discoverCategory)) return;
     renderTmdbGrid(results);
   } catch (e) {
-    if (state.view !== 'discover' || state.discoverCategory !== category) return;
+    if (state.view !== 'discover' || cacheKey !== discoverCacheKey(state.discoverCategory)) return;
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur tmdb : ${escapeHtml(e.message)}</div>`;
     countEl.textContent = '0';
   }
@@ -2624,15 +2748,23 @@ function renderTmdbGrid(items) {
   const loadMoreWrap = document.getElementById('load-more-wrap');
   if (loadMoreWrap) loadMoreWrap.style.display = 'none';
 
+  // Liste brute mémorisée : « masquer ma collec » re-rend sans refetch
+  state.lastTmdbItems = items || [];
+  let shown = state.lastTmdbItems;
+  if (state.discoverFilters.hideCollection) {
+    const inCollec = new Set(state.films.map(f => f.id));
+    shown = shown.filter(it => !inCollec.has((it.media_type || 'movie') + '-' + it.id));
+  }
+
   grid.innerHTML = '';
-  if (!items || items.length === 0) {
+  if (shown.length === 0) {
     countEl.textContent = '0';
     emptyEl.style.display = '';
     return;
   }
   emptyEl.style.display = 'none';
-  countEl.textContent = items.length;
-  for (const item of items) {
+  countEl.textContent = shown.length;
+  for (const item of shown) {
     grid.appendChild(buildTmdbCard(item));
   }
 }
@@ -4264,16 +4396,58 @@ async function tmdbTestKey(key) {
 }
 
 // Browse TMDB by category. Returns up to ~40 results (2 pages).
-async function tmdbBrowse(category) {
+// Avec un filtre (genre / pays), bascule sur /discover/movie : filtrer côté
+// client les ~40 items d'une catégorie ne laisserait presque rien, alors que
+// /discover cherche dans tout le catalogue. La sémantique des catégories est
+// conservée par fenêtre de dates (en salles ≈ 6 dernières semaines,
+// prochainement = sorties futures, tendances = populaires tous horizons).
+async function tmdbBrowse(category, filters) {
+  filters = filters || {};
+  const hasFilters = !!(filters.genre || filters.country || filters.decade
+    || (filters.sort && filters.sort !== 'popularity.desc'));
   const params = `api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
-  const endpoints = {
-    trending: `${TMDB_BASE}/trending/all/week?${params}`,
-    popular: `${TMDB_BASE}/movie/popular?${params}`,
-    top_rated: `${TMDB_BASE}/movie/top_rated?${params}`,
-    upcoming: `${TMDB_BASE}/movie/upcoming?${params}`,
-    now_playing: `${TMDB_BASE}/movie/now_playing?${params}`,
-  };
-  const baseUrl = endpoints[category] || endpoints.trending;
+  let baseUrl;
+  if (hasFilters) {
+    const sort = filters.sort || 'popularity.desc';
+    let extra = '&sort_by=' + encodeURIComponent(sort) + '&include_adult=false';
+    if (filters.genre) extra += '&with_genres=' + encodeURIComponent(filters.genre);
+    if (filters.country) extra += '&with_origin_country=' + encodeURIComponent(filters.country);
+    // Plancher de votes : trier par note sans plancher fait remonter des
+    // films notés 10/10 par trois votants ; par date, des sorties confidentielles
+    let voteFloor = 0;
+    if (sort === 'vote_average.desc') voteFloor = category === 'trending' ? 200 : category === 'now_playing' ? 50 : 0;
+    else if (sort === 'primary_release_date.desc' && category === 'trending') voteFloor = 20;
+    if (voteFloor) extra += '&vote_count.gte=' + voteFloor;
+    // Fenêtre de dates
+    const today = new Date().toISOString().slice(0, 10);
+    let gte = '', lte = '';
+    if (category === 'now_playing') {
+      gte = new Date(Date.now() - 42 * 86400000).toISOString().slice(0, 10);
+      lte = today;
+    } else if (category === 'upcoming') {
+      gte = today;
+    } else {
+      if (filters.decade) {
+        const dec = parseInt(filters.decade, 10);
+        gte = dec + '-01-01';
+        lte = (dec + 9) + '-12-31';
+      }
+      // Tri par date sur « tendances » : exclure les sorties futures
+      if (sort === 'primary_release_date.desc' && (!lte || lte > today)) lte = today;
+    }
+    if (gte) extra += `&primary_release_date.gte=${gte}`;
+    if (lte) extra += `&primary_release_date.lte=${lte}`;
+    baseUrl = `${TMDB_BASE}/discover/movie?${params}${extra}`;
+  } else {
+    const endpoints = {
+      trending: `${TMDB_BASE}/trending/all/week?${params}`,
+      popular: `${TMDB_BASE}/movie/popular?${params}`,
+      top_rated: `${TMDB_BASE}/movie/top_rated?${params}`,
+      upcoming: `${TMDB_BASE}/movie/upcoming?${params}`,
+      now_playing: `${TMDB_BASE}/movie/now_playing?${params}`,
+    };
+    baseUrl = endpoints[category] || endpoints.trending;
+  }
   // Fetch 2 pages in parallel
   const [p1, p2] = await Promise.all([
     fetch(baseUrl + '&page=1').then(r => r.ok ? r.json() : { results: [] }),
@@ -4282,13 +4456,22 @@ async function tmdbBrowse(category) {
   const all = [...(p1.results || []), ...(p2.results || [])];
   // trending/all renvoie aussi des personnes — pas affichables comme films
   // (pas de poster_path, et le clic requêterait /movie/{id_de_personne})
-  return all
+  const list = all
     .filter(it => it.media_type !== 'person')
     .map(it => ({
       ...it,
       // Add media_type for movie-only endpoints (TMDB doesn't include it there)
       media_type: it.media_type || 'movie',
     }));
+  // Re-tri local : TMDB ne garantit pas un ordre strict à la jonction des
+  // deux pages, et la date affichée (sortie FR via region=FR) peut différer
+  // de la date de tri serveur (sortie originale)
+  if (hasFilters) {
+    const sort = filters.sort || 'popularity.desc';
+    if (sort === 'vote_average.desc') list.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+    else if (sort === 'primary_release_date.desc') list.sort((a, b) => (b.release_date || '').localeCompare(a.release_date || ''));
+  }
+  return list;
 }
 
 // Build a full film object from TMDB detail data (movie or tv)
@@ -5207,6 +5390,28 @@ function wireEvents() {
   document.getElementById('discover-search').addEventListener('input', (e) => {
     clearTimeout(state.discoverSearchTimer);
     state.discoverSearchTimer = setTimeout(() => handleDiscoverSearch(e.target.value.trim()), 300);
+  });
+
+  // Filtres découvrir (genre / pays) — relancent la catégorie courante ;
+  // la recherche libre les ignore (l'API /search ne filtre pas), on la vide
+  ['discover-genre', 'discover-country', 'discover-decade', 'discover-sort'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+      state.discoverFilters.genre = document.getElementById('discover-genre').value;
+      state.discoverFilters.country = document.getElementById('discover-country').value;
+      state.discoverFilters.decade = document.getElementById('discover-decade').value;
+      state.discoverFilters.sort = document.getElementById('discover-sort').value;
+      const discInput = document.getElementById('discover-search');
+      if (discInput) discInput.value = '';
+      fetchAndRenderDiscover(state.discoverCategory);
+    });
+  });
+
+  // Masquer les films déjà en collection — filtre côté client au rendu,
+  // marche donc aussi sur la recherche libre et la reco
+  document.getElementById('discover-hide-collection').addEventListener('click', () => {
+    state.discoverFilters.hideCollection = !state.discoverFilters.hideCollection;
+    document.getElementById('discover-hide-collection').classList.toggle('active', state.discoverFilters.hideCollection);
+    if (state.lastTmdbItems) renderTmdbGrid(state.lastTmdbItems);
   });
 
   // Reco refresh button
