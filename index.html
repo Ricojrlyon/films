@@ -3158,6 +3158,12 @@ function openModal(f, opts) {
   if (f.trailer === undefined && f.tmdb_id && f.type) {
     enrichFilmTrailer(f);
   }
+  // Lazy-fix des noms non latins (réal / casting) — l'enrichissement de masse
+  // ne couvre que les films de la collection ; ici on couvre aussi les fiches
+  // découvrir/reco et les séries
+  if (f.tmdb_id && (hasNonLatin(f.director || '') || (f.cast || []).some(c => hasNonLatin(c)))) {
+    enrichFilmNames(f);
+  }
 }
 
 async function addTmdbFilmToCollection(film, statut, userData) {
@@ -4446,6 +4452,63 @@ async function enrichFilmTrailer(film) {
     if (trailer) reRenderModalIfShowing(film);
   } catch {}
   delete film._trailerFetching;
+}
+
+// Latinise les noms non latins d'une fiche (réal + casting) via les fiches
+// personnes TMDB (nom en-US puis alias latins). Même mécanique lazy que le
+// pays et la bande-annonce : corrigé en mémoire, re-rendu si la fiche est
+// ouverte, persisté au prochain save admin pour les films de la collection.
+// bestPersonName ne suffit pas ici : pour le cinéma asiatique, `name` ET
+// `original_name` sont souvent tous deux dans l'écriture d'origine.
+async function enrichFilmNames(film) {
+  // _namesTried : une tentative par session (le drapeau _ n'est pas persisté,
+  // donc réessayé à la prochaine visite si des noms restent non latins)
+  if (film._namesTried || !film.tmdb_id) return;
+  const needsDirector = hasNonLatin(film.director || '');
+  const castIdx = (film.cast || []).map((c, i) => hasNonLatin(c) ? i : -1).filter(i => i >= 0);
+  if (!needsDirector && castIdx.length === 0) return;
+  film._namesTried = true;
+  try {
+    const path = film.type === 'tv' ? 'tv' : 'movie';
+    const r = await fetch(`${TMDB_BASE}/${path}/${film.tmdb_id}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+    if (!r.ok) return;
+    const credits = await r.json();
+    const people = [...(credits.cast || []), ...(credits.crew || [])];
+    // Les créateurs de séries ne figurent pas dans les credits
+    if (needsDirector && film.type === 'tv') {
+      try {
+        const dr = await fetch(`${TMDB_BASE}/tv/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+        if (dr.ok) people.push(...((await dr.json()).created_by || []));
+      } catch {}
+    }
+    const latinFor = async (name) => {
+      const p = people.find(x => x.name === name || x.original_name === name);
+      if (!p) return null;
+      const direct = bestPersonName(p);
+      if (!hasNonLatin(direct)) return direct;
+      return p.id ? await fetchLatinNameById(p.id) : null;
+    };
+    let changed = false;
+    if (needsDirector) {
+      // Les duos « A, B » (séries) sont résolus personne par personne
+      const parts = film.director.split(',').map(s => s.trim());
+      const newParts = [];
+      for (const part of parts) {
+        if (!hasNonLatin(part)) { newParts.push(part); continue; }
+        const latin = await latinFor(part);
+        newParts.push(latin && !hasNonLatin(latin) ? latin : part);
+        await new Promise(res => setTimeout(res, 200));
+      }
+      const joined = newParts.join(', ');
+      if (joined !== film.director) { film.director = joined; changed = true; }
+    }
+    for (const i of castIdx) {
+      const latin = await latinFor(film.cast[i]);
+      if (latin && !hasNonLatin(latin)) { film.cast[i] = latin; changed = true; }
+      await new Promise(res => setTimeout(res, 200));
+    }
+    if (changed) reRenderModalIfShowing(film);
+  } catch { /* réseau — réessayé à la prochaine session */ }
 }
 
 function reRenderModalIfShowing(film) {
