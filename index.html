@@ -1283,6 +1283,26 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   background: var(--red);
   color: white;
 }
+/* Lien de réinitialisation : volontairement petit et discret pour éviter
+   un clic accidentel (l'action reste protégée par une confirmation) */
+.admin-modal-body button.admin-reset-btn {
+  background: transparent;
+  border: none;
+  color: var(--ink-mute);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  text-decoration: underline;
+  padding: 2px 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.admin-modal-body button.admin-reset-btn:hover:not(:disabled) {
+  background: transparent;
+  color: var(--red);
+}
 
 .error-inline {
   background: rgba(217, 119, 87, 0.1);
@@ -2197,7 +2217,9 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
         <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
           <button class="ghost" id="admin-lock-btn">verrouiller (rester admin pour cette session)</button>
-          <button class="ghost" id="admin-disable-btn">tout réinitialiser (oublier mon code)</button>
+        </div>
+        <div style="margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--rule);">
+          <button class="admin-reset-btn" id="admin-disable-btn">tout réinitialiser (oublier mon code)</button>
         </div>
       </div>
 
