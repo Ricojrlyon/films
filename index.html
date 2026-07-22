@@ -3260,7 +3260,7 @@ function openModal(f, opts) {
       <div class="modal-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(f.poster)})"` : ''}>${f.poster ? '' : "pas d'affiche"}</div>
       <div class="modal-head-meta">
         <h2 class="modal-title">${escapeHtml(f.title || 'sans titre')}</h2>
-        ${f.director ? `<div class="modal-director">par ${nameLink(f.director)}</div>` : ''}
+        ${f.director ? `<div class="modal-director">par ${f.director.split(',').map(n => nameLink(n.trim())).filter(Boolean).join(', ')}</div>` : ''}
         <div class="modal-meta-line">${metaParts.map(escapeHtml).join(' · ')}</div>
       </div>
     </div>
@@ -3360,10 +3360,14 @@ function openModal(f, opts) {
   if (f.trailer === undefined && f.tmdb_id && f.type) {
     enrichFilmTrailer(f);
   }
-  // Lazy-fix des noms non latins (réal / casting) — l'enrichissement de masse
-  // ne couvre que les films de la collection ; ici on couvre aussi les fiches
-  // découvrir/reco et les séries
-  if (f.tmdb_id && (hasNonLatin(f.director || '') || (f.cast || []).some(c => hasNonLatin(c)))) {
+  // Lazy : noms non latins (réal / casting) ET complétion de la liste des
+  // réalisateurs pour les films ajoutés avant la capture des co-réalisations
+  // (director_genders absent). Couvre aussi les fiches découvrir/reco.
+  if (f.tmdb_id && (
+        hasNonLatin(f.director || '') ||
+        (f.cast || []).some(c => hasNonLatin(c)) ||
+        (f.type === 'movie' && !f.director_genders)
+      )) {
     enrichFilmNames(f);
   }
 }
@@ -3907,13 +3911,16 @@ function renderDirectorChart() {
   const mCounts = new Map(), fCounts = new Map();
   for (const f of state.films) {
     if (!f.director) continue;
-    const g = f.director_gender;
-    // director_gender décrit la première personne (duos « A, B » des séries) :
-    // ne compter qu'elle — même règle de découpage que les compteurs — les
-    // co-créateurs ont un genre inconnu et n'entrent dans aucune des colonnes
-    const first = f.director.split(',')[0].trim();
-    if (g === 2) mCounts.set(first, (mCounts.get(first) || 0) + 1);
-    else if (g === 1) fCounts.set(first, (fCounts.get(first) || 0) + 1);
+    // Compter CHAQUE réalisateur avec son propre genre (co-réalisations).
+    // director_genders est parallèle à director.split(', ') ; à défaut (données
+    // anciennes non encore complétées), on retombe sur le genre unique.
+    const names = f.director.split(',').map(s => s.trim()).filter(Boolean);
+    const genders = (f.director_genders && f.director_genders.length) ? f.director_genders : [f.director_gender];
+    names.forEach((name, i) => {
+      const g = genders[i] != null ? genders[i] : 0;
+      if (g === 2) mCounts.set(name, (mCounts.get(name) || 0) + 1);
+      else if (g === 1) fCounts.set(name, (fCounts.get(name) || 0) + 1);
+    });
   }
   const renderSide = (counts, rootId, minCount = 2) => {
     const sorted = [...counts.entries()].filter(([, c]) => c >= minCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
@@ -4137,20 +4144,25 @@ async function enrichGender() {
       );
       if (!r.ok) { done++; continue; }
       const data = await r.json();
-      const dir = (data.crew || []).find(c => c.job === 'Director');
-      if (dir) f.director_gender = dir.gender || 0;
       const rawCast = (data.cast || []).slice(0, 5);
       f.cast_genders = rawCast.map(c => c.gender || 0);
 
-      // 2. Fix non-Latin director name
-      if (dir && hasNonLatin(f.director || '')) {
-        let latinName = bestPersonName(dir);
-        if (hasNonLatin(latinName) && dir.id) {
-          // Still non-Latin → fetch person endpoint for English name
+      // 2. Liste COMPLÈTE des réalisateurs (co-réalisations) + genres, noms latinisés
+      const dirs = (data.crew || []).filter(c => c.job === 'Director');
+      const dirNames = [], dirGenders = [], seenDir = new Set();
+      for (const d of dirs) {
+        let nm = bestPersonName(d);
+        if (hasNonLatin(nm) && d.id) {
           await new Promise(res => setTimeout(res, 300));
-          latinName = (await fetchLatinNameById(dir.id)) || latinName;
+          nm = (await fetchLatinNameById(d.id)) || nm;
         }
-        if (!hasNonLatin(latinName)) f.director = latinName;
+        if (!nm || seenDir.has(nm)) continue;
+        seenDir.add(nm); dirNames.push(nm); dirGenders.push(d.gender || 0);
+      }
+      if (dirNames.length) {
+        f.director = dirNames.join(', ');
+        f.director_genders = dirGenders;
+        f.director_gender = dirGenders[0] || 0;
       }
 
       // 3. Reconstruire les noms depuis les MÊMES entrées TMDB que les genres.
@@ -4611,20 +4623,29 @@ function extractCountryFromTmdbDetail(detail) {
 function buildFilmFromTmdb(detail, type, csvTitle = null) {
   let director = null;
   let directorGender = 0; // 0=unknown, 1=female, 2=male (TMDB convention)
+  let directorGenders = []; // parallèle à director.split(', ') — co-réalisations
   let cast = [];
   let castGenders = [];
   if (detail.credits) {
+    // Tous les réalisateurs (films co-réalisés : ex. « Ma Frère »), dédupliqués
+    let people;
     if (type === 'movie') {
-      const dir = (detail.credits.crew || []).find(c => c.job === 'Director');
-      if (dir) {
-        director = bestPersonName(dir);
-        directorGender = dir.gender || 0;
-      }
+      people = (detail.credits.crew || []).filter(c => c.job === 'Director');
     } else {
-      director = (detail.created_by || []).map(c => bestPersonName(c)).filter(Boolean).join(', ') || null;
-      // For TV, take the first creator's gender
-      const firstCreator = (detail.created_by || [])[0];
-      directorGender = firstCreator ? (firstCreator.gender || 0) : 0;
+      people = detail.created_by || [];
+    }
+    const names = [], genders = [], seen = new Set();
+    for (const p of people) {
+      const nm = bestPersonName(p);
+      if (!nm || seen.has(nm)) continue;
+      seen.add(nm);
+      names.push(nm);
+      genders.push(p.gender || 0);
+    }
+    if (names.length) {
+      director = names.join(', ');
+      directorGenders = genders;
+      directorGender = genders[0] || 0; // singulier conservé (reco, parité)
     }
     const rawCast = (detail.credits.cast || []).slice(0, 5);
     cast = rawCast.map(c => bestPersonName(c));
@@ -4655,6 +4676,7 @@ function buildFilmFromTmdb(detail, type, csvTitle = null) {
     release_date: release || null,
     director: director,
     director_gender: directorGender,
+    director_genders: directorGenders,
     cast: cast,
     cast_genders: castGenders,
     runtime: type === 'movie' ? (detail.runtime || null) : (Array.isArray(detail.episode_run_time) && detail.episode_run_time[0]) || null,
@@ -4734,12 +4756,14 @@ async function enrichFilmTrailer(film) {
 // `original_name` sont souvent tous deux dans l'écriture d'origine.
 async function enrichFilmNames(film) {
   // _namesTried : une tentative par session (le drapeau _ n'est pas persisté,
-  // donc réessayé à la prochaine visite si des noms restent non latins)
+  // donc réessayé à la prochaine visite si un besoin subsiste)
   if (film._namesTried || !film.tmdb_id) return;
-  const needsDirector = hasNonLatin(film.director || '');
+  const needsDirLatin = hasNonLatin(film.director || '');
+  const needsDirList = film.type === 'movie' && !film.director_genders; // co-réal à compléter
   const castIdx = (film.cast || []).map((c, i) => hasNonLatin(c) ? i : -1).filter(i => i >= 0);
-  if (!needsDirector && castIdx.length === 0) return;
+  if (!needsDirLatin && !needsDirList && castIdx.length === 0) return;
   film._namesTried = true;
+  const sleep = ms => new Promise(res => setTimeout(res, ms));
   try {
     const path = film.type === 'tv' ? 'tv' : 'movie';
     const r = await fetch(`${TMDB_BASE}/${path}/${film.tmdb_id}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
@@ -4747,37 +4771,56 @@ async function enrichFilmNames(film) {
     const credits = await r.json();
     const people = [...(credits.cast || []), ...(credits.crew || [])];
     // Les créateurs de séries ne figurent pas dans les credits
-    if (needsDirector && film.type === 'tv') {
+    if (film.type === 'tv') {
       try {
         const dr = await fetch(`${TMDB_BASE}/tv/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
         if (dr.ok) people.push(...((await dr.json()).created_by || []));
       } catch {}
     }
+    const latinName = async (person) => {
+      let nm = bestPersonName(person);
+      if (hasNonLatin(nm) && person.id) { await sleep(200); nm = (await fetchLatinNameById(person.id)) || nm; }
+      return nm;
+    };
     const latinFor = async (name) => {
       const p = people.find(x => x.name === name || x.original_name === name);
-      if (!p) return null;
-      const direct = bestPersonName(p);
-      if (!hasNonLatin(direct)) return direct;
-      return p.id ? await fetchLatinNameById(p.id) : null;
+      return p ? await latinName(p) : null;
     };
     let changed = false;
-    if (needsDirector) {
-      // Les duos « A, B » (séries) sont résolus personne par personne
+
+    if (film.type === 'movie') {
+      // Liste COMPLÈTE des réalisateurs (co-réalisations) + genres parallèles
+      const dirs = (credits.crew || []).filter(c => c.job === 'Director');
+      const names = [], genders = [], seen = new Set();
+      for (const d of dirs) {
+        const nm = await latinName(d);
+        if (!nm || seen.has(nm)) continue;
+        seen.add(nm); names.push(nm); genders.push(d.gender || 0);
+      }
+      if (names.length) {
+        const joined = names.join(', ');
+        if (joined !== film.director) { film.director = joined; changed = true; }
+        film.director_genders = genders;        // marque « complété » + genres
+        film.director_gender = genders[0] || 0;
+      }
+    } else if (needsDirLatin && film.director) {
+      // Séries : latiniser les créateurs déjà stockés, personne par personne
       const parts = film.director.split(',').map(s => s.trim());
       const newParts = [];
       for (const part of parts) {
         if (!hasNonLatin(part)) { newParts.push(part); continue; }
         const latin = await latinFor(part);
         newParts.push(latin && !hasNonLatin(latin) ? latin : part);
-        await new Promise(res => setTimeout(res, 200));
+        await sleep(200);
       }
       const joined = newParts.join(', ');
       if (joined !== film.director) { film.director = joined; changed = true; }
     }
+
     for (const i of castIdx) {
       const latin = await latinFor(film.cast[i]);
       if (latin && !hasNonLatin(latin)) { film.cast[i] = latin; changed = true; }
-      await new Promise(res => setTimeout(res, 200));
+      await sleep(200);
     }
     if (changed) reRenderModalIfShowing(film);
   } catch { /* réseau — réessayé à la prochaine session */ }
