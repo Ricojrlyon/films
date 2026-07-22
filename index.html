@@ -896,6 +896,8 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   padding: 6px 0;
   font-size: 13px;
 }
+.bar-row-clickable { cursor: pointer; border-radius: 6px; transition: background 0.15s; }
+.bar-row-clickable:hover { background: var(--bg-elev-2); }
 @media (max-width: 600px) {
   .bar-row { grid-template-columns: 100px 1fr 36px; gap: 8px; font-size: 12px; }
 }
@@ -2065,12 +2067,18 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
     <div class="chart-section">
       <h3 class="chart-title">par origine</h3>
-      <div class="chart-subtitle">distribution par pays · <span id="origin-coverage"></span></div>
+      <div class="chart-subtitle">pays de production · <span id="origin-coverage"></span></div>
       <div id="origin-chart"></div>
       <div id="origin-enrich-wrap" style="margin-top: 16px; display: none;">
         <button class="reco-refresh" id="origin-enrich-btn">↻ enrichir les pays manquants</button>
         <span id="origin-enrich-status" style="margin-left: 12px; color: var(--ink-mute); font-size: 12px;"></span>
       </div>
+    </div>
+
+    <div class="chart-section">
+      <h3 class="chart-title">par pays du·de la réalisateur·rice</h3>
+      <div class="chart-subtitle">pays de naissance · <span id="director-country-coverage"></span></div>
+      <div id="director-country-chart"></div>
     </div>
 
     <div class="chart-section">
@@ -3570,6 +3578,7 @@ function renderStats() {
   renderGenreRatingChart();
   renderHeatmap();
   renderOriginChart();
+  renderDirectorCountryChart();
   renderGenreChart();
   renderDirectorChart();
   renderActorChart();
@@ -3653,6 +3662,11 @@ function renderMonthsChart() {
     r.style.cursor = 'pointer';
     r.addEventListener('mouseenter', (e) => showMonthTip(r));
     r.addEventListener('touchstart', (e) => showMonthTip(r), { passive: true });
+    // Clic → films vus ce mois-là (data-key = "YYYY-MM")
+    r.addEventListener('click', () => {
+      const [yr, mo] = r.dataset.key.split('-');
+      if (parseInt(r.dataset.count, 10) > 0) goToVusWithFilters({ yearvu: yr, mois: mo });
+    });
   });
   svg.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
 
@@ -3736,32 +3750,43 @@ function renderHeatmap() {
       const isFav = i === 5;
       const bg = heatmapColor(intensity, isFav);
       const textCol = intensity > 0.55 ? '#fff' : 'var(--ink-soft)';
-      html += `<div class="heatmap-cell" style="background:${bg}; color:${textCol}">${v > 0 ? v : '·'}</div>`;
+      const clickAttrs = v > 0 ? ` heatmap-cell-clickable" data-genre="${escapeHtml(m.genre)}" data-rating="${i + 1}` : '';
+      html += `<div class="heatmap-cell${clickAttrs}" style="background:${bg}; color:${textCol}">${v > 0 ? v : '·'}</div>`;
     }
     html += `</div>`;
   }
   root.innerHTML = html;
+  // Case cliquable → films vus filtrés par ce genre et cette note
+  root.querySelectorAll('.heatmap-cell-clickable').forEach(cell => {
+    cell.style.cursor = 'pointer';
+    cell.title = 'voir ces films';
+    cell.addEventListener('click', () =>
+      goToVusWithFilters({ genre: cell.dataset.genre, ratings: [parseInt(cell.dataset.rating, 10)] }));
+  });
 }
 
 function renderOriginChart() {
-  const counts = new Map();
+  // Films vus uniquement, comptage FRACTIONNAIRE : une co-production « A · B · C »
+  // ajoute 1/3 à chaque pays → le total colle au nombre de films vus au lieu de
+  // gonfler (avant : chaque pays comptait 1, un film à 3 pays comptait 3 fois).
+  const weights = new Map();
   let knownCount = 0;
-  for (const f of state.films) {
+  const vus = state.films.filter(f => f.user?.statut === 'vu');
+  for (const f of vus) {
     if (!f.country) continue;
-    knownCount++;
-    // Split by " · " for co-productions and count each country
     const parts = f.country.split(' · ').map(s => s.trim()).filter(Boolean);
-    for (const p of parts) {
-      counts.set(p, (counts.get(p) || 0) + 1);
-    }
+    if (!parts.length) continue;
+    knownCount++;
+    const w = 1 / parts.length;
+    for (const p of parts) weights.set(p, (weights.get(p) || 0) + w);
   }
-  const total = state.films.length;
+  const total = vus.length;
   const missing = total - knownCount;
 
   // Coverage line
   const coverageEl = document.getElementById('origin-coverage');
   if (coverageEl) {
-    coverageEl.textContent = `${knownCount} / ${total} films analysés${missing > 0 ? ` · ${missing} sans pays` : ''}`;
+    coverageEl.textContent = `${knownCount} / ${total} films vus analysés${missing > 0 ? ` · ${missing} sans pays` : ''}`;
   }
 
   // Show "enrich" button if many films are missing
@@ -3770,8 +3795,8 @@ function renderOriginChart() {
     enrichWrap.style.display = missing > 5 ? '' : 'none';
   }
 
-  // Render bars (top 15)
-  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15);
+  // Render bars (top 10) — valeur arrondie à l'affichage
+  const sorted = [...weights.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
   const max = sorted.length ? sorted[0][1] : 1;
   const root = document.getElementById('origin-chart');
   if (!root) return;
@@ -3779,11 +3804,43 @@ function renderOriginChart() {
     root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic;">aucun pays connu pour le moment. clique "enrichir" pour récupérer ces données via tmdb.</div>';
     return;
   }
-  root.innerHTML = sorted.map(([country, n]) => `
+  root.innerHTML = sorted.map(([country, w]) => `
     <div class="bar-row">
       <div class="bar-label">${escapeHtml(country)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(n / max * 100).toFixed(1)}%"></div></div>
-      <div class="bar-value">${n}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(w / max * 100).toFixed(1)}%"></div></div>
+      <div class="bar-value">${Math.round(w)}</div>
+    </div>`).join('');
+}
+
+function renderDirectorCountryChart() {
+  // Films vus, comptage fractionnaire réparti entre les réalisateurs dont le
+  // pays de naissance est connu (données enrichies via TMDB /person).
+  const weights = new Map();
+  let known = 0;
+  const vus = state.films.filter(f => f.user?.statut === 'vu');
+  for (const f of vus) {
+    const cs = (f.director_countries || []).filter(Boolean);
+    if (!cs.length) continue;
+    known++;
+    const w = 1 / cs.length;
+    for (const c of cs) weights.set(c, (weights.get(c) || 0) + w);
+  }
+  const coverageEl = document.getElementById('director-country-coverage');
+  if (coverageEl) coverageEl.textContent = `${known} / ${vus.length} films vus analysés`;
+
+  const root = document.getElementById('director-country-chart');
+  if (!root) return;
+  if (weights.size === 0) {
+    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic;">pas encore de données. clique « ↻ enrichir genres &amp; réalisateurs » (section parité) pour les récupérer via tmdb.</div>';
+    return;
+  }
+  const sorted = [...weights.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const max = sorted[0][1];
+  root.innerHTML = sorted.map(([country, w]) => `
+    <div class="bar-row">
+      <div class="bar-label">${escapeHtml(country)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(w / max * 100).toFixed(1)}%"></div></div>
+      <div class="bar-value">${Math.round(w)}</div>
     </div>`).join('');
 }
 
@@ -3886,6 +3943,12 @@ function renderRatingDist() {
     bar.className = 'rating-bar' + (i === 5 ? ' fav' : '');
     bar.style.height = (counts[i] / max * 100) + '%';
     bar.innerHTML = `<span class="rating-bar-count">${counts[i]}</span>`;
+    // Clic → films vus notés ainsi
+    if (counts[i] > 0) {
+      bar.style.cursor = 'pointer';
+      bar.title = 'voir ces films';
+      bar.addEventListener('click', () => goToVusWithFilters({ ratings: [i + 1] }));
+    }
     root.appendChild(bar);
   }
 }
@@ -3960,11 +4023,14 @@ function renderYearChart() {
     return;
   }
   root.innerHTML = entries.map(([y, c]) => `
-    <div class="bar-row">
+    <div class="bar-row bar-row-clickable" data-year="${escapeHtml(y)}" title="voir ces films">
       <div class="bar-label">${escapeHtml(y)}</div>
       <div class="bar-track"><div class="bar-fill hot" style="width:${(c / max * 100).toFixed(1)}%"></div></div>
       <div class="bar-value">${c}</div>
     </div>`).join('');
+  // Clic sur une année → films vus cette année-là
+  root.querySelectorAll('.bar-row-clickable').forEach(row =>
+    row.addEventListener('click', () => goToVusWithFilters({ yearvu: row.dataset.year })));
 }
 
 function renderGenreRatingChart() {
@@ -4043,7 +4109,7 @@ function renderGenderBalance() {
   // (director_genders / cast_genders), pas sur la valeur du genre : un genre
   // « inconnu » que TMDB ne fournit pas est déjà traité (director_genders posé),
   // donc le bouton se masque au lieu de rester affiché à vie sur ces trous.
-  const needsEnrich = vus.some(f => f.type === 'movie' && f.tmdb_id && (!f.director_genders || !f.cast_genders));
+  const needsEnrich = vus.some(f => f.type === 'movie' && f.tmdb_id && (!f.director_genders || !f.director_countries || !f.cast_genders));
 
   // Show enrich button whenever data is missing, admin mode controls whether the
   // button actually does anything (checked inside enrichGender itself).
@@ -4117,6 +4183,16 @@ async function fetchLatinNameById(personId) {
   return null;
 }
 
+/** Pays de naissance normalisé d'une personne TMDB (via place_of_birth). '' si inconnu. */
+async function fetchPersonCountry(personId) {
+  try {
+    const r = await fetch(`${TMDB_BASE}/person/${personId}?api_key=${encodeURIComponent(admin.tmdbKey)}`);
+    if (!r.ok) return '';
+    const p = await r.json();
+    return placeToCountry(p.place_of_birth);
+  } catch { return ''; }
+}
+
 async function enrichGender() {
   if (!admin.active || !admin.tmdbKey) return;
   const btn = document.getElementById('gender-enrich-btn');
@@ -4128,7 +4204,7 @@ async function enrichGender() {
   //   so a failed name fix can be retried after deploying improved logic)
   const toEnrich = state.films.filter(
     f => f.tmdb_id && f.type === 'movie' && (
-      !f.director_genders || !f.cast_genders ||
+      !f.director_genders || !f.director_countries || !f.cast_genders ||
       hasNonLatin(f.director || '') ||
       (f.cast || []).some(c => hasNonLatin(c))
     )
@@ -4149,9 +4225,10 @@ async function enrichGender() {
       const rawCast = (data.cast || []).slice(0, 5);
       f.cast_genders = rawCast.map(c => c.gender || 0);
 
-      // 2. Liste COMPLÈTE des réalisateurs (co-réalisations) + genres, noms latinisés
+      // 2. Liste COMPLÈTE des réalisateurs (co-réalisations) + genres + pays de
+      //    naissance (via /person), noms latinisés — le tout aligné par index
       const dirs = (data.crew || []).filter(c => c.job === 'Director');
-      const dirNames = [], dirGenders = [], seenDir = new Set();
+      const dirNames = [], dirGenders = [], dirCountries = [], seenDir = new Set();
       for (const d of dirs) {
         let nm = bestPersonName(d);
         if (hasNonLatin(nm) && d.id) {
@@ -4160,11 +4237,18 @@ async function enrichGender() {
         }
         if (!nm || seenDir.has(nm)) continue;
         seenDir.add(nm); dirNames.push(nm); dirGenders.push(d.gender || 0);
+        let country = '';
+        if (d.id) {
+          await new Promise(res => setTimeout(res, 300));
+          country = await fetchPersonCountry(d.id);
+        }
+        dirCountries.push(country);
       }
       if (dirNames.length) {
         f.director = dirNames.join(', ');
         f.director_genders = dirGenders;
         f.director_gender = dirGenders[0] || 0;
+        f.director_countries = dirCountries;
       }
 
       // 3. Reconstruire les noms depuis les MÊMES entrées TMDB que les genres.
@@ -4243,6 +4327,41 @@ function renderYearBest() {
 function openModalFromCard(filmId) {
   const f = state.films.find(x => x.id === filmId);
   if (f) openModal(f);
+}
+
+// Depuis une stat cliquable → page collection, onglet « vus », filtres appliqués.
+// partial : { genre, ratings:[..], yearvu, mois, decade, lieu }
+function goToVusWithFilters(partial) {
+  partial = partial || {};
+  // Repartir de filtres propres, puis appliquer le sous-ensemble demandé
+  state.filters = { status: 'vu', search: '', genre: '', lieu: '', decade: '', yearvu: '', mois: '', ratings: new Set() };
+  ['genre', 'lieu', 'decade', 'yearvu', 'mois'].forEach(k => { if (partial[k]) state.filters[k] = partial[k]; });
+  if (partial.ratings) partial.ratings.forEach(rt => state.filters.ratings.add(rt));
+  state.view = 'vu';
+  state.sort = TAB_SORT_DEFAULTS.vu;
+
+  // Basculer sur la collection + onglet vus
+  showPage('collection');
+  document.querySelectorAll('#status-tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.view === 'vu'));
+  document.getElementById('collection-controls').style.display = '';
+  document.getElementById('discover-header').style.display = 'none';
+  document.getElementById('reco-header').style.display = 'none';
+
+  // Refléter l'état dans l'UI des filtres + ouvrir le panneau pour montrer ce qui est appliqué
+  document.getElementById('search').value = '';
+  document.getElementById('sort').value = state.sort;
+  const setSel = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  setSel('filter-genre', state.filters.genre);
+  setSel('filter-lieu', state.filters.lieu);
+  setSel('filter-decade', state.filters.decade);
+  setSel('filter-yearvu', state.filters.yearvu);
+  setSel('filter-mois', state.filters.mois);
+  document.querySelectorAll('#rating-chips .rating-chip').forEach(c =>
+    c.classList.toggle('active', state.filters.ratings.has(parseInt(c.dataset.rating, 10))));
+  document.getElementById('filter-panel').classList.add('open');
+
+  applyFilters();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ============================================================
@@ -4602,6 +4721,19 @@ function shortenCountryName(name) {
   if (name === "États-Unis d'Amérique" || name === 'États-Unis') return 'USA';
   if (name === 'Royaume-Uni') return 'UK';
   return name;
+}
+
+// TMDB place_of_birth est du texte libre (« Seoul, South Korea », « New York,
+// New York, USA »). On prend le dernier segment (le pays), normalisé sur le
+// même vocabulaire que les pays de production. '' si non exploitable.
+function placeToCountry(place) {
+  if (!place) return '';
+  const parts = String(place).split(',').map(s => s.trim()).filter(Boolean);
+  if (!parts.length) return '';
+  let c = parts[parts.length - 1];
+  // Sous-entités souvent écrites sans le pays
+  if (c === 'England' || c === 'Scotland' || c === 'Wales' || c === 'Northern Ireland') c = 'UK';
+  return shortenCountryName(c);
 }
 
 function extractCountryFromTmdbDetail(detail) {
