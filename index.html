@@ -1938,6 +1938,18 @@ button:focus-visible, input:focus-visible, select:focus-visible {
         <div class="filter-label">année vue</div>
         <select id="filter-yearvu"><option value="">toutes</option></select>
       </div>
+      <div class="filter-group">
+        <div class="filter-label">mois vu</div>
+        <select id="filter-mois">
+          <option value="">tous</option>
+          <option value="01">janvier</option><option value="02">février</option>
+          <option value="03">mars</option><option value="04">avril</option>
+          <option value="05">mai</option><option value="06">juin</option>
+          <option value="07">juillet</option><option value="08">août</option>
+          <option value="09">septembre</option><option value="10">octobre</option>
+          <option value="11">novembre</option><option value="12">décembre</option>
+        </select>
+      </div>
       <div class="filter-group" style="flex: 1 0 100%;">
         <div class="filter-label">notes</div>
         <div class="rating-chips" id="rating-chips">
@@ -2231,6 +2243,7 @@ const state = {
     lieu: '',
     decade: '',
     yearvu: '',
+    mois: '',
     ratings: new Set(),
   },
   sort: TAB_SORT_DEFAULTS.a_voir,
@@ -2381,6 +2394,14 @@ function applyFilters(opts) {
       return dv.startsWith(f.yearvu);
     });
   }
+  if (f.mois) {
+    // Le mois n'existe que pour les dates "YYYY-MM" (les "YYYY" et "before-"
+    // n'ont pas de mois connu). Se combine avec « année vue » en ET.
+    list = list.filter(x => {
+      const dv = x.user?.date_vue;
+      return dv && /^\d{4}-\d{2}$/.test(dv) && dv.slice(5, 7) === f.mois;
+    });
+  }
   if (f.ratings.size > 0) {
     list = list.filter(x => x.user?.rating && f.ratings.has(x.user.rating));
   }
@@ -2442,7 +2463,7 @@ function sortList(list, sortKey) {
 
 function updateFilterBadge() {
   const f = state.filters;
-  let active = ['genre', 'lieu', 'decade', 'yearvu'].filter(k => f[k]).length;
+  let active = ['genre', 'lieu', 'decade', 'yearvu', 'mois'].filter(k => f[k]).length;
   if (f.ratings.size > 0) active++;
   const badge = document.getElementById('filter-badge');
   if (active > 0) {
@@ -3591,12 +3612,31 @@ function renderMonthsChart() {
     tooltip.style.opacity = '1';
   }
 
-  // Bottom legend axis: just a hint
-  document.getElementById('months-axis').innerHTML = `<div style="display:flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute); margin-top: 8px;">
-    <span>${prettyMonth(months[0].key)}</span>
-    <span style="color: var(--ink-soft)">pic: ${max} films / mois</span>
-    <span>${prettyMonth(months[months.length - 1].key)}</span>
-  </div>`;
+  // Moyenne films/mois par année : somme des films de l'année ÷ nombre de mois
+  // de cette année présents dans la série (gaps à zéro compris, année courante
+  // partielle gérée naturellement) → colle exactement aux barres ci-dessus
+  const perYearAvg = new Map(); // année → [somme, mois présents]
+  for (const d of months) {
+    const yr = d.key.slice(0, 4);
+    const acc = perYearAvg.get(yr) || [0, 0];
+    acc[0] += d.count;
+    acc[1] += 1;
+    perYearAvg.set(yr, acc);
+  }
+  const avgChips = [...perYearAvg.entries()].map(([yr, [sum, n]]) =>
+    `<span><strong style="color: var(--ink-soft)">${yr}</strong> ${(sum / n).toFixed(1).replace('.', ',')}/mois</span>`
+  ).join('');
+
+  // Bottom legend: moyenne mensuelle par année + bornes de la série
+  document.getElementById('months-axis').innerHTML = `
+    <div style="display:flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute); margin-top: 10px;">
+      <span style="color: var(--ink-mute); letter-spacing: 0.08em;">moyenne /mois —</span>
+      ${avgChips}
+    </div>
+    <div style="display:flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute); margin-top: 8px;">
+      <span>${prettyMonth(months[0].key)}</span>
+      <span>${prettyMonth(months[months.length - 1].key)}</span>
+    </div>`;
 }
 
 function renderHeatmap() {
@@ -5446,6 +5486,7 @@ function wireEvents() {
     'filter-lieu': 'lieu',
     'filter-decade': 'decade',
     'filter-yearvu': 'yearvu',
+    'filter-mois': 'mois',
   };
   Object.entries(filterIds).forEach(([id, key]) => {
     document.getElementById(id).addEventListener('change', (e) => {
@@ -5477,7 +5518,7 @@ function wireEvents() {
 
   // Reset — restore defaults including the per-tab sort
   document.getElementById('filter-reset').addEventListener('click', () => {
-    state.filters = { status: 'a_voir', search: '', genre: '', lieu: '', decade: '', yearvu: '', ratings: new Set() };
+    state.filters = { status: 'a_voir', search: '', genre: '', lieu: '', decade: '', yearvu: '', mois: '', ratings: new Set() };
     state.sort = TAB_SORT_DEFAULTS.a_voir;
     document.getElementById('search').value = '';
     Object.keys(filterIds).forEach(id => { document.getElementById(id).value = ''; });
