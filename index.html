@@ -3071,9 +3071,16 @@ async function fetchAndRenderReco(forceRefresh = false) {
 // ============================================================
 // DETAIL MODAL
 // ============================================================
+// Contexte du modal ouvert — permet à un re-render (enrichissement paresseux)
+// de préserver le mode : sans ça, un film TMDB hors collection basculerait
+// en formulaire d'édition, dont les boutons agissent par id sur state.films
+// (introuvable → ne font rien)
+let openModalCtx = { id: null, tmdbOnly: false };
+
 function openModal(f, opts) {
   opts = opts || {};
   const tmdbOnly = opts.tmdbOnly === true;
+  openModalCtx = { id: f.id, tmdbOnly };
   const bg = document.getElementById('modal-bg');
   const body = document.getElementById('modal-body');
   // Reset filter from any previous open
@@ -4757,10 +4764,11 @@ async function enrichFilmNames(film) {
 function reRenderModalIfShowing(film) {
   const modal = document.getElementById('modal-backdrop');
   if (!modal || !modal.classList.contains('open')) return;
-  const titleEl = document.querySelector('.modal-title');
-  if (titleEl && titleEl.textContent === (film.title || 'sans titre')) {
-    openModal(film);
-  }
+  // Toujours la même fiche à l'écran ? (l'utilisateur a pu en ouvrir une autre
+  // pendant l'enrichissement asynchrone)
+  if (openModalCtx.id !== film.id) return;
+  // Ré-ouvrir dans le MÊME mode (préserve tmdbOnly pour un film hors collection)
+  openModal(film, { tmdbOnly: openModalCtx.tmdbOnly });
 }
 
 // ----------------- GITHUB --------------------
