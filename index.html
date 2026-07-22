@@ -1790,6 +1790,14 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   outline: none;
 }
 .edit-form .rating-chips { gap: 6px; }
+/* case « vu avant 2022 » sous le champ date */
+.date-before-toggle {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 10px; cursor: pointer;
+  font-family: 'Inter Tight', sans-serif; font-size: 13px;
+  text-transform: none; letter-spacing: 0; color: var(--ink-soft);
+}
+.date-before-toggle input { width: auto; margin: 0; cursor: pointer; accent-color: var(--warm); }
 .edit-form-actions {
   display: flex;
   gap: 8px;
@@ -3202,6 +3210,7 @@ function openModal(f, opts) {
                   <option value="11">novembre</option><option value="12">décembre</option>
                 </select>
               </div>
+              <label class="date-before-toggle"><input type="checkbox" id="tmdb-add-before"> vu avant 2022 (date précise inconnue)</label>
             </div>
             <div class="edit-form-actions">
               <button class="edit-save" id="tmdb-add-save">enregistrer</button>
@@ -3262,15 +3271,26 @@ function openModal(f, opts) {
       });
     });
 
+    // Case « vu avant 2022 »
+    wireBeforeToggle(
+      document.getElementById('tmdb-add-before'),
+      document.getElementById('tmdb-add-year'),
+      document.getElementById('tmdb-add-month')
+    );
+
     // Save: collect form values and add
     document.getElementById('tmdb-add-save').addEventListener('click', () => {
       const ratingBtn = document.querySelector('#tmdb-add-rating-chips .rating-chip.active');
       const rating = ratingBtn ? parseInt(ratingBtn.dataset.rating, 10) : null;
       const lieu = document.getElementById('tmdb-add-lieu').value || null;
+      const beforeChk = document.getElementById('tmdb-add-before');
       const y = document.getElementById('tmdb-add-year').value.trim();
       const m = document.getElementById('tmdb-add-month').value;
       let dateVue = null, dateLabel = null;
-      if (y) {
+      if (beforeChk && beforeChk.checked) {
+        dateVue = 'before-2022';
+        dateLabel = 'avant 2022';
+      } else if (y) {
         const currentYear = new Date().getFullYear();
         if (!/^\d{4}$/.test(y) || parseInt(y, 10) < 1900 || parseInt(y, 10) > currentYear) {
           showToast('année invalide (4 chiffres, entre 1900 et ' + currentYear + ')', 'error');
@@ -5153,7 +5173,7 @@ function renderEditForm(film) {
             <option value="11">novembre</option><option value="12">décembre</option>
           </select>
         </div>
-        ${(u.date_vue || '').startsWith('before-') ? `<div style="font-size: 11px; color: var(--ink-mute); margin-top: 6px;">date actuelle : « ${escapeHtml(u.date_vue_label || 'avant 2022')} » — conservée si l'année reste vide</div>` : ''}
+        <label class="date-before-toggle"><input type="checkbox" id="edit-date-before"> vu avant 2022 (date précise inconnue)</label>
       </div>
 
       <div class="edit-form-error error-inline" style="display: none;"></div>
@@ -5167,10 +5187,26 @@ function renderEditForm(film) {
   `;
 }
 
+// Case « vu avant 2022 » : quand cochée, neutralise année + mois (leur valeur
+// est ignorée au save, remplacée par le bucket before-2022)
+function wireBeforeToggle(chk, yearEl, monthEl) {
+  if (!chk) return;
+  const apply = () => {
+    const on = chk.checked;
+    if (on) { yearEl.value = ''; monthEl.value = ''; }
+    yearEl.disabled = on;
+    monthEl.disabled = on;
+    yearEl.style.opacity = monthEl.style.opacity = on ? '0.4' : '';
+  };
+  chk.addEventListener('change', apply);
+  apply();
+}
+
 function wireEditForm(film) {
   // After modal is rendered, set initial year/month based on existing date_vue
   const yearSel = document.getElementById('edit-date-year');
   const monthSel = document.getElementById('edit-date-month');
+  const beforeChk = document.getElementById('edit-date-before');
   if (yearSel) {
     const dv = film.user?.date_vue || '';
     if (/^\d{4}-\d{2}$/.test(dv)) {
@@ -5179,9 +5215,10 @@ function wireEditForm(film) {
     } else if (/^\d{4}$/.test(dv)) {
       yearSel.value = dv;
       monthSel.value = '';
+    } else if (dv.startsWith('before-') && beforeChk) {
+      beforeChk.checked = true;
     }
-    // date « avant XXXX » : champ laissé vide — la date existante est
-    // conservée au save tant que l'année n'est pas renseignée
+    wireBeforeToggle(beforeChk, yearSel, monthSel);
   }
 
   // Statut radio
@@ -5230,22 +5267,23 @@ async function saveEditedFilm(filmId) {
 
   let dateVue = null, dateLabel = null;
   if (isVu) {
-    const y = yearSel.value.trim();
-    const m = monthSel.value;
-    const currentYear = new Date().getFullYear();
-    if (y) {
-      if (!/^\d{4}$/.test(y) || parseInt(y, 10) < 1900 || parseInt(y, 10) > currentYear) {
-        errEl.textContent = 'année invalide (4 chiffres, entre 1900 et ' + currentYear + ')';
-        errEl.style.display = '';
-        return;
+    const beforeChk = document.getElementById('edit-date-before');
+    if (beforeChk && beforeChk.checked) {
+      dateVue = 'before-2022';
+      dateLabel = 'avant 2022';
+    } else {
+      const y = yearSel.value.trim();
+      const m = monthSel.value;
+      const currentYear = new Date().getFullYear();
+      if (y) {
+        if (!/^\d{4}$/.test(y) || parseInt(y, 10) < 1900 || parseInt(y, 10) > currentYear) {
+          errEl.textContent = 'année invalide (4 chiffres, entre 1900 et ' + currentYear + ')';
+          errEl.style.display = '';
+          return;
+        }
+        dateVue = m ? (y + '-' + m) : y;
+        dateLabel = formatDateLabel(dateVue);
       }
-      dateVue = m ? (y + '-' + m) : y;
-      dateLabel = formatDateLabel(dateVue);
-    } else if ((film.user?.date_vue || '').startsWith('before-')) {
-      // Année laissée vide sur un film daté « avant XXXX » : conserver la
-      // date existante plutôt que de l'effacer silencieusement
-      dateVue = film.user.date_vue;
-      dateLabel = film.user.date_vue_label;
     }
   }
 
