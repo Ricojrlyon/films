@@ -2114,7 +2114,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
       <div class="chart-subtitle">sur les films vus · données enrichies via tmdb</div>
       <div id="gender-balance"></div>
       <div id="gender-enrich-wrap" style="margin-top: 14px; display: none;">
-        <button class="reco-refresh" id="gender-enrich-btn">↻ enrichir les données de genre</button>
+        <button class="reco-refresh" id="gender-enrich-btn">↻ enrichir genres &amp; réalisateurs</button>
         <span id="gender-enrich-status" style="margin-left: 12px; color: var(--ink-mute); font-size: 12px;"></span>
       </div>
     </div>
@@ -4039,9 +4039,11 @@ function renderGenderBalance() {
 
   const withDirGender = vus.filter(f => f.director_gender && f.director_gender > 0).length;
   const withCastGender = vus.filter(f => (f.cast_genders || []).some(g => g > 0)).length;
-  // Aligné sur le périmètre d'enrichGender (films uniquement, avec tmdb_id) :
-  // sinon des séries sans données de genre laissaient le bouton affiché à vie
-  const needsEnrich = vus.some(f => f.type === 'movie' && f.tmdb_id && f.director && (!f.director_gender || f.director_gender === 0));
+  // Reste-t-il des films à enrichir ? Basé sur la présence des champs
+  // (director_genders / cast_genders), pas sur la valeur du genre : un genre
+  // « inconnu » que TMDB ne fournit pas est déjà traité (director_genders posé),
+  // donc le bouton se masque au lieu de rester affiché à vie sur ces trous.
+  const needsEnrich = vus.some(f => f.type === 'movie' && f.tmdb_id && (!f.director_genders || !f.cast_genders));
 
   // Show enrich button whenever data is missing, admin mode controls whether the
   // button actually does anything (checked inside enrichGender itself).
@@ -4126,7 +4128,7 @@ async function enrichGender() {
   //   so a failed name fix can be retried after deploying improved logic)
   const toEnrich = state.films.filter(
     f => f.tmdb_id && f.type === 'movie' && (
-      !f.director_gender || !f.cast_genders ||
+      !f.director_genders || !f.cast_genders ||
       hasNonLatin(f.director || '') ||
       (f.cast || []).some(c => hasNonLatin(c))
     )
