@@ -3174,7 +3174,7 @@ function openModal(f, opts) {
   // Meta line
   const metaParts = [];
   if (f.year) metaParts.push(f.year);
-  if (f.country) metaParts.push(f.country);
+  if (f.country) metaParts.push([...new Set(f.country.split(' · ').map(s => shortenCountryName(s.trim())).filter(Boolean))].join(' · '));
   if (f.runtime) metaParts.push(f.runtime + ' min');
   if (f.type === 'tv') metaParts.push('série');
 
@@ -3774,7 +3774,9 @@ function renderOriginChart() {
   const vus = state.films.filter(f => f.user?.statut === 'vu');
   for (const f of vus) {
     if (!f.country) continue;
-    const parts = f.country.split(' · ').map(s => s.trim()).filter(Boolean);
+    // Normaliser au rendu aussi : d'anciennes fiches stockent « United States
+    // of America » / « United Kingdom » bruts → fusionnés avec USA / UK
+    const parts = [...new Set(f.country.split(' · ').map(s => shortenCountryName(s.trim())).filter(Boolean))];
     if (!parts.length) continue;
     knownCount++;
     const w = 1 / parts.length;
