@@ -143,7 +143,7 @@ body {
   flex-wrap: wrap;
 }
 
-.tabs { display: flex; gap: 4px; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
 .tab {
   background: transparent;
   border: 1px solid var(--rule);
@@ -333,10 +333,13 @@ body {
   cursor: pointer;
   border-radius: var(--radius);
   overflow: hidden;
+  /* Fond surélevé + bordure : sans elle, le bas de la carte (là où l'affiche
+     s'éteint) se confondait avec le fond de page. Cf. *nocturne. */
   background: var(--bg-elev);
-  transition: transform 0.18s;
+  border: 1px solid rgba(231, 223, 190, 0.20);
+  transition: transform 0.18s, background 0.18s;
 }
-.card:hover { transform: translateY(-2px); }
+.card:hover { transform: translateY(-2px); background: var(--bg-elev-2); }
 .card .poster {
   aspect-ratio: 2/3;
   background-size: cover;
@@ -1470,11 +1473,17 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
 .explorer-modal { max-width: 800px; }
 .explorer-categories {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   margin-bottom: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
+.explorer-categories::-webkit-scrollbar { display: none; }
 .explorer-cat {
+  flex: 0 0 auto;
+  white-space: nowrap;
   background: var(--bg);
   border: 1px solid var(--rule);
   color: var(--ink-soft);
@@ -1533,32 +1542,34 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
 }
 .discover-filters {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 .discover-filters select {
+  flex: 1 1 100px;
+  min-width: 0;
   background: var(--bg-elev);
   border: 1px solid var(--rule);
   color: var(--ink-soft);
-  padding: 8px 12px;
+  padding: 6px 9px;
   border-radius: var(--radius);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   outline: none;
   cursor: pointer;
-  max-width: 200px;
 }
 .discover-filters select:focus { border-color: var(--warm); }
 .discover-filters select.active { border-color: var(--warm); color: var(--warm); }
 .discover-filters select:disabled { opacity: 0.35; cursor: not-allowed; }
 .discover-hide-toggle {
+  flex: 0 0 auto;
   background: var(--bg-elev);
   border: 1px solid var(--rule);
   color: var(--ink-soft);
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: var(--radius);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -2488,14 +2499,20 @@ function applyFilters(opts) {
 // l'API manque ou si l'utilisateur réduit les animations. Pas de
 // view-transition-name par carte (coût prohibitif au-delà de quelques dizaines).
 let firstRenderDone = false;
+let vtActive = false; // évite les transitions qui se chevauchent (overlay figé)
 function viewTransition(run) {
   const animate = firstRenderDone
+    && !vtActive
     && typeof document.startViewTransition === 'function'
     && document.visibilityState === 'visible'
     && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   firstRenderDone = true;
   if (!animate) { run(); return; }
-  try { document.startViewTransition(() => run()); } catch (_) { run(); }
+  vtActive = true;
+  try {
+    const t = document.startViewTransition(() => run());
+    t.finished.finally(() => { vtActive = false; });
+  } catch (_) { vtActive = false; run(); }
 }
 
 function normSearch(s) {
