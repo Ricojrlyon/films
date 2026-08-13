@@ -24,6 +24,7 @@
   --green: #7fc28f;
   --amber: #e3c16e;
   --red: #d97757;
+  --blue: #79a6d2;
   --radius: 3px;
   --motif-vert: oklch(0.72 0.12 150);
   --motif-rose: oklch(0.72 0.12 350);
@@ -363,14 +364,14 @@ body {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(22, 31, 37, 0.85);
+  background: rgba(22, 31, 37, 0.45);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--ink);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: var(--radius);
   border: 1px solid rgba(231, 223, 190, 0.2);
   letter-spacing: 0.04em;
@@ -379,7 +380,7 @@ body {
   gap: 3px;
 }
 .card .rating-badge.favorite {
-  background: rgba(255, 107, 74, 0.92);
+  background: rgba(255, 107, 74, 0.45);
   border-color: rgba(255, 107, 74, 0.6);
   color: white;
 }
@@ -391,16 +392,36 @@ body {
   position: absolute;
   bottom: 8px;
   left: 8px;
-  background: rgba(22, 31, 37, 0.85);
+  background: rgba(22, 31, 37, 0.45);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--warm);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 2px 6px;
   border-radius: var(--radius);
   border: 1px solid rgba(212, 165, 116, 0.4);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Badge « au ciné » : film actuellement en salles en France (TMDB now_playing).
+   Coin bas-droite — le seul libre sur tous les types de cartes. */
+.card .cine-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(22, 31, 37, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--green);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(127, 194, 143, 0.4);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -1697,16 +1718,19 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   position: absolute;
   top: 8px;
   left: 8px;
-  background: var(--green);
-  color: var(--bg);
-  padding: 4px 10px;
+  background: rgba(22, 31, 37, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--blue);
+  padding: 3px 7px;
   border-radius: var(--radius);
+  border: 1px solid rgba(121, 166, 210, 0.4);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   z-index: 2;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 .search-result.in-collection {
   border-color: var(--green);
@@ -2673,6 +2697,14 @@ function buildCard(f) {
     poster.appendChild(a);
   }
 
+  // « au ciné » : actuellement en salles en France
+  if (nowPlayingSet.has(f.id)) {
+    const c = document.createElement('div');
+    c.className = 'cine-badge';
+    c.textContent = 'au ciné';
+    poster.appendChild(c);
+  }
+
   // meta (title + year)
   const meta = document.createElement('div');
   meta.className = 'meta';
@@ -2919,8 +2951,16 @@ function buildTmdbCard(item) {
   if (inCollection) {
     const tag = document.createElement('div');
     tag.className = 'tmdb-in-collec';
-    tag.textContent = '✓ dans ma collec';
+    tag.textContent = 'dans ma collec';
     card.appendChild(tag);
+  }
+
+  // « au ciné » : actuellement en salles en France
+  if (nowPlayingSet.has(id)) {
+    const c = document.createElement('div');
+    c.className = 'cine-badge';
+    c.textContent = 'au ciné';
+    poster.appendChild(c);
   }
 
   const meta = document.createElement('div');
@@ -4588,6 +4628,39 @@ const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG = 'https://image.tmdb.org/t/p';
 function tmdbImgUrl(path, size = 'w342') { return path ? TMDB_IMG + '/' + size + path : null; }
 
+// ---- « au ciné » : films actuellement en salles en France (TMDB now_playing) ----
+// Ensemble d'ids « movie-<tmdb_id>» ; alimente le badge vert sur les cartes.
+let nowPlayingSet = new Set();
+async function fetchNowPlayingIdsFR() {
+  const base = `${TMDB_BASE}/movie/now_playing?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
+  const first = await fetch(base + '&page=1');
+  if (!first.ok) throw new Error('now_playing ' + first.status);
+  const data = await first.json();
+  const ids = (data.results || []).map(m => 'movie-' + m.id);
+  const totalPages = Math.min(data.total_pages || 1, 12); // borne : ~240 films, couvre les sorties courantes
+  const rest = [];
+  for (let p = 2; p <= totalPages; p++) rest.push(p);
+  const pages = await Promise.all(rest.map(p =>
+    fetch(base + '&page=' + p).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] }))));
+  for (const d of pages) for (const m of (d.results || [])) ids.push('movie-' + m.id);
+  return [...new Set(ids)];
+}
+async function ensureNowPlayingFR() {
+  const KEY = 'films_nowplaying_fr';
+  try {
+    const cached = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (cached && Array.isArray(cached.ids) && (Date.now() - cached.ts) < 24 * 3600 * 1000) {
+      nowPlayingSet = new Set(cached.ids);
+      return;
+    }
+  } catch {}
+  try {
+    const ids = await fetchNowPlayingIdsFR();
+    nowPlayingSet = new Set(ids);
+    try { localStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), ids })); } catch {}
+  } catch { /* réseau/tmdb — pas de badge, sans bloquer l'app */ }
+}
+
 /** Réécrit la taille d'une URL d'affiche TMDB déjà stockée
  *  (…/t/p/w500/x.jpg → …/t/p/w342/x.jpg). URL non-TMDB : inchangée.
  *  Les fiches stockent du w500 (bon pour le modal) mais les cartes de
@@ -5933,6 +6006,15 @@ function showPage(name) {
 loadAdminCreds();
 wireEvents();
 loadFilms();
+
+// Récupérer les films actuellement en salles (France) et repeindre les badges
+// « au ciné » sur la vue courante une fois la liste prête (cache 24 h).
+ensureNowPlayingFR().then(() => {
+  if (!nowPlayingSet.size) return;
+  if (state.view === 'a_voir' || state.view === 'vu') renderGrid();
+  else if (state.view === 'discover') fetchAndRenderDiscover(state.discoverCategory);
+  else if (state.view === 'reco' && state.recoDisplayed) renderTmdbGrid(state.recoDisplayed);
+});
 
 // Admin no longer auto-activates: user enters their code each session via the 🔒 button.
 // If localStorage has an encrypted PAT, the 🔒 click will show the "unlock with code" view.
