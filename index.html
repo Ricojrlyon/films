@@ -364,7 +364,7 @@ body {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(22, 31, 37, 0.45);
+  background: rgba(22, 31, 37, 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--ink);
@@ -380,7 +380,7 @@ body {
   gap: 3px;
 }
 .card .rating-badge.favorite {
-  background: rgba(255, 107, 74, 0.45);
+  background: rgba(255, 107, 74, 0.3);
   border-color: rgba(255, 107, 74, 0.6);
   color: white;
 }
@@ -392,7 +392,7 @@ body {
   position: absolute;
   bottom: 8px;
   left: 8px;
-  background: rgba(22, 31, 37, 0.45);
+  background: rgba(22, 31, 37, 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--warm);
@@ -412,7 +412,7 @@ body {
   position: absolute;
   bottom: 8px;
   right: 8px;
-  background: rgba(22, 31, 37, 0.45);
+  background: rgba(22, 31, 37, 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--green);
@@ -444,11 +444,29 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.card-meta-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
 .card-year {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: var(--ink-mute);
-  margin-top: 2px;
+  flex-shrink: 0;
+}
+/* Réalisateur·rice : à droite, en face de l'année, dans le même style */
+.card-director {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-mute);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 /* ============================================================
@@ -1718,7 +1736,7 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   position: absolute;
   top: 8px;
   left: 8px;
-  background: rgba(22, 31, 37, 0.45);
+  background: rgba(22, 31, 37, 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--blue);
@@ -2710,7 +2728,10 @@ function buildCard(f) {
   meta.className = 'meta';
   meta.innerHTML = `
     <p class="card-title">${escapeHtml(f.title || 'sans titre')}</p>
-    <div class="card-year">${f.year || '?'}${f.type === 'tv' ? ' · série' : ''}</div>`;
+    <div class="card-meta-line">
+      <span class="card-year">${f.year || '?'}${f.type === 'tv' ? ' · série' : ''}</span>
+      ${f.director ? `<span class="card-director">${escapeHtml(f.director)}</span>` : ''}
+    </div>`;
   card.appendChild(meta);
 
   return card;
@@ -2967,7 +2988,9 @@ function buildTmdbCard(item) {
   meta.className = 'meta';
   meta.innerHTML = `
     <p class="card-title">${escapeHtml(title)}</p>
-    <div class="card-year">${year}${item.media_type === 'tv' ? ' · série' : ''}</div>`;
+    <div class="card-meta-line">
+      <span class="card-year">${year}${item.media_type === 'tv' ? ' · série' : ''}</span>
+    </div>`;
   card.appendChild(meta);
 
   card.addEventListener('click', () => openTmdbItem(item));
