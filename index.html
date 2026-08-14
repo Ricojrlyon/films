@@ -430,6 +430,8 @@ body {
 .card .meta {
   padding: 8px 4px 4px;
 }
+/* Titre sur UNE ligne, tronqué en « … » : garantit une hauteur de méta
+   identique pour toutes les cartes (sinon les rangées se décalent). */
 .card-title {
   font-family: 'Bricolage Grotesque', 'Inter Tight', sans-serif;
   font-variation-settings: 'opsz' 14, 'wght' 500;
@@ -437,12 +439,10 @@ body {
   color: var(--ink);
   line-height: 1.19;
   letter-spacing: -0.006em;
-  text-wrap: balance;
   margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 .card-meta-line {
   display: flex;
@@ -2647,6 +2647,7 @@ function renderGrid(opts) {
   const frag = document.createDocumentFragment();
   for (const f of visible.slice(start)) frag.appendChild(buildCard(f));
   grid.appendChild(frag);
+  fillCardDirectors();
 
   if (visible.length < total) {
     loadMoreWrap.style.display = '';
@@ -2730,9 +2731,15 @@ function buildCard(f) {
     <p class="card-title">${escapeHtml(f.title || 'sans titre')}</p>
     <div class="card-meta-line">
       <span class="card-year">${f.year || '?'}${f.type === 'tv' ? ' · série' : ''}</span>
-      ${f.director ? `<span class="card-director">${escapeHtml(f.director)}</span>` : ''}
+      <span class="card-director"></span>
     </div>`;
   card.appendChild(meta);
+  // réalisateur : nom latinisé (résolu à la demande si l'un d'eux ne l'est pas)
+  card.dataset.filmId = f.id;
+  if (f.tmdb_id) card.dataset.tmdbId = f.tmdb_id;
+  card.dataset.mediaType = f.type || 'movie';
+  const pd = provisionalDirector(f.id);
+  if (pd) meta.querySelector('.card-director').textContent = pd;
 
   return card;
 }
@@ -2948,68 +2955,76 @@ function renderTmdbGrid(items) {
   for (const item of shown) {
     grid.appendChild(buildTmdbCard(item));
   }
-  fillTmdbDirectors();
+  fillCardDirectors();
 }
 
-// ---- Réalisateur des cartes TMDB (découvrir/reco) ----
-// Les listes TMDB ne renvoient pas le réalisateur : on le récupère à la
-// demande (crédits) puis on le met en cache (localStorage). Pré-rempli depuis
-// la collection quand le film y figure déjà (aucun fetch).
-const tmdbDirectorCache = new Map();
+// ---- Réalisateur des cartes (nom latinisé, à droite de l'année) ----
+// Les listes TMDB ne renvoient pas le réalisateur, et certains noms (stockés
+// ou TMDB) sont en écriture non latine. On résout à la demande via les crédits
+// + latinisation (fetchLatinNameById), et on met en cache le nom d'affichage.
+const directorCache = new Map(); // id -> nom d'affichage latinisé ('' = aucun)
 try {
-  const c = JSON.parse(localStorage.getItem('films_tmdb_directors') || 'null');
-  if (c) for (const k in c) tmdbDirectorCache.set(k, c[k]);
+  const c = JSON.parse(localStorage.getItem('films_card_directors') || 'null');
+  if (c) for (const k in c) directorCache.set(k, c[k]);
 } catch {}
-function persistTmdbDirectors() {
-  try { localStorage.setItem('films_tmdb_directors', JSON.stringify(Object.fromEntries(tmdbDirectorCache))); } catch {}
+function persistDirectors() {
+  try { localStorage.setItem('films_card_directors', JSON.stringify(Object.fromEntries(directorCache))); } catch {}
 }
-function knownDirector(id) {
-  if (tmdbDirectorCache.has(id)) return tmdbDirectorCache.get(id);
+// Déjà résolu (nom latin prêt) ? Pré-remplit le cache pour les noms de la
+// collection déjà latins → aucun fetch dans ce cas.
+function directorResolved(id) {
+  if (directorCache.has(id)) return true;
   const local = state.films.find(f => f.id === id);
-  if (local && local.director) { tmdbDirectorCache.set(id, local.director); return local.director; }
-  return undefined;
+  if (local && local.director && !hasNonLatin(local.director)) { directorCache.set(id, local.director); return true; }
+  return false;
 }
-async function fetchTmdbDirector(id, tmdbId, mediaType) {
-  const k = knownDirector(id);
-  if (k !== undefined) return k;
+// À afficher tout de suite : résolu, ou brut (éventuellement non latin) en attendant.
+function provisionalDirector(id) {
+  if (directorCache.has(id)) return directorCache.get(id);
+  const local = state.films.find(f => f.id === id);
+  return (local && local.director) || '';
+}
+async function resolveDirector(id, tmdbId, mediaType) {
+  if (directorResolved(id)) return directorCache.get(id);
+  if (!tmdbId) return provisionalDirector(id);
   let dir = '';
   try {
+    let people = [];
     if (mediaType === 'tv') {
       const r = await fetch(`${TMDB_BASE}/tv/${tmdbId}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
-      if (r.ok) dir = ((await r.json()).created_by || []).map(c => bestPersonName(c)).filter(Boolean).join(', ');
+      if (r.ok) people = (await r.json()).created_by || [];
     } else {
       const r = await fetch(`${TMDB_BASE}/movie/${tmdbId}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
-      if (r.ok) {
-        const seen = new Set(), names = [];
-        for (const p of ((await r.json()).crew || []).filter(c => c.job === 'Director')) {
-          const nm = bestPersonName(p);
-          if (nm && !seen.has(nm)) { seen.add(nm); names.push(nm); }
-        }
-        dir = names.join(', ');
-      }
+      if (r.ok) people = ((await r.json()).crew || []).filter(c => c.job === 'Director');
     }
+    const seen = new Set(), names = [];
+    for (const p of people) {
+      let nm = bestPersonName(p);
+      if (hasNonLatin(nm) && p.id) nm = (await fetchLatinNameById(p.id)) || nm;
+      if (nm && !seen.has(nm)) { seen.add(nm); names.push(nm); }
+    }
+    dir = names.join(', ');
   } catch {}
-  tmdbDirectorCache.set(id, dir);
-  return dir;
+  if (dir) directorCache.set(id, dir);
+  return dir || provisionalDirector(id);
 }
-async function fillTmdbDirectors() {
-  const cards = [...document.querySelectorAll('#grid .tmdb-card')].filter(c => {
-    const span = c.querySelector('.card-director');
-    return span && !span.textContent && knownDirector(c.dataset.filmId) === undefined;
-  });
+// Remplir/latiniser les réalisateurs des cartes affichées (concurrence bornée).
+async function fillCardDirectors() {
+  const cards = [...document.querySelectorAll('#grid .card')].filter(c =>
+    c.dataset.tmdbId && c.querySelector('.card-director') && !directorResolved(c.dataset.filmId));
   if (!cards.length) return;
   let idx = 0, changed = false;
   async function worker() {
     while (idx < cards.length) {
       const c = cards[idx++];
-      const dir = await fetchTmdbDirector(c.dataset.filmId, c.dataset.tmdbId, c.dataset.mediaType);
+      const dir = await resolveDirector(c.dataset.filmId, c.dataset.tmdbId, c.dataset.mediaType);
       const span = c.querySelector('.card-director');
-      if (span && dir) span.textContent = dir;
+      if (span) span.textContent = dir;
       changed = true;
     }
   }
   await Promise.all(Array.from({ length: 6 }, () => worker()));
-  if (changed) persistTmdbDirectors();
+  if (changed) persistDirectors();
 }
 
 function buildTmdbCard(item) {
@@ -3059,7 +3074,7 @@ function buildTmdbCard(item) {
   card.dataset.filmId = id;
   card.dataset.tmdbId = item.id;
   card.dataset.mediaType = item.media_type || 'movie';
-  const kd = knownDirector(id);
+  const kd = provisionalDirector(id);
   if (kd) meta.querySelector('.card-director').textContent = kd;
 
   card.addEventListener('click', () => openTmdbItem(item));
