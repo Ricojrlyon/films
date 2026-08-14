@@ -2948,6 +2948,68 @@ function renderTmdbGrid(items) {
   for (const item of shown) {
     grid.appendChild(buildTmdbCard(item));
   }
+  fillTmdbDirectors();
+}
+
+// ---- Réalisateur des cartes TMDB (découvrir/reco) ----
+// Les listes TMDB ne renvoient pas le réalisateur : on le récupère à la
+// demande (crédits) puis on le met en cache (localStorage). Pré-rempli depuis
+// la collection quand le film y figure déjà (aucun fetch).
+const tmdbDirectorCache = new Map();
+try {
+  const c = JSON.parse(localStorage.getItem('films_tmdb_directors') || 'null');
+  if (c) for (const k in c) tmdbDirectorCache.set(k, c[k]);
+} catch {}
+function persistTmdbDirectors() {
+  try { localStorage.setItem('films_tmdb_directors', JSON.stringify(Object.fromEntries(tmdbDirectorCache))); } catch {}
+}
+function knownDirector(id) {
+  if (tmdbDirectorCache.has(id)) return tmdbDirectorCache.get(id);
+  const local = state.films.find(f => f.id === id);
+  if (local && local.director) { tmdbDirectorCache.set(id, local.director); return local.director; }
+  return undefined;
+}
+async function fetchTmdbDirector(id, tmdbId, mediaType) {
+  const k = knownDirector(id);
+  if (k !== undefined) return k;
+  let dir = '';
+  try {
+    if (mediaType === 'tv') {
+      const r = await fetch(`${TMDB_BASE}/tv/${tmdbId}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+      if (r.ok) dir = ((await r.json()).created_by || []).map(c => bestPersonName(c)).filter(Boolean).join(', ');
+    } else {
+      const r = await fetch(`${TMDB_BASE}/movie/${tmdbId}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+      if (r.ok) {
+        const seen = new Set(), names = [];
+        for (const p of ((await r.json()).crew || []).filter(c => c.job === 'Director')) {
+          const nm = bestPersonName(p);
+          if (nm && !seen.has(nm)) { seen.add(nm); names.push(nm); }
+        }
+        dir = names.join(', ');
+      }
+    }
+  } catch {}
+  tmdbDirectorCache.set(id, dir);
+  return dir;
+}
+async function fillTmdbDirectors() {
+  const cards = [...document.querySelectorAll('#grid .tmdb-card')].filter(c => {
+    const span = c.querySelector('.card-director');
+    return span && !span.textContent && knownDirector(c.dataset.filmId) === undefined;
+  });
+  if (!cards.length) return;
+  let idx = 0, changed = false;
+  async function worker() {
+    while (idx < cards.length) {
+      const c = cards[idx++];
+      const dir = await fetchTmdbDirector(c.dataset.filmId, c.dataset.tmdbId, c.dataset.mediaType);
+      const span = c.querySelector('.card-director');
+      if (span && dir) span.textContent = dir;
+      changed = true;
+    }
+  }
+  await Promise.all(Array.from({ length: 6 }, () => worker()));
+  if (changed) persistTmdbDirectors();
 }
 
 function buildTmdbCard(item) {
@@ -2990,8 +3052,15 @@ function buildTmdbCard(item) {
     <p class="card-title">${escapeHtml(title)}</p>
     <div class="card-meta-line">
       <span class="card-year">${year}${item.media_type === 'tv' ? ' · série' : ''}</span>
+      <span class="card-director"></span>
     </div>`;
   card.appendChild(meta);
+  // réalisateur : rempli tout de suite si connu (collection/cache), sinon lazy
+  card.dataset.filmId = id;
+  card.dataset.tmdbId = item.id;
+  card.dataset.mediaType = item.media_type || 'movie';
+  const kd = knownDirector(id);
+  if (kd) meta.querySelector('.card-director').textContent = kd;
 
   card.addEventListener('click', () => openTmdbItem(item));
   card.addEventListener('keydown', (e) => {
