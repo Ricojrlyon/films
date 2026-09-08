@@ -2495,7 +2495,7 @@ function applyFilters(opts) {
   if (f.search) {
     const q = normSearch(f.search);
     list = list.filter(x => {
-      const fields = [x.title, x.original_title, x.director, (x.cast || []).join(' '), (x.source?.csv_title || '')];
+      const fields = [x.title, x.original_title, x.director, (x.cast || []).join(' '), (x.source?.csv_title || ''), titleCache.get(x.id) || ''];
       return fields.some(s => s && normSearch(s).includes(q));
     });
   }
@@ -2647,7 +2647,7 @@ function renderGrid(opts) {
   const frag = document.createDocumentFragment();
   for (const f of visible.slice(start)) frag.appendChild(buildCard(f));
   grid.appendChild(frag);
-  fillCardDirectors();
+  fillCardMeta();
 
   if (visible.length < total) {
     loadMoreWrap.style.display = '';
@@ -2693,7 +2693,7 @@ function buildCard(f) {
   const poster = document.createElement('div');
   poster.className = 'poster' + (f.poster ? '' : ' empty');
   if (f.poster) setLazyPoster(poster, tmdbResize(f.poster, 'w342'));
-  else poster.textContent = f.title;
+  else poster.textContent = displayTitle(f.id, f.title);
   card.appendChild(poster);
 
   // rating badge
@@ -2728,7 +2728,7 @@ function buildCard(f) {
   const meta = document.createElement('div');
   meta.className = 'meta';
   meta.innerHTML = `
-    <p class="card-title">${escapeHtml(f.title || 'sans titre')}</p>
+    <p class="card-title">${escapeHtml(displayTitle(f.id, f.title) || 'sans titre')}</p>
     <div class="card-meta-line">
       <span class="card-year">${f.year || '?'}${f.type === 'tv' ? ' · série' : ''}</span>
       <span class="card-director"></span>
@@ -2955,7 +2955,7 @@ function renderTmdbGrid(items) {
   for (const item of shown) {
     grid.appendChild(buildTmdbCard(item));
   }
-  fillCardDirectors();
+  fillCardMeta();
 }
 
 // ---- Réalisateur des cartes (nom latinisé, à droite de l'année) ----
@@ -3009,18 +3009,74 @@ async function resolveDirector(id, tmdbId, mediaType) {
   return dir || provisionalDirector(id);
 }
 // Remplir/latiniser les réalisateurs des cartes affichées (concurrence bornée).
-async function fillCardDirectors() {
+// ---- Titre latin des cartes/fiches ----
+// Un titre en écriture non latine (chinois, japonais…) est remplacé par le
+// titre anglais fourni par TMDB (ex. 年会不能停 ! -> Johnny Keep Walking!),
+// mis en cache pour ne pas refaire la requête.
+const titleCache = new Map();
+try {
+  const c = JSON.parse(localStorage.getItem('films_card_titles') || 'null');
+  if (c) for (const k in c) titleCache.set(k, c[k]);
+} catch {}
+function persistTitles() {
+  try { localStorage.setItem('films_card_titles', JSON.stringify(Object.fromEntries(titleCache))); } catch {}
+}
+function displayTitle(id, raw) {
+  if (titleCache.has(id)) return titleCache.get(id);
+  return raw || '';
+}
+async function resolveTitle(id, tmdbId, mediaType, raw) {
+  if (titleCache.has(id)) return titleCache.get(id);
+  if (!tmdbId || !hasNonLatin(raw || '')) return raw || '';
+  let t = '';
+  try {
+    const path = mediaType === 'tv' ? 'tv' : 'movie';
+    const r = await fetch(`${TMDB_BASE}/${path}/${tmdbId}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=en-US`);
+    if (r.ok) {
+      const d = await r.json();
+      const cand = d.title || d.name || '';
+      if (cand && !hasNonLatin(cand)) t = cand;
+    }
+    // Filet : certains films n'ont pas de titre en-US mais un titre alternatif latin
+    if (!t) {
+      const ar = await fetch(`${TMDB_BASE}/${path}/${tmdbId}/alternative_titles?api_key=${encodeURIComponent(admin.tmdbKey)}`);
+      if (ar.ok) {
+        const ad = await ar.json();
+        const list = ad.titles || ad.results || [];
+        const pick = list.find(x => /^(US|GB)$/.test(x.iso_3166_1 || '') && x.title && !hasNonLatin(x.title))
+                  || list.find(x => x.title && !hasNonLatin(x.title));
+        if (pick) t = pick.title;
+      }
+    }
+  } catch {}
+  if (t) { titleCache.set(id, t); persistTitles(); }
+  return t || raw || '';
+}
+
+async function fillCardMeta() {
+  const needsTitle = c => {
+    const el = c.querySelector('.card-title');
+    return el && hasNonLatin(el.textContent || '');
+  };
+  const needsDir = c => c.querySelector('.card-director') && !directorResolved(c.dataset.filmId);
   const cards = [...document.querySelectorAll('#grid .card')].filter(c =>
-    c.dataset.tmdbId && c.querySelector('.card-director') && !directorResolved(c.dataset.filmId));
+    c.dataset.tmdbId && (needsDir(c) || needsTitle(c)));
   if (!cards.length) return;
   let idx = 0, changed = false;
   async function worker() {
     while (idx < cards.length) {
       const c = cards[idx++];
-      const dir = await resolveDirector(c.dataset.filmId, c.dataset.tmdbId, c.dataset.mediaType);
-      const span = c.querySelector('.card-director');
-      if (span) span.textContent = dir;
-      changed = true;
+      if (needsTitle(c)) {
+        const el = c.querySelector('.card-title');
+        const t = await resolveTitle(c.dataset.filmId, c.dataset.tmdbId, c.dataset.mediaType, el.textContent);
+        if (t) el.textContent = t;
+      }
+      if (needsDir(c)) {
+        const dir = await resolveDirector(c.dataset.filmId, c.dataset.tmdbId, c.dataset.mediaType);
+        const span = c.querySelector('.card-director');
+        if (span) span.textContent = dir;
+        changed = true;
+      }
     }
   }
   await Promise.all(Array.from({ length: 6 }, () => worker()));
@@ -3042,7 +3098,7 @@ function buildTmdbCard(item) {
   const poster = document.createElement('div');
   poster.className = 'poster' + (posterUrl ? '' : ' empty');
   if (posterUrl) setLazyPoster(poster, posterUrl);
-  else poster.textContent = title;
+  else poster.textContent = displayTitle(id, title);
   card.appendChild(poster);
 
   // "in collection" badge (only on tmdb-card variant)
@@ -3064,7 +3120,7 @@ function buildTmdbCard(item) {
   const meta = document.createElement('div');
   meta.className = 'meta';
   meta.innerHTML = `
-    <p class="card-title">${escapeHtml(title)}</p>
+    <p class="card-title">${escapeHtml(displayTitle(id, title))}</p>
     <div class="card-meta-line">
       <span class="card-year">${year}${item.media_type === 'tv' ? ' · série' : ''}</span>
       <span class="card-director"></span>
@@ -3483,7 +3539,7 @@ function openModal(f, opts) {
     <div class="modal-head">
       <div class="modal-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(f.poster)})"` : ''}>${f.poster ? '' : "pas d'affiche"}</div>
       <div class="modal-head-meta">
-        <h2 class="modal-title">${escapeHtml(f.title || 'sans titre')}</h2>
+        <h2 class="modal-title">${escapeHtml(displayTitle(f.id, f.title) || 'sans titre')}</h2>
         ${f.director ? `<div class="modal-director">par ${f.director.split(',').map(n => nameLink(n.trim())).filter(Boolean).join(', ')}</div>` : ''}
         <div class="modal-meta-line">${metaParts.map(escapeHtml).join(' · ')}</div>
       </div>
@@ -3593,6 +3649,12 @@ function openModal(f, opts) {
         (f.type === 'movie' && !f.director_genders)
       )) {
     enrichFilmNames(f);
+  }
+  // Lazy : titre en écriture non latine -> titre anglais de TMDB, puis re-rendu
+  if (f.tmdb_id && hasNonLatin(f.title || '') && !titleCache.has(f.id)) {
+    resolveTitle(f.id, f.tmdb_id, f.type, f.title).then(t => {
+      if (t && t !== f.title) reRenderModalIfShowing(f);
+    });
   }
 }
 
