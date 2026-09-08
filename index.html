@@ -969,6 +969,8 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
 }
 .bar-row-clickable { cursor: pointer; border-radius: var(--radius); transition: background 0.15s; }
 .bar-row-clickable:hover { background: var(--bg-elev-2); }
+.stat-card-clickable { cursor: pointer; transition: background 0.15s; }
+.stat-card-clickable:hover { background: var(--bg-elev-2); }
 @media (max-width: 600px) {
   .bar-row { grid-template-columns: 100px 1fr 36px; gap: 8px; font-size: 12px; }
 }
@@ -2062,6 +2064,14 @@ button:focus-visible, input:focus-visible, select:focus-visible {
           <option value="11">novembre</option><option value="12">décembre</option>
         </select>
       </div>
+      <div class="filter-group">
+        <div class="filter-label">pays du film</div>
+        <select id="filter-country"><option value="">tous</option></select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">pays du·de la réal</div>
+        <select id="filter-realpays"><option value="">tous</option></select>
+      </div>
       <div class="filter-group" style="flex: 1 0 100%;">
         <div class="filter-label">notes</div>
         <div class="rating-chips" id="rating-chips">
@@ -2364,6 +2374,8 @@ const state = {
     decade: '',
     yearvu: '',
     mois: '',
+    country: '',
+    dirCountry: '',
     ratings: new Set(),
   },
   sort: TAB_SORT_DEFAULTS.a_voir,
@@ -2448,9 +2460,22 @@ function initFilters() {
       ? { value: y, label: 'avant ' + y.slice(7) }
       : { value: y, label: y }));
 
+  // Pays de production (normalisés, une entrée par pays même en co-production)
+  const paysFilm = new Set();
+  state.films.forEach(f => {
+    if (!f.country) return;
+    f.country.split(' · ').forEach(c => { const n = shortenCountryName(c.trim()); if (n) paysFilm.add(n); });
+  });
+  fillSelect('filter-country', [...paysFilm].sort((a, b) => a.localeCompare(b, 'fr')));
+
+  // Pays de naissance des réalisateurs (données enrichies)
+  const paysReal = new Set();
+  state.films.forEach(f => (f.director_countries || []).forEach(c => { if (c) paysReal.add(c); }));
+  fillSelect('filter-realpays', [...paysReal].sort((a, b) => a.localeCompare(b, 'fr')));
+
   // fillSelect remet le DOM sur le placeholder : réappliquer les filtres actifs,
   // sinon les selects affichent « tous » alors que la liste reste filtrée
-  const selMap = { 'filter-genre': 'genre', 'filter-lieu': 'lieu', 'filter-decade': 'decade', 'filter-yearvu': 'yearvu' };
+  const selMap = { 'filter-genre': 'genre', 'filter-lieu': 'lieu', 'filter-decade': 'decade', 'filter-yearvu': 'yearvu', 'filter-country': 'country', 'filter-realpays': 'dirCountry' };
   Object.entries(selMap).forEach(([id, key]) => {
     if (!state.filters[key]) return;
     const sel = document.getElementById(id);
@@ -2521,6 +2546,14 @@ function applyFilters(opts) {
       const dv = x.user?.date_vue;
       return dv && /^\d{4}-\d{2}$/.test(dv) && dv.slice(5, 7) === f.mois;
     });
+  }
+  if (f.country) {
+    // Une co-production compte pour chacun de ses pays (noms normalisés)
+    list = list.filter(x => x.country &&
+      x.country.split(' · ').map(c => shortenCountryName(c.trim())).includes(f.country));
+  }
+  if (f.dirCountry) {
+    list = list.filter(x => (x.director_countries || []).filter(Boolean).includes(f.dirCountry));
   }
   if (f.ratings.size > 0) {
     list = list.filter(x => x.user?.rating && f.ratings.has(x.user.rating));
@@ -2605,7 +2638,7 @@ function sortList(list, sortKey) {
 
 function updateFilterBadge() {
   const f = state.filters;
-  let active = ['genre', 'lieu', 'decade', 'yearvu', 'mois'].filter(k => f[k]).length;
+  let active = ['genre', 'lieu', 'decade', 'yearvu', 'mois', 'country', 'dirCountry'].filter(k => f[k]).length;
   if (f.ratings.size > 0) active++;
   const badge = document.getElementById('filter-badge');
   if (active > 0) {
@@ -3830,7 +3863,7 @@ function renderStats() {
       <div class="stat-card-detail">sur ${rated.length} films notés</div>
       ${cyRated.length ? yearSub(CY, cyAvgRating.toFixed(1) + '/6') : ''}
     </div>
-    <div class="stat-card hot">
+    <div class="stat-card hot stat-card-clickable" data-stat="favorites" title="voir ces films">
       <div class="stat-card-label">coups de cœur</div>
       <div class="stat-card-value">${favorites}</div>
       <div class="stat-card-detail">${(favorites * 100 / Math.max(1, vus.length)).toFixed(0)}% des vus</div>
@@ -3862,6 +3895,7 @@ function renderStats() {
   renderActorChart();
   renderGenderBalance();
   renderYearBest();
+  wireStatsClicks();
 }
 
 function renderMonthsChart() {
@@ -4235,8 +4269,10 @@ function renderRatingDist() {
 
 
 function renderGenreChart() {
+  // Films vus uniquement : le compte doit correspondre au clic (qui filtre les vus)
   const counts = new Map();
   for (const f of state.films) {
+    if (f.user?.statut !== 'vu') continue;
     for (const g of (f.genres || [])) counts.set(g, (counts.get(g) || 0) + 1);
   }
   const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
@@ -4609,13 +4645,69 @@ function openModalFromCard(filmId) {
   if (f) openModal(f);
 }
 
+// Rend cliquables les lignes d'un graphe en barres : le libellé de la ligne
+// devient la valeur du filtre. Idempotent (ne recâble pas une ligne déjà faite,
+// donc le graphe « par année » garde son propre câblage).
+// Combien de films vus le clic renverra-t-il ? (les graphes « pays » utilisent
+// un comptage fractionnaire : 197 pour la France ≠ 271 films impliquant la
+// France — l'infobulle annonce donc le vrai nombre avant le clic.)
+function countVusMatching(filterKey, val) {
+  const vus = state.films.filter(f => f.user?.statut === 'vu');
+  if (filterKey === 'genre') return vus.filter(f => (f.genres || []).includes(val)).length;
+  if (filterKey === 'country') return vus.filter(f => f.country &&
+    f.country.split(' · ').map(c => shortenCountryName(c.trim())).includes(val)).length;
+  if (filterKey === 'dirCountry') return vus.filter(f => (f.director_countries || []).filter(Boolean).includes(val)).length;
+  if (filterKey === 'search') {
+    const q = normSearch(val);
+    return vus.filter(f => [f.title, f.original_title, f.director, (f.cast || []).join(' ')]
+      .some(t => t && normSearch(t).includes(q))).length;
+  }
+  return null;
+}
+
+function wireBarRowsClick(rootId, filterKey) {
+  const root = document.getElementById(rootId);
+  if (!root) return;
+  root.querySelectorAll('.bar-row').forEach(row => {
+    if (row.classList.contains('bar-row-clickable')) return;
+    const label = row.querySelector('.bar-label');
+    const val = label && (label.textContent || '').trim();
+    if (!val) return;
+    row.classList.add('bar-row-clickable');
+    const n = countVusMatching(filterKey, val);
+    row.title = (n != null) ? `voir ces ${n} film${n > 1 ? 's' : ''}` : 'voir ces films';
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return; // clic sur le lien du nom -> tmdb
+      goToVusWithFilters({ [filterKey]: val });
+    });
+  });
+}
+
+// Toutes les stats « catégorie » deviennent des points d'entrée vers les vus.
+function wireStatsClicks() {
+  wireBarRowsClick('genre-rating-chart', 'genre');
+  wireBarRowsClick('genre-chart', 'genre');
+  wireBarRowsClick('origin-chart', 'country');
+  wireBarRowsClick('director-country-chart', 'dirCountry');
+  // réalisateurs / acteurs : pas de filtre dédié -> on passe par la recherche
+  ['director-chart-m', 'director-chart-f', 'actor-chart-m', 'actor-chart-f']
+    .forEach(id => wireBarRowsClick(id, 'search'));
+  document.querySelectorAll('#stats-numbers .stat-card-clickable').forEach(c => {
+    if (c.dataset.wired) return;
+    c.dataset.wired = '1';
+    c.addEventListener('click', () => {
+      if (c.dataset.stat === 'favorites') goToVusWithFilters({ ratings: [6] });
+    });
+  });
+}
+
 // Depuis une stat cliquable → page collection, onglet « vus », filtres appliqués.
 // partial : { genre, ratings:[..], yearvu, mois, decade, lieu }
 function goToVusWithFilters(partial) {
   partial = partial || {};
   // Repartir de filtres propres, puis appliquer le sous-ensemble demandé
-  state.filters = { status: 'vu', search: '', genre: '', lieu: '', decade: '', yearvu: '', mois: '', ratings: new Set() };
-  ['genre', 'lieu', 'decade', 'yearvu', 'mois'].forEach(k => { if (partial[k]) state.filters[k] = partial[k]; });
+  state.filters = { status: 'vu', search: '', genre: '', lieu: '', decade: '', yearvu: '', mois: '', country: '', dirCountry: '', ratings: new Set() };
+  ['genre', 'lieu', 'decade', 'yearvu', 'mois', 'country', 'dirCountry', 'search'].forEach(k => { if (partial[k]) state.filters[k] = partial[k]; });
   if (partial.ratings) partial.ratings.forEach(rt => state.filters.ratings.add(rt));
   state.view = 'vu';
   state.sort = TAB_SORT_DEFAULTS.vu;
@@ -4628,7 +4720,7 @@ function goToVusWithFilters(partial) {
   document.getElementById('reco-header').style.display = 'none';
 
   // Refléter l'état dans l'UI des filtres + ouvrir le panneau pour montrer ce qui est appliqué
-  document.getElementById('search').value = '';
+  document.getElementById('search').value = state.filters.search || '';
   document.getElementById('sort').value = state.sort;
   const setSel = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
   setSel('filter-genre', state.filters.genre);
@@ -4636,6 +4728,8 @@ function goToVusWithFilters(partial) {
   setSel('filter-decade', state.filters.decade);
   setSel('filter-yearvu', state.filters.yearvu);
   setSel('filter-mois', state.filters.mois);
+  setSel('filter-country', state.filters.country);
+  setSel('filter-realpays', state.filters.dirCountry);
   document.querySelectorAll('#rating-chips .rating-chip').forEach(c =>
     c.classList.toggle('active', state.filters.ratings.has(parseInt(c.dataset.rating, 10))));
   document.getElementById('filter-panel').classList.add('open');
@@ -6050,6 +6144,8 @@ function wireEvents() {
     'filter-decade': 'decade',
     'filter-yearvu': 'yearvu',
     'filter-mois': 'mois',
+    'filter-country': 'country',
+    'filter-realpays': 'dirCountry',
   };
   Object.entries(filterIds).forEach(([id, key]) => {
     document.getElementById(id).addEventListener('change', (e) => {
@@ -6081,7 +6177,7 @@ function wireEvents() {
 
   // Reset — restore defaults including the per-tab sort
   document.getElementById('filter-reset').addEventListener('click', () => {
-    state.filters = { status: 'a_voir', search: '', genre: '', lieu: '', decade: '', yearvu: '', mois: '', ratings: new Set() };
+    state.filters = { status: 'a_voir', search: '', genre: '', lieu: '', decade: '', yearvu: '', mois: '', country: '', dirCountry: '', ratings: new Set() };
     state.sort = TAB_SORT_DEFAULTS.a_voir;
     document.getElementById('search').value = '';
     Object.keys(filterIds).forEach(id => { document.getElementById(id).value = ''; });
