@@ -294,6 +294,13 @@ body {
   color: var(--bg);
   border-color: var(--warm);
 }
+/* Le ❤ est le cran au-dessus de 5★ : un filet le détache des étoiles */
+.rating-chip-sep {
+  width: 1px;
+  align-self: stretch;
+  background: var(--rule);
+  margin: 0 5px;
+}
 .rating-chip.fav.active {
   background: var(--hot);
   color: white;
@@ -728,6 +735,7 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   line-height: 1;
   margin-bottom: 6px;
 }
+.rating-cell-stars-big .star-empty { color: rgba(255, 255, 255, 0.12); }
 .rating-cell-stars-big.fav { color: var(--hot); font-size: 34px; letter-spacing: 0; }
 .rating-cell-value-medium {
   font-family: 'Bricolage Grotesque', 'Inter Tight', sans-serif;
@@ -2080,7 +2088,8 @@ button:focus-visible, input:focus-visible, select:focus-visible {
           <button class="rating-chip" data-rating="3">3★</button>
           <button class="rating-chip" data-rating="4">4★</button>
           <button class="rating-chip" data-rating="5">5★</button>
-          <button class="rating-chip fav" data-rating="6">❤</button>
+          <span class="rating-chip-sep" aria-hidden="true"></span>
+          <button class="rating-chip fav" data-rating="6" title="coups de cœur">❤</button>
         </div>
       </div>
       <div class="filter-group">
@@ -2138,7 +2147,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
     <div class="chart-section">
       <h3 class="chart-title">distribution des notes</h3>
-      <div class="chart-subtitle">comment tu notes en moyenne</div>
+      <div class="chart-subtitle">comment tu notes — ❤ = le cran au-dessus de 5★</div>
       <div class="rating-dist" id="rating-dist"></div>
       <div class="rating-axis">
         <div>1★</div><div>2★</div><div>3★</div><div>4★</div><div>5★</div><div>❤</div>
@@ -2147,7 +2156,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
     <div class="chart-section">
       <h3 class="chart-title">note moyenne par genre</h3>
-      <div class="chart-subtitle">quels genres tu sembles préférer</div>
+      <div class="chart-subtitle">quels genres tu sembles préférer — sur l'échelle /10</div>
       <div id="genre-rating-chart"></div>
     </div>
 
@@ -2316,7 +2325,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
         <p style="color: var(--ink-soft);">Tu peux maintenant modifier, ajouter, supprimer ou re-matcher des films. Ouvre un film pour voir le formulaire d'édition.</p>
 
         <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
-          <button class="ghost" id="admin-lock-btn">verrouiller (rester admin pour cette session)</button>
+          <button class="ghost" id="admin-lock-btn">verrouiller</button>
         </div>
         <div style="margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--rule);">
           <button class="admin-reset-btn" id="admin-disable-btn">tout réinitialiser (oublier mon code)</button>
@@ -2395,13 +2404,40 @@ const state = {
 // ============================================================
 // LOAD DATA
 // ============================================================
+// ── Notation : 6 crans ordinaux — 1 à 5 étoiles, puis le coup de cœur ───────
+// Les deux sont exclusifs : un film porte soit des étoiles, soit un ❤.
+// Le ❤ est le cran au-dessus de 5★, stocké en `rating: 6` + `favorite: true`.
+const RATING_MAX = 5;   // nombre d'étoiles de l'échelle
+const RATING_FAV = 6;   // cran « coup de cœur »
+// Normalise à la lecture, de façon idempotente : tolère les films.json écrits
+// par une version antérieure et fait respecter l'exclusivité des deux crans.
+function normalizeRatings(films) {
+  for (const f of films || []) {
+    const u = f && f.user;
+    if (!u) continue;
+    if (u.favorite || u.rating === RATING_FAV) { u.rating = RATING_FAV; u.favorite = true; }
+    else { u.favorite = false; }
+    if (u.rating > RATING_FAV) u.rating = RATING_FAV;
+  }
+  return films;
+}
+// Équivalent /10 affiché en regard de la moyenne TMDB. Les étoiles montent
+// jusqu'à 9,5 : le 10/10 est réservé au coup de cœur. Toute la conversion
+// passe par ici — changer d'échelle = changer ce tableau.
+const RATING_OUT_OF_10 = [2, 4, 6, 8, 9.5, 10];
+function ratingOutOf10(rating) { return RATING_OUT_OF_10[rating - 1]; }
+function formatOutOf10(rating) {
+  const v = ratingOutOf10(rating);
+  return Number.isInteger(v) ? String(v) : v.toFixed(1);
+}
+
 async function loadFilms() {
   try {
     // Cache-buster : le CDN de GitHub Pages sert films.json avec ~10 min de cache
     const r = await fetch('./films.json?t=' + Date.now());
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
-    state.films = data.films || [];
+    state.films = normalizeRatings(data.films || []);
     initFilters();
     // Reflect initial sort in the sort select
     document.getElementById('sort').value = state.sort;
@@ -2733,11 +2769,9 @@ function buildCard(f) {
   if (f.user?.rating) {
     const badge = document.createElement('div');
     badge.className = 'rating-badge' + (f.user.favorite ? ' favorite' : '');
-    if (f.user.favorite) {
-      badge.innerHTML = `❤`;
-    } else {
-      badge.innerHTML = `<span class="star">★</span>${f.user.rating}`;
-    }
+    badge.innerHTML = f.user.favorite
+      ? '❤'
+      : `<span class="star">★</span>${f.user.rating}`;
     poster.appendChild(badge);
   }
 
@@ -3270,7 +3304,7 @@ async function buildRecoPool(sources) {
       // are weighted ~35% more, gently tilting the pool without forcing it.
       const dirBoost = s.director_gender === 1 ? 1.35 : 1.0;
       const items = await tmdbGetRecommendations(s.tmdb_id, s.type);
-      results.push({ items, weight: (s.user.rating / 6) * dirBoost });
+      results.push({ items, weight: (s.user.rating / RATING_FAV) * dirBoost });
     }
   }
   await Promise.all(Array.from({ length: 5 }, () => worker()));
@@ -3430,19 +3464,19 @@ function openModal(f, opts) {
     bg.style.background = 'var(--bg-elev)';
   }
 
-  // Ratings: user (stars on /6 scale, but display value as /10 for comparison with TMDB) and TMDB (0-10)
+  // Note perso : 1 à 5 étoiles, ou le ❤ qui est le cran au-dessus.
+  // Convertie en /10 (2/4/6/8/9,5/10) pour se comparer à la moyenne TMDB.
   const rating = f.user?.rating;
   const fav = !!f.user?.favorite;
   const userRatingHtml = (rating && !tmdbOnly) ? (() => {
-    const visualStars = fav
+    const visual = fav
       ? '❤'
-      : '★'.repeat(rating) + '<span style="color:rgba(255,255,255,0.12)">★</span>'.repeat(6 - rating);
-    const ratingIn10 = (rating * 10 / 6).toFixed(1);
+      : '★'.repeat(rating) + `<span class="star-empty">${'★'.repeat(RATING_MAX - rating)}</span>`;
     return `
-      <div class="rating-cell ${fav ? 'fav' : ''}">
+      <div class="rating-cell">
         <div class="rating-cell-label">ta note</div>
-        <div class="rating-cell-stars-big ${fav ? 'fav' : ''}">${visualStars}</div>
-        <div class="rating-cell-footnote">${ratingIn10}<span class="denominator"> / 10</span></div>
+        <div class="rating-cell-stars-big ${fav ? 'fav' : ''}">${visual}</div>
+        <div class="rating-cell-footnote">${formatOutOf10(rating)}<span class="denominator"> / 10</span>${fav ? '<span class="denominator"> · coup de cœur</span>' : ''}</div>
       </div>`;
   })() : '';
 
@@ -3525,7 +3559,8 @@ function openModal(f, opts) {
                 <button class="rating-chip" data-rating="3">3★</button>
                 <button class="rating-chip" data-rating="4">4★</button>
                 <button class="rating-chip" data-rating="5">5★</button>
-                <button class="rating-chip fav" data-rating="6">❤</button>
+                <span class="rating-chip-sep" aria-hidden="true"></span>
+                <button class="rating-chip fav" data-rating="6" title="coup de cœur — le cran au-dessus de 5★">❤</button>
               </div>
             </div>
             <div class="field">
@@ -3604,7 +3639,8 @@ function openModal(f, opts) {
       });
     });
 
-    // Rating chips (single-select)
+    // Étoiles et ❤ : sélection unique — c'est l'un ou l'autre, jamais les deux
+    // (recliquer sur la puce active = plus de note)
     document.querySelectorAll('#tmdb-add-rating-chips .rating-chip').forEach(c => {
       c.addEventListener('click', () => {
         const wasActive = c.classList.contains('active');
@@ -3624,6 +3660,7 @@ function openModal(f, opts) {
     document.getElementById('tmdb-add-save').addEventListener('click', () => {
       const ratingBtn = document.querySelector('#tmdb-add-rating-chips .rating-chip.active');
       const rating = ratingBtn ? parseInt(ratingBtn.dataset.rating, 10) : null;
+      const favorite = rating === RATING_FAV;
       const lieu = document.getElementById('tmdb-add-lieu').value || null;
       const beforeChk = document.getElementById('tmdb-add-before');
       const y = document.getElementById('tmdb-add-year').value.trim();
@@ -3644,7 +3681,7 @@ function openModal(f, opts) {
       const userData = {
         statut: 'vu',
         rating: rating,
-        favorite: rating === 6,
+        favorite,
         lieu: lieu,
         date_vue: dateVue,
         date_vue_label: dateLabel,
@@ -3782,7 +3819,9 @@ function renderStats() {
 
   // Average rating (excluding null)
   const rated = vus.filter(f => f.user?.rating);
-  const avgRating = rated.length ? (rated.reduce((s, f) => s + f.user.rating, 0) / rated.length) : 0;
+  // Moyenne sur l'échelle /10 : les crans ne sont pas équidistants
+  // (2/4/6/8/9,5/10), moyenner les numéros de cran ne voudrait rien dire.
+  const avgRating = rated.length ? (rated.reduce((s, f) => s + ratingOutOf10(f.user.rating), 0) / rated.length) : 0;
 
   // Favorites — vus uniquement, cohérent avec le libellé « % des vus » de la carte
   const favorites = vus.filter(f => f.user?.favorite).length;
@@ -3828,7 +3867,7 @@ function renderStats() {
   const cyHours = Math.round(vusThisYear.reduce((s, f) => s + (f.runtime || 0), 0) / 60);
   const cyRated = vusThisYear.filter(f => f.user?.rating);
   const cyAvgRating = cyRated.length
-    ? (cyRated.reduce((s, f) => s + f.user.rating, 0) / cyRated.length)
+    ? (cyRated.reduce((s, f) => s + ratingOutOf10(f.user.rating), 0) / cyRated.length)
     : 0;
   const cyFavorites = vusThisYear.filter(f => f.user?.favorite).length;
   // Même règle que le compteur global : séparer les duos « A, B » (séries)
@@ -3859,9 +3898,9 @@ function renderStats() {
     </div>
     <div class="stat-card">
       <div class="stat-card-label">note moyenne</div>
-      <div class="stat-card-value">${avgRating.toFixed(1)}<span style="font-size:0.5em; color: var(--ink-mute)">/6</span></div>
+      <div class="stat-card-value">${avgRating.toFixed(1)}<span style="font-size:0.5em; color: var(--ink-mute)">/10</span></div>
       <div class="stat-card-detail">sur ${rated.length} films notés</div>
-      ${cyRated.length ? yearSub(CY, cyAvgRating.toFixed(1) + '/6') : ''}
+      ${cyRated.length ? yearSub(CY, cyAvgRating.toFixed(1) + '/10') : ''}
     </div>
     <div class="stat-card hot stat-card-clickable" data-stat="favorites" title="voir ces films">
       <div class="stat-card-label">coups de cœur</div>
@@ -4026,9 +4065,9 @@ function renderHeatmap() {
   }
   const topGenres = [...genreCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([g]) => g);
 
-  // Matrix: row = genre, col = rating (1..6)
+  // Matrice : ligne = genre, colonnes = 1★ … 5★ puis ❤
   const matrix = topGenres.map(g => {
-    const row = [0, 0, 0, 0, 0, 0]; // ratings 1-6
+    const row = new Array(RATING_FAV).fill(0);
     for (const f of state.films) {
       if (f.user?.statut !== 'vu' || !f.user?.rating) continue;
       if (!(f.genres || []).includes(g)) continue;
@@ -4056,10 +4095,10 @@ function renderHeatmap() {
   for (const m of matrix) {
     html += `<div class="heatmap-row">
       <div class="heatmap-genre-label">${escapeHtml(m.genre)}</div>`;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < RATING_FAV; i++) {
       const v = m.row[i];
       const intensity = maxCell > 0 ? v / maxCell : 0;
-      const isFav = i === 5;
+      const isFav = i === RATING_FAV - 1;
       const bg = heatmapColor(intensity, isFav);
       const textCol = intensity > 0.55 ? '#fff' : 'var(--ink-soft)';
       const clickAttrs = v > 0 ? ` heatmap-cell-clickable" data-genre="${escapeHtml(m.genre)}" data-rating="${i + 1}` : '';
@@ -4241,20 +4280,20 @@ function prettyMonth(yyyymm) {
 }
 
 function renderRatingDist() {
-  const counts = [0, 0, 0, 0, 0, 0]; // index 0 = rating 1, index 5 = rating 6
+  const counts = new Array(RATING_FAV).fill(0); // 1★ … 5★ puis ❤
   for (const f of state.films) {
     // Vus uniquement : une note conservée sur un film repassé « à voir »
     // ne doit pas compter dans « comment tu notes »
     if (f.user?.statut !== 'vu') continue;
     const r = f.user?.rating;
-    if (r >= 1 && r <= 6) counts[r - 1]++;
+    if (r >= 1 && r <= RATING_FAV) counts[r - 1]++;
   }
   const max = Math.max(...counts, 1);
   const root = document.getElementById('rating-dist');
   root.innerHTML = '';
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < RATING_FAV; i++) {
     const bar = document.createElement('div');
-    bar.className = 'rating-bar' + (i === 5 ? ' fav' : '');
+    bar.className = 'rating-bar' + (i === RATING_FAV - 1 ? ' fav' : '');
     bar.style.height = (counts[i] / max * 100) + '%';
     bar.innerHTML = `<span class="rating-bar-count">${counts[i]}</span>`;
     // Clic → films vus notés ainsi
@@ -4356,7 +4395,7 @@ function renderGenreRatingChart() {
     if (f.user?.statut !== 'vu' || !f.user?.rating) continue;
     for (const g of (f.genres || [])) {
       const b = buckets.get(g) || [0, 0];
-      b[0] += f.user.rating;
+      b[0] += ratingOutOf10(f.user.rating);
       b[1] += 1;
       buckets.set(g, b);
     }
@@ -4372,14 +4411,14 @@ function renderGenreRatingChart() {
     root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic;">pas assez de données.</div>';
     return;
   }
-  // Bars are 0..6 wide (matching rating scale)
+  // Barres sur l'échelle /10, la même que la carte « note moyenne »
   root.innerHTML = entries.map(([g, avg, n]) => {
-    const pct = (avg / 6 * 100).toFixed(1);
-    const stars = avg.toFixed(1);
+    const pct = (avg / 10 * 100).toFixed(1);
+    const value = avg.toFixed(1);
     return `<div class="bar-row">
       <div class="bar-label">${escapeHtml(g)}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-      <div class="bar-value">${stars}<span style="color: var(--ink-mute); margin-left: 4px;">(${n})</span></div>
+      <div class="bar-value">${value}<span style="color: var(--ink-mute); margin-left: 4px;">(${n})</span></div>
     </div>`;
   }).join('');
 }
@@ -4696,7 +4735,7 @@ function wireStatsClicks() {
     if (c.dataset.wired) return;
     c.dataset.wired = '1';
     c.addEventListener('click', () => {
-      if (c.dataset.stat === 'favorites') goToVusWithFilters({ ratings: [6] });
+      if (c.dataset.stat === 'favorites') goToVusWithFilters({ ratings: [RATING_FAV] });
     });
   });
 }
@@ -5409,7 +5448,7 @@ function adoptFilmsFromApi(content) {
   try {
     const data = JSON.parse(content);
     if (!data || !Array.isArray(data.films)) return;
-    state.films = data.films;
+    state.films = normalizeRatings(data.films);
     initFilters();
     if (state.view === 'a_voir' || state.view === 'vu') applyFilters({ preservePage: true });
     refreshStats();
@@ -5519,7 +5558,7 @@ async function doSaveFilmsToGithub(message) {
       try {
         const remoteData = JSON.parse(cur.content);
         if (remoteData && Array.isArray(remoteData.films)) {
-          state.films = mergeRemoteFilms(remoteData.films);
+          state.films = mergeRemoteFilms(normalizeRatings(remoteData.films));
           merged = true;
         }
       } catch { /* contenu distant illisible → on pousse l'état local tel quel */ }
@@ -5756,11 +5795,10 @@ function renderEditForm(film) {
       <div class="field edit-vu-field" style="display: ${isVu ? '' : 'none'}">
         <label>note</label>
         <div class="rating-chips" data-field="rating">
-          ${[1, 2, 3, 4, 5, 6].map(r => {
-            const isActive = u.rating === r;
-            const isFav = r === 6;
-            return `<button class="rating-chip ${isFav ? 'fav' : ''} ${isActive ? 'active' : ''}" data-rating="${r}">${isFav ? '❤' : r + '★'}</button>`;
-          }).join('')}
+          ${[1, 2, 3, 4, 5].map(r =>
+            `<button class="rating-chip ${u.rating === r ? 'active' : ''}" data-rating="${r}">${r}★</button>`).join('')}
+          <span class="rating-chip-sep" aria-hidden="true"></span>
+          <button class="rating-chip fav ${u.rating === 6 ? 'active' : ''}" data-rating="6" title="coup de cœur — le cran au-dessus de 5★">❤</button>
         </div>
       </div>
 
@@ -5847,13 +5885,13 @@ function wireEditForm(film) {
     });
   });
 
-  // Rating chips (single select)
+  // Étoiles et ❤ : sélection unique — c'est l'un ou l'autre, jamais les deux
+  // (recliquer sur la puce active = plus de note)
   document.querySelectorAll('.edit-form .rating-chips[data-field="rating"] .rating-chip').forEach(c => {
     c.addEventListener('click', () => {
       const wasActive = c.classList.contains('active');
       document.querySelectorAll('.edit-form .rating-chips[data-field="rating"] .rating-chip').forEach(x => x.classList.remove('active'));
       if (!wasActive) c.classList.add('active');
-      // Toggling off if it was already active = no rating
     });
   });
 
@@ -5880,6 +5918,7 @@ async function saveEditedFilm(filmId) {
   const statut = statutBtn ? statutBtn.dataset.value : 'vu';
   const isVu = statut === 'vu';
   const rating = (isVu && ratingBtn) ? parseInt(ratingBtn.dataset.rating, 10) : null;
+  const favorite = rating === RATING_FAV;
 
   let dateVue = null, dateLabel = null;
   if (isVu) {
@@ -5909,7 +5948,7 @@ async function saveEditedFilm(filmId) {
     ...film.user,
     statut,
     rating,
-    favorite: rating === 6,
+    favorite,
     lieu: lieuSel.value || null,
     date_vue: dateVue,
     date_vue_label: dateLabel,
