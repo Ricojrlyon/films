@@ -198,7 +198,7 @@ body {
 }
 .filter-toggle {
   background: transparent;
-  border: 1px dashed var(--rule-strong);
+  border: 1px solid var(--rule-strong);
   color: var(--ink-soft);
   padding: 8px 14px;
   border-radius: var(--radius);
@@ -736,7 +736,15 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   margin-bottom: 6px;
 }
 .rating-cell-stars-big .star-empty { color: rgba(255, 255, 255, 0.12); }
-.rating-cell-stars-big.fav { color: var(--hot); font-size: 34px; letter-spacing: 0; }
+.rating-cell-stars-big .rating-heart {
+  color: rgba(255, 255, 255, 0.12);
+  letter-spacing: 0;
+}
+/* à la suite des étoiles : on l'en détache. Seul (coup de cœur) : il prend
+   la place qu'occupaient les étoiles. */
+.rating-cell-stars-big .rating-heart:not(:first-child) { margin-left: 12px; }
+.rating-cell-stars-big .rating-heart:first-child { font-size: 34px; }
+.rating-cell-stars-big .rating-heart.on { color: var(--hot); }
 .rating-cell-value-medium {
   font-family: 'Bricolage Grotesque', 'Inter Tight', sans-serif;
   font-variation-settings: 'opsz' 26, 'wght' 600;
@@ -3464,18 +3472,22 @@ function openModal(f, opts) {
     bg.style.background = 'var(--bg-elev)';
   }
 
-  // Note perso : 1 à 5 étoiles, ou le ❤ qui est le cran au-dessus.
+  // Note perso : les crans étant exclusifs, un coup de cœur affiche le ❤ seul.
+  // Sinon les étoiles, suivies du ❤ en creux pour qu'on voie que le cran
+  // existe même quand il n'est pas donné.
   // Convertie en /10 (2/4/6/8/9,5/10) pour se comparer à la moyenne TMDB.
   const rating = f.user?.rating;
   const fav = !!f.user?.favorite;
   const userRatingHtml = (rating && !tmdbOnly) ? (() => {
     const visual = fav
-      ? '❤'
-      : '★'.repeat(rating) + `<span class="star-empty">${'★'.repeat(RATING_MAX - rating)}</span>`;
+      ? '<span class="rating-heart on">❤</span>'
+      : '★'.repeat(rating)
+        + `<span class="star-empty">${'★'.repeat(RATING_MAX - rating)}</span>`
+        + '<span class="rating-heart">❤</span>';
     return `
       <div class="rating-cell">
         <div class="rating-cell-label">ta note</div>
-        <div class="rating-cell-stars-big ${fav ? 'fav' : ''}">${visual}</div>
+        <div class="rating-cell-stars-big">${visual}</div>
         <div class="rating-cell-footnote">${formatOutOf10(rating)}<span class="denominator"> / 10</span>${fav ? '<span class="denominator"> · coup de cœur</span>' : ''}</div>
       </div>`;
   })() : '';
