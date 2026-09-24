@@ -3265,110 +3265,303 @@ function pickRecoSources() {
 
   // Try 4+ stars in last 6 months
   let sources = vus.filter(f => f.user.rating >= 4 && ageInMonths(f.user.date_vue) <= 6);
-  if (sources.length >= 5) return { sources, criteria: '4+ étoiles vus dans les 6 derniers mois' };
+  if (sources.length >= 5) return capRecoSources(sources, '4+ étoiles vus dans les 6 derniers mois');
 
   // Expand to 3+ stars in last 6 months
   sources = vus.filter(f => f.user.rating >= 3 && ageInMonths(f.user.date_vue) <= 6);
-  if (sources.length >= 5) return { sources, criteria: '3+ étoiles vus dans les 6 derniers mois' };
+  if (sources.length >= 5) return capRecoSources(sources, '3+ étoiles vus dans les 6 derniers mois');
 
   // Expand to 4+ in last 12 months
   sources = vus.filter(f => f.user.rating >= 4 && ageInMonths(f.user.date_vue) <= 12);
-  if (sources.length >= 5) return { sources, criteria: '4+ étoiles vus dans les 12 derniers mois' };
+  if (sources.length >= 5) return capRecoSources(sources, '4+ étoiles vus dans les 12 derniers mois');
 
   // Fallback: all 4+ stars ever
   sources = vus.filter(f => f.user.rating >= 4);
-  return { sources, criteria: '4+ étoiles (toutes périodes)' };
+  return capRecoSources(sources, '4+ étoiles (toutes périodes)');
 }
 
-async function tmdbGetRecommendations(tmdbId, type) {
-  const path = type === 'tv' ? 'tv' : 'movie';
-  const url = `${TMDB_BASE}/${path}/${tmdbId}/recommendations?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&page=1`;
+// Borne le coût du calcul (cf. RECO.maxSources) : on garde les mieux notés,
+// puis les plus récemment vus
+function capRecoSources(sources, criteria) {
+  const recency = f => { const dv = f.user.date_vue || ''; return dv.startsWith('before-') ? '' : dv; };
+  const kept = [...sources]
+    .sort((a, b) => b.user.rating - a.user.rating || recency(b).localeCompare(recency(a)))
+    .slice(0, RECO.maxSources);
+  return { sources: kept, criteria: kept.length < sources.length ? `${criteria}, les ${kept.length} mieux notés` : criteria };
+}
+
+// Principe :
+// 1) Voisinage — pour chaque film aimé, les films qui lui ressemblent
+//    vraiment. Candidats : ses recos et ses « similaires » TMDB. Un candidat
+//    n'est retenu que sur preuve de proximité : un thème en commun, le même
+//    réal ou des acteurs communs, ou une reco TMDB d'un film assez vu pour
+//    qu'elle soit fiable. Le genre seul ne suffit pas (« Drame » ressemble à tout).
+// 2) Critères — sur le film PROPOSÉ, jamais sur le film aimé : parmi ses
+//    voisins, on favorise ceux réalisés par une femme et on freine les
+//    productions américaines. Ils décident quels voisins on garde et pèsent
+//    sur le tirage, sans jamais toucher à la proximité elle-même.
+// 3) Grille — tirage pondéré par le score, fixé pour le mois, avec une part
+//    cible de films de réalisatrices (quand il y en a assez parmi les voisins)
+//    et un plafond par film aimé pour qu'elle reste mélangée.
+// Modifier un réglage invalide de lui-même le pool en cache (RECO_SIG).
+const RECO = {
+  maxSources: 30,             // « toutes périodes » peut dépasser 250 films
+  minVotes: 20,               // candidats trop confidentiels pour être jugés
+  trustRecosFromVotes: 100,   // en dessous, les recos TMDB d'un film sont du bruit
+  minProximity: 0.20,
+  neighborsPerSource: 8,
+  perSourceInGrid: 2,
+  proximity: { keywords: 0.50, genres: 0.20, tmdbReco: 0.15, people: 0.15 },
+  femaleDirectorBoost: 1.6,   // choix des voisins et poids au tirage
+  femaleDirectorShare: 0.5,   // part cible de la grille
+  countryMult: { US: 0.6 },   // au prorata des pays de production
+  // Mots-clés TMDB qui ne décrivent pas le style : « woman director »
+  // réintroduirait en douce un critère sur le film aimé ; scènes post-générique.
+  metaKeywords: [187056, 179431, 179430],
+};
+const RECO_SIG = (() => {
+  const str = JSON.stringify(RECO);
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+})();
+
+// Fetch TMDB tolérant : null en cas d'échec, nouvel essai sur 429 — le calcul
+// fait des centaines d'appels, un 429 avalé en silence tronquerait le pool.
+async function tmdbJson(url) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let r;
+    try { r = await fetch(url); } catch { return null; }
+    if (r.status === 429) { await new Promise(res => setTimeout(res, 1000 * (attempt + 1))); continue; }
+    if (!r.ok) return null;
+    try { return await r.json(); } catch { return null; }
+  }
+  return null;
+}
+
+async function mapWithConcurrency(items, n, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+    while (next < items.length) { const i = next++; out[i] = await fn(items[i], i); }
+  }));
+  return out;
+}
+
+async function tmdbRecoList(type, tmdbId, kind) {
+  const d = await tmdbJson(`${TMDB_BASE}/${type}/${tmdbId}/${kind}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&page=1`);
+  return (d?.results || []).map(it => ({ ...it, media_type: it.media_type || type }));
+}
+
+// Profil d'un film pour la reco (mots-clés, genres, réal, casting, pays,
+// votes), gardé 60 jours : d'un mois à l'autre, et surtout après une nouvelle
+// note, la plupart des candidats sont déjà connus.
+const RECO_PROFILES_KEY = 'films_reco_profiles_v1';
+const RECO_PROFILE_TTL = 60 * 24 * 3600 * 1000;
+function loadRecoProfiles() {
+  const m = new Map();
   try {
-    const r = await fetch(url);
-    if (!r.ok) return [];
-    const data = await r.json();
-    return (data.results || []).map(item => ({
-      ...item,
-      media_type: item.media_type || path,
-    }));
-  } catch {
-    return [];
-  }
+    const raw = JSON.parse(localStorage.getItem(RECO_PROFILES_KEY) || 'null');
+    const now = Date.now();
+    if (raw) for (const k in raw) if (now - raw[k].t < RECO_PROFILE_TTL) m.set(k, raw[k]);
+  } catch {}
+  return m;
+}
+function saveRecoProfiles(m) {
+  try { localStorage.setItem(RECO_PROFILES_KEY, JSON.stringify(Object.fromEntries(m))); }
+  catch { try { localStorage.removeItem(RECO_PROFILES_KEY); } catch {} } // quota : on sacrifie ce cache-là
+}
+async function recoProfile(cache, type, tmdbId) {
+  const key = type + '-' + tmdbId;
+  if (cache.has(key)) return cache.get(key);
+  const d = await tmdbJson(`${TMDB_BASE}/${type}/${tmdbId}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,keywords`);
+  if (!d) return null;
+  const dirs = type === 'tv' ? (d.created_by || []) : (d.credits?.crew || []).filter(c => c.job === 'Director');
+  let countries = (d.production_countries || []).map(c => c.iso_3166_1);
+  if (!countries.length && Array.isArray(d.origin_country)) countries = d.origin_country;
+  const prof = {
+    k: (d.keywords?.keywords || d.keywords?.results || []).map(x => x.id),
+    g: (d.genres || []).map(x => x.id),
+    d: dirs.map(x => x.id),
+    c: (d.credits?.cast || []).slice(0, 10).map(x => x.id),
+    f: dirs.some(x => x.gender === 1) ? 1 : 0,
+    p: countries,
+    v: d.vote_count || 0,
+    t: Date.now(),
+  };
+  cache.set(key, prof);
+  return prof;
 }
 
-async function buildRecoPool(sources) {
-  // Concurrence bornée à 5 (même pattern que bulkEnrichCountries) : le
-  // fallback « toutes périodes » peut dépasser 100 sources, et un Promise.all
-  // non borné déclenche des 429 TMDB avalés en silence (return []) → pool
-  // tronqué sans que rien ne le signale. L'ordre des résultats n'importe pas,
-  // l'agrégation est une somme.
-  const results = [];
-  let srcIdx = 0;
-  async function worker() {
-    while (srcIdx < sources.length) {
-      const s = sources[srcIdx++];
-      // Slight boost for female-directed source films (director_gender === 1 in TMDB convention).
-      // Using 1.35× means recommendations seeded from films by female directors
-      // are weighted ~35% more, gently tilting the pool without forcing it.
-      const dirBoost = s.director_gender === 1 ? 1.35 : 1.0;
-      const items = await tmdbGetRecommendations(s.tmdb_id, s.type);
-      results.push({ items, weight: (s.user.rating / RATING_FAV) * dirBoost });
-    }
-  }
-  await Promise.all(Array.from({ length: 5 }, () => worker()));
-  // Aggregate: score = sum of source weights, with language diversity adjustment
-  const scoreMap = new Map();
-  for (const { items, weight } of results) {
-    for (const item of items) {
-      const id = (item.media_type || 'movie') + '-' + item.id;
-      // Language diversity multiplier:
-      // · English (en): ×0.60 — already dominant in TMDB recommendations
-      // · French (fr):  ×0.78 — gently reduce French over-representation
-      //   without excluding French cinema
-      // · All others:   ×1.00 — full weight for non-English, non-French films
-      const langMult = item.original_language === 'en' ? 0.60
-                     : item.original_language === 'fr' ? 0.78
-                     : 1.0;
-      const adjScore = weight * langMult;
-      const existing = scoreMap.get(id);
-      if (existing) {
-        existing.score += adjScore;
-        existing.sources++;
-      } else {
-        scoreMap.set(id, { item, score: adjScore, sources: 1 });
-      }
-    }
-  }
-  // Filter out films already in collection
+// Multiplicateur des critères, calculé sur le film proposé
+function recoCriteria(prof) {
+  const female = prof.f ? RECO.femaleDirectorBoost : 1;
+  const cs = prof.p || [];
+  const country = cs.length ? cs.reduce((a, c) => a + (RECO.countryMult[c] ?? 1), 0) / cs.length : 1;
+  return female * country;
+}
+
+async function buildRecoPool(sources, onProgress) {
+  const cache = loadRecoProfiles();
   const inCollection = new Set(state.films.map(f => f.id));
-  const candidates = [...scoreMap.values()].filter(c => {
-    const id = (c.item.media_type || 'movie') + '-' + c.item.id;
-    return !inCollection.has(id);
+  const typeOf = t => t === 'tv' ? 'tv' : 'movie';
+  const keyOf = it => typeOf(it.media_type) + '-' + it.id;
+
+  // 1a. Chaque film aimé : son profil, ses recos et ses « similaires » TMDB
+  const perSource = (await mapWithConcurrency(sources, 6, async s => {
+    const type = typeOf(s.type);
+    const [prof, recos, similar] = await Promise.all([
+      recoProfile(cache, type, s.tmdb_id),
+      tmdbRecoList(type, s.tmdb_id, 'recommendations'),
+      tmdbRecoList(type, s.tmdb_id, 'similar'),
+    ]);
+    return prof ? { s, prof, recos, similar } : null;
+  })).filter(Boolean);
+
+  // 1b. Candidats : hors collection, assez de votes pour être jugés
+  const candidates = new Map();
+  for (const ps of perSource) for (const it of [...ps.recos, ...ps.similar]) {
+    const k = keyOf(it);
+    if (inCollection.has(k) || candidates.has(k) || (it.vote_count || 0) < RECO.minVotes) continue;
+    candidates.set(k, it);
+  }
+
+  // 1c. Profil de chaque candidat (le gros du coût, amorti par le cache)
+  let done = 0;
+  await mapWithConcurrency([...candidates.values()], 8, async it => {
+    await recoProfile(cache, typeOf(it.media_type), it.id);
+    if (onProgress) onProgress(++done, candidates.size);
   });
-  // Sort by score desc
-  candidates.sort((a, b) => b.score - a.score);
-  return candidates.slice(0, 80).map(c => c.item);
+  saveRecoProfiles(cache);
+
+  // Rareté des mots-clés et des genres parmi les candidats : partager
+  // « mecha » en dit plus long que partager « based on novel or book »
+  const meta = new Set(RECO.metaKeywords);
+  const styleKw = prof => new Set(prof.k.filter(x => !meta.has(x)));
+  const dfK = new Map(), dfG = new Map();
+  for (const k of candidates.keys()) {
+    const p = cache.get(k); if (!p) continue;
+    for (const x of new Set(p.k)) dfK.set(x, (dfK.get(x) || 0) + 1);
+    for (const x of new Set(p.g)) dfG.set(x, (dfG.get(x) || 0) + 1);
+  }
+  const N = Math.max(1, candidates.size);
+  const idfK = x => Math.log(1 + N / (dfK.get(x) || 1));
+  const idfG = x => Math.log(1 + N / (dfG.get(x) || 1));
+  function keywordSim(a, b) {   // cosinus pondéré par la rareté
+    if (!a.size || !b.size) return 0;
+    let dot = 0, na = 0, nb = 0;
+    for (const x of a) { const w = idfK(x) ** 2; na += w; if (b.has(x)) dot += w; }
+    for (const x of b) nb += idfK(x) ** 2;
+    return dot / Math.sqrt(na * nb);
+  }
+  function genreSim(a, b) {     // Jaccard pondéré par la rareté
+    const A = new Set(a), B = new Set(b);
+    if (!A.size || !B.size) return 0;
+    let inter = 0, union = 0;
+    for (const x of new Set([...A, ...B])) { const w = idfG(x); union += w; if (A.has(x) && B.has(x)) inter += w; }
+    return inter / union;
+  }
+  function peopleSim(a, b) {    // même réal = 1, sinon acteurs en commun
+    if (a.d.some(x => b.d.includes(x))) return 1;
+    return Math.min(1, a.c.filter(x => b.c.includes(x)).length / 3);
+  }
+
+  // 1d. Voisinage de chaque film aimé, puis 2. critères sur le film proposé
+  const W = RECO.proximity;
+  const pool = new Map(); // clé -> { it, prof, sim, src, best }
+  for (const ps of perSource) {
+    const sKw = styleKw(ps.prof);
+    const recoIds = new Set(ps.recos.map(keyOf));
+    const trustRecos = ps.prof.v >= RECO.trustRecosFromVotes;
+    const weight = ratingOutOf10(ps.s.user.rating) / 10;
+    const near = new Map();
+    for (const it of [...ps.recos, ...ps.similar]) {
+      const k = keyOf(it);
+      if (near.has(k) || !candidates.has(k)) continue;
+      const c = cache.get(k); if (!c) continue;
+      const kw = keywordSim(sKw, styleKw(c)), people = peopleSim(ps.prof, c), inRecos = recoIds.has(k);
+      if (!(kw > 0 || people > 0 || (inRecos && trustRecos))) continue; // pas de preuve de proximité
+      const p = W.keywords * kw + W.genres * genreSim(ps.prof.g, c.g) + W.tmdbReco * (inRecos ? 1 : 0) + W.people * people;
+      if (p >= RECO.minProximity) near.set(k, { it, c, p });
+    }
+    // Les critères départagent les voisins : ils décident lesquels on garde
+    const kept = [...near.entries()]
+      .sort((a, b) => b[1].p * recoCriteria(b[1].c) - a[1].p * recoCriteria(a[1].c))
+      .slice(0, RECO.neighborsPerSource);
+    for (const [k, { it, c, p }] of kept) {
+      const e = pool.get(k) || { it, prof: c, sim: 0, src: null, best: 0 };
+      e.sim += weight * p;   // proche de plusieurs films aimés → il monte
+      if (weight * p > e.best) { e.best = weight * p; e.src = ps.s.id; }
+      pool.set(k, e);
+    }
+  }
+
+  // Score final = similarité × critères. Items allégés : le pool est mis en cache.
+  return [...pool.values()]
+    .map(e => ({
+      id: e.it.id, media_type: e.it.media_type,
+      title: e.it.title, name: e.it.name,
+      original_title: e.it.original_title, original_name: e.it.original_name,
+      poster_path: e.it.poster_path, release_date: e.it.release_date, first_air_date: e.it.first_air_date,
+      original_language: e.it.original_language, vote_average: e.it.vote_average, vote_count: e.it.vote_count,
+      reco_w: e.sim * recoCriteria(e.prof),
+      reco_src: e.src,
+      reco_female: e.prof.f === 1,
+    }))
+    .sort((a, b) => b.reco_w - a.reco_w);
 }
 
-function monthlyRecoSubset(pool, count) {
-  if (pool.length === 0) return [];
-  const d = new Date();
-  const seed = d.getFullYear() * 12 + d.getMonth();
+function seededRandom(seed) {
   // Mulberry32-ish PRNG
   let s = seed * 2654435761 | 0;
-  const random = () => {
+  return () => {
     s = (s + 0x6D2B79F5) | 0;
     let t = Math.imul(s ^ (s >>> 15), 1 | s);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  const shuffled = [...pool];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled.slice(0, count);
 }
+
+// Tirage du mois, pondéré par le score (Efraimidis–Spirakis : clé u^(1/w)).
+// La part cible de réalisatrices est servie en premier, dans l'ordre du tirage,
+// puis le reste ; au plus RECO.perSourceInGrid films par film aimé.
+function monthlyRecoSubset(pool, count) {
+  if (pool.length === 0) return [];
+  const d = new Date();
+  const random = seededRandom(d.getFullYear() * 12 + d.getMonth());
+  const drawn = pool
+    .map(it => ({ it, key: Math.pow(random(), 1 / Math.max(it.reco_w || 1, 1e-6)) }))
+    .sort((a, b) => b.key - a.key)
+    .map(x => x.it);
+  const picked = new Set(), perSource = new Map();
+  const take = (accept, until) => {
+    for (const it of drawn) {
+      if (picked.size >= until) break;
+      if (picked.has(it) || !accept(it)) continue;
+      const n = perSource.get(it.reco_src) || 0;
+      if (it.reco_src && n >= RECO.perSourceInGrid) continue;
+      perSource.set(it.reco_src, n + 1);
+      picked.add(it);
+    }
+  };
+  take(it => it.reco_female, Math.round(count * RECO.femaleDirectorShare));
+  take(() => true, count);
+  // Peu de films aimés : le plafond laisserait des trous, on complète
+  for (const it of drawn) { if (picked.size >= count) break; picked.add(it); }
+  // Ordre d'affichage mélangé, fixé pour le mois : celles qui complètent la
+  // part cible sont puisées plus loin dans le tirage, et se regrouperaient
+  // sinon en fin de grille
+  const out = drawn.filter(it => picked.has(it));
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+// Un seul calcul à la fois : revenir sur l'onglet pendant qu'il tourne ne doit
+// pas en lancer un second
+let recoBuildInFlight = null;
 
 async function fetchAndRenderReco(forceRefresh = false) {
   const grid = document.getElementById('grid');
@@ -3388,7 +3581,8 @@ async function fetchAndRenderReco(forceRefresh = false) {
   const monthName = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'][new Date().getMonth()];
   ctxEl.innerHTML = `<strong>${monthName} ${new Date().getFullYear()}</strong> · basé sur <strong>${sources.length} films</strong> (${criteria})`;
 
-  const cacheKey = 'films_reco_pool_' + currentMonthKey() + '_' + state.films.filter(f => f.user?.rating).length;
+  const cacheKey = 'films_reco_pool_' + currentMonthKey() + '_' + state.films.filter(f => f.user?.rating).length
+    + '_' + RECO_SIG;
 
   let pool = state.recoPool;
   // Try localStorage cache
@@ -3404,11 +3598,17 @@ async function fetchAndRenderReco(forceRefresh = false) {
   }
 
   if (!pool || forceRefresh || pool.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">analyse de tes goûts… (' + sources.length + ' films à croiser)</div>';
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">analyse de tes goûts… (' + sources.length + ' films à croiser)<br><span id="reco-progress"></span></div>';
     countEl.textContent = '…';
     refreshBtn.disabled = true;
     try {
-      pool = await buildRecoPool(sources);
+      if (!recoBuildInFlight) {
+        recoBuildInFlight = buildRecoPool(sources, (done, total) => {
+          const el = document.getElementById('reco-progress');
+          if (el) el.textContent = done + ' / ' + total + ' films examinés';
+        }).finally(() => { recoBuildInFlight = null; });
+      }
+      pool = await recoBuildInFlight;
       state.recoPool = pool;
       // Save to localStorage
       try { localStorage.setItem(cacheKey, JSON.stringify(pool)); } catch {}
