@@ -5365,25 +5365,36 @@ async function tmdbBrowse(category, filters) {
   return list.slice(0, DISCOVER_COUNT);
 }
 
-// Au plus un film américain sur deux dans les onglets de Découvrir. Est
+// Au plus un film américain sur trois dans les onglets de Découvrir. Est
 // américain tout film dont les États-Unis sont un pays de production : les
 // coproductions comme GB/US ou US/DE/FR sont le plus souvent des films de
 // studios américains. L'ordre TMDB est gardé autant que possible : chaque
 // place revient au film le mieux classé qui ne fait pas dépasser la part.
+// Certains films ne profitent pas des places libérées (DISCOVER_NO_BOOST) :
+// ils restent à leur rang TMDB, sans remonter.
 // Le pays vient du profil de film de la reco, dont il partage le cache.
 const DISCOVER_COUNT = 40;
 const DISCOVER_REBALANCE_PAGES = 5;
-const DISCOVER_MAX_US_SHARE = 0.5;
+const DISCOVER_MAX_US_SHARE = 1 / 3;
+const DISCOVER_NO_BOOST = ['IN'];   // films indiens (sorties pour la diaspora)
 async function capUSShare(list, count) {
   const cache = loadRecoProfiles();
   const typeOf = it => it.media_type === 'tv' ? 'tv' : 'movie';
   await mapWithConcurrency(list, 8, it => recoProfile(cache, typeOf(it), it.id));
   saveRecoProfiles(cache);
-  const isUS = it => (cache.get(typeOf(it) + '-' + it.id)?.p || []).includes('US');
-  const queue = [...list], out = [];
+  const countries = it => cache.get(typeOf(it) + '-' + it.id)?.p || [];
+  const isUS = it => countries(it).includes('US');
+  const noBoost = it => countries(it).some(c => DISCOVER_NO_BOOST.includes(c));
+  // Films sans coup de pouce : réservés à leur rang TMDB (au-delà de la
+  // grille, ils n'y entrent pas) ; les autres places se remplissent sans eux
+  const pinned = new Map();
+  list.forEach((it, rank) => { if (noBoost(it) && rank < count) pinned.set(rank, it); });
+  const queue = list.filter(it => !noBoost(it)), out = [];
   let us = 0;
-  while (out.length < count && queue.length) {
-    // arrondi au supérieur : la 1re place peut revenir à un film US, pas la 2e
+  while (out.length < count) {
+    const held = pinned.get(out.length);
+    if (held) { if (isUS(held)) us++; out.push(held); continue; }
+    // arrondi au supérieur : la 1re place peut revenir à un film US, pas les 2 suivantes
     const allowed = Math.ceil((out.length + 1) * DISCOVER_MAX_US_SHARE);
     let i = queue.findIndex(it => us + (isUS(it) ? 1 : 0) <= allowed);
     // Il ne reste que des films US : la liste s'arrête là plutôt que de
