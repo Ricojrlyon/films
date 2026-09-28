@@ -5322,7 +5322,7 @@ async function tmdbBrowse(category, filters) {
     baseUrl = `${TMDB_BASE}/discover/movie?${params}${extra}`;
   } else {
     const endpoints = {
-      trending: `${TMDB_BASE}/trending/all/week?${params}`,
+      trending: `${TMDB_BASE}/trending/movie/week?${params}`,   // films seulement
       popular: `${TMDB_BASE}/movie/popular?${params}`,
       top_rated: `${TMDB_BASE}/movie/top_rated?${params}`,
       upcoming: `${TMDB_BASE}/movie/upcoming?${params}`,
@@ -5330,21 +5330,30 @@ async function tmdbBrowse(category, filters) {
     };
     baseUrl = endpoints[category] || endpoints.trending;
   }
-  // Fetch 2 pages in parallel
-  const [p1, p2] = await Promise.all([
+  // Ordre par défaut (popularité, sans filtre de pays) : on rééquilibre, et il
+  // faut aller chercher plus loin dans la liste — TMDB classe les films non
+  // américains bien après les 40 premiers. Sinon 2 pages suffisent.
+  const rebalance = !filters.country && (filters.sort || 'popularity.desc') === 'popularity.desc';
+  const pageCount = rebalance ? DISCOVER_REBALANCE_PAGES : 2;
+  const [p1, ...others] = await Promise.all([
     fetch(baseUrl + '&page=1').then(r => r.ok ? r.json() : { results: [] }),
-    fetch(baseUrl + '&page=2').then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] })),
+    ...Array.from({ length: pageCount - 1 }, (_, i) =>
+      fetch(baseUrl + '&page=' + (i + 2)).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] }))),
   ]);
-  const all = [...(p1.results || []), ...(p2.results || [])];
-  // trending/all renvoie aussi des personnes — pas affichables comme films
-  // (pas de poster_path, et le clic requêterait /movie/{id_de_personne})
+  const all = [p1, ...others].flatMap(p => p.results || []);
+  // Une liste « all » renverrait aussi des personnes — pas affichables comme films
+  // (pas de poster_path, et le clic requêterait /movie/{id_de_personne}).
+  // Dédoublonnage : la pagination TMDB glisse d'une page à l'autre.
+  const seen = new Set();
   const list = all
     .filter(it => it.media_type !== 'person')
     .map(it => ({
       ...it,
       // Add media_type for movie-only endpoints (TMDB doesn't include it there)
       media_type: it.media_type || 'movie',
-    }));
+    }))
+    .filter(it => { const k = it.media_type + '-' + it.id; return !seen.has(k) && seen.add(k); });
+  if (rebalance) return capUSShare(list, DISCOVER_COUNT);
   // Re-tri local : TMDB ne garantit pas un ordre strict à la jonction des
   // deux pages, et la date affichée (sortie FR via region=FR) peut différer
   // de la date de tri serveur (sortie originale)
@@ -5353,7 +5362,38 @@ async function tmdbBrowse(category, filters) {
     if (sort === 'vote_average.desc') list.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
     else if (sort === 'primary_release_date.desc') list.sort((a, b) => (b.release_date || '').localeCompare(a.release_date || ''));
   }
-  return list;
+  return list.slice(0, DISCOVER_COUNT);
+}
+
+// Au plus un film américain sur deux dans les onglets de Découvrir. Est
+// américain tout film dont les États-Unis sont un pays de production : les
+// coproductions comme GB/US ou US/DE/FR sont le plus souvent des films de
+// studios américains. L'ordre TMDB est gardé autant que possible : chaque
+// place revient au film le mieux classé qui ne fait pas dépasser la part.
+// Le pays vient du profil de film de la reco, dont il partage le cache.
+const DISCOVER_COUNT = 40;
+const DISCOVER_REBALANCE_PAGES = 5;
+const DISCOVER_MAX_US_SHARE = 0.5;
+async function capUSShare(list, count) {
+  const cache = loadRecoProfiles();
+  const typeOf = it => it.media_type === 'tv' ? 'tv' : 'movie';
+  await mapWithConcurrency(list, 8, it => recoProfile(cache, typeOf(it), it.id));
+  saveRecoProfiles(cache);
+  const isUS = it => (cache.get(typeOf(it) + '-' + it.id)?.p || []).includes('US');
+  const queue = [...list], out = [];
+  let us = 0;
+  while (out.length < count && queue.length) {
+    // arrondi au supérieur : la 1re place peut revenir à un film US, pas la 2e
+    const allowed = Math.ceil((out.length + 1) * DISCOVER_MAX_US_SHARE);
+    let i = queue.findIndex(it => us + (isUS(it) ? 1 : 0) <= allowed);
+    // Il ne reste que des films US : la liste s'arrête là plutôt que de
+    // dépasser la part (« tendances », très américain, peut compter moins de 40 films)
+    if (i === -1) break;
+    const [it] = queue.splice(i, 1);
+    if (isUS(it)) us++;
+    out.push(it);
+  }
+  return out;
 }
 
 // Build a full film object from TMDB detail data (movie or tv)
