@@ -34,7 +34,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=1">
+<link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 <div class="app">
@@ -80,10 +80,10 @@
         <button class="explorer-cat" data-cat="upcoming">prochainement</button>
       </div>
       <div class="discover-filters" id="discover-filters">
-        <select id="discover-genre"><option value="">tous genres</option></select>
-        <select id="discover-country"><option value="">tous pays</option></select>
+        <select id="discover-genre" aria-label="genre"><option value="">tous genres</option></select>
+        <select id="discover-country" aria-label="pays"><option value="">tous pays</option></select>
         <select id="discover-decade" title="période — disponible sur « tendances »"><option value="">toutes périodes</option></select>
-        <select id="discover-sort">
+        <select id="discover-sort" aria-label="trier par">
           <option value="popularity.desc">populaires</option>
           <option value="vote_average.desc">mieux notés</option>
           <option value="primary_release_date.desc">sorties récentes</option>
@@ -105,24 +105,24 @@
 
     <div class="filter-panel" id="filter-panel">
       <div class="filter-group">
-        <div class="filter-label">genre</div>
-        <select id="filter-genre"><option value="">tous</option></select>
+        <div class="filter-label" id="label-genre">genre</div>
+        <select id="filter-genre" aria-labelledby="label-genre"><option value="">tous</option></select>
       </div>
       <div class="filter-group">
-        <div class="filter-label">lieu</div>
-        <select id="filter-lieu"><option value="">tous</option></select>
+        <div class="filter-label" id="label-lieu">lieu</div>
+        <select id="filter-lieu" aria-labelledby="label-lieu"><option value="">tous</option></select>
       </div>
       <div class="filter-group">
-        <div class="filter-label">décennie de sortie</div>
-        <select id="filter-decade"><option value="">toutes</option></select>
+        <div class="filter-label" id="label-decade">décennie de sortie</div>
+        <select id="filter-decade" aria-labelledby="label-decade"><option value="">toutes</option></select>
       </div>
       <div class="filter-group">
-        <div class="filter-label">année vue</div>
-        <select id="filter-yearvu"><option value="">toutes</option></select>
+        <div class="filter-label" id="label-yearvu">année vue</div>
+        <select id="filter-yearvu" aria-labelledby="label-yearvu"><option value="">toutes</option></select>
       </div>
       <div class="filter-group">
-        <div class="filter-label">mois vu</div>
-        <select id="filter-mois">
+        <div class="filter-label" id="label-mois">mois vu</div>
+        <select id="filter-mois" aria-labelledby="label-mois">
           <option value="">tous</option>
           <option value="01">janvier</option><option value="02">février</option>
           <option value="03">mars</option><option value="04">avril</option>
@@ -133,12 +133,12 @@
         </select>
       </div>
       <div class="filter-group">
-        <div class="filter-label">pays du film</div>
-        <select id="filter-country"><option value="">tous</option></select>
+        <div class="filter-label" id="label-country">pays du film</div>
+        <select id="filter-country" aria-labelledby="label-country"><option value="">tous</option></select>
       </div>
       <div class="filter-group">
-        <div class="filter-label">pays du·de la réal</div>
-        <select id="filter-realpays"><option value="">tous</option></select>
+        <div class="filter-label" id="label-realpays">pays du·de la réal</div>
+        <select id="filter-realpays" aria-labelledby="label-realpays"><option value="">tous</option></select>
       </div>
       <div class="filter-group" style="flex: 1 0 100%;">
         <div class="filter-label">notes</div>
@@ -153,8 +153,8 @@
         </div>
       </div>
       <div class="filter-group">
-        <div class="filter-label">trier par</div>
-        <select id="sort">
+        <div class="filter-label" id="label-sort">trier par</div>
+        <select id="sort" aria-labelledby="label-sort">
           <option value="added_desc">date d'ajout (plus récent)</option>
           <option value="date_vue_desc">date vue (plus récent)</option>
           <option value="date_vue_asc">date vue (plus ancien)</option>
@@ -418,6 +418,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=1"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>

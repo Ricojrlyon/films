@@ -1,4 +1,4 @@
-// *films — code de l'application (chargé à la fin d'index.html)
+// *films : code de l'application (chargé à la fin d'index.html)
 'use strict';
 
 // ============================================================
@@ -1059,7 +1059,7 @@ async function buildRecoPool(sources, onProgress) {
     return prof ? { s, prof, recos, similar } : null;
   })).filter(Boolean);
   // Aucun profil récupéré pour aucun film aimé : TMDB ne répond pas (réseau, panne,
-  // clé refusée). Le dire, plutôt qu'une grille vide « rien à recommander » — et
+  // clé refusée). Le dire, plutôt qu'une grille vide « rien à recommander », et
   // ne rien mettre en cache
   if (sources.length && !perSource.length) throw new Error('tmdb ne répond pas, réessaie plus tard');
 
@@ -1642,7 +1642,7 @@ async function addTmdbFilmToCollection(film, statut, userData) {
 }
 
 // Ouverture de la fiche : si elle n'était pas déjà affichée (un re-rendu ne
-// compte pas), on mémorise l'élément d'où l'on vient — la carte — et la
+// compte pas), on mémorise l'élément d'où l'on vient (la carte) et la
 // sélection clavier entre dans la fiche, sur le bouton fermer.
 let modalReturnFocus = null;
 function showModalBackdrop() {
@@ -3188,7 +3188,7 @@ function normalizeBirthCountry(raw) {
   let c = String(raw).trim();
   const now = c.match(/[\[(]\s*now\s+([^\])]+)[\])]/i);
   c = now ? now[1].trim() : c.replace(/\s*[\[(][^\])]*[\])]\s*/g, ' ').trim();
-  const dash = c.split(/\s+[-–—]\s+/);
+  const dash = c.split(/\s+[-\u2013\u2014]\s+/);
   c = dash[dash.length - 1].trim();
   // Sous-entités souvent écrites sans le pays
   if (c === 'England' || c === 'Scotland' || c === 'Wales' || c === 'Northern Ireland') c = 'UK';

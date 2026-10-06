@@ -1,4 +1,4 @@
-/* *films — apparence du site (chargée par index.html) */
+/* *films : apparence du site (chargée par index.html) */
 
 :root {
   --bg: #161f25;
@@ -1601,7 +1601,7 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
 .reco-refresh:hover { color: var(--warm); border-color: var(--warm); }
 .reco-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
 /* Enrichissements des stats : réservés au mode édition (sans lui, rien ne peut
-   être enregistré) — l'emporte sur l'affichage décidé par le code */
+   être enregistré). Cette règle l'emporte sur l'affichage décidé par le code */
 body:not(.admin-mode) #gender-enrich-wrap,
 body:not(.admin-mode) #origin-enrich-wrap { display: none !important; }
 
