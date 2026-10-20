@@ -689,9 +689,10 @@ function renderTmdbGrid(items) {
 // ============================================================
 // Un clic sur un nom (fiche, tops des stats) ouvre la filmographie de la
 // personne dans la grille : onglets réalisation / interprétation, « vu X sur
-// Y » sur ce qui est sorti, projets à venir en tête. Films, séries,
-// documentaires et courts-métrages compris ; les émissions (talk-shows,
-// infos, téléréalité) et apparitions télé « dans son propre rôle » non.
+// Y » sur ce qui est sorti, projets à venir en tête. Films, séries et
+// courts-métrages compris, documentaires réalisés aussi ; pas les apparitions
+// dans des documentaires, ni les émissions (talk-shows, infos, téléréalité)
+// et apparitions télé « dans son propre rôle ».
 // Les films de la collection gardent leur carte (note, « à voir »).
 let personSeq = 0;
 let personReturn = null; // vue (et page) d'où l'on vient, pour « retour »
@@ -746,10 +747,14 @@ function personCredits(d) {
     }
     return [...vus.values()];
   };
+  const DOCUMENTAIRE = 99; // genre TMDB, films et séries
   return {
     real: sansDoublon((cc.crew || []).filter(c => c.job === 'Director' || c.job === 'Creator')),
-    jeu: sansDoublon((cc.cast || []).filter(c => !((c.media_type === 'tv') &&
-      ((c.genre_ids || []).some(g => BRUIT_TV.includes(g)) || autoPortrait.test(c.character || ''))))),
+    // Interprétation : ni apparitions dans des documentaires (interview,
+    // narration, « dans son propre rôle »), ni émissions télé
+    jeu: sansDoublon((cc.cast || []).filter(c => !(c.genre_ids || []).includes(DOCUMENTAIRE)
+      && !((c.media_type === 'tv') &&
+        ((c.genre_ids || []).some(g => BRUIT_TV.includes(g)) || autoPortrait.test(c.character || ''))))),
   };
 }
 
