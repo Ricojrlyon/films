@@ -16,7 +16,7 @@ const TAB_SORT_DEFAULTS = {
 const state = {
   films: [],
   filtered: [],
-  view: 'a_voir',           // 'a_voir' | 'vu' | 'discover' | 'reco'
+  view: 'a_voir',           // 'a_voir' | 'vu' | 'discover' | 'reco' | 'person' (filmographie)
   filters: {
     status: 'a_voir',       // shadows view for filtering logic
     search: '',
@@ -242,7 +242,14 @@ function applyFilters(opts) {
 
   state.filtered = list;
   if (!opts.preservePage) state.page = 1;
-  viewTransition(renderGrid);
+  // La grille n'affiche la collection que sur « à voir » / « vus » : après
+  // une modification faite depuis Découvrir, la Reco ou une filmographie,
+  // ces vues gardent leur grille (la filmographie se redessine)
+  // (vérifié aussi au moment du rendu : la transition animée peut le différer
+  // après un changement de vue)
+  const vueCollection = () => state.view === 'a_voir' || state.view === 'vu';
+  if (vueCollection()) viewTransition(() => { if (vueCollection()) renderGrid(); });
+  else if (state.view === 'person') renderPersonGrid();
   updateFilterBadge();
 }
 
@@ -495,6 +502,7 @@ function setView(view) {
   }
   document.getElementById('discover-header').style.display = isDiscover ? '' : 'none';
   document.getElementById('reco-header').style.display = isReco ? '' : 'none';
+  document.getElementById('person-header').style.display = 'none';
 
   // Trigger view-specific render
   if (isCollection) {
@@ -674,6 +682,202 @@ function renderTmdbGrid(items) {
     grid.appendChild(buildTmdbCard(item));
   }
   fillCardMeta();
+}
+
+// ============================================================
+// FILMOGRAPHIE (vue « personne »)
+// ============================================================
+// Un clic sur un nom (fiche, tops des stats) ouvre la filmographie de la
+// personne dans la grille : onglets réalisation / interprétation, « vu X sur
+// Y » sur ce qui est sorti, projets à venir en tête. Films, séries,
+// documentaires et courts-métrages compris ; les émissions (talk-shows,
+// infos, téléréalité) et apparitions télé « dans son propre rôle » non.
+// Les films de la collection gardent leur carte (note, « à voir »).
+let personSeq = 0;
+let personReturn = null; // vue (et page) d'où l'on vient, pour « retour »
+const personIdCache = new Map(); // 'real|Nom' -> id TMDB
+
+// Retrouver la personne TMDB d'un nom : par les crédits du film d'où l'on
+// vient, puis d'autres films de la collection où le nom figure (pas de
+// confusion entre homonymes), en dernier recours par une recherche par nom.
+async function resolvePersonId(name, role, ctxFilmId) {
+  const cle = role + '|' + name;
+  if (personIdCache.has(cle)) return personIdCache.get(cle);
+  const cible = normSearch(name);
+  const memeNom = p => [p.name, p.original_name, bestPersonName(p)].some(n => n && normSearch(n) === cible);
+  const films = ctxFilmId ? [ctxFilmId] : [];
+  for (const f of state.films) {
+    if (films.length >= 4) break;
+    const present = role === 'real'
+      ? (f.director || '').split(',').map(s => s.trim()).includes(name)
+      : (f.cast || []).includes(name);
+    if (present && f.tmdb_id && !films.includes(f.id)) films.push(f.id);
+  }
+  let id = null;
+  for (const fid of films) {
+    const type = fid.startsWith('tv-') ? 'tv' : 'movie';
+    const d = await tmdbJson(`${TMDB_BASE}/${type}/${fid.slice(type.length + 1)}?api_key=${encodeURIComponent(admin.tmdbKey)}&append_to_response=credits`);
+    if (!d) continue;
+    const gens = role === 'real'
+      ? (type === 'tv' ? (d.created_by || []) : (d.credits?.crew || []).filter(c => c.job === 'Director'))
+      : (d.credits?.cast || []);
+    // Nom latinisé par le site (réal coréen, japonais…) : un seul réal, c'est lui
+    const p = gens.find(memeNom) || (role === 'real' && gens.length === 1 ? gens[0] : null);
+    if (p) { id = p.id; break; }
+  }
+  if (!id) {
+    const s = await tmdbJson(`${TMDB_BASE}/search/person?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&query=${encodeURIComponent(name)}`);
+    id = s?.results?.[0]?.id || null;
+  }
+  if (id) personIdCache.set(cle, id);
+  return id;
+}
+
+function personCredits(d) {
+  const cc = d.combined_credits || {};
+  const BRUIT_TV = [10763, 10764, 10767]; // infos, téléréalité, talk-shows
+  const autoPortrait = /^(self|himself|herself|themselves|lui-même|elle-même)\b/i;
+  const sansDoublon = list => {
+    const vus = new Map();
+    for (const it of list) {
+      const item = { ...it, media_type: it.media_type || 'movie' };
+      const k = item.media_type + '-' + item.id;
+      if (!vus.has(k)) vus.set(k, item);
+    }
+    return [...vus.values()];
+  };
+  return {
+    real: sansDoublon((cc.crew || []).filter(c => c.job === 'Director' || c.job === 'Creator')),
+    jeu: sansDoublon((cc.cast || []).filter(c => !((c.media_type === 'tv') &&
+      ((c.genre_ids || []).some(g => BRUIT_TV.includes(g)) || autoPortrait.test(c.character || ''))))),
+  };
+}
+
+// Sortis (du plus récent au plus ancien) / à venir (date future ou inconnue)
+function personSplit(items) {
+  const today = new Date().toISOString().slice(0, 10);
+  const date = it => it.release_date || it.first_air_date || '';
+  const sortis = items.filter(it => date(it) && date(it) <= today).sort((a, b) => date(b).localeCompare(date(a)));
+  const aVenir = items.filter(it => !date(it) || date(it) > today)
+    .sort((a, b) => (date(a) || '9999').localeCompare(date(b) || '9999'));
+  return { sortis, aVenir };
+}
+const personStatut = it => state.films.find(f => f.id === it.media_type + '-' + it.id)?.user?.statut || null;
+
+async function openPerson(name, role, ctxFilmId) {
+  const seq = ++personSeq;
+  if (state.view !== 'person') {
+    personReturn = {
+      page: document.getElementById('stats-page').classList.contains('active') ? 'stats' : 'collection',
+      view: state.view,
+      scroll: window.scrollY,
+    };
+  }
+  closeModal();
+  showPage('collection');
+  state.view = 'person';
+  state.person = { nom: name, tab: role === 'real' ? 'real' : 'jeu', data: null, real: [], jeu: [] };
+  document.querySelectorAll('#status-tabs .tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('collection-controls').style.display = 'none';
+  document.getElementById('filter-panel').classList.remove('open');
+  document.getElementById('discover-header').style.display = 'none';
+  document.getElementById('reco-header').style.display = 'none';
+  document.getElementById('load-more-wrap').style.display = 'none';
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('person-header').style.display = '';
+  document.getElementById('person-id').innerHTML = `
+    <div><h2 class="person-name">${escapeHtml(name)}</h2>
+    <div class="person-meta">chargement de la filmographie…</div></div>`;
+  document.getElementById('person-tabs').innerHTML = '';
+  document.getElementById('person-progress').innerHTML = '';
+  if (posterObserver) posterObserver.disconnect();
+  document.getElementById('grid').innerHTML = '';
+  document.getElementById('result-count').textContent = '…';
+
+  const id = await resolvePersonId(name, role, ctxFilmId);
+  const d = id && await tmdbJson(`${TMDB_BASE}/person/${id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=combined_credits`);
+  // Un autre nom a pu être cliqué, ou une autre vue choisie, pendant les requêtes
+  if (seq !== personSeq || state.view !== 'person') return;
+  if (!d) {
+    document.querySelector('#person-id .person-meta').textContent = 'filmographie introuvable (tmdb ne répond pas, réessaie plus tard)';
+    document.getElementById('result-count').textContent = '0';
+    return;
+  }
+  Object.assign(state.person, { data: d }, personCredits(d));
+  if (!state.person[state.person.tab].length) state.person.tab = state.person.tab === 'real' ? 'jeu' : 'real';
+  renderPersonHeader();
+  renderPersonGrid();
+}
+
+function renderPersonHeader() {
+  const P = state.person, d = P.data;
+  const photo = safeUrl(tmdbImgUrl(d.profile_path, 'w185'));
+  const infos = [];
+  const ne = d.gender === 1 ? 'née en ' : d.gender === 2 ? 'né en ' : '';
+  if (d.birthday) infos.push(ne + d.birthday.slice(0, 4));
+  const pays = countryFr(placeToCountry(d.place_of_birth));
+  if (pays) infos.push(escapeHtml(pays));
+  if (d.deathday) infos.push((d.gender === 1 ? 'morte en ' : 'mort en ') + d.deathday.slice(0, 4));
+  const tmdb = `https://www.themoviedb.org/person/${encodeURIComponent(d.id)}`;
+  document.getElementById('person-id').innerHTML = `
+    <div class="person-photo" ${photo ? `style="background-image:url(${photo})"` : ''}></div>
+    <div>
+      <h2 class="person-name">${escapeHtml(P.nom)}</h2>
+      <div class="person-meta">${infos.join(' · ')}${infos.length ? ' · ' : ''}<a href="${tmdb}" target="_blank" rel="noopener">tmdb ↗</a></div>
+    </div>`;
+  const onglets = [['real', 'réalisation'], ['jeu', 'interprétation']].filter(([k]) => P[k].length);
+  const tabsEl = document.getElementById('person-tabs');
+  tabsEl.innerHTML = onglets.map(([k, lib]) =>
+    `<button class="explorer-cat${k === P.tab ? ' active' : ''}" data-tab="${k}" aria-pressed="${k === P.tab}">${lib} · ${P[k].length}</button>`).join('');
+  tabsEl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    P.tab = b.dataset.tab;
+    renderPersonHeader();
+    renderPersonGrid();
+  }));
+  const { sortis, aVenir } = personSplit(P[P.tab]);
+  const vus = sortis.filter(it => personStatut(it) === 'vu').length;
+  const aVoir = P[P.tab].filter(it => personStatut(it) === 'a_voir').length;
+  const extra = [aVoir ? `${aVoir} à voir` : '', aVenir.length ? `${aVenir.length} à venir` : ''].filter(Boolean).join(' · ');
+  document.getElementById('person-progress').innerHTML = sortis.length ? `
+    <div class="person-progress-bar"><span style="width:${(vus * 100 / sortis.length).toFixed(1)}%"></span></div>
+    <div class="person-progress-text">vu ${vus} sur ${sortis.length}${extra ? ' · ' + extra : ''}</div>` : '';
+}
+
+function renderPersonGrid() {
+  const P = state.person;
+  if (state.view !== 'person' || !P || !P.data) return;
+  const grid = document.getElementById('grid');
+  if (posterObserver) posterObserver.disconnect();
+  grid.innerHTML = '';
+  const items = P[P.tab];
+  document.getElementById('result-count').textContent = items.length;
+  document.getElementById('empty').style.display = items.length ? 'none' : '';
+  const titre = t => { const el = document.createElement('div'); el.className = 'person-grid-title'; el.textContent = t; return el; };
+  // Film de la collection : sa propre carte (note, « à voir ») ; sinon carte TMDB
+  const carte = it => { const f = state.films.find(x => x.id === it.media_type + '-' + it.id); return f ? buildCard(f) : buildTmdbCard(it); };
+  const { sortis, aVenir } = personSplit(items);
+  if (aVenir.length) { grid.appendChild(titre(`à venir · ${aVenir.length}`)); aVenir.forEach(it => grid.appendChild(carte(it))); }
+  if (sortis.length) { grid.appendChild(titre(`sortis · ${sortis.length}`)); sortis.forEach(it => grid.appendChild(carte(it))); }
+  fillCardMeta();
+}
+
+// « ← retour » : la vue d'avant, à la même place (sans perdre tri ni filtres)
+function closePerson() {
+  const r = personReturn || { page: 'collection', view: 'a_voir', scroll: 0 };
+  personReturn = null;
+  personSeq++;
+  state.person = null;
+  document.getElementById('person-header').style.display = 'none';
+  if (r.view === 'a_voir' || r.view === 'vu') {
+    state.view = r.view;
+    document.querySelectorAll('#status-tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.view === r.view));
+    document.getElementById('collection-controls').style.display = '';
+    applyFilters({ preservePage: true });
+  } else {
+    setView(r.view);
+  }
+  if (r.page === 'stats') showPage('stats');
+  else setTimeout(() => window.scrollTo(0, r.scroll || 0), 120);
 }
 
 // ---- Réalisateur des cartes (nom latinisé, à droite de l'année) ----
@@ -1516,7 +1720,7 @@ function openModal(f, opts) {
       <div class="modal-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(f.poster)})"` : ''}>${f.poster ? '' : "pas d'affiche"}</div>
       <div class="modal-head-meta">
         <h2 class="modal-title" id="modal-title">${escapeHtml(displayTitle(f.id, f.title) || 'sans titre')}</h2>
-        ${f.director ? `<div class="modal-director">par ${f.director.split(',').map(n => nameLink(n.trim())).filter(Boolean).join(', ')}</div>` : ''}
+        ${f.director ? `<div class="modal-director">par ${f.director.split(',').map(n => nameLink(n.trim(), 'real')).filter(Boolean).join(', ')}</div>` : ''}
         <div class="modal-meta-line">${metaParts.map(escapeHtml).join(' · ')}</div>
       </div>
     </div>
@@ -1525,6 +1729,7 @@ function openModal(f, opts) {
     ${genresHtml}
     ${synopsisHtml}
     ${castHtml}
+    <div class="watch-section" id="watch-section"></div>
     ${links.length ? `<div class="ext-links">${links.join('')}</div>` : ''}
     ${actionsHtml}
     ${editFormHtml}
@@ -1612,6 +1817,9 @@ function openModal(f, opts) {
   showModalBackdrop();
   document.body.style.overflow = 'hidden';
 
+  // Où le voir en France : rempli dès que TMDB répond
+  fillWatchProviders(f);
+
   // Lazy-fetch country if missing (existing films from initial migration didn't have it)
   if (!f.country && f.tmdb_id && f.type) {
     enrichFilmCountry(f);
@@ -1675,6 +1883,9 @@ async function addTmdbFilmToCollection(film, statut, userData) {
     // recherche ou catégorie filtrée), le film ajouté y passe « dans ma collec »
     if (state.view === 'discover') {
       renderTmdbGrid(state.lastTmdbItems || []);
+    } else if (state.view === 'person') {
+      renderPersonHeader();
+      renderPersonGrid();
     } else if (state.view === 'reco' && state.recoDisplayed) {
       // Réassigner (pas juste filtrer à la volée) : sinon le film ajouté
       // réapparaît au prochain re-render de la liste
@@ -1717,6 +1928,62 @@ function closeModal() {
   const back = modalReturnFocus;
   modalReturnFocus = null;
   if (back && document.contains(back)) back.focus({ preventScroll: true });
+}
+
+// ---- Où le voir (fiche) ----
+// Offres en France du film ouvert : TMDB /watch/providers, données JustWatch
+// (mention obligatoire). Abonnement, gratuit, location ou achat ; les
+// variantes d'une même plateforme (« Netflix Standard with Ads », « HBO Max
+// Amazon Channel ») sont fondues dans la plateforme principale. Les logos
+// mènent à la page TMDB qui liste les liens vers chaque plateforme.
+// Gardé en mémoire le temps de la visite.
+const watchCache = new Map(); // 'movie-603' -> offres FR ({} si aucune)
+async function fillWatchProviders(f) {
+  if (!f.tmdb_id) return;
+  if (!watchCache.has(f.id)) {
+    const path = f.type === 'tv' ? 'tv' : 'movie';
+    const d = await tmdbJson(`${TMDB_BASE}/${path}/${f.tmdb_id}/watch/providers?api_key=${encodeURIComponent(admin.tmdbKey)}`);
+    if (!d) return; // TMDB injoignable : la rubrique reste masquée
+    watchCache.set(f.id, d.results?.FR || {});
+  }
+  // La fiche a pu changer (ou se fermer) pendant la requête
+  const el = document.getElementById('watch-section');
+  if (!el || openModalCtx?.id !== f.id) return;
+  el.innerHTML = watchProvidersHtml(watchCache.get(f.id));
+}
+function watchProvidersHtml(fr) {
+  const fondre = list => {
+    const gardes = [];
+    for (const p of [...list].sort((a, b) => a.provider_name.length - b.provider_name.length)) {
+      const n = p.provider_name.toLowerCase();
+      if (p.logo_path && !gardes.some(g => n.startsWith(g.provider_name.toLowerCase()))) gardes.push(p);
+    }
+    return gardes.sort((a, b) => (a.display_priority ?? 999) - (b.display_priority ?? 999));
+  };
+  const lignes = [
+    ['abonnement', fr.flatrate || []],
+    ['gratuit', [...(fr.free || []), ...(fr.ads || [])]],
+    ['location · achat', [...(fr.rent || []), ...(fr.buy || [])]],
+  ].map(([titre, l]) => [titre, fondre(l)]).filter(([, l]) => l.length);
+  const lien = safeUrl(fr.link);
+  const logo = p => {
+    const nom = escapeHtml(p.provider_name);
+    const img = `<img src="${safeUrl(tmdbImgUrl(p.logo_path, 'w92'))}" alt="${nom}" loading="lazy">`;
+    return lien
+      ? `<a class="watch-logo" href="${lien}" target="_blank" rel="noopener" title="${nom}">${img}</a>`
+      : `<span class="watch-logo" title="${nom}">${img}</span>`;
+  };
+  const corps = lignes.length
+    ? lignes.map(([titre, l]) => `
+        <div class="watch-row">
+          <div class="watch-kind">${titre}</div>
+          <div class="watch-logos">${l.map(logo).join('')}</div>
+        </div>`).join('')
+    : '<div class="watch-none">aucune offre de streaming en France pour l\'instant</div>';
+  return `
+    <div class="modal-section-label">où le voir en France</div>
+    ${corps}
+    <div class="watch-source">offres : JustWatch${lien ? ` · <a href="${lien}" target="_blank" rel="noopener">voir le détail ↗</a>` : ''}</div>`;
 }
 
 // ============================================================
@@ -1850,6 +2117,7 @@ function renderStats() {
     </div>
   `;
 
+  renderYearReview();
   renderMonthsChart();
   renderYearChart();
   renderRatingDist();
@@ -1863,6 +2131,140 @@ function renderStats() {
   renderGenderBalance();
   renderYearBest();
   wireStatsClicks();
+}
+
+// ---- Bilan de l'année ----
+// Une année de visionnage au choix (les films « avant 2022 » n'ont pas
+// d'année) : chiffres clés comparés à l'année d'avant, temps forts, top 5.
+// Tout vient de films.json, sans appel TMDB. Les chiffres et temps forts
+// cliquables mènent aux vus filtrés (goToVusWithFilters), les films à leur fiche.
+let yearReviewYear = null;
+function renderYearReview() {
+  const yearsEl = document.getElementById('year-review-years');
+  const root = document.getElementById('year-review');
+  if (!yearsEl || !root) return;
+  const vus = state.films.filter(f => f.user?.statut === 'vu');
+  const anneeVue = f => /^\d{4}/.test(f.user.date_vue || '') ? f.user.date_vue.slice(0, 4) : null;
+  const annees = [...new Set(vus.map(anneeVue).filter(Boolean))].sort().reverse();
+  if (!annees.length) {
+    yearsEl.innerHTML = '';
+    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic;">pas encore de film vu daté.</div>';
+    return;
+  }
+  if (!annees.includes(yearReviewYear)) yearReviewYear = annees[0];
+  const Y = yearReviewYear;
+  yearsEl.innerHTML = annees.map(y =>
+    `<button class="explorer-cat${y === Y ? ' active' : ''}" data-year="${y}" aria-pressed="${y === Y}">${y}</button>`).join('');
+  yearsEl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    yearReviewYear = b.dataset.year;
+    renderYearReview();
+  }));
+
+  const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  const reals = f => (f.director || '').split(',').map(s => s.trim()).filter(Boolean);
+  const genresReal = f => (f.director_genders && f.director_genders.length) ? f.director_genders : [f.director_gender];
+  const de = y => vus.filter(f => anneeVue(f) === y);
+  const fs = de(Y);
+  const prevY = String(+Y - 1);
+  const prev = annees.includes(prevY) ? de(prevY) : null;
+  const pct = (k, n) => n ? Math.round(k * 100 / n) : 0;
+  const mesures = list => {
+    const notes = list.filter(f => f.user.rating);
+    return {
+      films: list.length,
+      heures: Math.round(list.reduce((s, f) => s + (f.runtime || 0), 0) / 60),
+      note: notes.length ? notes.reduce((s, f) => s + ratingOutOf10(f.user.rating), 0) / notes.length : null,
+      coeurs: list.filter(f => f.user.favorite).length,
+      cine: pct(list.filter(f => f.user.lieu === 'Cinéma').length, list.length),
+      femmes: pct(list.filter(f => genresReal(f).includes(1)).length, list.length),
+    };
+  };
+  const enCours = Y === String(new Date().getFullYear());
+  // Année en cours : les nombres (films, heures, coups de cœur) se comparent à
+  // l'année d'avant à la même date (mois connus seulement) ; les taux et la
+  // note moyenne, à l'année d'avant entière
+  const moisCourant = new Date().getMonth() + 1;
+  const prevMemeDate = prev && enCours
+    ? prev.filter(f => /^\d{4}-\d{2}$/.test(f.user.date_vue) && +f.user.date_vue.slice(5, 7) <= moisCourant)
+    : prev;
+  const m = mesures(fs), p = prev && mesures(prev), pDate = prev && mesures(prevMemeDate);
+  // Écart avec l'année d'avant, sous chaque chiffre
+  const evo = (cle, unite, decimales = 0, nombre = false) => {
+    const base = nombre ? pDate : p;
+    if (!base || m[cle] == null || base[cle] == null) return '';
+    const d = +(m[cle] - base[cle]).toFixed(decimales);
+    const txt = d > 0 ? '▲ +' + d.toLocaleString('fr-FR') : d < 0 ? '▼ ' + d.toLocaleString('fr-FR') : '= ';
+    return `<span class="stat-card-detail">${txt}${d ? unite : ''} vs ${prevY}${nombre && enCours ? ' à cette date' : ''}</span>`;
+  };
+  const go = filtres => `data-go="${escapeHtml(JSON.stringify(filtres))}"`;
+  const carte = (label, valeur, detail, filtres, cls = '') => filtres
+    ? `<button class="stat-card stat-card-clickable ${cls}" ${go(filtres)} title="voir ces films">
+         <span class="stat-card-label">${label}</span><span class="stat-card-value">${valeur}</span>${detail}</button>`
+    : `<div class="stat-card ${cls}"><div class="stat-card-label">${label}</div><div class="stat-card-value">${valeur}</div>${detail}</div>`;
+  const cartes = [
+    carte('films vus', m.films, evo('films', '', 0, true), { yearvu: Y }),
+    carte('heures', m.heures + 'h', evo('heures', 'h', 0, true), null, 'accent'),
+    carte('note moyenne', m.note == null ? '<span style="font-size:0.5em; color: var(--ink-mute)">aucune note</span>' : m.note.toFixed(1).replace('.', ',') + '<span style="font-size:0.5em; color: var(--ink-mute)">/10</span>', evo('note', '', 1), null),
+    carte('coups de cœur', m.coeurs, evo('coeurs', '', 0, true), m.coeurs ? { yearvu: Y, ratings: [RATING_FAV] } : null, 'hot'),
+    carte('au cinéma', m.cine + ' %', evo('cine', ' pts'), { yearvu: Y, lieu: 'Cinéma' }),
+    carte('réalisés par une femme', m.femmes + ' %', evo('femmes', ' pts'), null),
+  ].join('');
+
+  // Temps forts
+  const compte = valeurs => { const c = new Map(); valeurs.forEach(v => v && c.set(v, (c.get(v) || 0) + 1)); return [...c].sort((a, b) => b[1] - a[1]); };
+  const fait = (label, valeur, filtres, detail = '') => filtres
+    ? `<button class="yr-fact" ${go(filtres)}><span class="yr-fact-label">${label}</span><span class="yr-fact-value">${valeur}</span>${detail ? `<span class="yr-fact-detail">${detail}</span>` : ''}</button>`
+    : `<div class="yr-fact"><div class="yr-fact-label">${label}</div><div class="yr-fact-value">${valeur}</div>${detail ? `<div class="yr-fact-detail">${detail}</div>` : ''}</div>`;
+  const filmFait = (label, f, valeur) =>
+    `<button class="yr-fact" data-film-id="${escapeHtml(f.id)}"><span class="yr-fact-label">${label}</span><span class="yr-fact-value">${escapeHtml(displayTitle(f.id, f.title))}</span><span class="yr-fact-detail">${valeur}</span></button>`;
+  const faits = [];
+  const mois = compte(fs.map(f => /^\d{4}-\d{2}$/.test(f.user.date_vue) ? f.user.date_vue.slice(5, 7) : null));
+  if (mois.length) faits.push(fait('mois le plus chargé', `${MOIS[+mois[0][0] - 1]} · ${mois[0][1]} films`, { yearvu: Y, mois: mois[0][0] }));
+  const nouveaux = fs.filter(f => String(f.year) === Y).length;
+  faits.push(fait(`sortis en ${Y}`, `${nouveaux} films`, null, `${fs.length - nouveaux} plus anciens (rattrapages)`));
+  const avant = new Set(vus.filter(f => (f.user.date_vue || '').startsWith('before-') || (anneeVue(f) && anneeVue(f) < Y)).flatMap(reals));
+  const decouverts = new Map();
+  for (const f of fs) reals(f).forEach((n, i) => { if (!avant.has(n) && !decouverts.has(n)) decouverts.set(n, genresReal(f)[i]); });
+  const decouvertes = [...decouverts.values()].filter(g => g === 1).length;
+  faits.push(fait('réal découvert·es', `${decouverts.size}`, null, `vu·es pour la première fois, dont ${decouvertes} réalisatrice${decouvertes > 1 ? 's' : ''}`));
+  const genre = compte(fs.flatMap(f => f.genres || []))[0];
+  if (genre) faits.push(fait('genre le plus vu', `${escapeHtml(genre[0])} · ${genre[1]} films`, { yearvu: Y, genre: genre[0] }));
+  const pays = compte(fs.flatMap(f => [...new Set((f.country || '').split(' · ').map(c => countryFr(c.trim())).filter(Boolean))]))[0];
+  if (pays) faits.push(fait('pays le plus vu', `${escapeHtml(pays[0])} · ${pays[1]} films`, { yearvu: Y, country: pays[0] }));
+  const acteurs = compte(fs.flatMap(f => f.cast || [])).filter(([, n]) => n >= 2);
+  if (acteurs.length) {
+    const ex = acteurs.filter(([, n]) => n === acteurs[0][1]).slice(0, 2).map(([nom]) => nom);
+    faits.push(fait('le plus vu à l\'écran', escapeHtml(ex.join(', ')), ex.length === 1 ? { yearvu: Y, search: ex[0] } : null, `${acteurs[0][1]} films`));
+  }
+  const LIEUX = [['Cinéma', 'cinéma'], ['Stremio', 'Stremio'], ['Disque dur', 'disque dur'], ['Autre', 'autre']];
+  const lieux = LIEUX.map(([v, nom]) => [nom, fs.filter(f => f.user.lieu === v).length]).filter(([, n]) => n);
+  if (lieux.length) faits.push(fait('où', lieux.map(([nom, n]) => `${nom} ${n}`).join(' · ')));
+  const ancien = fs.filter(f => f.year).sort((a, b) => a.year - b.year)[0];
+  if (ancien) faits.push(filmFait('le plus ancien', ancien, `sorti en ${ancien.year}`));
+  const long = fs.filter(f => f.runtime).sort((a, b) => b.runtime - a.runtime)[0];
+  if (long) faits.push(filmFait('le plus long', long, `${Math.floor(long.runtime / 60)} h ${String(long.runtime % 60).padStart(2, '0')}`));
+
+  // Top 5 : note, puis moyenne TMDB pour départager
+  const top = fs.filter(f => f.user.rating).sort((a, b) => (b.user.rating - a.user.rating) || ((b.tmdb_rating || 0) - (a.tmdb_rating || 0))).slice(0, 5);
+  const topHtml = top.map(f => `
+    <div class="year-best-film" data-film-id="${escapeHtml(f.id)}" role="button" tabindex="0">
+      <div class="year-best-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(tmdbResize(f.poster, 'w185'))})"` : ''}></div>
+      <div class="year-best-title">${escapeHtml(displayTitle(f.id, f.title))}</div>
+      <div class="year-best-meta">${f.user.favorite ? '❤' : '★'.repeat(f.user.rating)}${f.director ? ' · ' + escapeHtml(f.director) : ''}</div>
+    </div>`).join('');
+
+  root.innerHTML = `
+    ${enCours ? `<div class="year-review-note">année en cours, jusqu'à ${MOIS[new Date().getMonth()]}</div>` : ''}
+    <div class="stats-numbers year-review-numbers">${cartes}</div>
+    <div class="year-review-facts">${faits.join('')}</div>
+    ${top.length ? `<div class="modal-section-label">top ${top.length} de ${Y}</div><div class="year-review-top">${topHtml}</div>` : ''}`;
+  root.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', () => goToVusWithFilters(JSON.parse(el.dataset.go))));
+  root.querySelectorAll('[data-film-id]').forEach(el => {
+    el.addEventListener('click', () => openModalFromCard(el.dataset.filmId));
+    if (el.getAttribute('role') === 'button') el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModalFromCard(el.dataset.filmId); }
+    });
+  });
 }
 
 function renderMonthsChart() {
@@ -2279,7 +2681,7 @@ function renderDirectorChart() {
     }
     root.innerHTML = sorted.map(([d, c]) => `
       <div class="bar-row">
-        <div class="bar-label">${nameLink(d)}</div>
+        <div class="bar-label">${nameLink(d, 'real')}</div>
         <div class="bar-track"><div class="bar-fill" style="width:${(c / max * 100).toFixed(1)}%"></div></div>
         <div class="bar-value">${c}</div>
       </div>`).join('');
@@ -2703,6 +3105,7 @@ function goToVusWithFilters(partial) {
   document.getElementById('collection-controls').style.display = '';
   document.getElementById('discover-header').style.display = 'none';
   document.getElementById('reco-header').style.display = 'none';
+  document.getElementById('person-header').style.display = 'none';
 
   // Refléter l'état dans l'UI des filtres + ouvrir le panneau pour montrer ce qui est appliqué
   document.getElementById('search').value = state.filters.search || '';
@@ -2750,12 +3153,14 @@ function bestPersonName(person) {
   return name;
 }
 
-/** Return a TMDB search link for a person name, or plain text if non-Latin. */
-function nameLink(name) {
+/** Nom cliquable : ouvre la filmographie de la personne dans le site
+ *  (openPerson, par un écouteur global sur .name-link). Le lien vers la
+ *  recherche TMDB reste en repli (clic du milieu, nouvel onglet).
+ *  role : 'real' (réalisation) ou 'jeu' (interprétation). */
+function nameLink(name, role = 'jeu') {
   if (!name) return '';
-  if (hasNonLatin(name)) return escapeHtml(name); // non-Latin: display as-is, no link
   const url = 'https://www.themoviedb.org/search/person?query=' + encodeURIComponent(name);
-  return `<a href="${url}" target="_blank" rel="noopener" class="name-link">${escapeHtml(name)}</a>`;
+  return `<a href="${url}" target="_blank" rel="noopener" class="name-link" data-person="${escapeHtml(name)}" data-role="${role}">${escapeHtml(name)}</a>`;
 }
 
 function escapeHtml(s) {
@@ -4235,6 +4640,17 @@ function wireEvents() {
   document.querySelectorAll('#status-tabs .tab[data-view]').forEach(t => {
     t.addEventListener('click', () => setView(t.dataset.view));
   });
+
+  // Noms cliquables (fiche, tops des stats) : filmographie dans le site.
+  // Clic du milieu ou avec Ctrl/Cmd : le lien TMDB s'ouvre comme avant.
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a.name-link[data-person]');
+    if (!a || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    const ficheOuverte = document.getElementById('modal-backdrop').classList.contains('open');
+    openPerson(a.dataset.person, a.dataset.role, ficheOuverte ? openModalCtx.id : null);
+  });
+  document.getElementById('person-back').addEventListener('click', closePerson);
 
   // Discover category pills
   document.querySelectorAll('#discover-categories .explorer-cat').forEach(pill => {

@@ -827,6 +827,29 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   border-radius: var(--radius);
   border: 1px solid var(--rule);
 }
+/* Où le voir en France (offres JustWatch via TMDB), rempli après l'ouverture */
+.watch-section { margin-bottom: 24px; }
+.watch-section:empty { display: none; }
+.watch-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.watch-kind {
+  flex: 0 0 120px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-mute);
+}
+.watch-logos { display: flex; flex-wrap: wrap; gap: 6px; }
+.watch-logo { display: block; border-radius: 6px; overflow: hidden; border: 1px solid var(--rule); transition: border-color 0.15s; }
+a.watch-logo:hover { border-color: var(--warm); }
+.watch-logo img { display: block; width: 34px; height: 34px; }
+.watch-none { font-size: 13px; color: var(--ink-soft); margin-bottom: 10px; }
+.watch-source { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute); }
+.watch-source a { color: var(--ink-soft); }
+@media (max-width: 600px) {
+  .watch-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .watch-kind { flex-basis: auto; }
+}
 .ext-links { display: flex; gap: 12px; flex-wrap: wrap; }
 .ext-link {
   font-family: 'JetBrains Mono', monospace;
@@ -903,6 +926,62 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
 }
 .stat-card.accent .stat-card-value { color: var(--warm); }
 .stat-card.hot .stat-card-value { color: var(--hot); }
+
+/* Filmographie (vue « personne ») */
+.person-header {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 16px; background: var(--bg-elev);
+  border: 1px solid var(--rule); border-radius: var(--radius);
+}
+.person-back {
+  align-self: flex-start; background: transparent; cursor: pointer;
+  border: 1px solid var(--rule); border-radius: var(--radius); color: var(--ink-soft);
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+  padding: 6px 12px; transition: all 0.15s;
+}
+.person-back:hover { color: var(--ink); border-color: var(--ink-soft); }
+.person-id { display: flex; gap: 16px; align-items: center; }
+.person-photo {
+  width: 72px; height: 108px; flex-shrink: 0; border-radius: var(--radius);
+  background-color: var(--bg); background-size: cover; background-position: center;
+}
+.person-name {
+  margin: 0; font-family: 'Bricolage Grotesque', 'Inter Tight', sans-serif;
+  font-variation-settings: 'opsz' 24, 'wght' 600; font-size: 26px; line-height: 1.1; color: var(--ink);
+}
+.person-meta { margin-top: 6px; font-size: 13px; color: var(--ink-soft); }
+.person-meta a { color: var(--ink-soft); }
+.person-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.person-tabs:empty, .person-progress:empty { display: none; }
+.person-progress { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.person-progress-bar { flex: 1 1 160px; max-width: 320px; height: 8px; background: var(--bg); border-radius: var(--radius); overflow: hidden; }
+.person-progress-bar span { display: block; height: 100%; background: var(--warm); }
+.person-progress-text { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-soft); }
+.person-grid-title {
+  grid-column: 1 / -1; padding-top: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft);
+}
+
+/* Bilan de l'année : sélecteur d'année, chiffres clés, temps forts, top 5 */
+.year-review-years { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 18px; }
+.year-review-note { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-mute); margin-bottom: 12px; }
+.year-review-numbers { margin-bottom: 16px; }
+.year-review-numbers .stat-card { background: var(--bg); }
+.year-review-numbers .stat-card-value { font-size: clamp(26px, 4vw, 34px); }
+.year-review-numbers button.stat-card { font: inherit; color: inherit; cursor: pointer; }
+.year-review-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-bottom: 20px; }
+.yr-fact {
+  display: flex; flex-direction: column; gap: 3px;
+  text-align: left; font: inherit; color: var(--ink);
+  background: var(--bg); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 10px 12px;
+}
+button.yr-fact { cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-strong); }
+.yr-fact-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-mute); }
+.yr-fact-value { font-size: 14px; }
+.yr-fact-detail { font-size: 12px; color: var(--ink-soft); }
+.year-review-top { display: flex; flex-wrap: wrap; gap: 4px; }
 
 /* Year-in-progress sub-stat inside each main stat card */
 .stat-card-year {
