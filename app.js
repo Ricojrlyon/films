@@ -2256,7 +2256,8 @@ function renderGenreChart() {
 function renderDirectorChart() {
   const mCounts = new Map(), fCounts = new Map();
   for (const f of state.films) {
-    if (!f.director) continue;
+    // Films vus seulement, comme les autres stats (et comme le clic sur la barre)
+    if (f.user?.statut !== 'vu' || !f.director) continue;
     // Compter CHAQUE réalisateur avec son propre genre (co-réalisations).
     // director_genders est parallèle à director.split(', ') ; à défaut (données
     // anciennes non encore complétées), on retombe sur le genre unique.
@@ -2354,6 +2355,8 @@ function renderGenreRatingChart() {
 function renderActorChart() {
   const mCounts = new Map(), fCounts = new Map();
   for (const f of state.films) {
+    // Films vus seulement, comme les autres stats (et comme le clic sur la barre)
+    if (f.user?.statut !== 'vu') continue;
     const cast = f.cast || [];
     const genders = f.cast_genders || [];
     cast.forEach((name, i) => {
