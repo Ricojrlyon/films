@@ -21,6 +21,8 @@ Application personnelle de suivi de films (et séries), hébergée sur GitHub Pa
 | `app.js` | Code de l'application (tout le JavaScript), chargé à la fin de la page |
 | `films.json` | Base de données : un tableau de films et leurs métadonnées |
 | `apercu.png` | Image d'aperçu affichée quand on partage le lien (1200 × 630) |
+| `manifest.webmanifest` | Description de l'application installable : nom, couleurs, page de départ, icônes (voir « Application sur téléphone ») |
+| `icone-192.png`, `icone-512.png`, `icone-maskable-512.png`, `apple-touch-icon.png` | Icônes de l'application : « \*F » dans la police du logo (Bungee), astérisque doré et F crème sur fond sombre (Android, forme adaptable d'Android avec la lettre plus petite pour rester entière en rond, iPhone) |
 | `README.md` | Ce document |
 
 Flux de données :
@@ -123,6 +125,15 @@ Le mode édition n'est actif que sur `*.github.io` (détection automatique du re
 
 - Description et aperçu Open Graph (titre, texte, `apercu.png`) : un lien partagé s'affiche avec une carte. L'adresse de l'image est absolue (`https://ricojrlyon.github.io/films/apercu.png`) : à adapter si le site change d'adresse.
 - Le site demande aux moteurs de recherche de **ne pas l'indexer** (`<meta name="robots" content="noindex, nofollow">`). Le dépôt public sur github.com reste, lui, visible sur GitHub.
+
+## Application sur téléphone
+
+Le site s'installe sur l'écran d'accueil comme une application, sans store : `manifest.webmanifest` (nom « \*films », plein écran, fond `#161f25`, page de départ `./`) et les icônes, déclarés dans l'en-tête d'`index.html` avec l'icône iPhone (`apple-touch-icon`). Le contenu reste celui du site en ligne : chaque mise à jour poussée arrive dans l'application.
+
+- **iPhone** : Safari → Partager → « Sur l'écran d'accueil ». L'application a sa propre mémoire, séparée de Safari : le mode édition (token GitHub + code) est à réactiver une fois, et les mémoires du site (Reco, dates françaises) se reconstruisent.
+- **Android, Chrome** : menu ⋮ → « Installer l'application ». Vraie installation (liste des applis), mémoire partagée avec Chrome.
+- **Android, Brave** (comme Firefox ou Edge) : en général un raccourci sur l'écran d'accueil plutôt qu'une installation complète, l'installation passant par un service réservé à Chrome ; mémoire partagée avec Brave. Une installation complète dans Brave pourrait demander un mode hors connexion (non fait).
+- Pas de mode hors connexion pour l'instant : sans réseau, l'application ne s'ouvre pas.
 
 ## Affichage
 
