@@ -22,7 +22,7 @@ Application personnelle de suivi de films (et séries), hébergée sur GitHub Pa
 | `films.json` | Base de données : un tableau de films et leurs métadonnées |
 | `apercu.png` | Image d'aperçu affichée quand on partage le lien (1200 × 630) |
 | `manifest.webmanifest` | Description de l'application installable : nom, couleurs, page de départ, icônes (voir « Application sur téléphone ») |
-| `icone-192.png`, `icone-512.png`, `icone-maskable-512.png`, `apple-touch-icon.png` | Icônes de l'application : « \*F » dans la police du logo (Bungee), astérisque doré et F crème sur fond sombre (Android, forme adaptable d'Android avec la lettre plus petite pour rester entière en rond, iPhone) |
+| `icone-192.png`, `icone-512.png`, `apple-touch-icon.png` | Icônes de l'application (Android, iPhone) : « \*F », même famille que l'icône « \*N » de nocturne (voir « Application sur téléphone ») |
 | `README.md` | Ce document |
 
 Flux de données :
@@ -134,6 +134,15 @@ Le site s'installe sur l'écran d'accueil comme une application, sans store : `m
 - **Android, Chrome** : menu ⋮ → « Installer l'application ». Vraie installation (liste des applis), mémoire partagée avec Chrome.
 - **Android, Brave** (comme Firefox ou Edge) : en général un raccourci sur l'écran d'accueil plutôt qu'une installation complète, l'installation passant par un service réservé à Chrome ; mémoire partagée avec Brave. Une installation complète dans Brave pourrait demander un mode hors connexion (non fait).
 - Pas de mode hors connexion pour l'instant : sans réseau, l'application ne s'ouvre pas.
+
+**L'icône « \*F »** suit les règles de l'icône « \*N » de nocturne (ricojrlyon/nocturne-lyon), pour que les deux applications aient l'air de la même famille sur un téléphone :
+
+- PNG carré, opaque, sans coins arrondis (le téléphone les arrondit lui-même) : 512 et 192 px pour Android, 180 px pour l'iPhone (`apple-touch-icon.png`).
+- Fond `#161f25`, F crème `#e7dfbe`, astérisque ocre `#d4a574`, police Bungee (graisse normale, licence libre OFL). « \* » puis la lettre, collés, sans espace ; l'astérisque garde sa place naturelle, son haut aligné sur le haut de la lettre.
+- Même taille de lettre que le N : police à 46,4 % du côté (237,6 px à 512, 89,1 px à 192, 83,5 px à 180). C'est la taille où le rectangle « \*N » (largeur du texte × hauteur des capitales) a une diagonale de 76 % du côté. « \*F », plus étroit, garde cette taille ; son rectangle (317,4 × 171 px à 512) est centré, ligne de base arrondie au pixel du dessous.
+- Le dessin tient dans le disque de 80 % du côté qu'Android ne rogne jamais : `icone-512.png` sert donc aussi de forme adaptable (« maskable ») dans le manifeste, comme chez nocturne.
+- Dessinées comme celles de nocturne : texte SVG affiché par un navigateur de la famille Chrome sans fenêtre (Edge). La même méthode refait le « \*N » de nocturne au pixel près.
+- Un téléphone garde l'icône du jour de l'installation : pour voir une nouvelle icône, retirer l'application de l'écran d'accueil puis l'ajouter de nouveau (Chrome sur Android peut la remplacer seul, en quelques jours).
 
 ## Affichage
 
