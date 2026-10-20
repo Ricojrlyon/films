@@ -1664,6 +1664,7 @@ async function addTmdbFilmToCollection(film, statut, userData) {
   };
   // Disable buttons during save
   document.querySelectorAll('.tmdb-action, #tmdb-add-save, #tmdb-add-cancel').forEach(b => b.disabled = true);
+  await fillDirectorCountries(film);
   try {
     state.films.unshift(film);
     sessionChanges.added.add(film.id);
@@ -2475,6 +2476,21 @@ async function fetchPersonCountry(personId) {
   } catch { return ''; }
 }
 
+// Pays de naissance des réalisateur·rices d'un film qu'on ajoute ou re-matche,
+// alignés sur director.split(', ') comme dans l'enrichissement de masse : le
+// film est complet tout de suite, et le bouton « enrichir » des stats ne
+// revient plus après chaque ajout. Si un appel TMDB échoue, le champ reste
+// absent : le bouton « enrichir » le rattrapera.
+async function fillDirectorCountries(film) {
+  const ids = film._director_ids;
+  delete film._director_ids;
+  if (film.type !== 'movie' || !ids || !ids.length || film.director_countries) return;
+  const people = await Promise.all(ids.map(id =>
+    tmdbJson(`${TMDB_BASE}/person/${id}?api_key=${encodeURIComponent(admin.tmdbKey)}`)));
+  if (people.some(p => !p)) return;
+  film.director_countries = people.map(p => placeToCountry(p.place_of_birth));
+}
+
 async function enrichGender() {
   if (!admin.active || !admin.tmdbKey) return;
   const btn = document.getElementById('gender-enrich-btn');
@@ -3281,6 +3297,7 @@ function buildFilmFromTmdb(detail, type, csvTitle = null) {
   let director = null;
   let directorGender = 0; // 0=unknown, 1=female, 2=male (TMDB convention)
   let directorGenders = []; // parallèle à director.split(', ') — co-réalisations
+  let directorIds = [];     // idem, pour aller chercher les pays de naissance (fillDirectorCountries)
   let cast = [];
   let castGenders = [];
   if (detail.credits) {
@@ -3291,17 +3308,19 @@ function buildFilmFromTmdb(detail, type, csvTitle = null) {
     } else {
       people = detail.created_by || [];
     }
-    const names = [], genders = [], seen = new Set();
+    const names = [], genders = [], ids = [], seen = new Set();
     for (const p of people) {
       const nm = bestPersonName(p);
       if (!nm || seen.has(nm)) continue;
       seen.add(nm);
       names.push(nm);
       genders.push(p.gender || 0);
+      ids.push(p.id);
     }
     if (names.length) {
       director = names.join(', ');
       directorGenders = genders;
+      directorIds = ids;
       directorGender = genders[0] || 0; // singulier conservé (reco, parité)
     }
     const rawCast = (detail.credits.cast || []).slice(0, 5);
@@ -3334,6 +3353,7 @@ function buildFilmFromTmdb(detail, type, csvTitle = null) {
     director: director,
     director_gender: directorGender,
     director_genders: directorGenders,
+    _director_ids: directorIds, // transitoire (préfixe _ : jamais enregistré)
     cast: cast,
     cast_genders: castGenders,
     runtime: type === 'movie' ? (detail.runtime || null) : (Array.isArray(detail.episode_run_time) && detail.episode_run_time[0]) || null,
@@ -4178,6 +4198,7 @@ async function confirmRematch(result) {
   try {
     const detail = await tmdbDetails(result.id, result.media_type);
     const newFilm = buildFilmFromTmdb(detail, result.media_type, oldFilm.source?.csv_title);
+    await fillDirectorCountries(newFilm);
     newFilm.user = oldFilm.user; // keep user data intact
     newFilm.source = { ...oldFilm.source, rematched_at: new Date().toISOString() };
     state.films[idx] = newFilm;
