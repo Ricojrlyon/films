@@ -453,12 +453,14 @@ function buildCard(f) {
   meta.innerHTML = `
     <p class="card-title">${escapeHtml(displayTitle(f.id, f.title) || 'sans titre')}</p>
     <div class="card-meta-line">
-      <span class="card-year">${f.year || '?'}${f.type === 'tv' ? ' · série' : ''}</span>
+      <span class="card-year">${escapeHtml(cardDateLabel(f.id, f.release_date, f.year) || '?')}${f.type === 'tv' ? ' · série' : ''}</span>
       <span class="card-director"></span>
     </div>`;
   card.appendChild(meta);
   // réalisateur : nom latinisé (résolu à la demande si l'un d'eux ne l'est pas)
+  // date : sortie française, résolue à la demande (fillCardMeta)
   card.dataset.filmId = f.id;
+  card.dataset.release = f.release_date || '';
   if (f.tmdb_id) card.dataset.tmdbId = f.tmdb_id;
   card.dataset.mediaType = f.type || 'movie';
   const pd = provisionalDirector(f.id);
@@ -769,16 +771,57 @@ async function resolveTitle(id, tmdbId, mediaType, raw) {
   return t || raw || '';
 }
 
+// ---- Date de sortie des cartes : mois/année de sortie en France ----
+// TMDB /release_dates, pays FR : sortie en salles (type 3, sinon 2), à défaut
+// sortie en ligne (type 4). En attendant la réponse, ou sans date française,
+// la date principale de TMDB (souvent la première sortie mondiale). Une date
+// française plus de 2 ans après la date principale est une ressortie : ignorée.
+// Seules les dates passées sont gardées sur l'appareil ; une sortie à venir ou
+// introuvable est revérifiée au chargement suivant (elle peut bouger).
+// Séries : TMDB n'a pas de date par pays, on garde la première diffusion.
+const releaseFrCache = new Map(); // id -> 'AAAA-MM-JJ'
+try {
+  const c = JSON.parse(localStorage.getItem('films_card_release_fr') || 'null');
+  if (c) for (const k in c) releaseFrCache.set(k, c[k]);
+} catch {}
+function persistReleaseFr() {
+  const today = new Date().toISOString().slice(0, 10);
+  const past = [...releaseFrCache].filter(([, d]) => d <= today);
+  try { localStorage.setItem('films_card_release_fr', JSON.stringify(Object.fromEntries(past))); } catch {}
+}
+function monthYear(date) {
+  const m = /^(\d{4})-(\d{2})/.exec(date || '');
+  return m ? m[2] + '/' + m[1] : '';
+}
+// Texte de date d'une carte : sortie française, sinon date principale, sinon année
+function cardDateLabel(id, date, year) {
+  return monthYear(releaseFrCache.get(id)) || monthYear(date) || (year ? String(year) : '');
+}
+const releaseFrPending = new Map(); // id -> promesse : une seule requête par film et par visite
+function resolveReleaseFr(id, tmdbId, primary) {
+  if (!releaseFrPending.has(id)) releaseFrPending.set(id, (async () => {
+    const d = await tmdbJson(`${TMDB_BASE}/movie/${tmdbId}/release_dates?api_key=${encodeURIComponent(admin.tmdbKey)}`);
+    const dates = (d?.results || []).find(r => r.iso_3166_1 === 'FR')?.release_dates || [];
+    const first = type => dates.filter(x => x.type === type).map(x => (x.release_date || '').slice(0, 10)).sort()[0];
+    let date = first(3) || first(2) || first(4) || '';
+    if (date && primary && parseInt(date, 10) - parseInt(primary, 10) > 2) date = '';
+    if (date) releaseFrCache.set(id, date);
+    return date;
+  })());
+  return releaseFrPending.get(id);
+}
+
 async function fillCardMeta() {
   const needsTitle = c => {
     const el = c.querySelector('.card-title');
     return el && hasNonLatin(el.textContent || '');
   };
   const needsDir = c => c.querySelector('.card-director') && !directorResolved(c.dataset.filmId);
+  const needsDate = c => c.dataset.mediaType === 'movie' && !releaseFrCache.has(c.dataset.filmId);
   const cards = [...document.querySelectorAll('#grid .card')].filter(c =>
-    c.dataset.tmdbId && (needsDir(c) || needsTitle(c)));
+    c.dataset.tmdbId && (needsDir(c) || needsTitle(c) || needsDate(c)));
   if (!cards.length) return;
-  let idx = 0, changed = false;
+  let idx = 0, changed = false, datesChanged = false;
   async function worker() {
     while (idx < cards.length) {
       const c = cards[idx++];
@@ -793,10 +836,16 @@ async function fillCardMeta() {
         if (span) span.textContent = dir;
         changed = true;
       }
+      if (needsDate(c) && await resolveReleaseFr(c.dataset.filmId, c.dataset.tmdbId, c.dataset.release)) {
+        const el = c.querySelector('.card-year');
+        if (el) el.textContent = cardDateLabel(c.dataset.filmId, c.dataset.release, '');
+        datesChanged = true;
+      }
     }
   }
   await Promise.all(Array.from({ length: 6 }, () => worker()));
   if (changed) persistDirectors();
+  if (datesChanged) persistReleaseFr();
 }
 
 function buildTmdbCard(item) {
@@ -808,7 +857,7 @@ function buildTmdbCard(item) {
   if (inCollection) card.classList.add('in-collection');
 
   const posterUrl = item.poster_path ? tmdbImgUrl(item.poster_path, 'w342') : null;
-  const year = (item.release_date || item.first_air_date || '').slice(0, 4) || '';
+  const release = item.release_date || item.first_air_date || '';
   const title = item.title || item.name || '';
 
   const poster = document.createElement('div');
@@ -838,12 +887,14 @@ function buildTmdbCard(item) {
   meta.innerHTML = `
     <p class="card-title">${escapeHtml(displayTitle(id, title))}</p>
     <div class="card-meta-line">
-      <span class="card-year">${year}${item.media_type === 'tv' ? ' · série' : ''}</span>
+      <span class="card-year">${escapeHtml(cardDateLabel(id, release, ''))}${item.media_type === 'tv' ? ' · série' : ''}</span>
       <span class="card-director"></span>
     </div>`;
   card.appendChild(meta);
   // réalisateur : rempli tout de suite si connu (collection/cache), sinon lazy
+  // date : sortie française, résolue à la demande (fillCardMeta)
   card.dataset.filmId = id;
+  card.dataset.release = release;
   card.dataset.tmdbId = item.id;
   card.dataset.mediaType = item.media_type || 'movie';
   const kd = provisionalDirector(id);
@@ -1402,8 +1453,8 @@ function openModal(f, opts) {
     if (admin.active) {
       actionsHtml = `
         <div class="tmdb-actions" id="tmdb-actions">
-          <button class="tmdb-action" data-action="show_vu_form">+ ajouter comme déjà vu</button>
-          <button class="tmdb-action ghost" data-action="add_avoir">+ ajouter à voir</button>
+          <button class="tmdb-action" data-action="show_vu_form">déjà vu</button>
+          <button class="tmdb-action" data-action="add_avoir">à voir</button>
         </div>
         <div class="tmdb-add-form-section" id="tmdb-add-form-section" style="display: none;">
           <div class="edit-section-title">ajouter aux vus</div>
@@ -1490,8 +1541,10 @@ function openModal(f, opts) {
           // Toggle form visibility
           document.getElementById('tmdb-actions').style.display = 'none';
           document.getElementById('tmdb-add-form-section').style.display = '';
-          // Default: current year, no month
-          document.getElementById('tmdb-add-year').value = String(new Date().getFullYear());
+          // Par défaut : mois et année en cours (à corriger pour un rattrapage)
+          const [y, m] = currentYearMonth();
+          document.getElementById('tmdb-add-year').value = y;
+          document.getElementById('tmdb-add-month').value = m;
         }
       });
     });
@@ -1617,9 +1670,10 @@ async function addTmdbFilmToCollection(film, statut, userData) {
     await saveFilmsToGithub('add: ' + film.title + ' (' + statut + ')');
     initFilters();
     refreshStats();
-    // If currently in discover/reco view, refresh
+    // Découvrir : réafficher la liste en cours telle quelle (résultats de
+    // recherche ou catégorie filtrée), le film ajouté y passe « dans ma collec »
     if (state.view === 'discover') {
-      fetchAndRenderDiscover(state.discoverCategory);
+      renderTmdbGrid(state.lastTmdbItems || []);
     } else if (state.view === 'reco' && state.recoDisplayed) {
       // Réassigner (pas juste filtrer à la volée) : sinon le film ajouté
       // réapparaît au prochain re-render de la liste
@@ -3877,6 +3931,12 @@ function renderEditForm(film) {
   `;
 }
 
+// Mois et année en cours, au format des champs « date vue » : ['2026', '10']
+function currentYearMonth() {
+  const d = new Date();
+  return [String(d.getFullYear()), String(d.getMonth() + 1).padStart(2, '0')];
+}
+
 // Case « vu avant 2022 » : quand cochée, neutralise année + mois (leur valeur
 // est ignorée au save, remplacée par le bucket before-2022)
 function wireBeforeToggle(chk, yearEl, monthEl) {
@@ -3918,6 +3978,12 @@ function wireEditForm(film) {
       b.classList.add('active');
       const newStatut = b.dataset.value;
       document.querySelectorAll('.edit-form .edit-vu-field').forEach(el => el.style.display = newStatut === 'vu' ? '' : 'none');
+      // Film « à voir » passé en « vu » sans date connue : mois et année en
+      // cours par défaut (à corriger pour un rattrapage)
+      if (newStatut === 'vu' && film.user?.statut !== 'vu' && yearSel
+          && !yearSel.value && !monthSel.value && !(beforeChk && beforeChk.checked)) {
+        [yearSel.value, monthSel.value] = currentYearMonth();
+      }
     });
   });
 

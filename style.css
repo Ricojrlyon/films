@@ -1628,12 +1628,6 @@ body:not(.admin-mode) #origin-enrich-wrap { display: none !important; }
 }
 .tmdb-action:hover:not(:disabled) { background: var(--ink); }
 .tmdb-action:disabled { opacity: 0.5; cursor: not-allowed; }
-.tmdb-action.ghost {
-  background: transparent;
-  color: var(--ink-soft);
-  border: 1px solid var(--rule-strong);
-}
-.tmdb-action.ghost:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-soft); }
 .tmdb-add-form-section {
   margin-top: 24px;
   padding-top: 24px;
