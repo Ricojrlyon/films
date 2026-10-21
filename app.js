@@ -1719,7 +1719,7 @@ function openModal(f, opts) {
           </div>
         </div>`;
     } else {
-      actionsHtml = `<div style="margin-top: 24px; padding: 16px; background: var(--bg-elev); border-radius: var(--radius); text-align: center; font-size: 13px; color: var(--ink-mute); font-style: italic;">active le mode édition (🔒) pour ajouter ce film à ta collection.</div>`;
+      actionsHtml = `<div style="margin-top: 24px; padding: 16px; background: var(--bg-elev); border-radius: var(--radius); text-align: center; font-size: 13px; color: var(--ink-mute); font-style: italic;">active le mode édition (${cadenasSvg(false, true)}) pour ajouter ce film à ta collection.</div>`;
     }
   }
 
@@ -2820,7 +2820,7 @@ function renderGenderBalance() {
   }
 
   if (withDirGender === 0 && withCastGender === 0) {
-    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic; font-size: 13px;">active le mode édition (🔒) puis clique "↻ enrichir les données de genre" ci-dessous.</div>';
+    root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic; font-size: 13px;">active le mode édition (' + cadenasSvg(false, true) + ') puis clique "↻ enrichir les données de genre" ci-dessous.</div>';
     return;
   }
 
@@ -4118,6 +4118,15 @@ function showToast(msg, type = '') {
 
 // ----------------- ADMIN SETUP --------------------
 
+// Cadenas du mode édition, d'une seule couleur : celle du texte (currentColor),
+// donc vert une fois déverrouillé. Fermé ou ouvert ; « texte » : dans une phrase.
+function cadenasSvg(ouvert, texte) {
+  const anse = ouvert ? 'M8 11V7.5a4 4 0 0 1 8 0' : 'M8 11V7.5a4 4 0 0 1 8 0V11';
+  return `<svg class="cadenas${texte ? ' cadenas-texte' : ''}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">`
+    + `<path d="${anse}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>`
+    + '<rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/></svg>';
+}
+
 function showAdminView(name) {
   document.querySelectorAll('.admin-view').forEach(v => v.style.display = 'none');
   document.getElementById('admin-view-' + name).style.display = '';
@@ -4209,7 +4218,7 @@ async function setupAdmin() {
     admin.active = true;
     document.body.classList.add('admin-mode');
     document.getElementById('nav-admin').classList.add('active');
-    document.getElementById('nav-admin').textContent = '🔓';
+    document.getElementById('nav-admin').innerHTML = cadenasSvg(true);
     okBox.textContent = '✓ admin actif — ton code est mémorisé. tu peux fermer cette fenêtre.';
     okBox.style.display = '';
     setTimeout(closeAdminSetup, 1600);
@@ -4252,7 +4261,7 @@ async function unlockAdmin() {
     admin.active = true;
     document.body.classList.add('admin-mode');
     document.getElementById('nav-admin').classList.add('active');
-    document.getElementById('nav-admin').textContent = '🔓';
+    document.getElementById('nav-admin').innerHTML = cadenasSvg(true);
     okBox.textContent = '✓ admin actif';
     okBox.style.display = '';
     setTimeout(closeAdminSetup, 800);
@@ -4278,7 +4287,7 @@ function lockAdmin() {
   admin.filmsSHA = null;
   document.body.classList.remove('admin-mode');
   document.getElementById('nav-admin').classList.remove('active');
-  document.getElementById('nav-admin').textContent = '🔒';
+  document.getElementById('nav-admin').innerHTML = cadenasSvg(false);
   closeAdminSetup();
   showToast('verrouillé');
 }
@@ -4291,7 +4300,7 @@ function disableAdmin() {
   admin.filmsSHA = null;
   document.body.classList.remove('admin-mode');
   document.getElementById('nav-admin').classList.remove('active');
-  document.getElementById('nav-admin').textContent = '🔒';
+  document.getElementById('nav-admin').innerHTML = cadenasSvg(false);
   closeAdminSetup();
   showToast('admin réinitialisé');
 }
@@ -4552,6 +4561,30 @@ async function deleteFilm(film) {
   }
 }
 
+// ----------------- MENTIONS LÉGALES --------------------
+// Fenêtre ouverte par le lien du pied de page ; la sélection clavier y entre
+// et revient au lien à la fermeture.
+let legalReturnFocus = null;
+function openLegal() {
+  const bd = document.getElementById('legal-backdrop');
+  if (bd.classList.contains('open')) return;
+  legalReturnFocus = document.activeElement;
+  bd.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('legal-close').focus({ preventScroll: true });
+  navLater('open');
+}
+function closeLegal() {
+  const bd = document.getElementById('legal-backdrop');
+  if (!bd.classList.contains('open')) return;
+  bd.classList.remove('open');
+  document.body.style.overflow = '';
+  const back = legalReturnFocus;
+  legalReturnFocus = null;
+  if (back && document.contains(back)) back.focus({ preventScroll: true });
+  navLater('close');
+}
+
 // ----------------- REMATCH MODAL --------------------
 function openRematchModal(film) {
   admin.pendingRematchFilmId = film.id;
@@ -4803,6 +4836,7 @@ function wireEvents() {
   // s'ouvre au-dessus de la fiche film : ne pas tout fermer d'un coup)
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    if (document.getElementById('legal-backdrop').classList.contains('open')) { closeLegal(); return; }
     if (document.getElementById('rematch-backdrop').classList.contains('open')) { closeRematchModal(); return; }
     if (document.getElementById('admin-setup-backdrop').classList.contains('open')) { closeAdminSetup(); return; }
     closeModal();
@@ -4829,6 +4863,12 @@ function wireEvents() {
   document.getElementById('nav-collection').addEventListener('click', () => { showPage('collection'); navLater('close'); });
   document.getElementById('nav-stats').addEventListener('click', () => { showPage('stats'); navLater('open'); });
   document.getElementById('brand').addEventListener('click', () => { showPage('collection'); navLater('close'); });
+  document.getElementById('footer-haut').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  document.getElementById('footer-legal').addEventListener('click', openLegal);
+  document.getElementById('legal-close').addEventListener('click', closeLegal);
+  document.getElementById('legal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'legal-backdrop') closeLegal();
+  });
 
   // ========== ADMIN WIRING ==========
 
@@ -4888,9 +4928,9 @@ function showPage(name) {
 // ============================================================
 // BOUTON PRÉCÉDENT (navigateur, téléphone)
 // ============================================================
-// Chaque fiche, filmographie, page stats, fenêtre (mode édition, re-match)
-// ou onglet (à voir, vus, découvrir, reco) ouvert ajoute une étape à
-// l'historique du navigateur : « précédent » referme le dernier ouvert et
+// Chaque fiche, filmographie, page stats, fenêtre (mode édition, re-match,
+// mentions légales) ou onglet (à voir, vus, recherche, reco) ouvert ajoute
+// une étape à l'historique du navigateur : « précédent » referme le dernier ouvert et
 // rend l'écran d'avant, à la même position.
 // Fermer autrement (croix, Échap, « ← retour », enregistrement) recule
 // l'historique jusqu'à l'étape qui montre le même écran, pour qu'il suive.
@@ -4939,7 +4979,8 @@ function navCurrent() {
     view: P ? (personReturn?.view || 'a_voir') : state.view,
     person: P ? { nom: P.nom, role: P.role || 'jeu', ctx: P.ctx || null, tab: P.tab } : null,
     fiche: open('modal-backdrop') ? openModalCtx.id : null,
-    dialog: open('rematch-backdrop') ? 'rematch' : open('admin-setup-backdrop') ? 'admin' : null,
+    dialog: open('legal-backdrop') ? 'legal' : open('rematch-backdrop') ? 'rematch'
+      : open('admin-setup-backdrop') ? 'admin' : null,
     filtres: navFiltres(), // gardés mais ne font pas une étape à eux seuls
   };
 }
@@ -5004,6 +5045,7 @@ function navReplace() {
 // « Précédent » (ou « suivant ») : remettre l'écran de l'étape atteinte
 function navApply(t) {
   const c = navCurrent();
+  if (c.dialog === 'legal' && t.dialog !== 'legal') closeLegal();
   if (c.dialog === 'rematch' && t.dialog !== 'rematch') closeRematchModal();
   if (c.dialog === 'admin' && t.dialog !== 'admin') closeAdminSetup();
   const autrePersonne = !navSamePerson(c.person, t.person);
@@ -5027,6 +5069,7 @@ function navApply(t) {
     else openTmdbItem({ id: Number(t.fiche.slice(i + 1)), media_type: t.fiche.slice(0, i) });
   }
   if (t.dialog === 'admin' && c.dialog !== 'admin') openAdminSetup();
+  if (t.dialog === 'legal' && c.dialog !== 'legal') openLegal();
   if (t.dialog === 'rematch' && c.dialog !== 'rematch' && admin.active) {
     const f = state.films.find(x => x.id === t.fiche);
     if (f) openRematchModal(f);
@@ -5076,5 +5119,5 @@ ensureNowPlayingFR().then(() => {
   else if (state.view === 'reco' && state.recoDisplayed) renderTmdbGrid(state.recoDisplayed);
 });
 
-// Admin no longer auto-activates: user enters their code each session via the 🔒 button.
-// If localStorage has an encrypted PAT, the 🔒 click will show the "unlock with code" view.
+// Admin no longer auto-activates: user enters their code each session via the lock button.
+// If localStorage has an encrypted PAT, the lock click will show the "unlock with code" view.

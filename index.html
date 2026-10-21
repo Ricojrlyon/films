@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <!-- Politique de sécurité : la page ne peut contacter que les services dont elle a
-     besoin (TMDB, GitHub, Google Fonts), et seul app.js peut exécuter du code.
+     besoin (TMDB, GitHub), et seul app.js peut exécuter du code. Les polices
+     sont sur le site (fonts/), rien n'est demandé à Google.
      Filet de sécurité si une faille apparaissait un jour : un code injecté ne
      pourrait ni s'exécuter ni envoyer de données ailleurs. À compléter si le site
      doit un jour charger une autre ressource externe (sinon elle sera bloquée). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://image.tmdb.org; connect-src 'self' https://api.themoviedb.org https://api.github.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://image.tmdb.org; connect-src 'self' https://api.themoviedb.org https://api.github.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#161f25">
 <!-- Site sombre : listes déroulantes, barres de défilement et champs natifs du navigateur en version sombre -->
@@ -35,12 +36,18 @@
 <meta property="og:locale" content="fr_FR">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-16 -16 32 32'><g fill='%23d4a574'><rect x='-2' y='-13' width='4' height='26' rx='2'/><rect x='-2' y='-13' width='4' height='26' rx='2' transform='rotate(60)'/><rect x='-2' y='-13' width='4' height='26' rx='2' transform='rotate(120)'/></g></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Polices hébergées sur le site (fonts/polices.css, comme nocturne-lyon) et non
+     plus chez Google Fonts, qui recevait l'adresse IP de chaque visiteur. Les quatre
+     de l'écran d'accueil (alphabet latin de base) sont demandées dès l'ouverture,
+     sans attendre la lecture de polices.css. -->
+<link rel="preload" href="fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bungee-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-tight-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link href="fonts/polices.css" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div class="app">
@@ -53,7 +60,7 @@
     <div class="nav">
       <button class="nav-btn active" data-page="collection" id="nav-collection">collection</button>
       <button class="nav-btn" data-page="stats" id="nav-stats">stats</button>
-      <button class="nav-btn admin-btn" id="nav-admin" title="mode édition">🔒</button>
+      <button class="nav-btn admin-btn" id="nav-admin" title="mode édition" aria-label="mode édition"><svg class="cadenas" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 11V7.5a4 4 0 0 1 8 0V11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/></svg></button>
     </div>
   </header>
 
@@ -63,7 +70,7 @@
       <div class="tabs" id="status-tabs">
         <button class="tab active" data-view="a_voir">à voir<span class="count" id="count-a_voir">0</span></button>
         <button class="tab" data-view="vu">vus<span class="count" id="count-vu">0</span></button>
-        <button class="tab tab-discover" data-view="discover">découvrir</button>
+        <button class="tab tab-discover" data-view="discover">recherche</button>
         <button class="tab tab-reco" data-view="reco">reco</button>
       </div>
       <div class="collection-controls" id="collection-controls">
@@ -316,10 +323,52 @@
     </div>
   </main>
 
+  <!-- Pied de page : signature, code source, mentions légales, retour en haut ;
+       logo et mention TMDB demandés par ses conditions d'utilisation -->
   <footer class="footer">
-    <span class="ast">*</span>films · mmxxvi
+    <div class="footer-ligne">
+      <span><span class="ast">*</span>films</span> ·
+      <a href="https://github.com/ricojrlyon/films" target="_blank" rel="noopener">code source ↗</a> ·
+      <button type="button" class="footer-btn" id="footer-legal">mentions légales</button> ·
+      <button type="button" class="footer-btn" id="footer-haut">↑ haut de page</button>
+    </div>
+    <div class="footer-ligne footer-tmdb">
+      <a href="https://www.themoviedb.org/" target="_blank" rel="noopener" class="footer-tmdb-logo"><img src="tmdb.svg" alt="TMDB" width="77" height="10"></a>
+      <span>ce site utilise l'api tmdb mais n'est ni approuvé ni certifié par tmdb</span>
+    </div>
   </footer>
 
+</div>
+
+<!-- ============== MENTIONS LÉGALES ============== -->
+<!-- Ouvertes par le lien du pied de page. Site personnel non professionnel :
+     la loi pour la confiance dans l'économie numérique permet à un particulier
+     de ne nommer que l'hébergeur. -->
+<div class="modal-backdrop admin-modal-backdrop" id="legal-backdrop">
+  <article class="modal admin-modal" role="dialog" aria-modal="true" aria-labelledby="legal-title">
+    <button class="modal-close" id="legal-close" aria-label="fermer">✕</button>
+    <div class="admin-modal-body legal-body">
+      <h2 class="admin-modal-title" id="legal-title">mentions légales</h2>
+
+      <h3>éditeur</h3>
+      <p>Site personnel, édité à titre non professionnel et non commercial. Comme la loi le permet à un particulier (loi pour la confiance dans l'économie numérique), l'éditeur n'est pas nommé ici&nbsp;: son identité est connue de l'hébergeur.</p>
+
+      <h3>hébergeur</h3>
+      <p>GitHub, Inc. (service GitHub Pages)<br>
+        88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis<br>
+        <a href="https://github.com" target="_blank" rel="noopener">github.com ↗</a></p>
+
+      <h3>données personnelles</h3>
+      <p>Le site ne collecte aucune donnée&nbsp;: pas de compte, pas de formulaire, pas de cookie, ni mesure d'audience ni publicité.</p>
+      <p>Pour aller plus vite, le navigateur garde sur l'appareil quelques mémoires techniques&nbsp;: noms des réalisateurs, titres, dates de sortie en France, films à l'affiche, recommandations du mois. Elles ne quittent pas l'appareil et s'effacent en supprimant les données du site dans le navigateur. Le mode édition, réservé au propriétaire du site, garde son accès à GitHub chiffré sur son seul appareil.</p>
+      <p>Pour afficher les fiches et les affiches, la page interroge TMDB. Comme pour tout site, l'hébergeur (GitHub) et TMDB reçoivent alors l'adresse IP du visiteur. Les polices sont sur le site&nbsp;: rien n'est demandé à Google.</p>
+
+      <h3>crédits</h3>
+      <p>Fiches et affiches&nbsp;: <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB ↗</a>. Ce site utilise l'API TMDB mais n'est ni approuvé ni certifié par TMDB. Les affiches restent la propriété de leurs ayants droit.</p>
+      <p>Offres de streaming («&nbsp;où le voir&nbsp;»)&nbsp;: JustWatch, via TMDB.</p>
+      <p>Polices&nbsp;: Bungee, Bricolage Grotesque, Inter Tight et JetBrains Mono, sous licence libre SIL Open Font License.</p>
+    </div>
+  </article>
 </div>
 
 <!-- ============== DETAIL MODAL ============== -->
@@ -439,6 +488,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>
