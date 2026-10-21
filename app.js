@@ -769,7 +769,8 @@ function personSplit(items) {
 }
 const personStatut = it => state.films.find(f => f.id === it.media_type + '-' + it.id)?.user?.statut || null;
 
-async function openPerson(name, role, ctxFilmId) {
+// tab : onglet à rouvrir (retour par l'historique)
+async function openPerson(name, role, ctxFilmId, tab) {
   const seq = ++personSeq;
   if (state.view !== 'person') {
     personReturn = {
@@ -781,7 +782,7 @@ async function openPerson(name, role, ctxFilmId) {
   closeModal();
   showPage('collection');
   state.view = 'person';
-  state.person = { nom: name, tab: role === 'real' ? 'real' : 'jeu', data: null, real: [], jeu: [] };
+  state.person = { nom: name, role, ctx: ctxFilmId || null, tab: tab || (role === 'real' ? 'real' : 'jeu'), data: null, real: [], jeu: [] };
   document.querySelectorAll('#status-tabs .tab').forEach(t => t.classList.remove('active'));
   document.getElementById('collection-controls').style.display = 'none';
   document.getElementById('filter-panel').classList.remove('open');
@@ -798,6 +799,7 @@ async function openPerson(name, role, ctxFilmId) {
   if (posterObserver) posterObserver.disconnect();
   document.getElementById('grid').innerHTML = '';
   document.getElementById('result-count').textContent = '…';
+  navLater('open');
 
   const id = await resolvePersonId(name, role, ctxFilmId);
   const d = id && await tmdbJson(`${TMDB_BASE}/person/${id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=combined_credits`);
@@ -838,6 +840,7 @@ function renderPersonHeader() {
     P.tab = b.dataset.tab;
     renderPersonHeader();
     renderPersonGrid();
+    navReplace(); // l'historique retient l'onglet choisi
   }));
   const { sortis, aVenir } = personSplit(P[P.tab]);
   const vus = sortis.filter(it => personStatut(it) === 'vu').length;
@@ -883,6 +886,7 @@ function closePerson() {
   }
   if (r.page === 'stats') showPage('stats');
   else setTimeout(() => window.scrollTo(0, r.scroll || 0), 120);
+  navLater('close');
 }
 
 // ---- Réalisateur des cartes (nom latinisé, à droite de l'année) ----
@@ -1129,8 +1133,10 @@ async function openTmdbItem(item) {
   const bg = document.getElementById('modal-bg');
   bg.style.backgroundImage = '';
   body.innerHTML = '<div style="padding: 60px 20px; text-align: center; color: var(--ink-mute); font-style: italic;">chargement des détails…</div>';
+  openModalCtx = { id, tmdbOnly: true }; // fiche en cours de chargement (historique)
   showModalBackdrop();
   document.body.style.overflow = 'hidden';
+  navLater('open');
   try {
     const detail = await tmdbDetails(item.id, item.media_type || 'movie');
     // L'utilisateur a pu fermer le modal pendant le chargement — ne pas le rouvrir
@@ -1821,6 +1827,7 @@ function openModal(f, opts) {
 
   showModalBackdrop();
   document.body.style.overflow = 'hidden';
+  navLater('open');
 
   // Où le voir en France : rempli dès que TMDB répond
   fillWatchProviders(f);
@@ -1933,6 +1940,7 @@ function closeModal() {
   const back = modalReturnFocus;
   modalReturnFocus = null;
   if (back && document.contains(back)) back.focus({ preventScroll: true });
+  navLater('close');
 }
 
 // ---- Où le voir (fiche) ----
@@ -3131,6 +3139,7 @@ function goToVusWithFilters(partial) {
 
   applyFilters();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  navLater('open'); // précédent : retour aux stats
 }
 
 // ============================================================
@@ -4125,6 +4134,7 @@ function openAdminSetup() {
     err.style.display = '';
     document.getElementById('admin-setup-backdrop').classList.add('open');
     document.body.style.overflow = 'hidden';
+    navLater('open');
     return;
   }
 
@@ -4146,11 +4156,13 @@ function openAdminSetup() {
 
   document.getElementById('admin-setup-backdrop').classList.add('open');
   document.body.style.overflow = 'hidden';
+  navLater('open');
 }
 
 function closeAdminSetup() {
   document.getElementById('admin-setup-backdrop').classList.remove('open');
   document.body.style.overflow = '';
+  navLater('close');
 }
 
 // First-time setup: PAT + new code → encrypt and save
@@ -4548,6 +4560,7 @@ function openRematchModal(film) {
   document.getElementById('rematch-results').innerHTML = '';
   document.getElementById('rematch-backdrop').classList.add('open');
   document.body.style.overflow = 'hidden';
+  navLater('open');
   setTimeout(() => {
     document.getElementById('rematch-input').focus();
     handleRematchSearch(film.title || '');
@@ -4558,6 +4571,7 @@ function closeRematchModal() {
   document.getElementById('rematch-backdrop').classList.remove('open');
   admin.pendingRematchFilmId = null;
   document.body.style.overflow = '';
+  navLater('close');
 }
 
 let rematchSearchTimer = null;
@@ -4642,8 +4656,9 @@ async function confirmRematch(result) {
 
 function wireEvents() {
   // All tabs use setView()
+  // (chaque onglet est une étape de l'historique : « précédent » y revient)
   document.querySelectorAll('#status-tabs .tab[data-view]').forEach(t => {
-    t.addEventListener('click', () => setView(t.dataset.view));
+    t.addEventListener('click', () => { setView(t.dataset.view); navLater('tab'); });
   });
 
   // Noms cliquables (fiche, tops des stats) : filmographie dans le site.
@@ -4770,6 +4785,7 @@ function wireEvents() {
     document.querySelectorAll('#rating-chips .rating-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('sort').value = TAB_SORT_DEFAULTS.a_voir;
     setView('a_voir');
+    navLater('tab');
   });
 
   // Load more
@@ -4809,9 +4825,10 @@ function wireEvents() {
   });
 
   // Navigation
-  document.getElementById('nav-collection').addEventListener('click', () => showPage('collection'));
-  document.getElementById('nav-stats').addEventListener('click', () => showPage('stats'));
-  document.getElementById('brand').addEventListener('click', () => showPage('collection'));
+  // (stats s'ouvre par-dessus la collection : y revenir referme les stats)
+  document.getElementById('nav-collection').addEventListener('click', () => { showPage('collection'); navLater('close'); });
+  document.getElementById('nav-stats').addEventListener('click', () => { showPage('stats'); navLater('open'); });
+  document.getElementById('brand').addEventListener('click', () => { showPage('collection'); navLater('close'); });
 
   // ========== ADMIN WIRING ==========
 
@@ -4864,7 +4881,182 @@ function showPage(name) {
     renderStats();
     statsDirty = false;
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Retour par « précédent » : navApply remet ensuite la position d'avant
+  if (!navApplying) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// BOUTON PRÉCÉDENT (navigateur, téléphone)
+// ============================================================
+// Chaque fiche, filmographie, page stats, fenêtre (mode édition, re-match)
+// ou onglet (à voir, vus, découvrir, reco) ouvert ajoute une étape à
+// l'historique du navigateur : « précédent » referme le dernier ouvert et
+// rend l'écran d'avant, à la même position.
+// Fermer autrement (croix, Échap, « ← retour », enregistrement) recule
+// l'historique jusqu'à l'étape qui montre le même écran, pour qu'il suive.
+// Chaque étape décrit son écran dans history.state.
+let navApplying = false;  // « précédent » en cours : ne rien enregistrer
+let navIntent = null;     // 'open' (nouvel écran), 'tab' (onglet) ou 'close' (écran d'avant)
+let navScheduled = false;
+let navPendingGo = false; // recul demandé par le site, en attente du navigateur
+let navY = 0;             // position dans la page avant le dernier changement
+let navAvantFiltres = null; // filtres de la collection avant le dernier changement
+const navStack = [];      // écran de chaque étape connue, par numéro
+
+// Filtres, tri et panneau des filtres de la collection : « précédent » les
+// rend tels qu'ils étaient (une stat cliquée filtre les vus, par exemple)
+function navFiltres() {
+  const f = state.filters;
+  return { ...f, ratings: [...f.ratings], sort: state.sort,
+    panneau: document.getElementById('filter-panel').classList.contains('open') };
+}
+const navCle = x => JSON.stringify(x && [x.status, x.search, x.genre, x.lieu, x.decade, x.yearvu,
+  x.mois, x.country, x.dirCountry, [...x.ratings].sort(), x.sort, x.panneau]);
+function navRendFiltres(x) {
+  const { sort, panneau, ratings, ...f } = x;
+  state.filters = { ...f, ratings: new Set(ratings) };
+  state.sort = sort;
+  document.getElementById('search').value = f.search || '';
+  document.getElementById('sort').value = sort;
+  [['filter-genre', 'genre'], ['filter-lieu', 'lieu'], ['filter-decade', 'decade'], ['filter-yearvu', 'yearvu'],
+    ['filter-mois', 'mois'], ['filter-country', 'country'], ['filter-realpays', 'dirCountry']]
+    .forEach(([id, k]) => { document.getElementById(id).value = f[k] || ''; });
+  document.querySelectorAll('#rating-chips .rating-chip').forEach(c =>
+    c.classList.toggle('active', state.filters.ratings.has(parseInt(c.dataset.rating, 10))));
+  document.getElementById('filter-panel').classList.toggle('open', !!panneau);
+  document.getElementById('filter-toggle').setAttribute('aria-expanded', panneau ? 'true' : 'false');
+  document.getElementById('filter-toggle-label').textContent = panneau ? '− filtres' : '+ filtres';
+  applyFilters();
+}
+
+function navCurrent() {
+  const open = id => document.getElementById(id).classList.contains('open');
+  const P = state.view === 'person' ? state.person : null;
+  return {
+    films: 1,
+    page: document.getElementById('stats-page').classList.contains('active') ? 'stats' : 'collection',
+    // onglet de la collection (sous une filmographie : celui où « ← retour » ramène)
+    view: P ? (personReturn?.view || 'a_voir') : state.view,
+    person: P ? { nom: P.nom, role: P.role || 'jeu', ctx: P.ctx || null, tab: P.tab } : null,
+    fiche: open('modal-backdrop') ? openModalCtx.id : null,
+    dialog: open('rematch-backdrop') ? 'rematch' : open('admin-setup-backdrop') ? 'admin' : null,
+    filtres: navFiltres(), // gardés mais ne font pas une étape à eux seuls
+  };
+}
+const navSamePerson = (a, b) => (!a && !b) || (!!a && !!b && a.nom === b.nom && a.role === b.role);
+const navSame = (a, b) => !!a && !!b && a.page === b.page && a.view === b.view
+  && a.fiche === b.fiche && a.dialog === b.dialog && navSamePerson(a.person, b.person);
+
+function navSet(s, push) {
+  try {
+    if (push) history.pushState(s, ''); else history.replaceState(s, '');
+    if (push) navStack.length = s.n; // les étapes « suivantes » sont effacées
+    navStack[s.n] = s;
+  } catch { /* Safari limite le nombre d'appels : l'historique ne suit plus, le site marche */ }
+}
+
+// Appelé après chaque ouverture ou fermeture ; regroupées en une étape
+// (ouvrir une filmographie ferme la fiche : c'est un nouvel écran)
+const NAV_RANG = { close: 0, tab: 1, open: 2 };
+function navLater(intent) {
+  if (navApplying) return;
+  if (!navIntent || NAV_RANG[intent] > NAV_RANG[navIntent]) navIntent = intent;
+  if (!navScheduled) { navScheduled = true; queueMicrotask(navFlush); }
+}
+
+function navFlush() {
+  navScheduled = false;
+  if (navPendingGo || !navIntent) return; // repris quand le navigateur aura reculé
+  const intent = navIntent;
+  navIntent = null;
+  const cur = navCurrent();
+  const st = history.state && history.state.films ? history.state : null;
+  if (!st) { navSet({ ...cur, n: 0, y: navY }, false); return; }
+  if (navSame(cur, st)) return;
+  const recule = n => {
+    navPendingGo = true;
+    history.go(n - st.n);
+    // Filet : si le navigateur ne répond pas, ne pas bloquer l'historique
+    setTimeout(() => { if (navPendingGo) { navPendingGo = false; if (navIntent) navFlush(); } }, 1500);
+  };
+  // Onglet : revenir à celui de l'étape d'avant recule d'une étape
+  // (à voir, vus, à voir : pas d'aller-retour empilés)
+  if (intent === 'tab' && navSame(navStack[st.n - 1], cur)) { recule(st.n - 1); return; }
+  if (intent !== 'close') {
+    // position et filtres de l'écran qu'on quitte
+    navSet({ ...st, y: navY, filtres: navAvantFiltres || st.filtres }, false);
+    navSet({ ...cur, n: st.n + 1 }, true);
+    return;
+  }
+  for (let n = st.n - 1; n >= 0 && navStack[n]; n--) {
+    if (navSame(navStack[n], cur)) { recule(n); return; }
+  }
+  navSet({ ...cur, n: st.n, y: st.y }, false);
+}
+
+// Même écran, détail changé (onglet de la filmographie)
+function navReplace() {
+  const st = history.state;
+  if (navApplying || navPendingGo || !st || !st.films) return;
+  navSet({ ...navCurrent(), n: st.n, y: st.y }, false);
+}
+
+// « Précédent » (ou « suivant ») : remettre l'écran de l'étape atteinte
+function navApply(t) {
+  const c = navCurrent();
+  if (c.dialog === 'rematch' && t.dialog !== 'rematch') closeRematchModal();
+  if (c.dialog === 'admin' && t.dialog !== 'admin') closeAdminSetup();
+  const autrePersonne = !navSamePerson(c.person, t.person);
+  const autreFiche = c.fiche !== t.fiche || autrePersonne;
+  if (c.fiche && autreFiche) closeModal();
+  if (autrePersonne && !t.person) closePerson();
+  // Onglet ; sous une filmographie à rouvrir, il est remis avant elle
+  // (c'est celui où « ← retour » ramènera)
+  const autreVue = !!t.view && t.view !== navCurrent().view;
+  if (autreVue && state.view !== 'person') setView(t.view);
+  if (t.filtres && state.view !== 'person' && (t.view === 'a_voir' || t.view === 'vu')
+    && navCle(t.filtres) !== navCle(navFiltres())) navRendFiltres(t.filtres);
+  if (autrePersonne && t.person) openPerson(t.person.nom, t.person.role, t.person.ctx, t.person.tab);
+  const page = document.getElementById('stats-page').classList.contains('active') ? 'stats' : 'collection';
+  if (page !== t.page) showPage(t.page);
+  if ((page !== t.page || autrePersonne || autreVue) && t.y != null) setTimeout(() => window.scrollTo(0, t.y), 130);
+  if (t.fiche && autreFiche) {
+    const f = state.films.find(x => x.id === t.fiche);
+    const i = t.fiche.indexOf('-');
+    if (f) openModal(f);
+    else openTmdbItem({ id: Number(t.fiche.slice(i + 1)), media_type: t.fiche.slice(0, i) });
+  }
+  if (t.dialog === 'admin' && c.dialog !== 'admin') openAdminSetup();
+  if (t.dialog === 'rematch' && c.dialog !== 'rematch' && admin.active) {
+    const f = state.films.find(x => x.id === t.fiche);
+    if (f) openRematchModal(f);
+  }
+}
+
+window.addEventListener('popstate', (e) => {
+  const t = e.state;
+  if (!t || !t.films) return;
+  navStack[t.n] = t;
+  if (navPendingGo) { // recul demandé par le site : l'écran est déjà le bon
+    navPendingGo = false;
+    if (navIntent) navFlush();
+    return;
+  }
+  navApplying = true;
+  try { navApply(t); } finally { navApplying = false; }
+});
+
+// Au chargement : rien d'ouvert. Après un rechargement, l'étape garde son
+// numéro (les étapes d'avant restent atteignables par « précédent »).
+function navInit() {
+  const st = history.state;
+  navSet({ ...navCurrent(), n: st && st.films ? st.n : 0, y: 0 }, false);
+  // Position et filtres notés aussi au clic ou à la touche, avant que l'écran ne change
+  const noterY = () => { navY = window.scrollY; };
+  const noter = () => { noterY(); navAvantFiltres = navFiltres(); };
+  window.addEventListener('scroll', noterY, { passive: true });
+  window.addEventListener('click', noter, true);
+  window.addEventListener('keydown', noter, true);
 }
 
 // ============================================================
@@ -4872,6 +5064,7 @@ function showPage(name) {
 // ============================================================
 loadAdminCreds();
 wireEvents();
+navInit();
 loadFilms();
 
 // Récupérer les films actuellement en salles (France) et repeindre les badges
