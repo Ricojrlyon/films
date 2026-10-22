@@ -889,18 +889,48 @@ function closePerson() {
   navLater('close');
 }
 
+// ---- Mémoires du navigateur venues de TMDB : 6 mois au plus ----
+// Les conditions de l'API TMDB (§1.C) interdisent de garder plus de 6 mois
+// une information obtenue de TMDB. Chaque entrée de ces mémoires garde sa
+// date (format { d: 1, e: { id: [valeur, date en ms] } }) ; à l'ouverture de
+// la page, celles de plus de 6 mois sont effacées, et relues à la demande.
+// L'ancien format, sans date, est effacé une fois : il se reconstruit au fil
+// de l'affichage.
+const TMDB_CACHE_MAX = 182 * 86400000; // 6 mois
+function tmdbMemory(key) {
+  const vals = new Map(), dates = new Map();
+  let purge = false;
+  try {
+    const c = JSON.parse(localStorage.getItem(key) || 'null');
+    if (c && c.d === 1 && c.e) {
+      const now = Date.now();
+      for (const k in c.e) {
+        const [v, t] = c.e[k];
+        if (now - t < TMDB_CACHE_MAX) { vals.set(k, v); dates.set(k, t); } else purge = true;
+      }
+    } else if (c) purge = true;
+  } catch {}
+  // keep : quelles entrées enregistrer (les dates de sortie : seulement les passées)
+  const save = (keep = () => true) => {
+    const now = Date.now(), e = {};
+    for (const [k, v] of vals) {
+      if (!keep(k, v)) continue;
+      if (!dates.has(k)) dates.set(k, now);
+      e[k] = [v, dates.get(k)];
+    }
+    try { localStorage.setItem(key, JSON.stringify({ d: 1, e })); } catch {}
+  };
+  if (purge) save();
+  return { vals, save };
+}
+
 // ---- Réalisateur des cartes (nom latinisé, à droite de l'année) ----
 // Les listes TMDB ne renvoient pas le réalisateur, et certains noms (stockés
 // ou TMDB) sont en écriture non latine. On résout à la demande via les crédits
 // + latinisation (fetchLatinNameById), et on met en cache le nom d'affichage.
-const directorCache = new Map(); // id -> nom d'affichage latinisé ('' = aucun)
-try {
-  const c = JSON.parse(localStorage.getItem('films_card_directors') || 'null');
-  if (c) for (const k in c) directorCache.set(k, c[k]);
-} catch {}
-function persistDirectors() {
-  try { localStorage.setItem('films_card_directors', JSON.stringify(Object.fromEntries(directorCache))); } catch {}
-}
+const directorMemory = tmdbMemory('films_card_directors');
+const directorCache = directorMemory.vals; // id -> nom d'affichage latinisé ('' = aucun)
+function persistDirectors() { directorMemory.save(); }
 // Déjà résolu (nom latin prêt) ? Pré-remplit le cache pour les noms de la
 // collection déjà latins → aucun fetch dans ce cas.
 function directorResolved(id) {
@@ -944,14 +974,9 @@ async function resolveDirector(id, tmdbId, mediaType) {
 // Un titre en écriture non latine (chinois, japonais…) est remplacé par le
 // titre anglais fourni par TMDB (ex. 年会不能停 ! -> Johnny Keep Walking!),
 // mis en cache pour ne pas refaire la requête.
-const titleCache = new Map();
-try {
-  const c = JSON.parse(localStorage.getItem('films_card_titles') || 'null');
-  if (c) for (const k in c) titleCache.set(k, c[k]);
-} catch {}
-function persistTitles() {
-  try { localStorage.setItem('films_card_titles', JSON.stringify(Object.fromEntries(titleCache))); } catch {}
-}
+const titleMemory = tmdbMemory('films_card_titles');
+const titleCache = titleMemory.vals;
+function persistTitles() { titleMemory.save(); }
 function displayTitle(id, raw) {
   if (titleCache.has(id)) return titleCache.get(id);
   return raw || '';
@@ -992,15 +1017,11 @@ async function resolveTitle(id, tmdbId, mediaType, raw) {
 // Seules les dates passées sont gardées sur l'appareil ; une sortie à venir ou
 // introuvable est revérifiée au chargement suivant (elle peut bouger).
 // Séries : TMDB n'a pas de date par pays, on garde la première diffusion.
-const releaseFrCache = new Map(); // id -> 'AAAA-MM-JJ'
-try {
-  const c = JSON.parse(localStorage.getItem('films_card_release_fr') || 'null');
-  if (c) for (const k in c) releaseFrCache.set(k, c[k]);
-} catch {}
+const releaseFrMemory = tmdbMemory('films_card_release_fr');
+const releaseFrCache = releaseFrMemory.vals; // id -> 'AAAA-MM-JJ'
 function persistReleaseFr() {
   const today = new Date().toISOString().slice(0, 10);
-  const past = [...releaseFrCache].filter(([, d]) => d <= today);
-  try { localStorage.setItem('films_card_release_fr', JSON.stringify(Object.fromEntries(past))); } catch {}
+  releaseFrMemory.save((k, d) => d <= today);
 }
 function monthYear(date) {
   const m = /^(\d{4})-(\d{2})/.exec(date || '');
@@ -1277,6 +1298,28 @@ function loadRecoProfiles() {
 function saveRecoProfiles(m) {
   try { localStorage.setItem(RECO_PROFILES_KEY, JSON.stringify(Object.fromEntries(m))); }
   catch { try { localStorage.removeItem(RECO_PROFILES_KEY); } catch {} } // quota : on sacrifie ce cache-là
+}
+
+// À l'ouverture de la page (et pas seulement quand l'onglet reco reconstruit
+// sa liste) : listes des mois passés, profils de plus de 60 jours et films à
+// l'affiche de plus de 6 mois sont effacés (conditions TMDB : 6 mois au plus)
+function purgeTmdbMemories() {
+  try {
+    const mois = 'films_reco_pool_' + currentMonthKey() + '_';
+    const vieux = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('films_reco_pool_') && !k.startsWith(mois)) vieux.push(k);
+    }
+    vieux.forEach(k => localStorage.removeItem(k));
+    const brut = JSON.parse(localStorage.getItem(RECO_PROFILES_KEY) || 'null');
+    if (brut) {
+      const gardes = loadRecoProfiles();
+      if (gardes.size < Object.keys(brut).length) saveRecoProfiles(gardes);
+    }
+    const affiche = JSON.parse(localStorage.getItem('films_nowplaying_fr') || 'null');
+    if (affiche && !(Date.now() - affiche.ts < TMDB_CACHE_MAX)) localStorage.removeItem('films_nowplaying_fr');
+  } catch {}
 }
 async function recoProfile(cache, type, tmdbId) {
   const key = type + '-' + tmdbId;
@@ -3935,6 +3978,129 @@ function reRenderModalIfShowing(film) {
   openModal(film, { tmdbOnly: openModalCtx.tmdbOnly });
 }
 
+// ---- Données TMDB de films.json : relues tous les 5 mois au plus ----
+// Les conditions de l'API TMDB (§1.C) interdisent de garder plus de 6 mois une
+// information obtenue de TMDB. Chaque film note la date de sa dernière lecture
+// chez TMDB (source.tmdb_at). Au déverrouillage du mode édition, les films lus
+// il y a plus de 5 mois (un mois de marge) sont relus en arrière-plan, comme à
+// l'ajout (buildFilmFromTmdb, noms latinisés, pays des réalisateurs), et
+// enregistrés par lots de 100. Seules les données TMDB changent : statut,
+// note, date, lieu (user) et l'origine de la fiche (source) restent tels quels.
+// Sans date, un film compte depuis son ajout, son re-match ou l'import
+// initial du 19 mai 2026 (commit dbf5d6a).
+const TMDB_REFRESH_AGE = 150 * 86400000; // 5 mois
+const TMDB_IMPORT_DATE = '2026-05-19T00:00:00Z';
+const TMDB_FIELDS = ['title', 'original_title', 'year', 'release_date', 'director', 'director_gender',
+  'director_genders', 'director_countries', 'cast', 'cast_genders', 'runtime', 'genres', 'country',
+  'poster', 'backdrop', 'synopsis', 'tmdb_rating', 'imdb_id', 'original_language', 'trailer'];
+const tmdbRefreshed = new Map(); // id -> données relues dans cette session (fusion au conflit 409)
+let tmdbRefreshRunning = false;
+
+function tmdbReadAt(f) {
+  const s = f.source || {};
+  const dates = [s.tmdb_at, s.rematched_at, s.added_at].filter(Boolean).map(d => Date.parse(d)).filter(t => !isNaN(t));
+  return dates.length ? Math.max(...dates) : Date.parse(TMDB_IMPORT_DATE);
+}
+
+// Relit un film chez TMDB ; null si TMDB ne répond pas (réessayé la fois suivante)
+async function readFilmFromTmdb(f) {
+  const path = f.type === 'tv' ? 'tv' : 'movie';
+  const detail = await tmdbJson(`${TMDB_BASE}/${path}/${f.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,external_ids,videos&include_video_language=fr,en`);
+  if (!detail || !detail.id) return null;
+  const fresh = buildFilmFromTmdb(detail, f.type);
+  // Noms restés non latins (cinéma asiatique…) : fiche personne, comme
+  // l'enrichissement des noms ; réalisateurs et casting alignés par index
+  const ids = fresh._director_ids || [];
+  if (hasNonLatin(fresh.director || '')) {
+    const noms = fresh.director.split(', ');
+    for (let i = 0; i < noms.length; i++) {
+      if (hasNonLatin(noms[i]) && ids[i]) noms[i] = (await fetchLatinNameById(ids[i])) || noms[i];
+    }
+    fresh.director = noms.join(', ');
+  }
+  const rawCast = ((detail.credits && detail.credits.cast) || []).slice(0, 5);
+  for (let i = 0; i < fresh.cast.length; i++) {
+    if (hasNonLatin(fresh.cast[i]) && rawCast[i] && rawCast[i].id) {
+      fresh.cast[i] = (await fetchLatinNameById(rawCast[i].id)) || fresh.cast[i];
+    }
+  }
+  await fillDirectorCountries(fresh);
+  // Pays de naissance incomplets (un appel a échoué) : tout réessayer plus tard
+  if (f.type === 'movie' && ids.length && !fresh.director_countries) return null;
+  const out = {};
+  for (const k of TMDB_FIELDS) out[k] = fresh[k];
+  return out;
+}
+
+// Données relues -> film (un champ absent chez TMDB disparaît aussi du film)
+function applyTmdbData(film, data, at) {
+  for (const k of TMDB_FIELDS) {
+    if (data[k] === undefined) delete film[k];
+    else film[k] = data[k];
+  }
+  film.source = { ...(film.source || {}), tmdb_at: at };
+}
+
+async function refreshTmdbData() {
+  if (tmdbRefreshRunning || !admin.active || !admin.tmdbKey) return;
+  const now = Date.now();
+  const todo = state.films.filter(f => f.tmdb_id && f.type && now - tmdbReadAt(f) > TMDB_REFRESH_AGE);
+  if (!todo.length) return;
+  tmdbRefreshRunning = true;
+  const box = document.getElementById('tmdb-maj');
+  const texte = box.querySelector('.tmdb-maj-texte');
+  const barre = box.querySelector('.tmdb-maj-barre span');
+  const montrer = (n) => {
+    texte.textContent = `données tmdb relues · ${n} / ${todo.length}`;
+    barre.style.width = (n * 100 / todo.length).toFixed(1) + '%';
+  };
+  box.hidden = false;
+  montrer(0);
+  let lus = 0, relus = 0, enAttente = 0;
+  const LOT = 100;
+  try {
+    for (let i = 0; i < todo.length && admin.active; i += LOT) {
+      await mapWithConcurrency(todo.slice(i, i + LOT), 4, async (f) => {
+        if (!admin.active) return;
+        const data = await readFilmFromTmdb(f);
+        // Le film a pu être supprimé, re-matché ou remplacé (fusion) pendant la
+        // lecture ; f lui-même d'abord (un doublon d'id serait sinon oublié)
+        const cur = state.films.includes(f) ? f : state.films.find(x => x.id === f.id);
+        if (data && cur && admin.active) {
+          const at = new Date().toISOString();
+          applyTmdbData(cur, data, at);
+          tmdbRefreshed.set(cur.id, { data, at });
+          relus++; enAttente++;
+        }
+        montrer(++lus);
+      });
+      if (enAttente && admin.active) {
+        const n = enAttente;
+        enAttente = 0;
+        await saveFilmsToGithub(`tmdb: données relues (${n} films)`);
+      }
+    }
+    if (admin.active) {
+      const rates = todo.length - relus;
+      if (!relus) showToast('tmdb ne répond pas : données relues au prochain déverrouillage', 'error');
+      else showToast(`✓ données tmdb à jour (${relus} film${relus > 1 ? 's' : ''})`
+        + (rates ? ` · ${rates} à réessayer` : ''), 'success');
+    }
+  } catch (e) {
+    showToast('relecture tmdb interrompue : ' + e.message, 'error');
+  } finally {
+    box.hidden = true;
+    tmdbRefreshRunning = false;
+    if (relus) {
+      // Affiches, notes, noms à jour à l'écran (la fiche ouverte n'est pas
+      // redessinée : elle peut contenir une saisie en cours)
+      initFilters();
+      if (state.view === 'a_voir' || state.view === 'vu') applyFilters({ preservePage: true });
+      refreshStats();
+    }
+  }
+}
+
 // ----------------- GITHUB --------------------
 async function ghTestToken() {
   if (!REPO) throw new Error('admin disponible uniquement sur github pages');
@@ -4016,6 +4182,8 @@ const sessionChanges = { added: new Set(), edited: new Set(), deleted: new Set()
 
 // Fusion film par film avec la version distante. Politique :
 // · film touché dans cette session (ajouté/édité) → la version locale gagne
+// · film seulement relu chez TMDB ici → la version distante, avec les
+//   données TMDB relues (statut, note… d'un autre appareil gardés)
 // · film non touché ici → la version distante gagne (elle peut porter des
 //   modifs plus récentes d'un autre appareil ; sinon elles sont identiques)
 // · ajout distant → récupéré ; suppression distante → respectée sauf si
@@ -4028,7 +4196,13 @@ function mergeRemoteFilms(remoteFilms) {
   for (const f of state.films) {
     const remote = remoteById.get(f.id);
     if (remote) {
-      merged.push(touched(f.id) ? f : remote);
+      if (touched(f.id)) merged.push(f);
+      else if (tmdbRefreshed.has(f.id)) {
+        const { data, at } = tmdbRefreshed.get(f.id);
+        const copie = { ...remote };
+        applyTmdbData(copie, data, at);
+        merged.push(copie);
+      } else merged.push(remote);
     } else if (touched(f.id)) {
       merged.push(f); // ajouté/édité ici : conserver malgré l'absence distante
     }
@@ -4222,6 +4396,7 @@ async function setupAdmin() {
     okBox.textContent = '✓ admin actif — ton code est mémorisé. tu peux fermer cette fenêtre.';
     okBox.style.display = '';
     setTimeout(closeAdminSetup, 1600);
+    setTimeout(refreshTmdbData, 3000); // données TMDB de plus de 5 mois
   } catch (e) {
     errBox.textContent = 'erreur : ' + e.message;
     errBox.style.display = '';
@@ -4265,6 +4440,7 @@ async function unlockAdmin() {
     okBox.textContent = '✓ admin actif';
     okBox.style.display = '';
     setTimeout(closeAdminSetup, 800);
+    setTimeout(refreshTmdbData, 3000); // données TMDB de plus de 5 mois
   } catch (e) {
     // Decrypt error or token invalid
     if (e.name === 'OperationError' || (e.message && e.message.toLowerCase().includes('decrypt'))) {
@@ -5108,6 +5284,7 @@ function navInit() {
 loadAdminCreds();
 wireEvents();
 navInit();
+purgeTmdbMemories();
 loadFilms();
 
 // Récupérer les films actuellement en salles (France) et repeindre les badges

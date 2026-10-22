@@ -24,7 +24,7 @@ Application personnelle de suivi de films (et séries), hébergée sur GitHub Pa
 | `manifest.webmanifest` | Description de l'application installable : nom, couleurs, page de départ, icônes (voir « Application sur téléphone ») |
 | `icone-192.png`, `icone-512.png`, `apple-touch-icon.png` | Icônes de l'application (Android, iPhone) : « \*F », même famille que l'icône « \*N » de nocturne (voir « Application sur téléphone ») |
 | `fonts/` | Les quatre polices du site (Bungee, Bricolage Grotesque, Inter Tight, JetBrains Mono), hébergées sur le site : fichiers `.woff2`, leurs déclarations dans `fonts/polices.css`, leurs licences `OFL-*.txt` (voir « Polices ») |
-| `tmdb.svg` | Logo officiel de TMDB, affiché en noir et blanc dans les mentions légales, rubrique crédits (voir « Partage et référencement ») |
+| `tmdb.svg` | Logo officiel de TMDB, affiché en blanc dans les mentions légales, rubrique crédits (voir « Partage et référencement ») |
 | `README.md` | Ce document |
 
 Flux de données :
@@ -67,7 +67,7 @@ Un film dans `films.json` :
   "synopsis": "…",
   "tmdb_rating": 5.9,
   "trailer": "https://www.youtube.com/watch?v=…",
-  "source": { "added_via": "admin", "added_at": "2026-07-08T…" },
+  "source": { "added_via": "admin", "added_at": "2026-07-08T…", "tmdb_at": "2026-10-22T…" },
   "user": {
     "statut": "a_voir",
     "rating": null,
@@ -90,6 +90,28 @@ Invariants à connaître avant de modifier le code :
 - `director_countries` : pays de naissance des réalisateur·rices (un par réal, `""` si inconnu), tiré du lieu de naissance TMDB, qui est du texte libre. `normalizeBirthCountry()` ramène les variantes (autres langues, villes et régions sans pays, mentions historiques, pour lesquelles on retient le pays actuel) au même vocabulaire que les pays de production, à l'enregistrement **et** à l'affichage : d'anciennes valeurs brutes sont donc corrigées sans réécrire le fichier. À l'affichage, ils sont traduits en français comme les pays de production. Ils sont récupérés dès l'ajout ou le re-match d'un film (`fillDirectorCountries`, un appel TMDB `/person` par réal), comme le genre ; le bouton « enrichir genres & réalisateurs » des stats ne sert plus qu'aux fiches anciennes, ou à un ajout pendant lequel TMDB n'a pas répondu (le champ reste alors absent).
 - Repasser un film en « à voir » **conserve** note, date et lieu (masqués, restaurés s'il repasse en « vu »).
 - Les clés préfixées `_` sont des drapeaux transitoires, filtrées à la sérialisation.
+- `source.tmdb_at` : date de la dernière lecture des données TMDB du film (voir « Données TMDB : 6 mois au plus »). Absente sur les fiches jamais relues : le film compte alors depuis `added_at`, `rematched_at` ou, pour l'import CSV (`csv_title`), le 19 mai 2026.
+
+## Données TMDB : 6 mois au plus
+
+Les conditions de l'API TMDB (§1.C) interdisent de garder plus de 6 mois une information obtenue de TMDB (« Cache, for longer than 6 months, any information obtained through or from TMDB or the TMDB APIs »). Le site s'y tient de deux façons.
+
+**Mémoires du navigateur** (`localStorage`) :
+
+- Noms des réalisateurs, titres latins et dates de sortie françaises des cartes (`films_card_directors`, `films_card_titles`, `films_card_release_fr`) : chaque entrée garde sa date (`tmdbMemory()`, format `{ d: 1, e: { id: [valeur, date] } }`). À l'ouverture de la page, celles de plus de 6 mois sont effacées, puis relues à la demande. L'ancien format, sans date, a été effacé une fois (2026-10-22) et se reconstruit au fil de l'affichage.
+- Reco : profils des films gardés 60 jours ; listes du mois (`films_reco_pool_…`) des mois passés effacées dès l'ouverture de la page (`purgeTmdbMemories()`), et plus seulement quand l'onglet reco reconstruit sa liste.
+- Films à l'affiche : relus toutes les 24 h ; une valeur de plus de 6 mois est effacée à l'ouverture.
+- En mémoire vive seulement (perdues en fermant la page) : offres « où le voir », filmographies.
+
+**films.json**, relu automatiquement (`refreshTmdbData()`) :
+
+- Au déverrouillage du mode édition, 3 secondes après, les films dont les données TMDB ont plus de 5 mois (un mois de marge) sont relus en arrière-plan, quatre à la fois, exactement comme à l'ajout : fiche TMDB complète (`buildFilmFromTmdb`), noms restés non latins passés par la fiche personne, pays de naissance des réalisateurs. Une petite barre en bas à gauche montre l'avancement.
+- Seuls les champs venus de TMDB changent (`TMDB_FIELDS` : titre, réalisateurs, casting, genres, pays, affiches, synopsis, note TMDB, bande-annonce…), puis `source.tmdb_at` reçoit la date. Statut, note, date, lieu (`user`) et l'origine de la fiche (`csv_title`, `added_at`…) ne sont jamais touchés.
+- Enregistrement par lots de 100 films (un commit « tmdb: données relues (100 films) » chacun) ; si la page est fermée en route, les films restants sont relus au déverrouillage suivant. Reverrouiller arrête la relecture sans rien enregistrer de plus.
+- Si TMDB ne répond pas pour un film, il garde ses données et sera réessayé la fois suivante (le message de fin indique combien).
+- Conflit avec un autre appareil (409) : un film seulement relu ici prend la version distante (statut, note… changés ailleurs) avec les données TMDB relues.
+- Répétition le 2026-10-22 sur la base en ligne, enregistrement intercepté : 530 films relus en 49 s, aucun échec, plus aucun nom non latin. Changent surtout la note TMDB, la bande-annonce et la langue d'origine (champ ajouté) ; parfois un titre, l'ordre des co-réalisateurs, un pays de naissance mal écrit (« Великобритания » devenu « UK »). Une erreur de TMDB se propage aussi : au 2026-10-22, le titre français de *Nausicaä de la vallée du vent* (`movie-81`) y était « Le Vaisseau fantôme » ; la corriger sur themoviedb.org (fiche ouverte à tous).
+- L'historique git garde les anciennes versions de `films.json` : on ne le réécrit pas, ce serait disproportionné pour un site personnel.
 
 ## Recherche : rééquilibrage
 
@@ -127,7 +149,7 @@ Le mode édition n'est actif que sur `*.github.io` (détection automatique du re
 
 - Description et aperçu Open Graph (titre, texte, `apercu.png`) : un lien partagé s'affiche avec une carte. L'adresse de l'image est absolue (`https://ricojrlyon.github.io/films/apercu.png`) : à adapter si le site change d'adresse.
 - Pied de page, sobre (petit texte gris en minuscules), sur une ligne : « \*films », lien « code source ↗ » vers le dépôt GitHub, « mentions légales », bouton « ↑ haut de page ». JustWatch, source des offres « où le voir », est aussi cité dans la fiche, sous ces offres.
-- **Mentions légales** : fenêtre ouverte par le lien du pied de page (elle compte pour le bouton précédent, Échap la ferme). Texte fourni par Emeric le 2026-10-22. Éditeur : site personnel, non professionnel et non commercial, sans nom (la loi pour la confiance dans l'économie numérique permet à un particulier de ne donner que l'hébergeur, qui connaît son identité). Hébergeur : GitHub, Inc., adresse prise dans sa politique de confidentialité (GitHub ne publie pas de numéro de téléphone). Données personnelles : aucune collecte ; ce que reçoivent TMDB (adresse IP, texte des recherches) et GitHub (adresse IP) ; base légale, l'intérêt légitime ; transferts vers les États-Unis : GitHub est inscrit au Data Privacy Framework, ainsi que Xperi Inc., propriétaire de TMDB (vérifié le 2026-10-22 sur dataprivacyframework.gov : TMDB n'y figure pas sous son propre nom, la politique de confidentialité de TMDB renvoie à Xperi Inc.). Crédits : le logo de TMDB (fichier officiel « primary short », page « Logos & Attribution » de themoviedb.org, téléchargé le 2026-10-21, affiché en noir et blanc par le CSS, `filter: grayscale(1)`, sans modifier le fichier) et la mention en anglais que demandent les conditions d'utilisation de TMDB, à placer dans une rubrique de crédits ; JustWatch ; les polices. Les obligations des sites professionnels (RCS, TVA, conditions de vente) ne s'appliquent pas. **À revoir si le site change** : nouveau service externe, mesure d'audience, formulaire, cookies.
+- **Mentions légales** : fenêtre ouverte par le lien du pied de page (elle compte pour le bouton précédent, Échap la ferme). Texte fourni par Emeric le 2026-10-22. Éditeur : site personnel, non professionnel et non commercial, sans nom (la loi pour la confiance dans l'économie numérique permet à un particulier de ne donner que l'hébergeur, qui connaît son identité). Hébergeur : GitHub, Inc., adresse prise dans sa politique de confidentialité (GitHub ne publie pas de numéro de téléphone). Données personnelles : aucune collecte ; ce que reçoivent TMDB (adresse IP, texte des recherches) et GitHub (adresse IP) ; base légale, l'intérêt légitime ; transferts vers les États-Unis : TMDB et GitHub sont couverts par le Data Privacy Framework (vérifié le 2026-10-22 sur dataprivacyframework.gov : GitHub y est inscrit ; TMDB est exploité par TiVo Platform Technologies LLC, d'après ses conditions d'utilisation de l'API, société couverte par l'inscription de sa maison mère Xperi Inc.). Crédits : le logo de TMDB (fichier officiel « primary short », page « Logos & Attribution » de themoviedb.org, téléchargé le 2026-10-21) et la mention en anglais que demandent les conditions d'utilisation de TMDB ; la FAQ de TMDB demande de les placer dans une rubrique « About » ou « Credits », et n'autorise le logo qu'en blanc, en noir ou dans ses couleurs : il est affiché en blanc par le CSS (`filter: brightness(0) invert(1)`, le fichier n'est pas modifié). Les affiches restent la propriété de leurs ayants droit ; JustWatch ; les polices. Les obligations des sites professionnels (RCS, TVA, conditions de vente) ne s'appliquent pas. **À revoir si le site change** : nouveau service externe, mesure d'audience, formulaire, cookies.
 - Le site demande aux moteurs de recherche de **ne pas l'indexer** (`<meta name="robots" content="noindex, nofollow">`). Le dépôt public sur github.com reste, lui, visible sur GitHub.
 
 ## Application sur téléphone
@@ -168,7 +190,7 @@ Les quatre polices sont hébergées sur le site (`fonts/`) et non plus chez Goog
 ## Affichage
 
 - Le site se déclare sombre (`<meta name="color-scheme" content="dark">`). Ce que dessine le navigateur lui-même suit donc le thème sombre : listes déroulantes ouvertes, barres de défilement, case à cocher du mode édition. Les éléments du site gardent leurs couleurs, toutes définies dans le CSS.
-- Date des cartes : mois et année de sortie en France (`10/2026`), lue sur TMDB (`/movie/{id}/release_dates`, pays FR) : sortie en salles (type 3, sinon 2), à défaut sortie en ligne (type 4). Une avant-première ou un festival ne compte pas ; une date française plus de 2 ans après la date principale est une ressortie et n'est pas retenue. Sans date française (ou en attendant la réponse), la carte affiche la date principale de TMDB, souvent la première sortie mondiale ; les séries gardent leur première diffusion. Les dates passées restent en mémoire sur l'appareil (`localStorage`, clé `films_card_release_fr`) ; une sortie à venir ou introuvable est revérifiée au chargement suivant. Rien n'est écrit dans `films.json` : les filtres et tris par année gardent l'année principale.
+- Date des cartes : mois et année de sortie en France (`10/2026`), lue sur TMDB (`/movie/{id}/release_dates`, pays FR) : sortie en salles (type 3, sinon 2), à défaut sortie en ligne (type 4). Une avant-première ou un festival ne compte pas ; une date française plus de 2 ans après la date principale est une ressortie et n'est pas retenue. Sans date française (ou en attendant la réponse), la carte affiche la date principale de TMDB, souvent la première sortie mondiale ; les séries gardent leur première diffusion. Les dates passées restent en mémoire sur l'appareil 6 mois au plus (`localStorage`, clé `films_card_release_fr`, voir « Données TMDB : 6 mois au plus ») ; une sortie à venir ou introuvable est revérifiée au chargement suivant. Rien n'est écrit dans `films.json` : les filtres et tris par année gardent l'année principale.
 - Affiche introuvable (image retirée de TMDB, réseau coupé) : la carte affiche le titre du film à la place, comme une carte sans affiche (`showPoster`, pour toutes les grilles).
 - Effets de flou : chaque `backdrop-filter` est doublé de `-webkit-backdrop-filter`, seule forme comprise par Safari avant la version 18. À reprendre pour tout nouveau flou.
 
@@ -187,7 +209,7 @@ Chaque sauvegarde réécrit tout le fichier, donc les écritures concurrentes so
 
 - **File d'attente locale** : les sauvegardes d'un même onglet sont sérialisées (un enrichissement de masse ne peut pas percuter une édition).
 - **Conflit 409** (le fichier a changé depuis notre lecture, sur un autre appareil) : **fusion film par film** au lieu d'écrasement. Un film modifié dans la session garde sa version locale ; un film non touché prend la version distante ; les ajouts des deux côtés sont conservés (les distants en tête) ; les suppressions des deux côtés sont respectées. La fusion relit le fichier distant quelle que soit sa taille.
-- Cas limite assumé : si un conflit survient pendant un enrichissement de masse, l'enrichissement des films non touchés manuellement peut être perdu. Le relancer suffit : aucune donnée personnelle n'est en jeu.
+- Cas limite assumé : si un conflit survient pendant un enrichissement de masse, l'enrichissement des films non touchés manuellement peut être perdu. Le relancer suffit : aucune donnée personnelle n'est en jeu. La relecture automatique des données TMDB, elle, est gardée à la fusion (voir « Données TMDB : 6 mois au plus »).
 
 ## Développement local et déploiement
 

@@ -1296,9 +1296,10 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
 }
 .legal-body p { font-size: 14px; line-height: 1.6; color: var(--ink-soft); margin: 0 0 8px; }
 .legal-body a { color: var(--ink); }
-/* Logo officiel de TMDB (tmdb.svg), passé en noir et blanc pour se fondre
-   dans la page ; le fichier lui-même n'est pas modifié */
-.legal-tmdb img { height: 10px; width: auto; vertical-align: 0; filter: grayscale(1); }
+/* Logo officiel de TMDB (tmdb.svg), affiché en blanc pour se fondre dans la
+   page : TMDB permet son logo en blanc ou en noir, pas en gris. Le fichier
+   lui-même n'est pas modifié. */
+.legal-tmdb img { height: 10px; width: auto; vertical-align: 0; filter: brightness(0) invert(1); }
 .legal-body .insecable { white-space: nowrap; }
 
 /* ============================================================
@@ -1814,6 +1815,25 @@ body:not(.admin-mode) #origin-enrich-wrap { display: none !important; }
 }
 .toast.success { border-color: var(--green); color: var(--green); }
 .toast.error { border-color: var(--red); color: var(--red); }
+
+/* Relecture des données TMDB (mode édition) : discrète, en bas à gauche */
+.tmdb-maj {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 900;
+  background: var(--bg-elev);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+}
+.tmdb-maj[hidden] { display: none; }
+.tmdb-maj-barre { display: block; height: 2px; margin-top: 6px; background: var(--rule); }
+.tmdb-maj-barre span { display: block; height: 100%; width: 0; background: var(--warm); transition: width 0.3s; }
 
 /* Edit form inside detail modal */
 .edit-section {
