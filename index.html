@@ -47,7 +47,7 @@
 <link href="fonts/polices.css" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 <div class="app">
@@ -323,18 +323,14 @@
     </div>
   </main>
 
-  <!-- Pied de page : signature, code source, mentions légales, retour en haut ;
-       logo et mention TMDB demandés par ses conditions d'utilisation -->
+  <!-- Pied de page : signature, code source, mentions légales, retour en haut
+       (le logo et la mention TMDB sont dans les mentions légales, rubrique crédits) -->
   <footer class="footer">
     <div class="footer-ligne">
       <span><span class="ast">*</span>films</span> ·
       <a href="https://github.com/ricojrlyon/films" target="_blank" rel="noopener">code source ↗</a> ·
       <button type="button" class="footer-btn" id="footer-legal">mentions légales</button> ·
       <button type="button" class="footer-btn" id="footer-haut">↑ haut de page</button>
-    </div>
-    <div class="footer-ligne footer-tmdb">
-      <a href="https://www.themoviedb.org/" target="_blank" rel="noopener" class="footer-tmdb-logo"><img src="tmdb.svg" alt="TMDB" width="77" height="10"></a>
-      <span>ce site utilise l'api tmdb mais n'est ni approuvé ni certifié par tmdb</span>
     </div>
   </footer>
 
@@ -343,7 +339,8 @@
 <!-- ============== MENTIONS LÉGALES ============== -->
 <!-- Ouvertes par le lien du pied de page. Site personnel non professionnel :
      la loi pour la confiance dans l'économie numérique permet à un particulier
-     de ne nommer que l'hébergeur. -->
+     de ne nommer que l'hébergeur. Rubrique crédits : logo et mention que
+     demandent les conditions d'utilisation de TMDB. -->
 <div class="modal-backdrop admin-modal-backdrop" id="legal-backdrop">
   <article class="modal admin-modal" role="dialog" aria-modal="true" aria-labelledby="legal-title">
     <button class="modal-close" id="legal-close" aria-label="fermer">✕</button>
@@ -351,22 +348,21 @@
       <h2 class="admin-modal-title" id="legal-title">mentions légales</h2>
 
       <h3>éditeur</h3>
-      <p>Site personnel, édité à titre non professionnel et non commercial. Comme la loi le permet à un particulier (loi pour la confiance dans l'économie numérique), l'éditeur n'est pas nommé ici&nbsp;: son identité est connue de l'hébergeur.</p>
+      <p>Site personnel, édité à titre non professionnel et non commercial.</p>
 
       <h3>hébergeur</h3>
-      <p>GitHub, Inc. (service GitHub Pages)<br>
-        88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis<br>
-        <a href="https://github.com" target="_blank" rel="noopener">github.com ↗</a></p>
+      <p>GitHub, Inc. (service GitHub Pages), 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, <span class="insecable">États-Unis</span> · <a href="https://github.com" target="_blank" rel="noopener">github.com ↗</a></p>
 
       <h3>données personnelles</h3>
-      <p>Le site ne collecte aucune donnée&nbsp;: pas de compte, pas de formulaire, pas de cookie, ni mesure d'audience ni publicité.</p>
-      <p>Pour aller plus vite, le navigateur garde sur l'appareil quelques mémoires techniques&nbsp;: noms des réalisateurs, titres, dates de sortie en France, films à l'affiche, recommandations du mois. Elles ne quittent pas l'appareil et s'effacent en supprimant les données du site dans le navigateur. Le mode édition, réservé au propriétaire du site, garde son accès à GitHub chiffré sur son seul appareil.</p>
-      <p>Pour afficher les fiches et les affiches, la page interroge TMDB. Comme pour tout site, l'hébergeur (GitHub) et TMDB reçoivent alors l'adresse IP du visiteur. Les polices sont sur le site&nbsp;: rien n'est demandé à Google.</p>
+      <p>Ni compte, ni formulaire, ni cookie, ni mesure d'audience, ni publicité&nbsp;: l'éditeur ne conserve rien sur les visiteurs.</p>
+      <p>Pour afficher les films, le navigateur interroge TMDB à l'ouverture de la page, à chaque fiche et à chaque recherche&nbsp;: TMDB reçoit l'adresse IP et le texte des recherches. GitHub, qui héberge les pages, reçoit aussi l'adresse IP.</p>
+      <p>Base légale&nbsp;: l'intérêt légitime à faire fonctionner le site. TMDB et GitHub sont établis aux <span class="insecable">États-Unis</span>&nbsp;; GitHub est inscrit au Data Privacy Framework, tout comme Xperi Inc., propriétaire de TMDB.</p>
+      <p>Le stockage local du navigateur garde quelques données sur les films, rien sur le visiteur.</p>
 
       <h3>crédits</h3>
-      <p>Fiches et affiches&nbsp;: <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB ↗</a>. Ce site utilise l'API TMDB mais n'est ni approuvé ni certifié par TMDB. Les affiches restent la propriété de leurs ayants droit.</p>
-      <p>Offres de streaming («&nbsp;où le voir&nbsp;»)&nbsp;: JustWatch, via TMDB.</p>
-      <p>Polices&nbsp;: Bungee, Bricolage Grotesque, Inter Tight et JetBrains Mono, sous licence libre SIL Open Font License.</p>
+      <p>Fiches et affiches&nbsp;: <a href="https://www.themoviedb.org/" target="_blank" rel="noopener" class="legal-tmdb"><img src="tmdb.svg" alt="TMDB" width="77" height="10"></a>. <span lang="en">This website uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.</span></p>
+      <p>Offres de streaming&nbsp;: JustWatch, via TMDB.</p>
+      <p>Polices&nbsp;: Bungee, Bricolage Grotesque, Inter Tight et JetBrains Mono, sous licence SIL Open Font License.</p>
     </div>
   </article>
 </div>
