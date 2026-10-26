@@ -1543,9 +1543,11 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
 }
 
 /* Explorer */
+/* Les 4 catégories de Découvrir : une ligne sur ordinateur ; sur
+   téléphone, « canal+ » passe à la ligne au lieu de sortir de l'écran */
 .explorer-categories {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
   overflow-x: auto;
@@ -1574,8 +1576,8 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
   color: var(--bg);
   border-color: var(--warm);
 }
-/* Petits téléphones : les 3 catégories tiennent sur une ligne (au-dessus de
-   375 px, rien ne change) */
+/* Petits téléphones : boutons plus serrés (au-dessus de 375 px, rien ne
+   change) */
 @media (max-width: 374px) {
   .explorer-cat { padding: 8px 11px; }
 }

@@ -47,7 +47,7 @@
 <link href="fonts/polices.css" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <div class="app">
@@ -70,7 +70,7 @@
       <div class="tabs" id="status-tabs">
         <button class="tab active" data-view="a_voir">à voir<span class="count" id="count-a_voir">0</span></button>
         <button class="tab" data-view="vu">vus<span class="count" id="count-vu">0</span></button>
-        <button class="tab tab-discover" data-view="discover">recherche</button>
+        <button class="tab tab-discover" data-view="discover">découvrir</button>
         <button class="tab tab-reco" data-view="reco">reco</button>
       </div>
       <div class="collection-controls" id="collection-controls">
@@ -91,11 +91,12 @@
         <button class="explorer-cat active" data-cat="now_playing">au cinéma</button>
         <button class="explorer-cat" data-cat="trending">tendances</button>
         <button class="explorer-cat" data-cat="upcoming">prochainement</button>
+        <button class="explorer-cat" data-cat="canal">canal+</button>
       </div>
       <div class="discover-filters" id="discover-filters">
         <select id="discover-genre" aria-label="genre"><option value="">tous genres</option></select>
         <select id="discover-country" aria-label="pays"><option value="">tous pays</option></select>
-        <select id="discover-decade" title="période — disponible sur « tendances »"><option value="">toutes périodes</option></select>
+        <select id="discover-decade" title="période : disponible sur « tendances » et « canal+ »"><option value="">toutes périodes</option></select>
         <select id="discover-sort" aria-label="trier par">
           <option value="popularity.desc">populaires</option>
           <option value="vote_average.desc">mieux notés</option>
@@ -489,6 +490,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>

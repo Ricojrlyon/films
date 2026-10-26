@@ -521,14 +521,18 @@ function setView(view) {
 // ============================================================
 // DISCOVER VIEW
 // ============================================================
+// Catégories sans fenêtre de dates imposée : la décennie s'y applique
+// (« au cinéma » et « prochainement » ont la leur)
+const discoverAvecPeriode = category => category === 'trending' || category === 'canal';
+
 // Filtres effectifs pour une catégorie : la décennie ne s'applique que sur
-// « tendances » (les deux autres catégories imposent leur fenêtre de dates)
+// « tendances » et « canal+ »
 function discoverEffectiveFilters(category) {
   const f = state.discoverFilters;
   return {
     genre: f.genre || '',
     country: f.country || '',
-    decade: category === 'trending' ? (f.decade || '') : '',
+    decade: discoverAvecPeriode(category) ? (f.decade || '') : '',
     sort: f.sort || 'popularity.desc',
   };
 }
@@ -557,7 +561,7 @@ async function initDiscoverFilterOptions() {
         o.textContent = name.toLowerCase();
         csel.appendChild(o);
       });
-    // Décennies (pertinentes sur « tendances » uniquement)
+    // Décennies (pertinentes sur « tendances » et « canal+ »)
     const dsel = document.getElementById('discover-decade');
     for (let d = 2020; d >= 1950; d -= 10) {
       const o = document.createElement('option');
@@ -587,9 +591,9 @@ async function fetchAndRenderDiscover(category) {
   state.discoverCategory = category;
   // Update active pill
   document.querySelectorAll('#discover-categories .explorer-cat').forEach(p => p.classList.toggle('active', p.dataset.cat === category));
-  // La décennie n'a de sens que sur « tendances »
+  // La décennie n'a de sens que sur « tendances » et « canal+ »
   const decadeSel = document.getElementById('discover-decade');
-  if (decadeSel) decadeSel.disabled = category !== 'trending';
+  if (decadeSel) decadeSel.disabled = !discoverAvecPeriode(category);
   // Marquage visuel des filtres actifs
   ['discover-genre', 'discover-country', 'discover-decade'].forEach(id => {
     const sel = document.getElementById(id);
@@ -3474,13 +3478,19 @@ async function tmdbDetails(id, type) {
 // /discover cherche dans tout le catalogue. La sémantique des catégories est
 // conservée par fenêtre de dates (en salles ≈ 6 dernières semaines,
 // prochainement = sorties futures, tendances = populaires tous horizons).
+// « canal+ » passe toujours par /discover : les films que l'abonnement
+// Canal+ permet de voir en France (offres JustWatch relayées par TMDB :
+// fournisseur 381, en streaming par abonnement seulement ; Canal VOD, pour
+// la location et l'achat, n'en fait pas partie), tous horizons comme
+// « tendances ».
+const CANAL_PLUS = 381;
 async function tmdbBrowse(category, filters) {
   filters = filters || {};
   const hasFilters = !!(filters.genre || filters.country || filters.decade
     || (filters.sort && filters.sort !== 'popularity.desc'));
   const params = `api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
   let baseUrl;
-  if (hasFilters) {
+  if (hasFilters || category === 'canal') {
     const sort = filters.sort || 'popularity.desc';
     let extra = '&sort_by=' + encodeURIComponent(sort) + '&include_adult=false';
     if (filters.genre) extra += '&with_genres=' + encodeURIComponent(filters.genre);
@@ -3488,8 +3498,9 @@ async function tmdbBrowse(category, filters) {
     // Plancher de votes : trier par note sans plancher fait remonter des
     // films notés 10/10 par trois votants ; par date, des sorties confidentielles
     let voteFloor = 0;
-    if (sort === 'vote_average.desc') voteFloor = category === 'trending' ? 200 : category === 'now_playing' ? 50 : 0;
-    else if (sort === 'primary_release_date.desc' && category === 'trending') voteFloor = 20;
+    const tousHorizons = discoverAvecPeriode(category);
+    if (sort === 'vote_average.desc') voteFloor = tousHorizons ? 200 : category === 'now_playing' ? 50 : 0;
+    else if (sort === 'primary_release_date.desc' && tousHorizons) voteFloor = 20;
     if (voteFloor) extra += '&vote_count.gte=' + voteFloor;
     // Fenêtre de dates
     const today = new Date().toISOString().slice(0, 10);
@@ -3510,6 +3521,9 @@ async function tmdbBrowse(category, filters) {
     }
     if (gte) extra += `&primary_release_date.gte=${gte}`;
     if (lte) extra += `&primary_release_date.lte=${lte}`;
+    if (category === 'canal') {
+      extra += `&watch_region=FR&with_watch_providers=${CANAL_PLUS}&with_watch_monetization_types=flatrate`;
+    }
     baseUrl = `${TMDB_BASE}/discover/movie?${params}${extra}`;
   } else {
     const endpoints = {
@@ -3523,7 +3537,7 @@ async function tmdbBrowse(category, filters) {
   // faut aller chercher plus loin dans la liste — TMDB classe les films non
   // américains bien après les 40 premiers. Sinon 2 pages suffisent.
   const rebalance = !filters.country && (filters.sort || 'popularity.desc') === 'popularity.desc';
-  const pageCount = rebalance ? DISCOVER_REBALANCE_PAGES : 2;
+  const pageCount = rebalance ? (category === 'canal' ? DISCOVER_CANAL_PAGES : DISCOVER_REBALANCE_PAGES) : 2;
   const [p1, ...others] = await Promise.all([
     fetch(baseUrl + '&page=1').then(r => r.ok ? r.json() : { results: [] }),
     ...Array.from({ length: pageCount - 1 }, (_, i) =>
@@ -3564,6 +3578,10 @@ async function tmdbBrowse(category, filters) {
 // Le pays vient du profil de film de la reco, dont il partage le cache.
 const DISCOVER_COUNT = 40;
 const DISCOVER_REBALANCE_PAGES = 5;
+// « canal+ » : catalogue très américain, il faut lire plus loin pour remplir
+// les 40 places (mesuré le 2026-10-26 : 14 films avec 5 pages, 40 avec 10,
+// environ 4 s à la première visite, le temps de connaître les pays)
+const DISCOVER_CANAL_PAGES = 10;
 const DISCOVER_MAX_US_SHARE = 1 / 3;
 const DISCOVER_NO_BOOST = ['IN'];   // films indiens (sorties pour la diaspora)
 async function capUSShare(list, count) {
@@ -5105,7 +5123,7 @@ function showPage(name) {
 // BOUTON PRÉCÉDENT (navigateur, téléphone)
 // ============================================================
 // Chaque fiche, filmographie, page stats, fenêtre (mode édition, re-match,
-// mentions légales) ou onglet (à voir, vus, recherche, reco) ouvert ajoute
+// mentions légales) ou onglet (à voir, vus, découvrir, reco) ouvert ajoute
 // une étape à l'historique du navigateur : « précédent » referme le dernier ouvert et
 // rend l'écran d'avant, à la même position.
 // Fermer autrement (croix, Échap, « ← retour », enregistrement) recule
