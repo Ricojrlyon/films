@@ -457,8 +457,8 @@ function buildCard(f) {
     poster.appendChild(c);
   }
 
-  // « canal+ » : film à voir disponible avec l'abonnement Canal+
-  if (f.user?.statut === 'a_voir' && canalSet.has(f.id)) {
+  // « canal+ » : disponible avec l'abonnement Canal+
+  if (canalSet.has(f.id)) {
     const c = document.createElement('div');
     c.className = 'canal-badge';
     c.textContent = 'canal+';
@@ -738,8 +738,10 @@ function renderTmdbGrid(items) {
   }
   emptyEl.style.display = 'none';
   countEl.textContent = shown.length;
+  const listeCanal = state.view === 'discover' && state.discoverCategory === 'canal'
+    && items === state.discoverCache[discoverCacheKey('canal')];
   for (const item of shown) {
-    grid.appendChild(buildTmdbCard(item));
+    grid.appendChild(buildTmdbCard(item, listeCanal));
   }
   fillCardMeta();
 }
@@ -1143,7 +1145,8 @@ async function fillCardMeta() {
   if (datesChanged) persistReleaseFr();
 }
 
-function buildTmdbCard(item) {
+// sansCanal : la liste « canal+ » elle-même (tous ses films y sont)
+function buildTmdbCard(item, sansCanal) {
   const card = document.createElement('div');
   card.className = 'card tmdb-card';
   card.tabIndex = 0;
@@ -1188,6 +1191,13 @@ function buildTmdbCard(item) {
   card.appendChild(meta);
   // réalisateur : rempli tout de suite si connu (collection/cache), sinon lazy
   // date : sortie française, résolue à la demande (fillCardMeta)
+  // « canal+ » : disponible avec l'abonnement Canal+
+  if (!sansCanal && canalSet.has(id)) {
+    const c = document.createElement('div');
+    c.className = 'canal-badge';
+    c.textContent = 'canal+';
+    poster.appendChild(c);
+  }
   card.dataset.filmId = id;
   card.dataset.release = release;
   card.dataset.tmdbId = item.id;
@@ -1380,6 +1390,8 @@ function purgeTmdbMemories() {
     }
     const affiche = JSON.parse(localStorage.getItem('films_nowplaying_fr') || 'null');
     if (affiche && !(Date.now() - affiche.ts < TMDB_CACHE_MAX)) localStorage.removeItem('films_nowplaying_fr');
+    const canal = JSON.parse(localStorage.getItem('films_canal_fr') || 'null');
+    if (canal && !(Date.now() - canal.ts < TMDB_CACHE_MAX)) localStorage.removeItem('films_canal_fr');
   } catch {}
 }
 async function recoProfile(cache, type, tmdbId) {
@@ -2013,7 +2025,6 @@ async function addTmdbFilmToCollection(film, statut, userData) {
     }
     closeModal();
     showToast('✓ ajouté : ' + film.title, 'success');
-    majCanal(); // un film « à voir » : est-il sur Canal+ ?
   } catch (e) {
     // Rollback
     const idx = state.films.findIndex(f => f.id === film.id);
@@ -3417,46 +3428,49 @@ async function fetchNowPlayingIdsFR() {
   for (const d of pages) for (const m of (d.results || [])) ids.push('movie-' + m.id);
   return [...new Set(ids)];
 }
-// ---- « canal+ » : films à voir disponibles avec l'abonnement Canal+ ----
-// Pour chaque film « à voir », ses offres en France (TMDB /watch/providers,
-// données JustWatch) : Canal+ (fournisseur 381) en streaming par abonnement ;
-// Canal VOD, location et achat, ne compte pas. Gardé sur l'appareil 24 h
-// par film (clé films_canal_fr, { id: [disponible, date] }), seulement pour
-// les films encore à voir : un film ajouté est vérifié au passage suivant.
+// ---- « canal+ » : tout ce que l'abonnement Canal+ permet de voir en France ----
+// Le catalogue complet, films et séries (TMDB /discover avec les offres
+// JustWatch : fournisseur 381, en streaming par abonnement ; Canal VOD,
+// location et achat, n'en fait pas partie), relu une fois par jour (clé
+// films_canal_fr, { ts, ids }) : environ 60 pages TMDB pour 1 150 titres
+// au 2026-10-26. Il alimente la pastille « canal+ » de toutes les cartes
+// (sauf la liste « canal+ » de Découvrir). Comparé le 2026-10-26, film par
+// film, aux offres de 99 films de la collection : aucun désaccord.
 let canalSet = new Set();
-let canalEnCours = false;
+async function fetchCanalCatalogue() {
+  const ids = [];
+  for (const type of ['movie', 'tv']) {
+    const base = `${TMDB_BASE}/discover/${type}?api_key=${encodeURIComponent(admin.tmdbKey)}&watch_region=FR`
+      + `&with_watch_providers=${CANAL_PLUS}&with_watch_monetization_types=flatrate&sort_by=popularity.desc&include_adult=false`;
+    const p1 = await tmdbJson(base + '&page=1');
+    if (!p1) throw new Error('canal+ ' + type);
+    const n = Math.min(p1.total_pages || 1, 100);
+    const suite = await mapWithConcurrency(Array.from({ length: n - 1 }, (_, i) => i + 2), 6,
+      page => tmdbJson(base + '&page=' + page));
+    // Une page manquante fausserait la liste : on la garde pour la visite, sans l'enregistrer
+    if (suite.some(d => !d)) ids.incomplet = true;
+    for (const d of [p1, ...suite]) for (const it of ((d && d.results) || [])) ids.push(type + '-' + it.id);
+  }
+  const out = [...new Set(ids)];
+  out.incomplet = !!ids.incomplet;
+  return out;
+}
 async function ensureCanalFR() {
-  if (canalEnCours) return false;
-  canalEnCours = true;
-  try { return await verifierCanal(); } finally { canalEnCours = false; }
-}
-async function verifierCanal() {
   const KEY = 'films_canal_fr';
-  const now = Date.now();
-  let memo = {};
-  try { memo = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch {}
-  const aVoir = state.films.filter(f => f.user?.statut === 'a_voir' && f.tmdb_id && f.type);
-  const aVerifier = aVoir.filter(f => !(memo[f.id] && now - memo[f.id][1] < 24 * 3600 * 1000));
-  await mapWithConcurrency(aVerifier, 4, async f => {
-    const path = f.type === 'tv' ? 'tv' : 'movie';
-    const d = await tmdbJson(`${TMDB_BASE}/${path}/${f.tmdb_id}/watch/providers?api_key=${encodeURIComponent(admin.tmdbKey)}`);
-    if (!d) return; // TMDB injoignable : réessayé au passage suivant
-    const abo = ((d.results && d.results.FR && d.results.FR.flatrate) || []);
-    memo[f.id] = [abo.some(p => p.provider_id === CANAL_PLUS), now];
-  });
-  // Ne garder que les films encore à voir
-  const garde = {};
-  for (const f of aVoir) if (memo[f.id]) garde[f.id] = memo[f.id];
-  try { localStorage.setItem(KEY, JSON.stringify(garde)); } catch {}
-  const avant = [...canalSet].sort().join();
-  canalSet = new Set(Object.keys(garde).filter(id => garde[id][0]));
-  return [...canalSet].sort().join() !== avant; // la liste a-t-elle changé ?
-}
-// Vérifier (les films pas encore vus) puis repeindre « à voir » si besoin
-function majCanal() {
-  ensureCanalFR().then(change => {
-    if (change && state.view === 'a_voir') renderGrid();
-  }).catch(() => {});
+  try {
+    const cached = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (cached && Array.isArray(cached.ids) && (Date.now() - cached.ts) < 24 * 3600 * 1000) {
+      canalSet = new Set(cached.ids);
+      return;
+    }
+  } catch {}
+  try {
+    const ids = await fetchCanalCatalogue();
+    canalSet = new Set(ids);
+    if (!ids.incomplet) {
+      try { localStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), ids })); } catch {}
+    }
+  } catch { /* réseau/tmdb : pas de pastille, sans bloquer le site */ }
 }
 
 async function ensureNowPlayingFR() {
@@ -4843,7 +4857,6 @@ async function saveEditedFilm(filmId) {
     refreshStats();
     closeModal();
     showToast('✓ ' + film.title + ' mis à jour', 'success');
-    majCanal(); // repassé « à voir » : est-il sur Canal+ ?
   } catch (e) {
     // Rollback : le save a échoué, films.json contient toujours les anciennes valeurs
     state.films[filmIndex].user = prevUser;
@@ -5429,7 +5442,14 @@ loadAdminCreds();
 wireEvents();
 navInit();
 purgeTmdbMemories();
-loadFilms().then(majCanal);
+loadFilms();
+ensureCanalFR().then(() => {
+  if (!canalSet.size) return;
+  if (state.view === 'a_voir' || state.view === 'vu') renderGrid();
+  else if (state.view === 'discover' && state.lastTmdbItems) renderTmdbGrid(state.lastTmdbItems);
+  else if (state.view === 'reco' && state.recoDisplayed) renderTmdbGrid(state.recoDisplayed);
+  else if (state.view === 'person') renderPersonGrid();
+});
 
 // Récupérer les films actuellement en salles (France) et repeindre les badges
 // « au ciné » sur la vue courante une fois la liste prête (cache 24 h).
