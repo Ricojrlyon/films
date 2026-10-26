@@ -25,6 +25,7 @@ Application personnelle de suivi de films (et séries), hébergée sur GitHub Pa
 | `icone-192.png`, `icone-512.png`, `apple-touch-icon.png` | Icônes de l'application (Android, iPhone) : « \*F », même famille que l'icône « \*N » de nocturne (voir « Application sur téléphone ») |
 | `fonts/` | Les quatre polices du site (Bungee, Bricolage Grotesque, Inter Tight, JetBrains Mono), hébergées sur le site : fichiers `.woff2`, leurs déclarations dans `fonts/polices.css`, leurs licences `OFL-*.txt` (voir « Polices ») |
 | `tmdb.svg` | Logo officiel de TMDB, affiché en blanc dans les mentions légales, rubrique crédits (voir « Partage et référencement ») |
+| `.github/workflows/canal-plus.yml` | Le robot de l'alerte Canal+ : chaque matin, un ticket GitHub (envoyé par mail) pour chaque film « à voir » arrivé sur Canal+ (voir « Alerte Canal+ ») |
 | `README.md` | Ce document |
 
 Flux de données :
@@ -211,6 +212,18 @@ Les quatre polices sont hébergées sur le site (`fonts/`) et non plus chez Goog
 - Bouton du mode édition : un cadenas dessiné (`cadenasSvg` dans app.js), d'une seule couleur, celle du texte du bouton (gris, vert une fois déverrouillé, ouvert), à la place de l'emoji en couleurs ; il est nommé « mode édition » pour les lecteurs d'écran (`aria-label`). Le même cadenas, en petit, figure dans les phrases qui y renvoient.
 - Lecteurs d'écran : les deux champs de recherche ont un nom (`aria-label`), et les titres des stats sont des `h2`, juste sous le titre du site (`h1`), sans niveau sauté.
 - Listes de filtres et de tri : dans la collection, chacune est reliée à son étiquette visible (`aria-labelledby` vers l'id `label-…`), donc le nom annoncé suit le texte affiché. Dans Découvrir, sans étiquettes visibles, elles ont un nom invisible (`aria-label`), sauf « période », nommée par son info-bulle.
+
+## Alerte Canal+
+
+Chaque matin, un robot GitHub (`.github/workflows/canal-plus.yml`, mis en place le 2026-10-26) prévient quand un film de la liste « à voir » entre dans le catalogue Canal+ (abonnement, pas achat ni location) : il ouvre un ticket (issue) « « Hamnet » est sur Canal+ » dans le dépôt, et GitHub l'envoie par mail et sur son application.
+
+- Il lit `films.json` et la clé TMDB d'`app.js` sur le dépôt, puis le catalogue Canal+ en France, films et séries (TMDB `/discover`, fournisseur 381, `flatrate`), comme la pastille « canal+ ».
+- Les tickets (étiquette `canal+`) servent de mémoire, rien n'est écrit dans le dépôt ni republié : un film n'est signalé qu'une fois par arrivée. Le ticket peut être fermé quand on veut. Quand le film quitte Canal+ ou n'est plus « à voir » (vu, supprimé), le robot ferme son ticket avec un mot et l'étiquette `terminé` ; s'il revient plus tard sur Canal+, une nouvelle alerte part. Un catalogue lu incomplètement (TMDB en panne) ne ferme rien.
+- Le ticket nomme le propriétaire du dépôt (`@ricojrlyon`) : la notification arrive même si l'on ne suit pas tout le dépôt. Réglages : https://github.com/settings/notifications (mail pour « Participating, @mentions » et « Watching »).
+- Premier passage : les films à voir déjà sur Canal+ sont signalés aussi (choix d'Emeric). Au 2026-10-26, un seul : Hamnet.
+- Écrit sans brique externe (pas d'`actions/checkout`) : Python seul, déjà présent sur les machines de GitHub, d'où aucun avertissement Node.js. Jeton : celui que GitHub donne au robot (`GITHUB_TOKEN`, droit d'écrire des tickets seulement), aucun secret à créer.
+- Lancer à la main : onglet Actions, « alerte canal+ », Run workflow. Le passage programmé est à 6 h UTC (7 h ou 8 h à Paris), avec parfois du retard chez GitHub. GitHub suspend les passages programmés d'un dépôt public resté 60 jours sans aucun changement : chaque modification de `films.json` (ajout, note) suffit à l'éviter ; sinon le réactiver dans l'onglet Actions.
+- Essayé le 2026-10-26 en simulation (rien d'écrit) sur la base en ligne : alerte pour Hamnet ; et, avec de faux tickets, pas de seconde alerte, nouvelle alerte après un retour, ticket fermé à la main respecté, fin pour un film parti de Canal+ ou vu.
 
 ## Synchronisation multi-appareils
 
