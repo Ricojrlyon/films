@@ -34,7 +34,9 @@ const state = {
   pageSize: 60,
   // Discover view
   discoverCategory: 'now_playing',
+  discoverLimits: {},   // clé de liste -> nombre de films demandés (« charger plus »)
   discoverFilters: { genre: '', country: '', decade: '', sort: 'popularity.desc', hideCollection: false },
+  discoverCanalSort: 'primary_release_date.desc', // « canal+ » a son propre tri (voir discoverSortDefaut)
   discoverCache: {},       // { 'catégorie|genre|pays': [items] } — session cache
   discoverSearchTimer: null,
   lastTmdbItems: null,      // dernière liste TMDB affichée (re-rendu du masquage sans refetch)
@@ -345,6 +347,7 @@ function renderGrid(opts) {
   if (!opts.append && posterObserver) posterObserver.disconnect();
   const empty = document.getElementById('empty');
   const loadMoreWrap = document.getElementById('load-more-wrap');
+  document.getElementById('discover-more-wrap').style.display = 'none';
   const total = state.filtered.length;
   document.getElementById('result-count').textContent = total;
 
@@ -454,6 +457,14 @@ function buildCard(f) {
     poster.appendChild(c);
   }
 
+  // « canal+ » : film à voir disponible avec l'abonnement Canal+
+  if (f.user?.statut === 'a_voir' && canalSet.has(f.id)) {
+    const c = document.createElement('div');
+    c.className = 'canal-badge';
+    c.textContent = 'canal+';
+    poster.appendChild(c);
+  }
+
   // meta (title + year)
   const meta = document.createElement('div');
   meta.className = 'meta';
@@ -525,6 +536,12 @@ function setView(view) {
 // (« au cinéma » et « prochainement » ont la leur)
 const discoverAvecPeriode = category => category === 'trending' || category === 'canal';
 
+// Tri par défaut : « canal+ » montre d'abord les sorties récentes (les films
+// récents arrivent sur Canal+ environ 6 mois après la salle), les autres
+// catégories la popularité. Le tri choisi sur « canal+ » lui reste propre ;
+// celui des autres catégories est commun aux trois.
+const discoverSortDefaut = category => category === 'canal' ? 'primary_release_date.desc' : 'popularity.desc';
+
 // Filtres effectifs pour une catégorie : la décennie ne s'applique que sur
 // « tendances » et « canal+ »
 function discoverEffectiveFilters(category) {
@@ -533,7 +550,7 @@ function discoverEffectiveFilters(category) {
     genre: f.genre || '',
     country: f.country || '',
     decade: discoverAvecPeriode(category) ? (f.decade || '') : '',
-    sort: f.sort || 'popularity.desc',
+    sort: (category === 'canal' ? state.discoverCanalSort : f.sort) || discoverSortDefaut(category),
   };
 }
 
@@ -600,7 +617,10 @@ async function fetchAndRenderDiscover(category) {
     if (sel) sel.classList.toggle('active', !!sel.value && !sel.disabled);
   });
   const sortSel = document.getElementById('discover-sort');
-  if (sortSel) sortSel.classList.toggle('active', sortSel.value !== 'popularity.desc');
+  if (sortSel) {
+    sortSel.value = discoverEffectiveFilters(category).sort; // le tri de cette catégorie
+    sortSel.classList.toggle('active', sortSel.value !== discoverSortDefaut(category));
+  }
 
   const grid = document.getElementById('grid');
   const countEl = document.getElementById('result-count');
@@ -617,7 +637,8 @@ async function fetchAndRenderDiscover(category) {
   grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">chargement tmdb…</div>';
   countEl.textContent = '…';
   try {
-    const results = await tmdbBrowse(category, discoverEffectiveFilters(category));
+    const results = await tmdbBrowse(category, discoverEffectiveFilters(category),
+      state.discoverLimits[cacheKey] || DISCOVER_COUNT);
     state.discoverCache[cacheKey] = results;
     // La vue, la catégorie OU les filtres ont pu changer pendant le fetch —
     // ne pas écraser la grille (réponses croisées)
@@ -627,6 +648,38 @@ async function fetchAndRenderDiscover(category) {
     if (state.view !== 'discover' || cacheKey !== discoverCacheKey(state.discoverCategory)) return;
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur tmdb : ${escapeHtml(e.message)}</div>`;
     countEl.textContent = '0';
+  }
+}
+
+// « charger plus de films » (catégorie « canal+ ») : la même liste, 40
+// films plus loin. Elle est relue en entier avec plus de pages TMDB : le
+// rééquilibrage choisit les mêmes films pour les premières places, les
+// suivants s'ajoutent dessous (la page ne bouge pas).
+const DISCOVER_PLUS = ['canal'];
+let discoverPlusEnCours = false;
+async function loadMoreDiscover() {
+  if (discoverPlusEnCours) return;
+  const category = state.discoverCategory;
+  const cacheKey = discoverCacheKey(category);
+  const btn = document.getElementById('discover-more');
+  const limite = (state.discoverLimits[cacheKey] || DISCOVER_COUNT) + DISCOVER_COUNT;
+  discoverPlusEnCours = true;
+  btn.disabled = true;
+  btn.textContent = 'chargement…';
+  try {
+    const results = await tmdbBrowse(category, discoverEffectiveFilters(category), limite);
+    state.discoverLimits[cacheKey] = limite;
+    state.discoverCache[cacheKey] = results;
+    // Autre vue, autre catégorie ou recherche en cours : la liste attendra
+    const recherche = (document.getElementById('discover-search').value || '').trim();
+    if (state.view !== 'discover' || cacheKey !== discoverCacheKey(state.discoverCategory) || recherche.length >= 2) return;
+    renderTmdbGrid(results);
+  } catch (e) {
+    showToast('erreur tmdb : ' + e.message, 'error');
+  } finally {
+    discoverPlusEnCours = false;
+    btn.disabled = false;
+    btn.textContent = 'charger plus de films';
   }
 }
 
@@ -665,6 +718,9 @@ function renderTmdbGrid(items) {
   const emptyEl = document.getElementById('empty');
   const loadMoreWrap = document.getElementById('load-more-wrap');
   if (loadMoreWrap) loadMoreWrap.style.display = 'none';
+  const plus = state.view === 'discover' && DISCOVER_PLUS.includes(state.discoverCategory)
+    && items && items === state.discoverCache[discoverCacheKey(state.discoverCategory)] && items.encore;
+  document.getElementById('discover-more-wrap').style.display = plus ? '' : 'none';
 
   // Liste brute mémorisée : « masquer ma collec » re-rend sans refetch
   state.lastTmdbItems = items || [];
@@ -793,6 +849,7 @@ async function openPerson(name, role, ctxFilmId, tab) {
   document.getElementById('discover-header').style.display = 'none';
   document.getElementById('reco-header').style.display = 'none';
   document.getElementById('load-more-wrap').style.display = 'none';
+  document.getElementById('discover-more-wrap').style.display = 'none';
   document.getElementById('empty').style.display = 'none';
   document.getElementById('person-header').style.display = '';
   document.getElementById('person-id').innerHTML = `
@@ -1956,6 +2013,7 @@ async function addTmdbFilmToCollection(film, statut, userData) {
     }
     closeModal();
     showToast('✓ ajouté : ' + film.title, 'success');
+    majCanal(); // un film « à voir » : est-il sur Canal+ ?
   } catch (e) {
     // Rollback
     const idx = state.films.findIndex(f => f.id === film.id);
@@ -3359,6 +3417,48 @@ async function fetchNowPlayingIdsFR() {
   for (const d of pages) for (const m of (d.results || [])) ids.push('movie-' + m.id);
   return [...new Set(ids)];
 }
+// ---- « canal+ » : films à voir disponibles avec l'abonnement Canal+ ----
+// Pour chaque film « à voir », ses offres en France (TMDB /watch/providers,
+// données JustWatch) : Canal+ (fournisseur 381) en streaming par abonnement ;
+// Canal VOD, location et achat, ne compte pas. Gardé sur l'appareil 24 h
+// par film (clé films_canal_fr, { id: [disponible, date] }), seulement pour
+// les films encore à voir : un film ajouté est vérifié au passage suivant.
+let canalSet = new Set();
+let canalEnCours = false;
+async function ensureCanalFR() {
+  if (canalEnCours) return false;
+  canalEnCours = true;
+  try { return await verifierCanal(); } finally { canalEnCours = false; }
+}
+async function verifierCanal() {
+  const KEY = 'films_canal_fr';
+  const now = Date.now();
+  let memo = {};
+  try { memo = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch {}
+  const aVoir = state.films.filter(f => f.user?.statut === 'a_voir' && f.tmdb_id && f.type);
+  const aVerifier = aVoir.filter(f => !(memo[f.id] && now - memo[f.id][1] < 24 * 3600 * 1000));
+  await mapWithConcurrency(aVerifier, 4, async f => {
+    const path = f.type === 'tv' ? 'tv' : 'movie';
+    const d = await tmdbJson(`${TMDB_BASE}/${path}/${f.tmdb_id}/watch/providers?api_key=${encodeURIComponent(admin.tmdbKey)}`);
+    if (!d) return; // TMDB injoignable : réessayé au passage suivant
+    const abo = ((d.results && d.results.FR && d.results.FR.flatrate) || []);
+    memo[f.id] = [abo.some(p => p.provider_id === CANAL_PLUS), now];
+  });
+  // Ne garder que les films encore à voir
+  const garde = {};
+  for (const f of aVoir) if (memo[f.id]) garde[f.id] = memo[f.id];
+  try { localStorage.setItem(KEY, JSON.stringify(garde)); } catch {}
+  const avant = [...canalSet].sort().join();
+  canalSet = new Set(Object.keys(garde).filter(id => garde[id][0]));
+  return [...canalSet].sort().join() !== avant; // la liste a-t-elle changé ?
+}
+// Vérifier (les films pas encore vus) puis repeindre « à voir » si besoin
+function majCanal() {
+  ensureCanalFR().then(change => {
+    if (change && state.view === 'a_voir') renderGrid();
+  }).catch(() => {});
+}
+
 async function ensureNowPlayingFR() {
   const KEY = 'films_nowplaying_fr';
   try {
@@ -3484,7 +3584,8 @@ async function tmdbDetails(id, type) {
 // la location et l'achat, n'en fait pas partie), tous horizons comme
 // « tendances ».
 const CANAL_PLUS = 381;
-async function tmdbBrowse(category, filters) {
+// count : nombre de films voulus (40, puis 80, 120… avec « charger plus »)
+async function tmdbBrowse(category, filters, count = DISCOVER_COUNT) {
   filters = filters || {};
   const hasFilters = !!(filters.genre || filters.country || filters.decade
     || (filters.sort && filters.sort !== 'popularity.desc'));
@@ -3537,12 +3638,22 @@ async function tmdbBrowse(category, filters) {
   // faut aller chercher plus loin dans la liste — TMDB classe les films non
   // américains bien après les 40 premiers. Sinon 2 pages suffisent.
   const rebalance = !filters.country && (filters.sort || 'popularity.desc') === 'popularity.desc';
-  const pageCount = rebalance ? (category === 'canal' ? DISCOVER_CANAL_PAGES : DISCOVER_REBALANCE_PAGES) : 2;
-  const [p1, ...others] = await Promise.all([
-    fetch(baseUrl + '&page=1').then(r => r.ok ? r.json() : { results: [] }),
-    ...Array.from({ length: pageCount - 1 }, (_, i) =>
-      fetch(baseUrl + '&page=' + (i + 2)).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] }))),
-  ]);
+  const lots = Math.ceil(count / DISCOVER_COUNT);
+  const pageCount = lots * (rebalance ? (category === 'canal' ? DISCOVER_CANAL_PAGES : DISCOVER_REBALANCE_PAGES) : 2);
+  // La page 1 est indispensable (réseau coupé : erreur affichée) ; une autre
+  // page qui échoue est simplement ignorée
+  const page1 = () => fetch(baseUrl + '&page=1').then(r => r.ok ? r.json() : { results: [] });
+  const page = n => fetch(baseUrl + '&page=' + n).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] }));
+  let p1, others;
+  if (lots === 1) {
+    // Première liste : toutes les pages d'un coup
+    [p1, ...others] = await Promise.all([page1(), ...Array.from({ length: pageCount - 1 }, (_, i) => page(i + 2))]);
+  } else {
+    // « charger plus » : pas plus de pages que TMDB n'en a
+    p1 = await page1();
+    const fin = Math.min(pageCount, p1.total_pages || pageCount);
+    others = await Promise.all(Array.from({ length: Math.max(0, fin - 1) }, (_, i) => page(i + 2)));
+  }
   const all = [p1, ...others].flatMap(p => p.results || []);
   // Une liste « all » renverrait aussi des personnes — pas affichables comme films
   // (pas de poster_path, et le clic requêterait /movie/{id_de_personne}).
@@ -3556,7 +3667,15 @@ async function tmdbBrowse(category, filters) {
       media_type: it.media_type || 'movie',
     }))
     .filter(it => { const k = it.media_type + '-' + it.id; return !seen.has(k) && seen.add(k); });
-  if (rebalance) return capUSShare(list, DISCOVER_COUNT);
+  // TMDB a-t-il encore des pages au-delà de celles lues ? (« charger plus »)
+  const encore = (p1.total_pages || 0) > pageCount;
+  if (rebalance) {
+    const out = await capUSShare(list, count);
+    // Toutes les places remplies : les films déjà lus peuvent en remplir
+    // d'autres, même quand TMDB n'a plus de pages
+    out.encore = encore || out.length >= count;
+    return out;
+  }
   // Re-tri local : TMDB ne garantit pas un ordre strict à la jonction des
   // deux pages, et la date affichée (sortie FR via region=FR) peut différer
   // de la date de tri serveur (sortie originale)
@@ -3565,7 +3684,9 @@ async function tmdbBrowse(category, filters) {
     if (sort === 'vote_average.desc') list.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
     else if (sort === 'primary_release_date.desc') list.sort((a, b) => (b.release_date || '').localeCompare(a.release_date || ''));
   }
-  return list.slice(0, DISCOVER_COUNT);
+  const out = list.slice(0, count);
+  out.encore = encore || list.length > count;
+  return out;
 }
 
 // Au plus un film américain sur trois dans les onglets de Découvrir. Est
@@ -4722,6 +4843,7 @@ async function saveEditedFilm(filmId) {
     refreshStats();
     closeModal();
     showToast('✓ ' + film.title + ' mis à jour', 'success');
+    majCanal(); // repassé « à voir » : est-il sur Canal+ ?
   } catch (e) {
     // Rollback : le save a échoué, films.json contient toujours les anciennes valeurs
     state.films[filmIndex].user = prevUser;
@@ -4921,7 +5043,9 @@ function wireEvents() {
       state.discoverFilters.genre = document.getElementById('discover-genre').value;
       state.discoverFilters.country = document.getElementById('discover-country').value;
       state.discoverFilters.decade = document.getElementById('discover-decade').value;
-      state.discoverFilters.sort = document.getElementById('discover-sort').value;
+      const tri = document.getElementById('discover-sort').value;
+      if (state.discoverCategory === 'canal') state.discoverCanalSort = tri;
+      else state.discoverFilters.sort = tri;
       const discInput = document.getElementById('discover-search');
       if (discInput) discInput.value = '';
       fetchAndRenderDiscover(state.discoverCategory);
@@ -5014,6 +5138,8 @@ function wireEvents() {
     setView('a_voir');
     navLater('tab');
   });
+
+  document.getElementById('discover-more').addEventListener('click', loadMoreDiscover);
 
   // Load more
   document.getElementById('load-more').addEventListener('click', () => {
@@ -5303,7 +5429,7 @@ loadAdminCreds();
 wireEvents();
 navInit();
 purgeTmdbMemories();
-loadFilms();
+loadFilms().then(majCanal);
 
 // Récupérer les films actuellement en salles (France) et repeindre les badges
 // « au ciné » sur la vue courante une fois la liste prête (cache 24 h).

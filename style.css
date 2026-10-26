@@ -415,6 +415,27 @@ body {
   text-transform: uppercase;
 }
 
+/* Pastille « canal+ » : film à voir disponible avec l'abonnement Canal+.
+   Même coin que « au ciné », juste au-dessus quand les deux sont là. */
+.card .canal-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(22, 31, 37, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(231, 223, 190, 0.4);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.card .cine-badge + .canal-badge { bottom: 28px; }
+
 /* meta on hover (desktop) and always on tap */
 .card .meta {
   padding: 8px 4px 4px;
