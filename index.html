@@ -98,9 +98,11 @@
         <select id="discover-country" aria-label="pays"><option value="">tous pays</option></select>
         <select id="discover-decade" title="période : disponible sur « tendances » et « canal+ »"><option value="">toutes périodes</option></select>
         <select id="discover-sort" aria-label="trier par">
+          <option value="gouts">selon tes goûts</option>
           <option value="popularity.desc">populaires</option>
           <option value="vote_average.desc">mieux notés</option>
           <option value="primary_release_date.desc">sorties récentes</option>
+          <option value="release_date.asc">dates les plus proches</option>
         </select>
         <button class="discover-hide-toggle" id="discover-hide-collection"
                 title="masquer les films déjà dans ma collection">masquer ma collec</button>
@@ -205,7 +207,7 @@
     <div class="load-more-wrap" id="load-more-wrap" style="display: none;">
       <button class="load-more" id="load-more">charger plus</button>
     </div>
-    <!-- Découvrir, catégorie « canal+ » : 40 films de plus à chaque clic -->
+    <!-- Découvrir, « canal+ » et « prochainement » : 40 films de plus à chaque clic -->
     <div class="load-more-wrap" id="discover-more-wrap" style="display: none;">
       <button class="load-more" id="discover-more">charger plus de films</button>
     </div>
@@ -494,6 +496,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=13"></script>
+<script src="app.js?v=14"></script>
 </body>
 </html>

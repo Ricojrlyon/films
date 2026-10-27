@@ -36,7 +36,8 @@ const state = {
   discoverCategory: 'now_playing',
   discoverLimits: {},   // clé de liste -> nombre de films demandés (« charger plus »)
   discoverFilters: { genre: '', country: '', decade: '', sort: 'popularity.desc', hideCollection: false },
-  discoverCanalSort: 'primary_release_date.desc', // « canal+ » a son propre tri (voir discoverSortDefaut)
+  // « canal+ » et « prochainement » ont chacun leur tri (voir discoverSortDefaut)
+  discoverSortsPropres: { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', now_playing: 'gouts' },
   discoverCache: {},       // { 'catégorie|genre|pays': [items] } — session cache
   discoverSearchTimer: null,
   lastTmdbItems: null,      // dernière liste TMDB affichée (re-rendu du masquage sans refetch)
@@ -537,10 +538,13 @@ function setView(view) {
 const discoverAvecPeriode = category => category === 'trending' || category === 'canal';
 
 // Tri par défaut : « canal+ » montre d'abord les sorties récentes (les films
-// récents arrivent sur Canal+ environ 6 mois après la salle), les autres
-// catégories la popularité. Le tri choisi sur « canal+ » lui reste propre ;
-// celui des autres catégories est commun aux trois.
-const discoverSortDefaut = category => category === 'canal' ? 'primary_release_date.desc' : 'popularity.desc';
+// récents arrivent sur Canal+ environ 6 mois après la salle), « prochainement »
+// les sorties en salle en France les plus proches (cette semaine, puis la
+// suivante…), « au cinéma » les films selon les goûts d'Emeric (voir
+// classerSelonGouts), « tendances » la popularité. Le tri choisi sur
+// « canal+ », « prochainement » ou « au cinéma » leur reste propre.
+const DISCOVER_TRI_DEFAUT = { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', now_playing: 'gouts' };
+const discoverSortDefaut = category => DISCOVER_TRI_DEFAUT[category] || 'popularity.desc';
 
 // Filtres effectifs pour une catégorie : la décennie ne s'applique que sur
 // « tendances » et « canal+ »
@@ -550,7 +554,8 @@ function discoverEffectiveFilters(category) {
     genre: f.genre || '',
     country: f.country || '',
     decade: discoverAvecPeriode(category) ? (f.decade || '') : '',
-    sort: (category === 'canal' ? state.discoverCanalSort : f.sort) || discoverSortDefaut(category),
+    sort: (category in state.discoverSortsPropres ? state.discoverSortsPropres[category] : f.sort)
+      || discoverSortDefaut(category),
   };
 }
 
@@ -618,6 +623,11 @@ async function fetchAndRenderDiscover(category) {
   });
   const sortSel = document.getElementById('discover-sort');
   if (sortSel) {
+    // « dates les plus proches » n'a de sens que pour « prochainement », et
+    // « sorties récentes » (de la plus récente à la plus ancienne) pas pour lui
+    sortSel.querySelector('option[value="release_date.asc"]').hidden = category !== 'upcoming';
+    sortSel.querySelector('option[value="gouts"]').hidden = category !== 'now_playing';
+    sortSel.querySelector('option[value="primary_release_date.desc"]').hidden = category === 'upcoming';
     sortSel.value = discoverEffectiveFilters(category).sort; // le tri de cette catégorie
     sortSel.classList.toggle('active', sortSel.value !== discoverSortDefaut(category));
   }
@@ -634,11 +644,14 @@ async function fetchAndRenderDiscover(category) {
     return;
   }
 
-  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">chargement tmdb…</div>';
+  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">chargement tmdb…<br><span id="discover-progress"></span></div>';
   countEl.textContent = '…';
   try {
     const results = await tmdbBrowse(category, discoverEffectiveFilters(category),
-      state.discoverLimits[cacheKey] || DISCOVER_COUNT);
+      state.discoverLimits[cacheKey] || DISCOVER_COUNT, (fait, total) => {
+        const el = document.getElementById('discover-progress');
+        if (el) el.textContent = 'classement selon tes goûts : ' + fait + ' / ' + total;
+      });
     state.discoverCache[cacheKey] = results;
     // La vue, la catégorie OU les filtres ont pu changer pendant le fetch —
     // ne pas écraser la grille (réponses croisées)
@@ -651,11 +664,11 @@ async function fetchAndRenderDiscover(category) {
   }
 }
 
-// « charger plus de films » (catégorie « canal+ ») : la même liste, 40
+// « charger plus de films » (« canal+ », « prochainement ») : la même liste, 40
 // films plus loin. Elle est relue en entier avec plus de pages TMDB : le
 // rééquilibrage choisit les mêmes films pour les premières places, les
 // suivants s'ajoutent dessous (la page ne bouge pas).
-const DISCOVER_PLUS = ['canal'];
+const DISCOVER_PLUS = ['canal', 'upcoming', 'now_playing'];
 let discoverPlusEnCours = false;
 async function loadMoreDiscover() {
   if (discoverPlusEnCours) return;
@@ -1538,6 +1551,118 @@ async function buildRecoPool(sources, onProgress) {
     .sort((a, b) => b.reco_w - a.reco_w);
 }
 
+// « au cinéma », tri « selon tes goûts » (par défaut depuis le 2026-10-27).
+// Tous les films à l'affiche en France (TMDB now_playing, environ 180)
+// reçoivent une note d'affinité avec les films aimés (vus, 4★ et plus) :
+//  · ressemblance (40 %) : comme la Reco, mots-clés pondérés par leur
+//    rareté, genres, même réal ou acteurs communs ; moyenne des 5 films
+//    aimés les plus proches, chacun pesant sa note ;
+//  · pays (35 %) et genres (25 %) : leur place parmi les films aimés. Les
+//    sorties françaises récentes ont souvent peu ou pas de mots-clés chez
+//    TMDB : sans ces deux signaux, elles seraient jugées sur le genre seul ;
+//  · critères de la Reco : réalisatrice ×1,6, production américaine ×0,6 ;
+//  · présence : jusqu'à -35 % pour un film sans aucun vote TMDB (complet à
+//    100 votes), pour que les toutes petites sorties ne passent pas toutes
+//    devant.
+// Les films de la liste « à voir » passent devant. Réglé le 2026-10-27 sur
+// les exemples d'Emeric : Le Corset 2e, Garance 4e, Melpomène 11e, Notre
+// salut 23e ; Street Fighter 133e, Détective Conan 156e (sur 182).
+// Coût : les profils des films aimés et des films à l'affiche (environ 450
+// appels TMDB la première fois, une quinzaine de secondes), puis le cache
+// des profils de la Reco (60 jours).
+const GOUTS = { ressemblance: 0.40, pays: 0.35, genres: 0.25, voisins: 5, presence: 0.35 };
+async function classerSelonGouts(items, onProgress) {
+  const cache = loadRecoProfiles();
+  const aimes = state.films.filter(f => f.user?.statut === 'vu' && f.type === 'movie' && f.tmdb_id && f.user.rating >= 4);
+  const ids = [...new Set([...aimes.map(f => f.tmdb_id), ...items.map(it => it.id)])];
+  let fait = 0;
+  await mapWithConcurrency(ids, 8, async id => {
+    await recoProfile(cache, 'movie', id);
+    if (onProgress) onProgress(++fait, ids.length);
+  });
+  saveRecoProfiles(cache);
+  const P = id => cache.get('movie-' + id);
+  const sources = aimes.map(f => ({ w: ratingOutOf10(f.user.rating) / 10, p: P(f.tmdb_id) })).filter(s => s.p);
+  // Rareté des mots-clés et des genres sur l'ensemble (aimés + à l'affiche)
+  const tous = [...sources.map(s => s.p), ...items.map(it => P(it.id)).filter(Boolean)];
+  const dfK = new Map(), dfG = new Map();
+  for (const p of tous) {
+    for (const x of new Set(p.k)) dfK.set(x, (dfK.get(x) || 0) + 1);
+    for (const x of new Set(p.g)) dfG.set(x, (dfG.get(x) || 0) + 1);
+  }
+  const N = Math.max(1, tous.length);
+  const idfK = x => Math.log(1 + N / (dfK.get(x) || 1));
+  const idfG = x => Math.log(1 + N / (dfG.get(x) || 1));
+  const meta = new Set(RECO.metaKeywords);
+  const motsCles = p => new Set(p.k.filter(x => !meta.has(x)));
+  const cosinus = (a, b) => {
+    if (!a.size || !b.size) return 0;
+    let dot = 0, na = 0, nb = 0;
+    for (const x of a) { const w = idfK(x) ** 2; na += w; if (b.has(x)) dot += w; }
+    for (const x of b) nb += idfK(x) ** 2;
+    return dot / Math.sqrt(na * nb);
+  };
+  const jaccard = (a, b) => {
+    const A = new Set(a), B = new Set(b);
+    if (!A.size || !B.size) return 0;
+    let inter = 0, union = 0;
+    for (const x of new Set([...A, ...B])) { const w = idfG(x); union += w; if (A.has(x) && B.has(x)) inter += w; }
+    return inter / union;
+  };
+  const equipe = (a, b) => a.d.some(x => b.d.includes(x)) ? 1 : Math.min(1, a.c.filter(x => b.c.includes(x)).length / 3);
+  for (const s of sources) s.kw = motsCles(s.p);
+  // Place d'un pays, d'un genre parmi les films aimés (1 = le plus fréquent)
+  const part = choix => {
+    const m = new Map();
+    for (const s of sources) for (const x of new Set(choix(s.p))) m.set(x, (m.get(x) || 0) + 1);
+    const max = Math.max(1, ...m.values());
+    return x => (m.get(x) || 0) / max;
+  };
+  const partPays = part(p => p.p), partGenre = part(p => p.g);
+  const ressemblance = new Map();
+  for (const it of items) {
+    const p = P(it.id);
+    if (!p) continue;
+    const kw = motsCles(p);
+    const sims = sources.map(s => s.w * (0.5 * cosinus(s.kw, kw) + 0.25 * jaccard(s.p.g, p.g) + 0.25 * equipe(s.p, p)))
+      .sort((a, b) => b - a).slice(0, GOUTS.voisins);
+    ressemblance.set(it.id, sims.reduce((a, x) => a + x, 0) / GOUTS.voisins);
+  }
+  const maxRess = Math.max(1e-9, ...ressemblance.values());
+  const aVoir = new Set(state.films.filter(f => f.user?.statut === 'a_voir').map(f => f.id));
+  for (const it of items) {
+    const p = P(it.id) || { p: [], g: [], f: 0 };
+    const pays = p.p.length ? Math.max(...p.p.map(partPays)) : 0.3;
+    const genres = p.g.length ? p.g.reduce((a, g) => a + partGenre(g), 0) / p.g.length : 0.3;
+    const presence = Math.min(1, Math.log10(1 + (it.vote_count || 0)) / 2);
+    it._gout = (GOUTS.ressemblance * (ressemblance.get(it.id) || 0) / maxRess + GOUTS.pays * pays + GOUTS.genres * genres)
+      * recoCriteria(p) * (1 - GOUTS.presence + GOUTS.presence * presence);
+    it._aVoir = aVoir.has('movie-' + it.id) ? 1 : 0;
+    it._pays = p.p;
+  }
+  return items.sort((a, b) => b._aVoir - a._aVoir || b._gout - a._gout);
+}
+
+// Liste « au cinéma » selon les goûts : toutes les pages de TMDB, classées,
+// puis les filtres genre et pays appliqués ici
+async function parcourirSelonGouts(filters, count, onProgress) {
+  const base = `${TMDB_BASE}/movie/now_playing?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
+  const p1 = await fetch(base + '&page=1').then(r => r.ok ? r.json() : { results: [] });
+  const total = Math.min(p1.total_pages || 1, 25);
+  const suite = await mapWithConcurrency(Array.from({ length: total - 1 }, (_, i) => i + 2), 6,
+    page => tmdbJson(base + '&page=' + page));
+  const vus = new Set();
+  let items = [p1, ...suite].flatMap(d => (d && d.results) || [])
+    .filter(it => !vus.has(it.id) && vus.add(it.id))
+    .map(it => ({ ...it, media_type: 'movie' }));
+  items = await classerSelonGouts(items, onProgress);
+  if (filters.genre) items = items.filter(it => (it.genre_ids || []).includes(Number(filters.genre)));
+  if (filters.country) items = items.filter(it => (it._pays || []).includes(filters.country));
+  const out = items.slice(0, count);
+  out.encore = items.length > count;
+  return out;
+}
+
 function seededRandom(seed) {
   // Mulberry32-ish PRNG
   let s = seed * 2654435761 | 0;
@@ -1784,8 +1909,8 @@ function openModal(f, opts) {
     if (admin.active) {
       actionsHtml = `
         <div class="tmdb-actions" id="tmdb-actions">
-          <button class="tmdb-action" data-action="show_vu_form">déjà vu</button>
           <button class="tmdb-action" data-action="add_avoir">à voir</button>
+          <button class="tmdb-action" data-action="show_vu_form">déjà vu</button>
         </div>
         <div class="tmdb-add-form-section" id="tmdb-add-form-section" style="display: none;">
           <div class="edit-section-title">ajouter aux vus</div>
@@ -3599,8 +3724,9 @@ async function tmdbDetails(id, type) {
 // « tendances ».
 const CANAL_PLUS = 381;
 // count : nombre de films voulus (40, puis 80, 120… avec « charger plus »)
-async function tmdbBrowse(category, filters, count = DISCOVER_COUNT) {
+async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress) {
   filters = filters || {};
+  if (filters.sort === 'gouts') return parcourirSelonGouts(filters, count, onProgress);
   const hasFilters = !!(filters.genre || filters.country || filters.decade
     || (filters.sort && filters.sort !== 'popularity.desc'));
   const params = `api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
@@ -3624,7 +3750,10 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT) {
       gte = new Date(Date.now() - 42 * 86400000).toISOString().slice(0, 10);
       lte = today;
     } else if (category === 'upcoming') {
-      gte = today;
+      // Dates de sortie en salle EN FRANCE (region=FR : release_date porte sur
+      // le pays ; types 2 et 3, sortie limitée ou nationale), pas la date
+      // mondiale : l'ordre suit le calendrier des salles françaises
+      extra += `&release_date.gte=${today}&with_release_type=2|3`;
     } else {
       if (filters.decade) {
         const dec = parseInt(filters.decade, 10);
@@ -3657,6 +3786,10 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT) {
   // La page 1 est indispensable (réseau coupé : erreur affichée) ; une autre
   // page qui échoue est simplement ignorée
   const page1 = () => fetch(baseUrl + '&page=1').then(r => r.ok ? r.json() : { results: [] });
+  // « prochainement » : les ressorties de vieux films (classiques ressortis en
+  // salle) ne sont pas des nouveautés : écartées (sortie d'origine > 1 an)
+  const ilYaUnAn = new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10);
+  const nouveau = it => category !== 'upcoming' || !it.release_date || it.release_date >= ilYaUnAn;
   const page = n => fetch(baseUrl + '&page=' + n).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] }));
   let p1, others;
   if (lots === 1) {
@@ -3680,7 +3813,8 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT) {
       // Add media_type for movie-only endpoints (TMDB doesn't include it there)
       media_type: it.media_type || 'movie',
     }))
-    .filter(it => { const k = it.media_type + '-' + it.id; return !seen.has(k) && seen.add(k); });
+    .filter(it => { const k = it.media_type + '-' + it.id; return !seen.has(k) && seen.add(k); })
+    .filter(nouveau);
   // TMDB a-t-il encore des pages au-delà de celles lues ? (« charger plus »)
   const encore = (p1.total_pages || 0) > pageCount;
   if (rebalance) {
@@ -5057,7 +5191,7 @@ function wireEvents() {
       state.discoverFilters.country = document.getElementById('discover-country').value;
       state.discoverFilters.decade = document.getElementById('discover-decade').value;
       const tri = document.getElementById('discover-sort').value;
-      if (state.discoverCategory === 'canal') state.discoverCanalSort = tri;
+      if (state.discoverCategory in state.discoverSortsPropres) state.discoverSortsPropres[state.discoverCategory] = tri;
       else state.discoverFilters.sort = tri;
       const discInput = document.getElementById('discover-search');
       if (discInput) discInput.value = '';
