@@ -764,10 +764,8 @@ function renderTmdbGrid(items) {
   countEl.textContent = shown.length;
   const listeCanal = state.view === 'discover' && state.discoverCategory === 'canal'
     && items === state.discoverCache[discoverCacheKey('canal')];
-  const listeLyon = state.view === 'discover' && state.discoverCategory === 'lyon'
-    && items === state.discoverCache[discoverCacheKey('lyon')];
   for (const item of shown) {
-    grid.appendChild(buildTmdbCard(item, listeCanal, listeLyon));
+    grid.appendChild(buildTmdbCard(item, listeCanal));
   }
   fillCardMeta();
 }
@@ -1171,9 +1169,8 @@ async function fillCardMeta() {
   if (datesChanged) persistReleaseFr();
 }
 
-// sansCanal : la liste « canal+ » elle-même (tous ses films y sont) ;
-// avecSalles : la liste « à lyon » (les salles qui le jouent, sous le titre)
-function buildTmdbCard(item, sansCanal, avecSalles) {
+// sansCanal : la liste « canal+ » elle-même (tous ses films y sont)
+function buildTmdbCard(item, sansCanal) {
   const card = document.createElement('div');
   card.className = 'card tmdb-card';
   card.tabIndex = 0;
@@ -1231,12 +1228,6 @@ function buildTmdbCard(item, sansCanal, avecSalles) {
   card.dataset.mediaType = item.media_type || 'movie';
   const kd = provisionalDirector(id);
   if (kd) meta.querySelector('.card-director').textContent = kd;
-  if (avecSalles) {
-    const sl = document.createElement('div');
-    sl.className = 'card-salles';
-    sl.textContent = Object.keys(seancesLyon(id)).map(nomSalle).sort((a, b) => a.localeCompare(b, 'fr')).join(' · ');
-    card.appendChild(sl);
-  }
 
   card.addEventListener('click', () => openTmdbItem(item));
   card.addEventListener('keydown', (e) => {
@@ -1728,40 +1719,6 @@ async function parcourirLyon(filters, count, onProgress) {
   return out;
 }
 
-// Fiche : les séances à venir dans les salles suivies
-const JOURS_COURTS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
-async function fillLyon(f) {
-  await chargerLyon();
-  const el = document.getElementById('lyon-section');
-  if (!el || openModalCtx?.id !== f.id) return;
-  const salles = seancesLyon(f.id);
-  const codes = Object.keys(salles).sort((a, b) => nomSalle(a).localeCompare(nomSalle(b), 'fr'));
-  if (!codes.length) { el.innerHTML = ''; return; }
-  const auj = maintenantLocal().slice(0, 10);
-  const demain = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })();
-  const libelleJour = iso => {
-    if (iso === auj) return 'auj.';
-    if (iso === demain) return 'demain';
-    const d = new Date(iso + 'T12:00:00');
-    return JOURS_COURTS[d.getDay()] + ' ' + d.getDate();
-  };
-  const blocs = codes.map(code => {
-    const parJour = new Map();
-    for (const [quand, v] of salles[code]) {
-      const j = quand.slice(0, 10);
-      if (!parJour.has(j)) parJour.set(j, []);
-      parJour.get(j).push(quand.slice(11, 16) + (v ? ` <span class="lyon-v">${v}</span>` : ''));
-    }
-    const salle = (lyon.salles || []).find(s => s.code === code) || {};
-    const url = safeUrl(salle.url || '');
-    const jours = [...parJour].map(([j, h]) => `<span class="lyon-jour"><b>${libelleJour(j)}</b>${h.join(' · ')}</span>`).join('');
-    return `<div class="lyon-salle">${url ? `<a class="lyon-nom" href="${url}" target="_blank" rel="noopener">${escapeHtml(nomSalle(code))} ↗</a>` : escapeHtml(nomSalle(code))}
-      <div class="lyon-jours">${jours}</div></div>`;
-  });
-  el.innerHTML = `<div class="modal-section-label">à lyon cette semaine</div>${blocs.join('')}
-    <div class="watch-source">séances : AlloCiné</div>`;
-}
-
 function seededRandom(seed) {
   // Mulberry32-ish PRNG
   let s = seed * 2654435761 | 0;
@@ -2080,7 +2037,6 @@ function openModal(f, opts) {
     ${genresHtml}
     ${synopsisHtml}
     ${castHtml}
-    <div class="lyon-section" id="lyon-section"></div>
     <div class="watch-section" id="watch-section"></div>
     ${links.length ? `<div class="ext-links">${links.join('')}</div>` : ''}
     ${actionsHtml}
@@ -2172,7 +2128,7 @@ function openModal(f, opts) {
 
   // Où le voir en France : rempli dès que TMDB répond
   fillWatchProviders(f);
-  fillLyon(f);
+  chargerLyon().then(() => renderOuVoir(f));
 
   // Lazy-fetch country if missing (existing films from initial migration didn't have it)
   if (!f.country && f.tmdb_id && f.type) {
@@ -2286,27 +2242,54 @@ function closeModal() {
 }
 
 // ---- Où le voir (fiche) ----
-// Offres en France du film ouvert : TMDB /watch/providers, données JustWatch
-// (mention obligatoire). Abonnement, gratuit, location ou achat ; les
-// variantes d'une même plateforme (« Netflix Standard with Ads », « HBO Max
-// Amazon Channel ») sont fondues dans la plateforme principale. Les logos
-// mènent à la page TMDB qui liste les liens vers chaque plateforme.
-// Gardé en mémoire le temps de la visite.
+// Une rubrique, en lignes :
+//  · « en salle à lyon » : les salles suivies qui jouent le film cette
+//    semaine (cinemas_lyon.json), dans l'ordre de la liste du robot
+//    (Lumière, Comœdia, UGC, Pathé), chacune menant à ses séances AlloCiné ;
+//  · les offres en France : TMDB /watch/providers, données JustWatch
+//    (mention obligatoire). Abonnement, gratuit, location ou achat ; les
+//    variantes d'une même plateforme (« Netflix Standard with Ads », « HBO
+//    Max Amazon Channel ») sont fondues dans la plateforme principale. Les
+//    logos mènent à la page TMDB qui liste les liens vers chaque plateforme.
+//    Gardées en mémoire le temps de la visite.
+// Les deux arrivent séparément : la rubrique est refaite à chaque arrivée.
 const watchCache = new Map(); // 'movie-603' -> offres FR ({} si aucune)
 async function fillWatchProviders(f) {
   if (!f.tmdb_id) return;
   if (!watchCache.has(f.id)) {
     const path = f.type === 'tv' ? 'tv' : 'movie';
     const d = await tmdbJson(`${TMDB_BASE}/${path}/${f.tmdb_id}/watch/providers?api_key=${encodeURIComponent(admin.tmdbKey)}`);
-    if (!d) return; // TMDB injoignable : la rubrique reste masquée
+    if (!d) return; // TMDB injoignable : pas d'offres (les salles restent)
     watchCache.set(f.id, d.results?.FR || {});
   }
-  // La fiche a pu changer (ou se fermer) pendant la requête
+  renderOuVoir(f);
+}
+function renderOuVoir(f) {
+  // La fiche a pu changer (ou se fermer) pendant les requêtes
   const el = document.getElementById('watch-section');
   if (!el || openModalCtx?.id !== f.id) return;
-  el.innerHTML = watchProvidersHtml(watchCache.get(f.id));
+  const joue = seancesLyon(f.id);
+  const salles = (lyon?.salles || []).filter(s => joue[s.code]);
+  const fr = watchCache.get(f.id);
+  if (!salles.length && !fr) { el.innerHTML = ''; return; }
+  const ligneSalles = salles.length ? `
+    <div class="watch-row">
+      <div class="watch-kind">en salle à lyon</div>
+      <div class="watch-salles">${salles.map(s => {
+        const url = safeUrl(s.url || '');
+        return url
+          ? `<a class="watch-salle" href="${url}" target="_blank" rel="noopener">${escapeHtml(s.nom)}</a>`
+          : `<span class="watch-salle">${escapeHtml(s.nom)}</span>`;
+      }).join('')}</div>
+    </div>` : '';
+  const sources = [salles.length ? 'séances : AlloCiné' : '', fr ? 'offres : JustWatch' : ''].filter(Boolean);
+  el.innerHTML = `
+    <div class="modal-section-label">où le voir</div>
+    ${ligneSalles}
+    ${fr ? offresHtml(fr) : ''}
+    <div class="watch-source">${sources.join(' · ')}</div>`;
 }
-function watchProvidersHtml(fr) {
+function offresHtml(fr) {
   const fondre = list => {
     const gardes = [];
     for (const p of [...list].sort((a, b) => a.provider_name.length - b.provider_name.length)) {
@@ -2328,17 +2311,13 @@ function watchProvidersHtml(fr) {
       ? `<a class="watch-logo" href="${lien}" target="_blank" rel="noopener" title="${nom}">${img}</a>`
       : `<span class="watch-logo" title="${nom}">${img}</span>`;
   };
-  const corps = lignes.length
+  return lignes.length
     ? lignes.map(([titre, l]) => `
         <div class="watch-row">
           <div class="watch-kind">${titre}</div>
           <div class="watch-logos">${l.map(logo).join('')}</div>
         </div>`).join('')
     : '<div class="watch-none">aucune offre de streaming en France pour l\'instant</div>';
-  return `
-    <div class="modal-section-label">où le voir en France</div>
-    ${corps}
-    <div class="watch-source">offres : JustWatch${lien ? ` · <a href="${lien}" target="_blank" rel="noopener">voir le détail ↗</a>` : ''}</div>`;
 }
 
 // ============================================================
