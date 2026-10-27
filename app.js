@@ -37,7 +37,7 @@ const state = {
   discoverLimits: {},   // clé de liste -> nombre de films demandés (« charger plus »)
   discoverFilters: { genre: '', country: '', decade: '', sort: 'popularity.desc', hideCollection: false },
   // « canal+ » et « prochainement » ont chacun leur tri (voir discoverSortDefaut)
-  discoverSortsPropres: { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', now_playing: 'gouts' },
+  discoverSortsPropres: { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', lyon: 'gouts' },
   discoverCache: {},       // { 'catégorie|genre|pays': [items] } — session cache
   discoverSearchTimer: null,
   lastTmdbItems: null,      // dernière liste TMDB affichée (re-rendu du masquage sans refetch)
@@ -450,8 +450,12 @@ function buildCard(f) {
     poster.appendChild(a);
   }
 
+  // « à lyon » : film à voir qui passe cette semaine dans une salle suivie
+  // (il remplace « au ciné », plus vague)
+  const passeALyon = f.user?.statut === 'a_voir' && aLyon(f.id);
+
   // « au ciné » : actuellement en salles en France
-  if (nowPlayingSet.has(f.id)) {
+  if (nowPlayingSet.has(f.id) && !passeALyon) {
     const c = document.createElement('div');
     c.className = 'cine-badge';
     c.textContent = 'au ciné';
@@ -463,6 +467,13 @@ function buildCard(f) {
     const c = document.createElement('div');
     c.className = 'canal-badge';
     c.textContent = 'canal+';
+    poster.appendChild(c);
+  }
+
+  if (passeALyon) {
+    const c = document.createElement('div');
+    c.className = 'lyon-badge';
+    c.textContent = 'à lyon';
     poster.appendChild(c);
   }
 
@@ -540,10 +551,10 @@ const discoverAvecPeriode = category => category === 'trending' || category === 
 // Tri par défaut : « canal+ » montre d'abord les sorties récentes (les films
 // récents arrivent sur Canal+ environ 6 mois après la salle), « prochainement »
 // les sorties en salle en France les plus proches (cette semaine, puis la
-// suivante…), « au cinéma » les films selon les goûts d'Emeric (voir
-// classerSelonGouts), « tendances » la popularité. Le tri choisi sur
-// « canal+ », « prochainement » ou « au cinéma » leur reste propre.
-const DISCOVER_TRI_DEFAUT = { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', now_playing: 'gouts' };
+// suivante…), « à lyon » les films selon les goûts d'Emeric (voir
+// classerSelonGouts), « au cinéma » et « tendances » la popularité. Le tri
+// choisi sur « canal+ », « prochainement » ou « à lyon » leur reste propre.
+const DISCOVER_TRI_DEFAUT = { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', lyon: 'gouts' };
 const discoverSortDefaut = category => DISCOVER_TRI_DEFAUT[category] || 'popularity.desc';
 
 // Filtres effectifs pour une catégorie : la décennie ne s'applique que sur
@@ -626,7 +637,7 @@ async function fetchAndRenderDiscover(category) {
     // « dates les plus proches » n'a de sens que pour « prochainement », et
     // « sorties récentes » (de la plus récente à la plus ancienne) pas pour lui
     sortSel.querySelector('option[value="release_date.asc"]').hidden = category !== 'upcoming';
-    sortSel.querySelector('option[value="gouts"]').hidden = category !== 'now_playing';
+    sortSel.querySelector('option[value="gouts"]').hidden = category !== 'lyon';
     sortSel.querySelector('option[value="primary_release_date.desc"]').hidden = category === 'upcoming';
     sortSel.value = discoverEffectiveFilters(category).sort; // le tri de cette catégorie
     sortSel.classList.toggle('active', sortSel.value !== discoverSortDefaut(category));
@@ -668,7 +679,7 @@ async function fetchAndRenderDiscover(category) {
 // films plus loin. Elle est relue en entier avec plus de pages TMDB : le
 // rééquilibrage choisit les mêmes films pour les premières places, les
 // suivants s'ajoutent dessous (la page ne bouge pas).
-const DISCOVER_PLUS = ['canal', 'upcoming', 'now_playing'];
+const DISCOVER_PLUS = ['canal', 'upcoming', 'lyon'];
 let discoverPlusEnCours = false;
 async function loadMoreDiscover() {
   if (discoverPlusEnCours) return;
@@ -753,8 +764,10 @@ function renderTmdbGrid(items) {
   countEl.textContent = shown.length;
   const listeCanal = state.view === 'discover' && state.discoverCategory === 'canal'
     && items === state.discoverCache[discoverCacheKey('canal')];
+  const listeLyon = state.view === 'discover' && state.discoverCategory === 'lyon'
+    && items === state.discoverCache[discoverCacheKey('lyon')];
   for (const item of shown) {
-    grid.appendChild(buildTmdbCard(item, listeCanal));
+    grid.appendChild(buildTmdbCard(item, listeCanal, listeLyon));
   }
   fillCardMeta();
 }
@@ -1158,8 +1171,9 @@ async function fillCardMeta() {
   if (datesChanged) persistReleaseFr();
 }
 
-// sansCanal : la liste « canal+ » elle-même (tous ses films y sont)
-function buildTmdbCard(item, sansCanal) {
+// sansCanal : la liste « canal+ » elle-même (tous ses films y sont) ;
+// avecSalles : la liste « à lyon » (les salles qui le jouent, sous le titre)
+function buildTmdbCard(item, sansCanal, avecSalles) {
   const card = document.createElement('div');
   card.className = 'card tmdb-card';
   card.tabIndex = 0;
@@ -1217,6 +1231,12 @@ function buildTmdbCard(item, sansCanal) {
   card.dataset.mediaType = item.media_type || 'movie';
   const kd = provisionalDirector(id);
   if (kd) meta.querySelector('.card-director').textContent = kd;
+  if (avecSalles) {
+    const sl = document.createElement('div');
+    sl.className = 'card-salles';
+    sl.textContent = Object.keys(seancesLyon(id)).map(nomSalle).sort((a, b) => a.localeCompare(b, 'fr')).join(' · ');
+    card.appendChild(sl);
+  }
 
   card.addEventListener('click', () => openTmdbItem(item));
   card.addEventListener('keydown', (e) => {
@@ -1551,9 +1571,8 @@ async function buildRecoPool(sources, onProgress) {
     .sort((a, b) => b.reco_w - a.reco_w);
 }
 
-// « au cinéma », tri « selon tes goûts » (par défaut depuis le 2026-10-27).
-// Tous les films à l'affiche en France (TMDB now_playing, environ 180)
-// reçoivent une note d'affinité avec les films aimés (vus, 4★ et plus) :
+// « à lyon », tri « selon tes goûts » (par défaut). Chaque film reçoit une
+// note d'affinité avec les films aimés (vus, 4★ et plus) :
 //  · ressemblance (40 %) : comme la Reco, mots-clés pondérés par leur
 //    rareté, genres, même réal ou acteurs communs ; moyenne des 5 films
 //    aimés les plus proches, chacun pesant sa note ;
@@ -1565,11 +1584,11 @@ async function buildRecoPool(sources, onProgress) {
 //    100 votes), pour que les toutes petites sorties ne passent pas toutes
 //    devant.
 // Les films de la liste « à voir » passent devant. Réglé le 2026-10-27 sur
-// les exemples d'Emeric : Le Corset 2e, Garance 4e, Melpomène 11e, Notre
-// salut 23e ; Street Fighter 133e, Détective Conan 156e (sur 182).
-// Coût : les profils des films aimés et des films à l'affiche (environ 450
-// appels TMDB la première fois, une quinzaine de secondes), puis le cache
-// des profils de la Reco (60 jours).
+// les films à l'affiche en France et les exemples d'Emeric : Le Corset 2e,
+// Garance 4e, Melpomène 11e, Notre salut 23e ; Street Fighter 133e,
+// Détective Conan 156e (sur 182). Coût : les profils des films aimés et des
+// films classés (quelques centaines d'appels TMDB la première fois), puis
+// le cache des profils de la Reco (60 jours).
 const GOUTS = { ressemblance: 0.40, pays: 0.35, genres: 0.25, voisins: 5, presence: 0.35 };
 async function classerSelonGouts(items, onProgress) {
   const cache = loadRecoProfiles();
@@ -1643,24 +1662,104 @@ async function classerSelonGouts(items, onProgress) {
   return items.sort((a, b) => b._aVoir - a._aVoir || b._gout - a._gout);
 }
 
-// Liste « au cinéma » selon les goûts : toutes les pages de TMDB, classées,
-// puis les filtres genre et pays appliqués ici
-async function parcourirSelonGouts(filters, count, onProgress) {
-  const base = `${TMDB_BASE}/movie/now_playing?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
-  const p1 = await fetch(base + '&page=1').then(r => r.ok ? r.json() : { results: [] });
-  const total = Math.min(p1.total_pages || 1, 25);
-  const suite = await mapWithConcurrency(Array.from({ length: total - 1 }, (_, i) => i + 2), 6,
-    page => tmdbJson(base + '&page=' + page));
-  const vus = new Set();
-  let items = [p1, ...suite].flatMap(d => (d && d.results) || [])
-    .filter(it => !vus.has(it.id) && vus.add(it.id))
-    .map(it => ({ ...it, media_type: 'movie' }));
-  items = await classerSelonGouts(items, onProgress);
-  if (filters.genre) items = items.filter(it => (it.genre_ids || []).includes(Number(filters.genre)));
-  if (filters.country) items = items.filter(it => (it._pays || []).includes(filters.country));
-  const out = items.slice(0, count);
-  out.encore = items.length > count;
+// ---- Cinémas de Lyon ----
+// cinemas_lyon.json, déposé chaque nuit par le robot
+// .github/workflows/cinemas-lyon.yml : le programme des 7 prochains jours de
+// dix salles (séances AlloCiné), chaque film retrouvé chez TMDB quand il
+// existe. Séance : [« AAAA-MM-JJTHH:MM », « VO » | « VF » | « »].
+let lyon = null;
+let lyonParFilm = new Map();   // 'movie-<tmdb>' -> film du programme
+let lyonChargement = null;
+function chargerLyon() {
+  if (!lyonChargement) {
+    lyonChargement = fetch('cinemas_lyon.json?h=' + Math.floor(Date.now() / 3600000))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d || !Array.isArray(d.films)) return;
+        lyon = d;
+        lyonParFilm = new Map(d.films.filter(f => f.tmdb).map(f => ['movie-' + f.tmdb, f]));
+      })
+      .catch(() => {});
+  }
+  return lyonChargement;
+}
+function maintenantLocal() {
+  const d = new Date(), z = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`;
+}
+// Séances pas encore passées, salle par salle : { code: [[date, version], …] }
+function seancesLyon(id) {
+  const f = lyonParFilm.get(id);
+  if (!f) return {};
+  const t = maintenantLocal(), out = {};
+  for (const [code, liste] of Object.entries(f.salles || {})) {
+    const reste = liste.filter(s => s[0] >= t);
+    if (reste.length) out[code] = reste;
+  }
   return out;
+}
+const aLyon = id => Object.keys(seancesLyon(id)).length > 0;
+const nomSalle = code => (lyon?.salles || []).find(s => s.code === code)?.nom || code;
+
+// Catégorie « à lyon » : les films qui passent encore cette semaine, avec les
+// filtres genre et pays et les tris du menu (« selon tes goûts » par défaut)
+async function parcourirLyon(filters, count, onProgress) {
+  await chargerLyon();
+  if (!lyon) throw new Error('programme des cinémas pas encore disponible');
+  const items = lyon.films.filter(f => f.tmdb && aLyon('movie-' + f.tmdb)).map(f => ({
+    id: f.tmdb, media_type: 'movie', title: f.titre_tmdb || f.titre, original_title: f.original_title,
+    poster_path: f.poster_path, release_date: f.release_date, vote_count: f.vote_count || 0,
+    vote_average: f.vote_average || 0, popularity: f.popularity || 0, genre_ids: f.genre_ids || [],
+  }));
+  let liste = await classerSelonGouts(items, onProgress); // donne aussi les pays (filtre)
+  const sort = filters.sort || 'gouts';
+  if (sort === 'popularity.desc') liste = [...liste].sort((a, b) => b.popularity - a.popularity);
+  else if (sort === 'vote_average.desc') {
+    // Les notes à moins de 20 votes ne disent pas grand-chose : après les autres
+    const fiable = it => it.vote_count >= 20 ? 1 : 0;
+    liste = [...liste].sort((a, b) => fiable(b) - fiable(a) || b.vote_average - a.vote_average);
+  } else if (sort === 'primary_release_date.desc') {
+    liste = [...liste].sort((a, b) => (b.release_date || '').localeCompare(a.release_date || ''));
+  }
+  if (filters.genre) liste = liste.filter(it => (it.genre_ids || []).includes(Number(filters.genre)));
+  if (filters.country) liste = liste.filter(it => (it._pays || []).includes(filters.country));
+  const out = liste.slice(0, count);
+  out.encore = liste.length > count;
+  return out;
+}
+
+// Fiche : les séances à venir dans les salles suivies
+const JOURS_COURTS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+async function fillLyon(f) {
+  await chargerLyon();
+  const el = document.getElementById('lyon-section');
+  if (!el || openModalCtx?.id !== f.id) return;
+  const salles = seancesLyon(f.id);
+  const codes = Object.keys(salles).sort((a, b) => nomSalle(a).localeCompare(nomSalle(b), 'fr'));
+  if (!codes.length) { el.innerHTML = ''; return; }
+  const auj = maintenantLocal().slice(0, 10);
+  const demain = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })();
+  const libelleJour = iso => {
+    if (iso === auj) return 'auj.';
+    if (iso === demain) return 'demain';
+    const d = new Date(iso + 'T12:00:00');
+    return JOURS_COURTS[d.getDay()] + ' ' + d.getDate();
+  };
+  const blocs = codes.map(code => {
+    const parJour = new Map();
+    for (const [quand, v] of salles[code]) {
+      const j = quand.slice(0, 10);
+      if (!parJour.has(j)) parJour.set(j, []);
+      parJour.get(j).push(quand.slice(11, 16) + (v ? ` <span class="lyon-v">${v}</span>` : ''));
+    }
+    const salle = (lyon.salles || []).find(s => s.code === code) || {};
+    const url = safeUrl(salle.url || '');
+    const jours = [...parJour].map(([j, h]) => `<span class="lyon-jour"><b>${libelleJour(j)}</b>${h.join(' · ')}</span>`).join('');
+    return `<div class="lyon-salle">${url ? `<a class="lyon-nom" href="${url}" target="_blank" rel="noopener">${escapeHtml(nomSalle(code))} ↗</a>` : escapeHtml(nomSalle(code))}
+      <div class="lyon-jours">${jours}</div></div>`;
+  });
+  el.innerHTML = `<div class="modal-section-label">à lyon cette semaine</div>${blocs.join('')}
+    <div class="watch-source">séances : AlloCiné</div>`;
 }
 
 function seededRandom(seed) {
@@ -1981,6 +2080,7 @@ function openModal(f, opts) {
     ${genresHtml}
     ${synopsisHtml}
     ${castHtml}
+    <div class="lyon-section" id="lyon-section"></div>
     <div class="watch-section" id="watch-section"></div>
     ${links.length ? `<div class="ext-links">${links.join('')}</div>` : ''}
     ${actionsHtml}
@@ -2072,6 +2172,7 @@ function openModal(f, opts) {
 
   // Où le voir en France : rempli dès que TMDB répond
   fillWatchProviders(f);
+  fillLyon(f);
 
   // Lazy-fetch country if missing (existing films from initial migration didn't have it)
   if (!f.country && f.tmdb_id && f.type) {
@@ -3726,7 +3827,7 @@ const CANAL_PLUS = 381;
 // count : nombre de films voulus (40, puis 80, 120… avec « charger plus »)
 async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress) {
   filters = filters || {};
-  if (filters.sort === 'gouts') return parcourirSelonGouts(filters, count, onProgress);
+  if (category === 'lyon') return parcourirLyon(filters, count, onProgress);
   const hasFilters = !!(filters.genre || filters.country || filters.decade
     || (filters.sort && filters.sort !== 'popularity.desc'));
   const params = `api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
@@ -5577,6 +5678,9 @@ wireEvents();
 navInit();
 purgeTmdbMemories();
 loadFilms();
+chargerLyon().then(() => {
+  if (lyon && state.view === 'a_voir') renderGrid();
+});
 ensureCanalFR().then(() => {
   if (!canalSet.size) return;
   if (state.view === 'a_voir' || state.view === 'vu') renderGrid();

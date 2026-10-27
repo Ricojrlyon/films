@@ -436,6 +436,38 @@ body {
   text-transform: uppercase;
 }
 .card .cine-badge + .canal-badge { bottom: 28px; }
+/* Pastille « à lyon » : film à voir qui passe cette semaine dans une des
+   salles suivies (cinemas_lyon.json). Ambre ; elle remplace « au ciné ». */
+.card .lyon-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(22, 31, 37, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--amber);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(227, 193, 110, 0.4);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.card .canal-badge + .lyon-badge { bottom: 28px; }
+/* Catégorie « à lyon » : les salles sous le titre, deux lignes au plus */
+.card .card-salles {
+  padding: 0 4px 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  line-height: 1.4;
+  color: var(--amber);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 /* meta on hover (desktop) and always on tap */
 .card .meta {
@@ -852,6 +884,15 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
 /* Où le voir en France (offres JustWatch via TMDB), rempli après l'ouverture */
 .watch-section { margin-bottom: 24px; }
 .watch-section:empty { display: none; }
+/* Fiche : séances dans les cinémas de Lyon suivis */
+.lyon-section { margin-bottom: 24px; }
+.lyon-section:empty { display: none; }
+.lyon-salle { margin-bottom: 10px; }
+.lyon-nom { font-size: 13px; color: var(--ink); text-decoration: none; }
+.lyon-nom:hover { color: var(--amber); }
+.lyon-jours { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 3px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-soft); }
+.lyon-jour b { color: var(--amber); font-weight: 500; margin-right: 4px; }
+.lyon-v { font-size: 9px; color: var(--ink-mute); }
 .watch-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .watch-kind {
   flex: 0 0 120px;
