@@ -1,0 +1,222 @@
+# Cinémas de Lyon : chaque nuit, le programme des 7 prochains jours de dix
+# salles (Lumière Terreaux, Bellecour, Fourmi, Comœdia, UGC Part-Dieu,
+# Astoria, Cité Internationale, Confluence, Pathé Bellecour, Vaise), lu sur
+# AlloCiné, chaque film retrouvé chez TMDB, dans cinemas_lyon.json que le
+# site lit (catégorie « à lyon », pastille, fiche). Aucune brique externe
+# (pas d'avertissement Node.js) : le programme Python est ci-dessous.
+# Pour le lancer à la main : onglet Actions, « cinémas lyon », Run workflow.
+name: cinémas lyon
+
+on:
+  schedule:
+    - cron: '30 3 * * *'   # 3 h 30 UTC : 4 h 30 ou 5 h 30 à Paris (GitHub peut décaler un peu)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cinemas-lyon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: programme des cinémas de Lyon
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BRANCHE: ${{ github.ref_name }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          python3 - <<'PY'
+          # Cinémas de Lyon : chaque nuit, le programme des 7 prochains jours de dix
+          # salles (séances AlloCiné), chaque film retrouvé chez TMDB, dans
+          # cinemas_lyon.json à la racine du dépôt (le site le lit).
+          import json, os, re, sys, time, unicodedata, urllib.error, urllib.parse, urllib.request, base64
+          from datetime import date, datetime, timedelta, timezone
+
+          REPO = os.environ['REPO']
+          BRANCHE = os.environ.get('BRANCHE', 'main')
+          JETON = os.environ.get('GH_TOKEN', '')
+          SIMULATION = os.environ.get('SIMULATION') == '1'   # essai : écrit le fichier sur place, rien sur GitHub
+          FICHIER = 'cinemas_lyon.json'
+          SALLES = [  # code AlloCiné, nom affiché
+              ('P0017', 'Lumière Terreaux'), ('P0015', 'Lumière Bellecour'), ('W6903', 'Lumière Fourmi'),
+              ('P3757', 'Comœdia'), ('P0036', 'UGC Part-Dieu'), ('P0005', 'UGC Astoria'),
+              ('P0671', 'UGC Cité Internationale'), ('W6902', 'UGC Confluence'),
+              ('P0012', 'Pathé Bellecour'), ('P6909', 'Pathé Vaise'),
+          ]
+          JOURS = 7
+          NAVIGATEUR = {'User-Agent': 'Mozilla/5.0 (films, programme des cinemas de Lyon)'}
+
+
+          def lire(url, entetes=None, donnees=None, methode=None):
+              for essai in range(4):
+                  req = urllib.request.Request(url, data=donnees, headers=entetes or NAVIGATEUR, method=methode)
+                  try:
+                      with urllib.request.urlopen(req, timeout=30) as r:
+                          corps = r.read()
+                          return json.loads(corps) if corps else None
+                  except urllib.error.HTTPError as e:
+                      if e.code == 404:
+                          return None
+                      if e.code == 429 or e.code >= 500:
+                          time.sleep(3 * (essai + 1))
+                          continue
+                      raise
+                  except (urllib.error.URLError, TimeoutError):
+                      time.sleep(3 * (essai + 1))
+              raise RuntimeError('injoignable : ' + url.split('?')[0])
+
+
+          def github(chemin, donnees=None, methode=None):
+              entetes = {'Accept': 'application/vnd.github+json', 'User-Agent': 'films-cinemas-lyon', 'Authorization': 'Bearer ' + JETON}
+              corps = json.dumps(donnees).encode() if donnees is not None else None
+              if corps:
+                  entetes['Content-Type'] = 'application/json'
+              return lire('https://api.github.com' + chemin, entetes, corps, methode)
+
+
+          def brut(fichier):
+              url = 'https://raw.githubusercontent.com/%s/%s/%s?t=%d' % (REPO, BRANCHE, fichier, time.time())
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as r:
+                      return r.read().decode('utf-8')
+              except urllib.error.HTTPError:
+                  return None
+
+
+          def norme(s):
+              s = unicodedata.normalize('NFD', (s or '').lower())
+              s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
+              return re.sub(r'[^a-z0-9]+', ' ', s).strip()
+
+
+          def realisateurs(credits):
+              # Liste de crédits, parfois sous une autre forme : on ne garde que ce qui se lit
+              if isinstance(credits, dict):
+                  credits = credits.get('edges') or credits.get('nodes') or []
+              noms = []
+              for c in credits if isinstance(credits, list) else []:
+                  if isinstance(c, dict) and 'node' in c:
+                      c = c['node']
+                  if not isinstance(c, dict) or ((c.get('position') or {}).get('name') != 'DIRECTOR'):
+                      continue
+                  p = c.get('person') or {}
+                  noms.append(' '.join(filter(None, [p.get('firstName'), p.get('lastName')])))
+              return noms
+
+
+          # 1. Le programme, salle par salle, jour par jour (pages de 15 films)
+          aujourdhui = datetime.now(timezone(timedelta(hours=1))).date()
+          films = {}  # id AlloCiné -> film
+          for code, nom in SALLES:
+              for j in range(JOURS):
+                  page, pages = 1, 1
+                  while page <= pages:
+                      url = 'https://www.allocine.fr/_/showtimes/theater-%s/d-%d/%s' % (code, j, 'p-%d/' % page if page > 1 else '')
+                      d = lire(url) or {}
+                      pages = int((d.get('pagination') or {}).get('totalPages') or 1)
+                      for r in d.get('results') or []:
+                          m = r.get('movie') or {}
+                          if not m.get('internalId'):
+                              continue
+                          f = films.setdefault(m['internalId'], {
+                              'allocine': m['internalId'], 'titre': m.get('title'), 'titre_vo': m.get('originalTitle'),
+                              'annees': sorted({int(x['releaseDate']['date'][:4]) for x in (m.get('releases') or [])
+                                                if (x.get('releaseDate') or {}).get('date')}),
+                              'realisateurs': realisateurs(m.get('credits')),
+                              'salles': {},
+                          })
+                          seances = f['salles'].setdefault(code, [])
+                          for liste in (r.get('showtimes') or {}).values():
+                              for s in liste or []:
+                                  if not s.get('startsAt'):
+                                      continue
+                                  # VO (version originale), VF (doublée) ; un film français (LOCAL) : rien
+                                  v = {'ORIGINAL': 'VO', 'DUBBED': 'VF'}.get(s.get('diffusionVersion'), '')
+                                  cle = [s['startsAt'][:16], v]
+                                  if cle not in seances:
+                                      seances.append(cle)
+                      page += 1
+                      time.sleep(0.3)
+          for f in films.values():
+              for s in f['salles'].values():
+                  s.sort()
+          print('%d films dans %d salles' % (len(films), len(SALLES)))
+
+          # 2. Chaque film chez TMDB : titre et année (une ressortie garde l'année
+          #    d'origine parmi ses dates), réutilisé d'une nuit à l'autre
+          ancien = {}
+          try:
+              # Retrouvé il y a moins de 30 jours : repris tel quel (au-delà, relu chez
+              # TMDB : ses conditions interdisent de garder ses données plus de 6 mois)
+              limite = (aujourdhui - timedelta(days=30)).isoformat()
+              ancien = {f['allocine']: f for f in json.loads(brut(FICHIER) or '{}').get('films', [])
+                        if f.get('tmdb') and (f.get('tmdb_lu') or '') >= limite}
+          except ValueError:
+              pass
+          cle = re.search(r"const TMDB_KEY = '([^']+)'", brut('app.js')).group(1)
+
+
+          def tmdb_cherche(titre, annees):
+              if not titre:
+                  return None
+              meilleur, note_max = None, 0
+              for langue in ('fr-FR', 'en-US'):
+                  d = lire('https://api.themoviedb.org/3/search/movie?api_key=%s&language=%s&region=FR&query=%s'
+                           % (cle, langue, urllib.parse.quote(titre))) or {}
+                  for c in (d.get('results') or [])[:10]:
+                      noms = {norme(c.get('title')), norme(c.get('original_title'))}
+                      an = int((c.get('release_date') or '0')[:4] or 0)
+                      note = 0
+                      if norme(titre) in noms:
+                          note += 2
+                      if annees and an and min(abs(an - a) for a in annees) <= 1:
+                          note += 2
+                      elif not annees:
+                          note += 1
+                      note += min(1, (c.get('vote_count') or 0) / 200)
+                      if note > note_max:
+                          meilleur, note_max = c, note
+                  if note_max >= 4:
+                      break
+              return meilleur if note_max >= 3 else None
+
+
+          trouves = 0
+          for f in films.values():
+              a = ancien.get(f['allocine'])
+              if a:
+                  for k in ('tmdb', 'tmdb_lu', 'poster_path', 'release_date', 'original_title', 'vote_count', 'vote_average', 'popularity', 'genre_ids', 'titre_tmdb'):
+                      f[k] = a.get(k)
+              else:
+                  c = tmdb_cherche(f['titre_vo'], f['annees']) or tmdb_cherche(f['titre'], f['annees'])
+                  if c:
+                      f.update({'tmdb': c['id'], 'tmdb_lu': aujourdhui.isoformat(), 'titre_tmdb': c.get('title'), 'poster_path': c.get('poster_path'),
+                                'release_date': c.get('release_date'), 'original_title': c.get('original_title'),
+                                'vote_count': c.get('vote_count'), 'vote_average': c.get('vote_average'),
+                                'popularity': c.get('popularity'), 'genre_ids': c.get('genre_ids')})
+                  time.sleep(0.1)
+              trouves += 1 if f.get('tmdb') else 0
+          print('%d films retrouvés chez TMDB, %d non' % (trouves, len(films) - trouves))
+
+          # 3. Le fichier, et son dépôt sur GitHub s'il a changé
+          sortie = {
+              'genere': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+              'du': aujourdhui.isoformat(), 'jours': JOURS,
+              'salles': [{'code': c, 'nom': n, 'url': 'https://www.allocine.fr/seance/salle_gen_csalle=%s.html' % c} for c, n in SALLES],
+              'films': sorted(films.values(), key=lambda f: norme(f.get('titre'))),
+          }
+          texte = json.dumps(sortie, ensure_ascii=False, separators=(',', ':'))
+          if SIMULATION:
+              open(FICHIER, 'w', encoding='utf-8').write(texte)
+              print('[simulation] %s écrit sur place (%d Ko)' % (FICHIER, len(texte) // 1024))
+              sys.exit(0)
+          actuel = github('/repos/%s/contents/%s?ref=%s' % (REPO, FICHIER, BRANCHE))
+          corps = {'message': 'cinémas lyon : programme du %s' % aujourdhui.strftime('%d/%m'),
+                   'content': base64.b64encode(texte.encode('utf-8')).decode(), 'branch': BRANCHE}
+          if actuel:
+              corps['sha'] = actuel['sha']
+          github('/repos/%s/contents/%s' % (REPO, FICHIER), corps, 'PUT')
+          print('%s déposé (%d Ko)' % (FICHIER, len(texte) // 1024))
+          PY
