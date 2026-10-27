@@ -1945,7 +1945,7 @@ function openModal(f, opts) {
   const cast = (f.cast || []);
   const castHtml = cast.length ? `
     <div class="modal-section-label">casting</div>
-    <div class="cast-list">${cast.map(c => `<div class="cast-item">${nameLink(c)}</div>`).join('')}</div>` : '';
+    <div class="cast-list">${cast.map(c => nameLink(c, 'jeu', 'cast-item')).join('')}</div>` : '';
 
   // External links
   const links = [];
@@ -2282,11 +2282,19 @@ function renderOuVoir(f) {
           : `<span class="watch-salle">${escapeHtml(s.nom)}</span>`;
       }).join('')}</div>
     </div>` : '';
-  const sources = [salles.length ? 'séances : AlloCiné' : '', fr ? 'offres : JustWatch' : ''].filter(Boolean);
+  const offres = fr ? offresHtml(fr) : '';
+  // Ni salle ni offre (les offres sont arrivées) : une phrase grise
+  if (!ligneSalles && !offres) {
+    el.innerHTML = `
+      <div class="modal-section-label">où le voir</div>
+      <div class="watch-none">indisponible pour le moment</div>`;
+    return;
+  }
+  const sources = [ligneSalles ? 'séances : AlloCiné' : '', offres ? 'offres : JustWatch' : ''].filter(Boolean);
   el.innerHTML = `
     <div class="modal-section-label">où le voir</div>
     ${ligneSalles}
-    ${fr ? offresHtml(fr) : ''}
+    ${offres}
     <div class="watch-source">${sources.join(' · ')}</div>`;
 }
 function offresHtml(fr) {
@@ -2311,13 +2319,11 @@ function offresHtml(fr) {
       ? `<a class="watch-logo" href="${lien}" target="_blank" rel="noopener" title="${nom}">${img}</a>`
       : `<span class="watch-logo" title="${nom}">${img}</span>`;
   };
-  return lignes.length
-    ? lignes.map(([titre, l]) => `
+  return lignes.map(([titre, l]) => `
         <div class="watch-row">
           <div class="watch-kind">${titre}</div>
           <div class="watch-logos">${l.map(logo).join('')}</div>
-        </div>`).join('')
-    : '<div class="watch-none">aucune offre de streaming en France pour l\'instant</div>';
+        </div>`).join('');
 }
 
 // ============================================================
@@ -3492,10 +3498,10 @@ function bestPersonName(person) {
  *  (openPerson, par un écouteur global sur .name-link). Le lien vers la
  *  recherche TMDB reste en repli (clic du milieu, nouvel onglet).
  *  role : 'real' (réalisation) ou 'jeu' (interprétation). */
-function nameLink(name, role = 'jeu') {
+function nameLink(name, role = 'jeu', classe = '') {
   if (!name) return '';
   const url = 'https://www.themoviedb.org/search/person?query=' + encodeURIComponent(name);
-  return `<a href="${url}" target="_blank" rel="noopener" class="name-link" data-person="${escapeHtml(name)}" data-role="${role}">${escapeHtml(name)}</a>`;
+  return `<a href="${url}" target="_blank" rel="noopener" class="name-link${classe ? ' ' + classe : ''}" data-person="${escapeHtml(name)}" data-role="${role}">${escapeHtml(name)}</a>`;
 }
 
 function escapeHtml(s) {

@@ -856,12 +856,13 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   color: var(--ink-soft);
 }
 .cast-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 24px;
 }
-.cast-item {
+/* La case entière est le lien (a.name-link), à la largeur du nom */
+a.cast-item {
   font-size: 13px;
   color: var(--ink);
   padding: 8px 12px;
@@ -869,6 +870,7 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   border-radius: var(--radius);
   border: 1px solid var(--rule);
 }
+a.cast-item:hover { border-color: var(--warm); }
 /* Où le voir : salles de Lyon (cinemas_lyon.json) puis offres en France
    (JustWatch via TMDB), rempli après l'ouverture */
 .watch-section { margin-bottom: 24px; }
@@ -879,11 +881,12 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   color: var(--ink);
   text-decoration: none;
   padding: 4px 10px;
+  background: var(--bg-elev);
   border: 1px solid var(--rule);
-  border-radius: 999px;
-  transition: border-color 0.15s, color 0.15s;
+  border-radius: var(--radius);
+  transition: border-color 0.15s;
 }
-a.watch-salle:hover { border-color: var(--green); color: var(--green); }
+a.watch-salle:hover { border-color: var(--warm); }
 .watch-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .watch-kind {
   flex: 0 0 120px;
@@ -894,10 +897,10 @@ a.watch-salle:hover { border-color: var(--green); color: var(--green); }
   color: var(--ink-mute);
 }
 .watch-logos { display: flex; flex-wrap: wrap; gap: 6px; }
-.watch-logo { display: block; border-radius: 5px; overflow: hidden; border: 1px solid var(--rule); transition: border-color 0.15s; }
+.watch-logo { display: block; border-radius: 4px; overflow: hidden; border: 1px solid var(--rule); transition: border-color 0.15s; }
 a.watch-logo:hover { border-color: var(--warm); }
-.watch-logo img { display: block; width: 26px; height: 26px; }
-.watch-none { font-size: 13px; color: var(--ink-soft); margin-bottom: 10px; }
+.watch-logo img { display: block; width: 20px; height: 20px; }
+.watch-none { font-size: 13px; color: var(--ink-mute); }
 .watch-source { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute); }
 @media (max-width: 600px) {
   .watch-row { flex-direction: column; align-items: flex-start; gap: 6px; }
