@@ -33,7 +33,7 @@ const state = {
   page: 1,
   pageSize: 60,
   // Discover view
-  discoverCategory: 'now_playing',
+  discoverCategory: 'lyon',   // catégorie ouverte en arrivant sur Découvrir
   discoverLimits: {},   // clé de liste -> nombre de films demandés (« charger plus »)
   discoverFilters: { genre: '', country: '', decade: '', sort: 'popularity.desc', hideCollection: false },
   // « canal+ » et « prochainement » ont chacun leur tri (voir discoverSortDefaut)
