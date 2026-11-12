@@ -1135,15 +1135,21 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
   text-align: right;
 }
 
-/* months chart (bars) */
+/* months chart (bars). Dessiné à la taille réelle (pas d'étirement) ; sur
+   écran étroit, au moins 14 px par mois et défilement horizontal, ouvert
+   sur les mois les plus récents. La bulle reste fixe, hors du défilement. */
 .months-chart-wrap {
   width: 100%;
-  height: 220px;
   position: relative;
 }
+.months-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
+}
 .months-chart {
-  width: 100%;
-  height: 100%;
+  height: 220px;
   display: block;
 }
 .month-bar { transition: opacity 0.15s; }

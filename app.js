@@ -2633,11 +2633,15 @@ function renderMonthsChart() {
   }
 
   const max = Math.max(...months.map(d => d.count), 1);
-  const W = 1000, H = 200;
+  // Largeur réelle en pixels (rien n'est étiré, les textes gardent leur
+  // forme) : toute la place disponible, et au moins 14 px par mois ; au-delà,
+  // le graphique défile à l'horizontale (.months-scroll)
+  const scroller = document.getElementById('months-scroll');
+  const n = months.length;
+  const W = Math.max(scroller.clientWidth || 1000, n * 14), H = 220;
   const padLeft = 4, padRight = 4, padTop = 16, padBottom = 28;
   const innerW = W - padLeft - padRight;
   const innerH = H - padTop - padBottom;
-  const n = months.length;
   const gap = 2;
   const barW = (innerW - gap * (n - 1)) / n;
 
@@ -2661,20 +2665,23 @@ function renderMonthsChart() {
     }
   });
 
-  // Horizontal max line + label
+  // Horizontal max line + label (à droite : visible quand le graphique défile,
+  // il s'ouvre sur les mois récents)
   const maxLine = `
     <line x1="${padLeft}" y1="${padTop}" x2="${W - padRight}" y2="${padTop}" stroke="var(--rule)" stroke-width="0.5"/>
-    <text x="${padLeft}" y="${padTop - 4}" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--ink-mute)" letter-spacing="0.5">${max}</text>
+    <text x="${W - padRight}" y="${padTop - 4}" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--ink-mute)" letter-spacing="0.5" text-anchor="end">${max}</text>
   `;
 
   const svg = document.getElementById('months-chart');
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
   svg.innerHTML = `
     ${yearLines}
     ${maxLine}
     ${bars}
     ${yearLabels}
   `;
+  scroller.scrollLeft = scroller.scrollWidth; // les mois les plus récents
 
   // Interactivity: hover/tap → tooltip
   const tooltip = document.getElementById('months-tooltip');
@@ -2726,6 +2733,18 @@ function renderMonthsChart() {
       <span>${prettyMonth(months[months.length - 1].key)}</span>
     </div>`;
 }
+// Fenêtre redimensionnée, téléphone tourné : « par mois » est redessiné à la
+// nouvelle largeur (il est dessiné en pixels réels)
+let moisLargeur = 0, moisMinuterie = null;
+window.addEventListener('resize', () => {
+  clearTimeout(moisMinuterie);
+  moisMinuterie = setTimeout(() => {
+    const largeur = document.getElementById('months-scroll')?.clientWidth || 0;
+    if (!largeur || largeur === moisLargeur) return;
+    moisLargeur = largeur;
+    if (document.getElementById('stats-page').classList.contains('active')) renderMonthsChart();
+  }, 150);
+});
 
 function renderHeatmap() {
   // Top N most-frequent genres × ratings 1..6
