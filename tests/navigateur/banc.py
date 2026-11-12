@@ -113,6 +113,13 @@ class Banc(unittest.TestCase):
         self.ctx.route('https://api.github.com/**', github)
         self.ctx.route('https://image.tmdb.org/**', lambda route, req: route.abort())
         self.ctx.add_init_script(ENVELOPPE)
+        # FILMS_APP_JS, FILMS_STYLE_CSS, FILMS_INDEX_HTML=<chemin> : servir une
+        # autre copie (l'ancienne version, pour vérifier qu'un test attrapait le défaut)
+        for env, motif, type_ in (('FILMS_APP_JS', '**/app.js*', 'application/javascript'),
+                                  ('FILMS_STYLE_CSS', '**/style.css*', 'text/css'),
+                                  ('FILMS_INDEX_HTML', '**/index.html', 'text/html')):
+            if os.environ.get(env):
+                self.ctx.route(motif, lambda route, req, c=os.environ[env], t=type_: route.fulfill(path=c, content_type=t))
         self.page = self.ctx.new_page()
         self.erreurs = []
         self.page.on('pageerror', lambda e: self.erreurs.append(str(e)))

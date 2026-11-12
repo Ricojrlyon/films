@@ -9,7 +9,7 @@
      pourrait ni s'exécuter ni envoyer de données ailleurs. À compléter si le site
      doit un jour charger une autre ressource externe (sinon elle sera bloquée). -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://image.tmdb.org; connect-src 'self' https://api.themoviedb.org https://api.github.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#161f25">
 <!-- Site sombre : listes déroulantes, barres de défilement et champs natifs du navigateur en version sombre -->
 <meta name="color-scheme" content="dark">
@@ -47,7 +47,7 @@
 <link href="fonts/polices.css" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=16">
+<link rel="stylesheet" href="style.css?v=17">
 </head>
 <body>
 <div class="app">
@@ -195,7 +195,7 @@
     </div>
 
     <div class="results-header" id="results-header">
-      <div class="results-count"><strong id="result-count">0</strong>résultat(s)</div>
+      <div class="results-count" aria-live="polite" aria-atomic="true"><strong id="result-count">0</strong>résultat(s)</div>
     </div>
 
     <div class="grid" id="grid"></div>
@@ -390,7 +390,7 @@
 
 <!-- ============== ADMIN SETUP MODAL ============== -->
 <div class="modal-backdrop admin-modal-backdrop" id="admin-setup-backdrop">
-  <article class="modal admin-modal">
+  <article class="modal admin-modal" role="dialog" aria-modal="true" aria-label="mode édition">
     <button class="modal-close" id="admin-setup-close" aria-label="fermer">✕</button>
     <div class="admin-modal-body">
 
@@ -400,7 +400,7 @@
         <p style="color: var(--ink-soft);">Une seule fois, tu as besoin de coller ton <strong>token github</strong> et de choisir un <strong>code</strong>. Ensuite, pour modifier des films, tu n'auras qu'à entrer ton code.</p>
 
         <div class="field">
-          <label>1. github personal access token</label>
+          <label for="admin-setup-pat">1. github personal access token</label>
           <input type="password" id="admin-setup-pat" placeholder="ghp_… ou github_pat_…" autocomplete="off">
           <div class="note">colle ton token github. <a href="#" id="admin-pat-help" style="color: var(--warm); text-decoration: underline;">→ comment en créer un</a></div>
         </div>
@@ -418,13 +418,13 @@
         </div>
 
         <div class="field">
-          <label>2. choisis ton code (4+ caractères)</label>
+          <label for="admin-setup-code">2. choisis ton code (4+ caractères)</label>
           <input type="password" id="admin-setup-code" placeholder="ton code secret" autocomplete="off">
           <div class="note">tu auras besoin de ce code à chaque session pour activer l'édition. choisis quelque chose de simple à retenir mais que toi seul connais.</div>
         </div>
 
         <div class="field">
-          <label>3. confirme ton code</label>
+          <label for="admin-setup-code-confirm">3. confirme ton code</label>
           <input type="password" id="admin-setup-code-confirm" placeholder="le même code" autocomplete="off">
         </div>
 
@@ -442,7 +442,7 @@
         <p style="color: var(--ink-soft);">entre ton code pour activer le mode édition.</p>
 
         <div class="field">
-          <label>ton code</label>
+          <label for="admin-unlock-code">ton code</label>
           <input type="password" id="admin-unlock-code" placeholder="ton code secret" autocomplete="off">
         </div>
 
@@ -474,13 +474,13 @@
 
 <!-- ============== REMATCH MODAL ============== -->
 <div class="modal-backdrop admin-modal-backdrop" id="rematch-backdrop">
-  <article class="modal admin-modal">
+  <article class="modal admin-modal" role="dialog" aria-modal="true" aria-labelledby="rematch-title">
     <button class="modal-close" id="rematch-close" aria-label="fermer">✕</button>
     <div class="admin-modal-body">
-      <h2 class="admin-modal-title">re-matcher tmdb</h2>
+      <h2 class="admin-modal-title" id="rematch-title">re-matcher tmdb</h2>
       <p style="color: var(--ink-soft);">remplace les métadonnées (affiche, casting, durée…) tout en gardant tes données perso (note, lieu, date).</p>
       <div class="field">
-        <label>recherche tmdb</label>
+        <label for="rematch-input">recherche tmdb</label>
         <input type="text" id="rematch-input" placeholder="titre alternatif…" autocomplete="off">
         <div class="note" id="rematch-status"></div>
       </div>
@@ -490,7 +490,7 @@
 </div>
 
 <!-- ============== TOAST ============== -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <!-- Relecture des données TMDB de plus de 5 mois (mode édition, app.js refreshTmdbData) -->
 <div class="tmdb-maj" id="tmdb-maj" role="status" hidden>
   <span class="tmdb-maj-texte"></span>
@@ -499,6 +499,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=23"></script>
+<script src="app.js?v=24"></script>
 </body>
 </html>

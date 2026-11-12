@@ -440,6 +440,7 @@ function buildCard(f) {
   const card = document.createElement('div');
   card.className = 'card' + (f.user?.statut === 'a_voir' ? ' to-watch' : '');
   card.tabIndex = 0;
+  card.setAttribute('role', 'button'); // Entrée ou Espace ouvre la fiche
   card.addEventListener('click', () => openModal(f));
   card.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(f); }
@@ -901,6 +902,7 @@ const personStatut = it => state.films.find(f => f.id === it.media_type + '-' + 
 // tab : onglet à rouvrir (retour par l'historique)
 async function openPerson(name, role, ctxFilmId, tab) {
   const seq = ++personSeq;
+  const entree = state.view !== 'person'; // pas un simple changement d'onglet
   if (state.view !== 'person') {
     personReturn = {
       page: document.getElementById('stats-page').classList.contains('active') ? 'stats' : 'collection',
@@ -921,6 +923,8 @@ async function openPerson(name, role, ctxFilmId, tab) {
   document.getElementById('discover-more-wrap').style.display = 'none';
   document.getElementById('empty').style.display = 'none';
   document.getElementById('person-header').style.display = '';
+  // Clavier : la sélection va au bouton « ← retour » (la fiche d'où l'on vient a disparu)
+  if (entree) document.getElementById('person-back').focus({ preventScroll: true });
   document.getElementById('person-id').innerHTML = `
     <div><h2 class="person-name">${escapeHtml(name)}</h2>
     <div class="person-meta">chargement de la filmographie…</div></div>`;
@@ -1015,7 +1019,10 @@ function closePerson() {
     setView(r.view);
   }
   if (r.page === 'stats') showPage('stats');
-  else setTimeout(() => window.scrollTo(0, r.scroll || 0), 120);
+  else {
+    setTimeout(() => window.scrollTo(0, r.scroll || 0), 120);
+    document.querySelector('#status-tabs .tab.active')?.focus({ preventScroll: true });
+  }
   navLater('close');
 }
 
@@ -1217,6 +1224,7 @@ function buildTmdbCard(item, sansCanal) {
   const card = document.createElement('div');
   card.className = 'card tmdb-card';
   card.tabIndex = 0;
+  card.setAttribute('role', 'button'); // Entrée ou Espace ouvre la fiche
   const id = (item.media_type || 'movie') + '-' + item.id;
   const inCollection = state.films.some(f => f.id === id);
   if (inCollection) card.classList.add('in-collection');
@@ -2021,8 +2029,8 @@ function openModal(f, opts) {
           <div class="edit-section-title">ajouter aux vus</div>
           <div class="edit-form">
             <div class="field">
-              <label>note</label>
-              <div class="rating-chips" id="tmdb-add-rating-chips">
+              <label id="tmdb-add-label-note">note</label>
+              <div class="rating-chips" id="tmdb-add-rating-chips" role="group" aria-labelledby="tmdb-add-label-note">
                 <button class="rating-chip" data-rating="1">1★</button>
                 <button class="rating-chip" data-rating="2">2★</button>
                 <button class="rating-chip" data-rating="3">3★</button>
@@ -2033,7 +2041,7 @@ function openModal(f, opts) {
               </div>
             </div>
             <div class="field">
-              <label>lieu</label>
+              <label for="tmdb-add-lieu">lieu</label>
               <select id="tmdb-add-lieu">
                 <option value="">—</option>
                 <option value="Cinéma">Cinéma</option>
@@ -2045,8 +2053,8 @@ function openModal(f, opts) {
             <div class="field">
               <label>date vue</label>
               <div style="display: flex; gap: 8px;">
-                <input type="number" id="tmdb-add-year" min="1900" max="2099" placeholder="année (ex. 2019)" style="flex:1;">
-                <select id="tmdb-add-month" style="flex:1;">
+                <input type="number" id="tmdb-add-year" min="1900" max="2099" placeholder="année (ex. 2019)" aria-label="année vue" style="flex:1;">
+                <select id="tmdb-add-month" aria-label="mois vu" style="flex:1;">
                   <option value="">—</option>
                   <option value="01">janvier</option><option value="02">février</option>
                   <option value="03">mars</option><option value="04">avril</option>
@@ -2281,6 +2289,7 @@ function showModalBackdrop() {
 function closeModal() {
   document.getElementById('modal-backdrop').classList.remove('open');
   modalSaisie = false;
+  majFenetres(); // la page redevient utilisable avant d'y rendre la sélection
   document.body.style.overflow = '';
   // reset backdrop filter
   document.getElementById('modal-bg').style.filter = '';
@@ -2725,6 +2734,9 @@ function renderMonthsChart() {
   const svg = document.getElementById('months-chart');
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.setAttribute('width', W);
+  const record = months.find(d => d.count === max);
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', `films vus par mois, de ${prettyMonth(months[0].key)} à ${prettyMonth(months[months.length - 1].key)} ; record : ${max} en ${prettyMonth(record.key)}`);
   svg.innerHTML = `
     ${yearLines}
     ${maxLine}
@@ -2839,7 +2851,9 @@ function renderHeatmap() {
       const intensity = maxCell > 0 ? v / maxCell : 0;
       const isFav = i === RATING_FAV - 1;
       const bg = heatmapColor(intensity, isFav);
-      const textCol = intensity > 0.55 ? '#fff' : 'var(--ink-soft)';
+      // Texte sombre sur les cases claires, clair sur les sombres (blanc et
+      // beige donnaient 1,9 à 3,9:1)
+      const textCol = intensity > 0.57 ? 'var(--bg)' : 'var(--ink)';
       const clickAttrs = v > 0 ? ` heatmap-cell-clickable" data-genre="${escapeHtml(m.genre)}" data-rating="${i + 1}` : '';
       html += `<div class="heatmap-cell${clickAttrs}" style="background:${bg}; color:${textCol}">${v > 0 ? v : '·'}</div>`;
     }
@@ -2850,8 +2864,9 @@ function renderHeatmap() {
   root.querySelectorAll('.heatmap-cell-clickable').forEach(cell => {
     cell.style.cursor = 'pointer';
     cell.title = 'voir ces films';
-    cell.addEventListener('click', () =>
-      goToVusWithFilters({ genre: cell.dataset.genre, ratings: [parseInt(cell.dataset.rating, 10)] }));
+    const note = parseInt(cell.dataset.rating, 10);
+    rendreActivable(cell, () => goToVusWithFilters({ genre: cell.dataset.genre, ratings: [note] }),
+      `${cell.dataset.genre}, ${note === RATING_FAV ? 'coups de cœur' : note + ' étoiles'} : ${cell.textContent} films`);
   });
 }
 
@@ -3039,7 +3054,8 @@ function renderRatingDist() {
     if (counts[i] > 0) {
       bar.style.cursor = 'pointer';
       bar.title = 'voir ces films';
-      bar.addEventListener('click', () => goToVusWithFilters({ ratings: [i + 1] }));
+      rendreActivable(bar, () => goToVusWithFilters({ ratings: [i + 1] }),
+        `${i + 1 === RATING_FAV ? 'coups de cœur' : (i + 1) + ' étoiles'} : ${counts[i]} films`);
     }
     root.appendChild(bar);
   }
@@ -3125,7 +3141,7 @@ function renderYearChart() {
     </div>`).join('');
   // Clic sur une année → films vus cette année-là
   root.querySelectorAll('.bar-row-clickable').forEach(row =>
-    row.addEventListener('click', () => goToVusWithFilters({ yearvu: row.dataset.year })));
+    rendreActivable(row, () => goToVusWithFilters({ yearvu: row.dataset.year }), row.dataset.year + ' : voir ces films'));
 }
 
 function renderGenreRatingChart() {
@@ -3431,8 +3447,70 @@ function renderYearBest() {
   // Écouteurs plutôt qu'un onclick inline : un id interpolé dans du JS
   // d'attribut n'est pas neutralisable par escapeHtml
   root.querySelectorAll('.year-best-film').forEach(el => {
-    el.addEventListener('click', () => openModalFromCard(el.dataset.filmId));
+    rendreActivable(el, () => openModalFromCard(el.dataset.filmId)); // Entrée l'ouvre aussi
   });
+}
+
+// Élément cliquable qui n'est pas un bouton (case, ligne, barre, résultat) :
+// aussi atteignable avec Tab, annoncé comme un bouton, activé par Entrée ou
+// Espace. nom : ce que lit un lecteur d'écran (sinon le texte de l'élément).
+function rendreActivable(el, action, nom) {
+  el.setAttribute('tabindex', '0');
+  el.setAttribute('role', 'button');
+  if (nom) el.setAttribute('aria-label', nom);
+  el.addEventListener('click', action);
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); action(e); }
+  });
+}
+
+// Un seul observateur pour deux états, où qu'ils changent dans le code :
+// · boutons bascules (onglets, catégories, puces de note, choix du
+//   formulaire) : aria-pressed suit la classe « active », pour les lecteurs d'écran ;
+// · fenêtres (fiche, mode édition, re-match, mentions) : tout ce qui est
+//   dessous devient inerte (ni Tab, ni clic, ni lecteur d'écran, Safari
+//   compris) ; la fenêtre du dessus est la dernière ouverte dans la page.
+//   Le mode édition et le re-match rendent la sélection à leur bouton d'origine.
+const BASCULES = '.tab, .explorer-cat, .rating-chip, .discover-hide-toggle, .radio-btn';
+const fenetreOrigine = new Map(); // id de fenêtre -> élément qui avait la sélection
+// Rend inerte ce qui est sous la fenêtre du dessus. Appelée aussi tout de
+// suite à la fermeture d'une fenêtre (closeModal, closeLegal) : l'observateur
+// ne passe qu'un instant après, trop tard pour rendre la sélection à la page.
+function majFenetres() {
+  const ouvertes = [...document.querySelectorAll('.modal-backdrop.open')];
+  document.querySelector('.app').inert = ouvertes.length > 0;
+  document.querySelectorAll('.modal-backdrop').forEach(b => { b.inert = b.classList.contains('open') && b !== ouvertes[ouvertes.length - 1]; });
+}
+function suivreEtats() {
+  const presse = b => b.setAttribute('aria-pressed', b.classList.contains('active'));
+  document.querySelectorAll(BASCULES).forEach(presse);
+  new MutationObserver(mutations => {
+    let fen = false;
+    for (const m of mutations) {
+      if (m.type === 'attributes') {
+        if (m.target.matches(BASCULES)) presse(m.target);
+        if (m.target.matches('.modal-backdrop')) {
+          fen = true;
+          const id = m.target.id, ouverte = m.target.classList.contains('open');
+          if (id === 'admin-setup-backdrop' || id === 'rematch-backdrop') {
+            if (ouverte && !fenetreOrigine.has(id)) fenetreOrigine.set(id, document.activeElement);
+            if (!ouverte && fenetreOrigine.has(id)) {
+              const el = fenetreOrigine.get(id);
+              fenetreOrigine.delete(id);
+              setTimeout(() => { if (el && document.contains(el)) el.focus({ preventScroll: true }); });
+            }
+          }
+        }
+      } else {
+        for (const n of m.addedNodes) {
+          if (n.nodeType !== 1) continue;
+          if (n.matches(BASCULES)) presse(n);
+          n.querySelectorAll(BASCULES).forEach(presse);
+        }
+      }
+    }
+    if (fen) majFenetres();
+  }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
 }
 
 // Helper to open modal from a card click in stats (lookup by id)
@@ -3472,10 +3550,10 @@ function wireBarRowsClick(rootId, filterKey) {
     row.classList.add('bar-row-clickable');
     const n = countVusMatching(filterKey, val);
     row.title = (n != null) ? `voir ces ${n} film${n > 1 ? 's' : ''}` : 'voir ces films';
-    row.addEventListener('click', (e) => {
+    rendreActivable(row, (e) => {
       if (e.target.closest('a')) return; // clic sur le lien du nom -> tmdb
       goToVusWithFilters({ [filterKey]: val });
-    });
+    }, val + ' : ' + row.title);
   });
 }
 
@@ -3491,7 +3569,7 @@ function wireStatsClicks() {
   document.querySelectorAll('#stats-numbers .stat-card-clickable').forEach(c => {
     if (c.dataset.wired) return;
     c.dataset.wired = '1';
-    c.addEventListener('click', () => {
+    rendreActivable(c, () => {
       if (c.dataset.stat === 'favorites') goToVusWithFilters({ ratings: [RATING_FAV] });
     });
   });
@@ -4799,6 +4877,7 @@ function openAdminSetup() {
 
   if (admin.active) {
     showAdminView('manage');
+    setTimeout(() => document.getElementById('admin-lock-btn').focus(), 80);
   } else if (admin.encryptedPAT) {
     showAdminView('unlock');
     setTimeout(() => {
@@ -4981,16 +5060,16 @@ function renderEditForm(film) {
       <div class="edit-section-title">mode édition</div>
 
       <div class="field">
-        <label>statut</label>
-        <div class="radio-group" data-field="statut">
+        <label id="edit-label-statut">statut</label>
+        <div class="radio-group" data-field="statut" role="group" aria-labelledby="edit-label-statut">
           <button class="radio-btn ${u.statut === 'a_voir' ? 'active' : ''}" data-value="a_voir">à voir</button>
           <button class="radio-btn ${u.statut === 'vu' ? 'active' : ''}" data-value="vu">vu</button>
         </div>
       </div>
 
       <div class="field edit-vu-field" style="display: ${isVu ? '' : 'none'}">
-        <label>note</label>
-        <div class="rating-chips" data-field="rating">
+        <label id="edit-label-note">note</label>
+        <div class="rating-chips" data-field="rating" role="group" aria-labelledby="edit-label-note">
           ${[1, 2, 3, 4, 5].map(r =>
             `<button class="rating-chip ${u.rating === r ? 'active' : ''}" data-rating="${r}">${r}★</button>`).join('')}
           <span class="rating-chip-sep" aria-hidden="true"></span>
@@ -4999,8 +5078,8 @@ function renderEditForm(film) {
       </div>
 
       <div class="field edit-vu-field" style="display: ${isVu ? '' : 'none'}">
-        <label>lieu</label>
-        <select data-field="lieu">
+        <label for="edit-lieu">lieu</label>
+        <select data-field="lieu" id="edit-lieu">
           <option value="">—</option>
           <option value="Cinéma" ${u.lieu === 'Cinéma' ? 'selected' : ''}>Cinéma</option>
           <option value="Stremio" ${u.lieu === 'Stremio' ? 'selected' : ''}>Stremio</option>
@@ -5012,8 +5091,8 @@ function renderEditForm(film) {
       <div class="field edit-vu-field" style="display: ${isVu ? '' : 'none'}">
         <label>date vue</label>
         <div style="display: flex; gap: 8px;">
-          <input type="number" id="edit-date-year" min="1900" max="2099" placeholder="année (ex. 2019)" style="flex:1;">
-          <select data-field="month" id="edit-date-month" style="flex:1;">
+          <input type="number" id="edit-date-year" min="1900" max="2099" placeholder="année (ex. 2019)" aria-label="année vue" style="flex:1;">
+          <select data-field="month" id="edit-date-month" aria-label="mois vu" style="flex:1;">
             <option value="">—</option>
             <option value="01">janvier</option><option value="02">février</option>
             <option value="03">mars</option><option value="04">avril</option>
@@ -5233,6 +5312,7 @@ function closeLegal() {
   const bd = document.getElementById('legal-backdrop');
   if (!bd.classList.contains('open')) return;
   bd.classList.remove('open');
+  majFenetres();
   document.body.style.overflow = '';
   const back = legalReturnFocus;
   legalReturnFocus = null;
@@ -5258,7 +5338,8 @@ function openRematchModal(film) {
 function closeRematchModal() {
   document.getElementById('rematch-backdrop').classList.remove('open');
   admin.pendingRematchFilmId = null;
-  document.body.style.overflow = '';
+  // La fiche est encore ouverte dessous : sa page de fond reste immobile
+  if (!document.getElementById('modal-backdrop').classList.contains('open')) document.body.style.overflow = '';
   navLater('close');
 }
 
@@ -5290,7 +5371,7 @@ async function handleRematchSearch(query) {
         <div class="search-result-year">${year}</div>
         <div class="search-result-type">${r.media_type === 'tv' ? 'série' : 'film'}</div>
       `;
-      div.addEventListener('click', () => confirmRematch(r));
+      rendreActivable(div, () => confirmRematch(r));
       resultsEl.appendChild(div);
     }
   } catch (e) {
@@ -5794,6 +5875,7 @@ function repeindreVueCourante() {
 // ============================================================
 loadAdminCreds();
 wireEvents();
+suivreEtats();
 navInit();
 purgeTmdbMemories();
 loadFilms();

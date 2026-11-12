@@ -1,18 +1,11 @@
 # Écrans du site dans un vrai navigateur, TMDB simulé (voir banc.py) :
 #   python -m unittest discover -s tests/navigateur
-# FILMS_APP_JS=<chemin> fait servir une autre copie d'app.js (l'ancienne
-# version, pour vérifier qu'un test attrapait bien le défaut).
-import os, unittest
+# FILMS_APP_JS=<chemin> fait servir une autre copie d'app.js (voir banc.py).
+import unittest
 from banc import Banc
 
 
 class Ecrans(Banc):
-    def setUp(self):
-        super().setUp()
-        autre = os.environ.get('FILMS_APP_JS')
-        if autre:
-            self.ctx.route('**/app.js*', lambda route, req: route.fulfill(path=autre, content_type='application/javascript'))
-
     def test_B5_pas_de_faux_aucun_film_au_demarrage(self):
         # films.json lent : les pastilles (Canal+, Lyon, au ciné) arrivent avant
         self.ctx.add_init_script('window.__regles.push({ motif: "films.json", ms: 1500 })')
