@@ -1,0 +1,38 @@
+# Cinémas de Lyon : chaque nuit, le programme des 7 prochains jours de dix
+# salles (Lumière Terreaux, Bellecour, Fourmi, Comœdia, UGC Part-Dieu,
+# Astoria, Cité Internationale, Confluence, Pathé Bellecour, Vaise), lu sur
+# AlloCiné, chaque film retrouvé chez TMDB, dans cinemas_lyon.json que le
+# site lit (catégorie « à lyon », pastille, fiche). Aucune brique externe
+# (pas d'avertissement Node.js) : le programme Python est dans
+# .github/scripts/cinemas_lyon.py (testé par test_cinemas_lyon.py), relu
+# ici à la version exacte de ce passage.
+# Pour le lancer à la main : onglet Actions, « cinémas lyon », Run workflow.
+name: cinémas lyon
+
+on:
+  schedule:
+    - cron: '30 3 * * *'   # 3 h 30 UTC ; en pratique GitHub le lance plutôt vers midi
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Un seul passage à la fois (lancement à la main pendant le passage prévu)
+concurrency:
+  group: cinemas-lyon
+  cancel-in-progress: false
+
+jobs:
+  cinemas-lyon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: programme des cinémas de Lyon
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BRANCHE: ${{ github.ref_name }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          curl -fsSL "https://raw.githubusercontent.com/$REPO/$GITHUB_SHA/.github/scripts/cinemas_lyon.py" -o cinemas_lyon.py
+          python3 cinemas_lyon.py

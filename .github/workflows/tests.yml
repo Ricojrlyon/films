@@ -1,0 +1,34 @@
+# Tests du site et des robots, à chaque envoi qui touche au code (pas aux
+# données : les enregistrements de films.json et le programme des cinémas ne
+# le déclenchent pas). En cas d'échec, GitHub prévient par mail.
+# Le site publié ne dépend de rien ici. Pour lancer à la main : onglet
+# Actions, « tests », Run workflow.
+name: tests
+
+on:
+  push:
+    paths: ['app.js', 'style.css', 'index.html', 'tests/**', '.github/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7   # tourne sous Node 24 : pas d'avertissement Node.js 20
+        with:
+          persist-credentials: false
+      - name: fonctions du site (node --test, sans navigateur)
+        run: node --test tests/*.test.mjs
+      - name: robots (python, sans réseau)
+        run: python3 -m unittest discover -s .github/scripts -p "test_*.py"
+      - name: écrans dans un navigateur (Playwright, TMDB simulé)
+        env:
+          FILMS_NAVIGATEUR: chromium
+        run: |
+          python3 -m pip install --quiet playwright
+          python3 -m playwright install --with-deps chromium
+          python3 -m unittest discover -s tests/navigateur
