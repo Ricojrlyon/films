@@ -462,7 +462,7 @@ function buildCard(f) {
     poster.appendChild(c);
   }
 
-  // « canal+ » : disponible avec l'abonnement Canal+
+  // « canal+ » : disponible avec l'abonnement Canal+ (OCS et Apple TV compris)
   if (canalSet.has(f.id)) {
     const c = document.createElement('div');
     c.className = 'canal-badge';
@@ -3641,21 +3641,27 @@ async function fetchNowPlayingIdsFR() {
 }
 // ---- « canal+ » : tout ce que l'abonnement Canal+ permet de voir en France ----
 // Le catalogue complet, films et séries (TMDB /discover avec les offres
-// JustWatch : fournisseur 381, en streaming par abonnement ; Canal VOD,
-// location et achat, n'en fait pas partie), relu une fois par jour (clé
-// films_canal_fr, { ts, ids }) : environ 60 pages TMDB pour 1 150 titres
-// au 2026-10-26. Il alimente la pastille « canal+ » de toutes les cartes
-// (sauf la liste « canal+ » de Découvrir). Comparé le 2026-10-26, film par
-// film, aux offres de 99 films de la collection : aucun désaccord.
+// JustWatch, en streaming par abonnement ; Canal VOD, location et achat, n'en
+// fait pas partie), relu une fois par jour (clé films_canal_fr,
+// { ts, fournisseurs, ids }). Depuis le 2026-11-12, OCS et Apple TV, compris
+// dans l'abonnement Canal+ d'Emeric, en font partie (ABONNEMENT_CANAL) :
+// environ 130 pages TMDB pour 2 600 titres (1 978 films, 623 séries ; OCS
+// 1 219 films dont 146 déjà sur Canal+, Apple TV 106 films). Il alimente la
+// pastille « canal+ » de toutes les cartes (sauf la liste « canal+ » de
+// Découvrir, qui reste Canal+ seul). Comparé le 2026-10-26, film par film,
+// aux offres de 99 films de la collection : aucun désaccord.
+// Fournisseurs TMDB en France : 381 Canal+, 685 « Cine+ OCS » (le catalogue
+// OCS ; il n'y a plus de fournisseur OCS seul), 350 Apple TV.
+const ABONNEMENT_CANAL = '381|685|350';   // « | » : l'un ou l'autre
 let canalSet = new Set();
 async function fetchCanalCatalogue() {
   const ids = [];
   for (const type of ['movie', 'tv']) {
     const base = `${TMDB_BASE}/discover/${type}?api_key=${encodeURIComponent(admin.tmdbKey)}&watch_region=FR`
-      + `&with_watch_providers=${CANAL_PLUS}&with_watch_monetization_types=flatrate&sort_by=popularity.desc&include_adult=false`;
+      + `&with_watch_providers=${encodeURIComponent(ABONNEMENT_CANAL)}&with_watch_monetization_types=flatrate&sort_by=popularity.desc&include_adult=false`;
     const p1 = await tmdbJson(base + '&page=1');
     if (!p1) throw new Error('canal+ ' + type);
-    const n = Math.min(p1.total_pages || 1, 100);
+    const n = Math.min(p1.total_pages || 1, 200);
     const suite = await mapWithConcurrency(Array.from({ length: n - 1 }, (_, i) => i + 2), 6,
       page => tmdbJson(base + '&page=' + page));
     // Une page manquante fausserait la liste : on la garde pour la visite, sans l'enregistrer
@@ -3670,7 +3676,9 @@ async function ensureCanalFR() {
   const KEY = 'films_canal_fr';
   try {
     const cached = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (cached && Array.isArray(cached.ids) && (Date.now() - cached.ts) < 24 * 3600 * 1000) {
+    // Une liste lue avec d'autres fournisseurs (avant OCS et Apple TV) est relue
+    if (cached && Array.isArray(cached.ids) && cached.fournisseurs === ABONNEMENT_CANAL
+        && (Date.now() - cached.ts) < 24 * 3600 * 1000) {
       canalSet = new Set(cached.ids);
       return;
     }
@@ -3679,7 +3687,7 @@ async function ensureCanalFR() {
     const ids = await fetchCanalCatalogue();
     canalSet = new Set(ids);
     if (!ids.incomplet) {
-      try { localStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), ids })); } catch {}
+      try { localStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), fournisseurs: ABONNEMENT_CANAL, ids })); } catch {}
     }
   } catch { /* réseau/tmdb : pas de pastille, sans bloquer le site */ }
 }
