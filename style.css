@@ -8,7 +8,7 @@
   --rule-strong: #3a4853;
   --ink: #e7dfbe;
   --ink-soft: #a59f86;
-  --ink-mute: #5e6973;
+  --ink-mute: #8d97a1; /* texte secondaire : au moins 4,5:1 sur les trois fonds (WCAG AA) */
   --warm: #d4a574;
   --hot: #ff6b4a;
   --green: #7fc28f;
@@ -149,7 +149,7 @@ body {
 }
 .tab .count {
   margin-left: 6px;
-  opacity: 0.65;
+  opacity: 0.85; /* lisible (4,9:1 et plus) sur onglet actif comme inactif */
   font-size: 9px;
 }
 
@@ -1991,8 +1991,13 @@ body:not(.admin-mode) #origin-enrich-wrap { display: none !important; }
 }
 .edit-delete:hover { background: var(--red); color: white; }
 
+/* Repère du clavier, liens compris : sans règle, Chrome et Brave dessinent un
+   anneau presque noir, invisible sur le fond sombre. La dernière ligne passe
+   devant le « outline: none » des champs du formulaire d'édition. */
 button:focus-visible, input:focus-visible, select:focus-visible,
-.card:focus-visible, .year-best-film:focus-visible {
+a:focus-visible, [tabindex]:focus-visible,
+.card:focus-visible, .year-best-film:focus-visible,
+.edit-form input:focus-visible {
   outline: 2px solid var(--warm);
   outline-offset: 2px;
 }

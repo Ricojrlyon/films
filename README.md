@@ -26,7 +26,11 @@ Application personnelle de suivi de films (et séries), hébergée sur GitHub Pa
 | `fonts/` | Les quatre polices du site (Bungee, Bricolage Grotesque, Inter Tight, JetBrains Mono), hébergées sur le site : fichiers `.woff2`, leurs déclarations dans `fonts/polices.css`, leurs licences `OFL-*.txt` (voir « Polices ») |
 | `tmdb.svg` | Logo officiel de TMDB, affiché en blanc dans les mentions légales, rubrique crédits (voir « Partage et référencement ») |
 | `.github/workflows/canal-plus.yml` | Le robot de l'alerte Canal+ : chaque matin, un ticket GitHub (envoyé par mail) pour chaque film « à voir » arrivé sur Canal+ (voir « Alerte Canal+ ») |
-| `.github/workflows/cinemas-lyon.yml` | Le robot des cinémas de Lyon : chaque nuit, le programme de la semaine de dix salles, dans `cinemas_lyon.json` (voir « Cinémas de Lyon ») |
+| `.github/workflows/cinemas-lyon.yml` | Le robot des cinémas de Lyon : chaque nuit, le programme de la semaine de dix salles, dans `cinemas_lyon.json` (voir « Cinémas de Lyon ») ; son programme Python est dans `.github/scripts/cinemas_lyon.py` |
+| `.github/scripts/` | Programmes Python des robots, et leurs tests (`test_*.py`, sans réseau) |
+| `.github/workflows/tests.yml` | Lance les tests à chaque envoi qui touche au code (voir « Tests ») |
+| `tests/` | Tests des fonctions d'`app.js` et de `style.css` (`node --test`), sans navigateur ; le site publié n'en dépend pas |
+| `AUDIT.md` | Audit complet du 2026-11-12 : constats, plan de correction par lots |
 | `cinemas_lyon.json` | Programme des cinémas de Lyon, réécrit chaque nuit par le robot : ne pas le modifier ni le pousser à la main |
 | `README.md` | Ce document |
 
@@ -121,7 +125,7 @@ Les conditions de l'API TMDB (§1.C) interdisent de garder plus de 6 mois une in
 
 Depuis le 2026-10-27, le site connaît le programme de dix salles lyonnaises : Lumière Terreaux, Lumière Bellecour, Lumière Fourmi, Comœdia, UGC Part-Dieu, UGC Astoria, UGC Cité Internationale, UGC Confluence, Pathé Bellecour et Pathé Vaise.
 
-- **Le robot** (`.github/workflows/cinemas-lyon.yml`, chaque nuit à 3 h 30 UTC, ou à la main : Actions, « cinémas lyon », Run workflow) lit sur AlloCiné les séances des 7 prochains jours de chaque salle (`/_/showtimes/theater-<code>/d-<jour>/`, par pages de 15 films ; codes AlloCiné dans la liste `SALLES`), retrouve chaque film chez TMDB (titre original puis français, année parmi ses dates de sortie : une ressortie retrouve le film d'origine) et dépose `cinemas_lyon.json` à la racine du dépôt (API GitHub, un commit par nuit, qui republie le site). Une correspondance TMDB est reprise d'une nuit à l'autre pendant 30 jours, puis relue (conditions TMDB : 6 mois au plus). Au 2026-10-27 : 69 films, 64 retrouvés ; les autres (captations de ballet, documentaires absents de TMDB) ne s'affichent pas. Python seul, sans brique externe (pas d'avertissement Node.js), environ une minute et demie.
+- **Le robot** (`.github/workflows/cinemas-lyon.yml`, chaque nuit à 3 h 30 UTC, ou à la main : Actions, « cinémas lyon », Run workflow) lit sur AlloCiné les séances des 7 prochains jours de chaque salle (`/_/showtimes/theater-<code>/d-<AAAA-MM-JJ>/`, par pages de 15 films ; codes AlloCiné dans la liste `SALLES`). AlloCiné attend la date complète : jusqu'au 2026-11-12, le robot demandait `d-0` à `d-6`, numéros qu'AlloCiné ignore ; il ne recevait que la page par défaut (aujourd'hui et demain matin), soit environ une journée de séances au lieu de sept (constat R1 de l'audit), retrouve chaque film chez TMDB (titre original puis français, année parmi ses dates de sortie : une ressortie retrouve le film d'origine) et dépose `cinemas_lyon.json` à la racine du dépôt (API GitHub, un commit par nuit, qui republie le site). Une correspondance TMDB est reprise d'une nuit à l'autre pendant 30 jours, puis relue (conditions TMDB : 6 mois au plus). Au 2026-10-27 : 69 films, 64 retrouvés ; les autres (captations de ballet, documentaires absents de TMDB) ne s'affichent pas. Python seul, sans brique externe (pas d'avertissement Node.js) : le programme est dans `.github/scripts/cinemas_lyon.py`, que le robot télécharge à la version exacte de son passage. Si aucune séance n'est lue (AlloCiné changé ou injoignable), il s'arrête en erreur sans rien publier (échec visible dans l'onglet Actions, mail de GitHub) au lieu de vider la catégorie. Un seul passage à la fois (`concurrency`). En pratique, GitHub lance ce passage prévu à 3 h 30 UTC plutôt vers midi.
 - **Limite** : l'adresse d'AlloCiné n'est pas un service officiel ; ses conditions interdisent en principe la lecture automatique. Quelques centaines de lectures par nuit, pour un usage personnel ; si AlloCiné la change ou la bloque, la catégorie et les pastilles s'éteignent jusqu'à ce que le robot soit adapté.
 - **Séances** : `[« AAAA-MM-JJTHH:MM », version]`, version « VO », « VF » (doublée) ou vide (film français). Seules les séances pas encore passées comptent.
 - **Catégorie « à lyon »** (Découvrir, en premier, devant « au cinéma » ; c'est elle qui s'affiche en ouvrant Découvrir) : les films qui passent encore cette semaine (affiches seules, sans le nom des salles). Tri par défaut « selon tes goûts » (`classerSelonGouts`, ci-dessous), propre à cette catégorie ; « populaires », « mieux notés » (les films de moins de 20 votes après les autres) et « sorties récentes » restent proposés. Filtres genre et pays ; 40 films à la fois, « charger plus de films ».
@@ -233,7 +237,8 @@ Les quatre polices sont hébergées sur le site (`fonts/`) et non plus chez Goog
 
 ## Accessibilité
 
-- Navigation clavier : les cartes et les films de l'année sont atteignables avec Tab (contour doré, visible seulement au clavier) ; Entrée ouvre la fiche.
+- Navigation clavier : les cartes et les films de l'année sont atteignables avec Tab ; Entrée ouvre la fiche. Le contour doré (visible seulement au clavier) entoure aussi les liens (noms, cases du casting, liens tmdb et allociné, logos des plateformes, pied de page) et les champs du formulaire d'édition : sans règle à eux, Chrome et Brave dessinaient un anneau presque noir, invisible sur le fond sombre.
+- Contraste : le gris des textes secondaires (`--ink-mute`, année et réal sous les cartes, sous-titres des stats, pied de page, textes d'aide) est à `#8d97a1`, soit au moins 4,5:1 sur les trois fonds du site (seuil WCAG AA pour le petit texte ; il était à 2,4 à 3:1). Les compteurs des onglets sont à 85 % d'opacité.
 - Fiche film : déclarée comme fenêtre de dialogue, nommée par le titre du film. À l'ouverture, la sélection clavier entre dans la fiche ; Tab y reste tant qu'elle est au premier plan ; Échap la ferme et la sélection revient à la carte d'origine.
 - Petits écrans : les quatre catégories de Découvrir passent sur deux lignes quand la place manque, au lieu de sortir de l'écran (« canal+ » restait caché à droite jusqu'à 400 px de large) ; sur ordinateur, une seule ligne.
 - Bouton du mode édition : un cadenas dessiné (`cadenasSvg` dans app.js), d'une seule couleur, celle du texte du bouton (gris, vert une fois déverrouillé, ouvert), à la place de l'emoji en couleurs ; il est nommé « mode édition » pour les lecteurs d'écran (`aria-label`). Le même cadenas, en petit, figure dans les phrases qui y renvoient.
@@ -257,8 +262,20 @@ Chaque matin, un robot GitHub (`.github/workflows/canal-plus.yml`, mis en place 
 Chaque sauvegarde réécrit tout le fichier, donc les écritures concurrentes sont gérées explicitement :
 
 - **File d'attente locale** : les sauvegardes d'un même onglet sont sérialisées (un enrichissement de masse ne peut pas percuter une édition).
-- **Conflit 409** (le fichier a changé depuis notre lecture, sur un autre appareil) : **fusion film par film** au lieu d'écrasement. Un film modifié dans la session garde sa version locale ; un film non touché prend la version distante ; les ajouts des deux côtés sont conservés (les distants en tête) ; les suppressions des deux côtés sont respectées. La fusion relit le fichier distant quelle que soit sa taille.
+- **Conflit 409** (le fichier a changé depuis notre lecture, sur un autre appareil) : **fusion film par film** au lieu d'écrasement. Un film modifié ici **depuis le dernier enregistrement réussi** garde sa version locale ; un film non touché prend la version distante ; les ajouts des deux côtés sont conservés (les distants en tête) ; les suppressions des deux côtés sont respectées. La fusion relit le fichier distant quelle que soit sa taille.
+- **Marques « modifié ici »** (`sessionChanges`) : numérotées (`marquer`), et oubliées dès que l'envoi qui les contenait a réussi (`oublierMarques`). Avant le 2026-11-12, elles restaient jusqu'à la fermeture de l'onglet : un onglet resté ouvert, ou l'application du téléphone gardée en mémoire, écrasait au conflit suivant une note faite ailleurs, ressuscitait un film supprimé ailleurs ou effaçait un film rajouté ailleurs (constat D1 de l'audit). Les marques posées pendant un envoi restent pour le suivant.
+- **Échec d'un enregistrement** : le retour à l'état d'avant retrouve le film par son id (et seulement s'il porte encore cette modification), pas par sa place dans la liste, qu'une fusion a pu décaler.
+- **Re-match** vers un film déjà dans la collection : refusé (« ce film est déjà dans ta collection »), comme l'ajout ; il créait un doublon d'id.
 - Cas limite assumé : si un conflit survient pendant un enrichissement de masse, l'enrichissement des films non touchés manuellement peut être perdu. Le relancer suffit : aucune donnée personnelle n'est en jeu. La relecture automatique des données TMDB, elle, est gardée à la fusion (voir « Données TMDB : 6 mois au plus »).
+
+## Tests
+
+Le site publié ne dépend d'aucun d'eux ; ils tournent à côté :
+
+- `node --test tests/*.test.mjs` : fonctions d'`app.js`, chargé sans navigateur par `tests/charger.mjs` (le démarrage est coupé, la page et GitHub sont simulés), et contrôles de `style.css`. Enregistrement : fusion au conflit 409 entre deux appareils, file d'attente, retour arrière après échec, re-match (`tests/sauvegarde.test.mjs`) ; contraste et repère du clavier (`tests/styles.test.mjs`). `FILMS_APP_JS=<chemin>` et `FILMS_STYLE_CSS=<chemin>` font tester une autre copie (par exemple l'ancienne version, pour vérifier qu'un test attrapait bien le défaut).
+- `python3 -m unittest discover -s .github/scripts -p "test_*.py"` : robots, avec un faux AlloCiné, sans réseau.
+- `.github/workflows/tests.yml` lance les deux à chaque envoi qui touche au code (`app.js`, `style.css`, `index.html`, `tests/`, `.github/`), pas aux enregistrements de `films.json` ; en cas d'échec, GitHub prévient par mail.
+- Chaque correction de bug arrive avec un test qui échouait avant.
 
 ## Développement local et déploiement
 

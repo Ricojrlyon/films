@@ -2185,7 +2185,7 @@ async function addTmdbFilmToCollection(film, statut, userData) {
   await fillDirectorCountries(film);
   try {
     state.films.unshift(film);
-    sessionChanges.added.add(film.id);
+    marquer(sessionChanges.added, film.id);
     await saveFilmsToGithub('add: ' + film.title + ' (' + statut + ')');
     initFilters();
     refreshStats();
@@ -4393,7 +4393,7 @@ const TMDB_IMPORT_DATE = '2026-05-19T00:00:00Z';
 const TMDB_FIELDS = ['title', 'original_title', 'year', 'release_date', 'director', 'director_gender',
   'director_genders', 'director_countries', 'cast', 'cast_genders', 'runtime', 'genres', 'country',
   'poster', 'backdrop', 'synopsis', 'tmdb_rating', 'imdb_id', 'original_language', 'trailer'];
-const tmdbRefreshed = new Map(); // id -> données relues dans cette session (fusion au conflit 409)
+const tmdbRefreshed = new Map(); // id -> données relues pas encore enregistrées (fusion au conflit 409)
 let tmdbRefreshRunning = false;
 
 function tmdbReadAt(f) {
@@ -4469,7 +4469,7 @@ async function refreshTmdbData() {
         if (data && cur && admin.active) {
           const at = new Date().toISOString();
           applyTmdbData(cur, data, at);
-          tmdbRefreshed.set(cur.id, { data, at });
+          tmdbRefreshed.set(cur.id, { data, at, n: ++changeSeq });
           relus++; enAttente++;
         }
         montrer(++lus);
@@ -4576,12 +4576,26 @@ async function ghPutFile(path, content, sha, message) {
   return await r.json(); // contains content.sha for new version
 }
 
-// Suivi des changements de la session — la fusion au conflit 409 s'en sert
-// pour distinguer « ajouté/supprimé ici » de « supprimé/ajouté ailleurs »
-const sessionChanges = { added: new Set(), edited: new Set(), deleted: new Set() };
+// Suivi des changements pas encore enregistrés : la fusion au conflit 409
+// s'en sert pour distinguer « ajouté/supprimé ici » de « supprimé/ajouté
+// ailleurs ». id -> numéro de la modification ; une fois l'envoi réussi, la
+// marque est oubliée (sinon, dans un onglet resté ouvert, elle ferait gagner
+// plus tard une version périmée contre une modification faite ailleurs).
+const sessionChanges = { added: new Map(), edited: new Map(), deleted: new Map() };
+let changeSeq = 0;
+function marquer(liste, id) { liste.set(id, ++changeSeq); }
+// Oublie les marques déjà envoyées (numéro <= jusqua) ; celles posées pendant
+// l'envoi (numéro plus grand) restent pour le suivant
+function oublierMarques(jusqua) {
+  for (const liste of Object.values(sessionChanges)) {
+    for (const [id, n] of liste) if (n <= jusqua) liste.delete(id);
+  }
+  for (const [id, r] of tmdbRefreshed) if (r.n <= jusqua) tmdbRefreshed.delete(id);
+}
 
 // Fusion film par film avec la version distante. Politique :
-// · film touché dans cette session (ajouté/édité) → la version locale gagne
+// · film touché ici depuis le dernier envoi réussi (ajouté/édité) → la
+//   version locale gagne
 // · film seulement relu chez TMDB ici → la version distante, avec les
 //   données TMDB relues (statut, note… d'un autre appareil gardés)
 // · film non touché ici → la version distante gagne (elle peut porter des
@@ -4652,8 +4666,10 @@ async function doSaveFilmsToGithub(message) {
     admin.filmsSHA = cur.sha;
   }
   try {
+    const seq = changeSeq; // tout ce qui est marqué jusqu'ici part dans cet envoi
     const result = await ghPutFile('films.json', buildFilmsPayload(), admin.filmsSHA, message);
     admin.filmsSHA = result.content.sha;
+    oublierMarques(seq);
   } catch (e) {
     // Conflit (409) : le fichier a changé depuis notre lecture (autre appareil).
     // Fusionner film par film au lieu d'écraser, puis réessayer une fois.
@@ -4668,8 +4684,10 @@ async function doSaveFilmsToGithub(message) {
           merged = true;
         }
       } catch { /* contenu distant illisible → on pousse l'état local tel quel */ }
+      const seq = changeSeq;
       const result = await ghPutFile('films.json', buildFilmsPayload(), admin.filmsSHA, message);
       admin.filmsSHA = result.content.sha;
+      oublierMarques(seq);
       if (merged) {
         // L'état peut avoir intégré des modifs distantes : rafraîchir l'affichage
         initFilters();
@@ -5097,7 +5115,7 @@ async function saveEditedFilm(filmId) {
     state.films[filmIndex].user = newUser;
     // Trace l'édition pour la fusion 409 (on la laisse même si le save échoue :
     // au pire un film survit à une suppression distante, jamais de perte)
-    sessionChanges.edited.add(filmId);
+    marquer(sessionChanges.edited, filmId);
     await saveFilmsToGithub('edit: ' + film.title);
     initFilters();
     applyFilters({ preservePage: true });
@@ -5106,7 +5124,10 @@ async function saveEditedFilm(filmId) {
     showToast('✓ ' + film.title + ' mis à jour', 'success');
   } catch (e) {
     // Rollback : le save a échoué, films.json contient toujours les anciennes valeurs
-    state.films[filmIndex].user = prevUser;
+    // Par id (une fusion 409 a pu décaler les films), et seulement si la
+    // fiche porte encore CETTE modification (une édition suivante a pu la remplacer)
+    const cur = state.films.find(f => f.id === filmId);
+    if (cur && cur.user === newUser) cur.user = prevUser;
     errEl.textContent = 'erreur : ' + e.message;
     errEl.style.display = '';
     saveBtn.disabled = false;
@@ -5122,7 +5143,7 @@ async function deleteFilm(film) {
   const removed = state.films[idx];
   try {
     state.films.splice(idx, 1);
-    sessionChanges.deleted.add(film.id);
+    marquer(sessionChanges.deleted, film.id);
     await saveFilmsToGithub('delete: ' + film.title);
     initFilters();
     applyFilters({ preservePage: true });
@@ -5227,13 +5248,20 @@ async function confirmRematch(result) {
   if (idx === -1) return;
   const oldFilm = state.films[idx];
 
+  // Comme l'ajout : pas de second exemplaire d'un film déjà dans la collection
+  const nouvelId = result.media_type + '-' + result.id;
+  if (nouvelId !== oldFilm.id && state.films.some(f => f.id === nouvelId)) {
+    document.getElementById('rematch-status').textContent = 'ce film est déjà dans ta collection';
+    return;
+  }
   if (!confirm('remplacer les métadonnées par "' + (result.title || result.name) + '" ?')) return;
 
   const statusEl = document.getElementById('rematch-status');
   statusEl.textContent = 'récupération des détails…';
+  let newFilm = null;
   try {
     const detail = await tmdbDetails(result.id, result.media_type);
-    const newFilm = buildFilmFromTmdb(detail, result.media_type, oldFilm.source?.csv_title);
+    newFilm = buildFilmFromTmdb(detail, result.media_type, oldFilm.source?.csv_title);
     await fillDirectorCountries(newFilm);
     newFilm.user = oldFilm.user; // keep user data intact
     newFilm.source = { ...oldFilm.source, rematched_at: new Date().toISOString() };
@@ -5241,10 +5269,10 @@ async function confirmRematch(result) {
     // Un rematch peut changer l'id (autre fiche TMDB) : pour la fusion 409,
     // c'est une suppression de l'ancien + un ajout du nouveau
     if (newFilm.id !== oldFilm.id) {
-      sessionChanges.deleted.add(oldFilm.id);
-      sessionChanges.added.add(newFilm.id);
+      marquer(sessionChanges.deleted, oldFilm.id);
+      marquer(sessionChanges.added, newFilm.id);
     } else {
-      sessionChanges.edited.add(newFilm.id);
+      marquer(sessionChanges.edited, newFilm.id);
     }
 
     statusEl.textContent = 'enregistrement…';
@@ -5257,7 +5285,9 @@ async function confirmRematch(result) {
     showToast('✓ re-matché : ' + newFilm.title, 'success');
   } catch (e) {
     // Rollback : le save a échoué, films.json contient toujours l'ancienne fiche
-    state.films[idx] = oldFilm;
+    // Par la fiche elle-même, pas par sa position : une fusion 409 a pu décaler la liste
+    const i = newFilm ? state.films.indexOf(newFilm) : -1;
+    if (i !== -1) state.films[i] = oldFilm;
     statusEl.textContent = 'erreur : ' + e.message;
   }
 }
