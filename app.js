@@ -76,13 +76,26 @@ function formatOutOf10(rating) {
   return Number.isInteger(v) ? String(v) : v.toFixed(1);
 }
 
+// Entrées de films.json retouchées à la main : une seule entrée abîmée ne
+// doit pas vider tout le site. On écarte ce qui n'est pas un film (null, texte),
+// on remet date_vue en texte et genres en liste. Un film incomplet est gardé
+// tel quel : l'écarter le ferait disparaître de la base au prochain enregistrement.
+function remettreEnForme(films) {
+  return (Array.isArray(films) ? films : []).filter(f => f && typeof f === 'object' && !Array.isArray(f)).map(f => {
+    const u = f.user;
+    if (u && typeof u === 'object' && u.date_vue != null && typeof u.date_vue !== 'string') u.date_vue = String(u.date_vue);
+    if (f.genres != null && !Array.isArray(f.genres)) f.genres = typeof f.genres === 'string' ? [f.genres] : [];
+    return f;
+  });
+}
+
 async function loadFilms() {
   try {
     // Cache-buster : le CDN de GitHub Pages sert films.json avec ~10 min de cache
     const r = await fetch('./films.json?t=' + Date.now());
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
-    state.films = normalizeRatings(data.films || []);
+    state.films = normalizeRatings(remettreEnForme(data.films));
     initFilters();
     // Reflect initial sort in the sort select
     document.getElementById('sort').value = state.sort;
@@ -278,8 +291,14 @@ function viewTransition(run) {
   } catch (_) { vtActive = false; run(); }
 }
 
+// Texte comparable pour la recherche : sans majuscules ni accents, apostrophe
+// typographique (’, celle de TMDB et de l'iPhone) = apostrophe droite, œ = oe,
+// espaces insécables et espace finale (ajoutée par le clavier du téléphone) neutres
 function normSearch(s) {
-  return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u2018\u2019\u02bc`]/g, "'")
+    .replace(/œ/g, 'oe').replace(/æ/g, 'ae')
+    .replace(/\s+/g, ' ').trim();
 }
 
 function sortList(list, sortKey) {
@@ -535,7 +554,11 @@ function setView(view) {
     applyFilters();
   } else if (isDiscover) {
     initDiscoverFilterOptions();
-    fetchAndRenderDiscover(state.discoverCategory);
+    // Une recherche était affichée (retour d'une fiche, d'une filmographie,
+    // d'un autre onglet) : la rendre, pas la catégorie sous une case remplie
+    const q = (document.getElementById('discover-search').value || '').trim();
+    if (q.length >= 2) handleDiscoverSearch(q);
+    else fetchAndRenderDiscover(state.discoverCategory);
   } else if (isReco) {
     fetchAndRenderReco();
   }
@@ -620,6 +643,7 @@ async function initDiscoverFilterOptions() {
   }
 }
 
+const discoverEnCours = new Map(); // « clé de liste|nombre » -> lecture TMDB en cours
 async function fetchAndRenderDiscover(category) {
   state.discoverCategory = category;
   // Update active pill
@@ -657,19 +681,29 @@ async function fetchAndRenderDiscover(category) {
 
   grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">chargement tmdb…<br><span id="discover-progress"></span></div>';
   countEl.textContent = '…';
+  // La vue, la catégorie, les filtres ou une recherche tapée entre-temps
+  // (case remplie) ont pu changer pendant le chargement : ne pas écraser la grille
+  const perimee = () => state.view !== 'discover' || cacheKey !== discoverCacheKey(state.discoverCategory)
+    || (document.getElementById('discover-search').value || '').trim().length >= 2;
   try {
-    const results = await tmdbBrowse(category, discoverEffectiveFilters(category),
-      state.discoverLimits[cacheKey] || DISCOVER_COUNT, (fait, total) => {
+    // Une seule lecture par liste : un second clic, un aller-retour d'onglet
+    // pendant le chargement attendent la même (« à lyon » : ~330 appels TMDB)
+    const limite = state.discoverLimits[cacheKey] || DISCOVER_COUNT;
+    let lecture = discoverEnCours.get(cacheKey + '|' + limite);
+    if (!lecture) {
+      lecture = tmdbBrowse(category, discoverEffectiveFilters(category), limite, (fait, total) => {
+        // Progression seulement sur l'écran de chargement de cette liste
         const el = document.getElementById('discover-progress');
-        if (el) el.textContent = 'classement selon tes goûts : ' + fait + ' / ' + total;
-      });
+        if (el && cacheKey === discoverCacheKey(state.discoverCategory)) el.textContent = 'classement selon tes goûts : ' + fait + ' / ' + total;
+      }).finally(() => discoverEnCours.delete(cacheKey + '|' + limite));
+      discoverEnCours.set(cacheKey + '|' + limite, lecture);
+    }
+    const results = await lecture;
     state.discoverCache[cacheKey] = results;
-    // La vue, la catégorie OU les filtres ont pu changer pendant le fetch —
-    // ne pas écraser la grille (réponses croisées)
-    if (state.view !== 'discover' || cacheKey !== discoverCacheKey(state.discoverCategory)) return;
+    if (perimee()) return;
     renderTmdbGrid(results);
   } catch (e) {
-    if (state.view !== 'discover' || cacheKey !== discoverCacheKey(state.discoverCategory)) return;
+    if (perimee()) return;
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur tmdb : ${escapeHtml(e.message)}</div>`;
     countEl.textContent = '0';
   }
@@ -708,6 +742,7 @@ async function loadMoreDiscover() {
 }
 
 let discoverSearchSeq = 0;
+let discoverDerniereRecherche = null; // { q, results } : rendue sans relire TMDB au retour
 async function handleDiscoverSearch(query) {
   // Jeton de séquence : une réponse lente ne doit pas écraser celle d'une frappe plus récente
   const seq = ++discoverSearchSeq;
@@ -721,15 +756,23 @@ async function handleDiscoverSearch(query) {
   }
   // Clear active pill while searching
   document.querySelectorAll('#discover-categories .explorer-cat').forEach(p => p.classList.remove('active'));
+  if (discoverDerniereRecherche && discoverDerniereRecherche.q === query) {
+    renderTmdbGrid(discoverDerniereRecherche.results.slice(0, 40));
+    return;
+  }
   grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">recherche…</div>';
   countEl.textContent = '…';
+  // L'utilisateur a pu changer de vue, relancer une recherche, ou vider la
+  // case en cliquant une catégorie ou un filtre pendant le chargement
+  const perimee = () => seq !== discoverSearchSeq || state.view !== 'discover'
+    || (document.getElementById('discover-search').value || '').trim() !== query;
   try {
     const results = await tmdbSearch(query);
-    // L'utilisateur a pu changer de vue ou relancer une recherche pendant le fetch
-    if (seq !== discoverSearchSeq || state.view !== 'discover') return;
+    if (perimee()) return;
+    discoverDerniereRecherche = { q: query, results };
     renderTmdbGrid(results.slice(0, 40));
   } catch (e) {
-    if (seq !== discoverSearchSeq || state.view !== 'discover') return;
+    if (perimee()) return;
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur tmdb : ${escapeHtml(e.message)}</div>`;
     countEl.textContent = '0';
   }
@@ -1250,17 +1293,19 @@ async function openTmdbItem(item) {
   bg.style.backgroundImage = '';
   body.innerHTML = '<div style="padding: 60px 20px; text-align: center; color: var(--ink-mute); font-style: italic;">chargement des détails…</div>';
   openModalCtx = { id, tmdbOnly: true }; // fiche en cours de chargement (historique)
+  const toujoursLa = () => document.getElementById('modal-backdrop').classList.contains('open') && openModalCtx.id === id;
   showModalBackdrop();
   document.body.style.overflow = 'hidden';
   navLater('open');
   try {
     const detail = await tmdbDetails(item.id, item.media_type || 'movie');
-    // L'utilisateur a pu fermer le modal pendant le chargement — ne pas le rouvrir
-    if (!document.getElementById('modal-backdrop').classList.contains('open')) return;
+    // L'utilisateur a pu fermer la fiche, ou en ouvrir une autre, pendant le
+    // chargement : ne pas la rouvrir, ne pas remplacer l'autre
+    if (!toujoursLa()) return;
     const film = buildFilmFromTmdb(detail, item.media_type || 'movie');
     openModal(film, { tmdbOnly: true });
   } catch (e) {
-    if (!document.getElementById('modal-backdrop').classList.contains('open')) return;
+    if (!toujoursLa()) return;
     body.innerHTML = `<div class="error-inline" style="margin: 20px;">erreur : ${escapeHtml(e.message)}</div>`;
   }
 }
@@ -1861,10 +1906,14 @@ async function fetchAndRenderReco(forceRefresh = false) {
 // en formulaire d'édition, dont les boutons agissent par id sur state.films
 // (introuvable → ne font rien)
 let openModalCtx = { id: null, tmdbOnly: false };
+// Une saisie a commencé dans la fiche ouverte (formulaire d'édition ou « déjà vu ») :
+// les réponses TMDB tardives ne la redessinent plus (voir reRenderModalIfShowing)
+let modalSaisie = false;
 
 function openModal(f, opts) {
   opts = opts || {};
   const tmdbOnly = opts.tmdbOnly === true;
+  if (openModalCtx.id !== f.id) modalSaisie = false; // autre fiche : rien de saisi
   openModalCtx = { id: f.id, tmdbOnly };
   const bg = document.getElementById('modal-bg');
   const body = document.getElementById('modal-body');
@@ -2205,7 +2254,7 @@ async function addTmdbFilmToCollection(film, statut, userData) {
       });
       renderTmdbGrid(state.recoDisplayed);
     }
-    closeModal();
+    if (openModalCtx.id === film.id) closeModal();
     showToast('✓ ajouté : ' + film.title, 'success');
   } catch (e) {
     // Rollback
@@ -2231,6 +2280,7 @@ function showModalBackdrop() {
 
 function closeModal() {
   document.getElementById('modal-backdrop').classList.remove('open');
+  modalSaisie = false;
   document.body.style.overflow = '';
   // reset backdrop filter
   document.getElementById('modal-bg').style.filter = '';
@@ -3577,7 +3627,8 @@ const admin = {
 };
 
 function loadAdminCreds() {
-  admin.encryptedPAT = localStorage.getItem('films_encrypted_pat') || null;
+  try { admin.encryptedPAT = localStorage.getItem('films_encrypted_pat') || null; }
+  catch { admin.encryptedPAT = null; } // stockage interdit (cookies bloqués) : le site marche sans
 }
 
 function saveEncryptedPAT(b64) {
@@ -3898,7 +3949,12 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress)
   const pageCount = lots * (rebalance ? (category === 'canal' ? DISCOVER_CANAL_PAGES : DISCOVER_REBALANCE_PAGES) : 2);
   // La page 1 est indispensable (réseau coupé : erreur affichée) ; une autre
   // page qui échoue est simplement ignorée
-  const page1 = () => fetch(baseUrl + '&page=1').then(r => r.ok ? r.json() : { results: [] });
+  // Erreur HTTP (TMDB en panne, 429) : une erreur, pas une liste vide (qui
+  // dirait « aucun film, élargis tes filtres » et resterait gardée toute la visite)
+  const page1 = () => fetch(baseUrl + '&page=1').then(r => {
+    if (!r.ok) throw new Error('tmdb ne répond pas (' + r.status + ')');
+    return r.json();
+  });
   // « prochainement » : les ressorties de vieux films (classiques ressortis en
   // salle) ne sont pas des nouveautés : écartées (sortie d'origine > 1 an)
   const ilYaUnAn = new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10);
@@ -4374,6 +4430,8 @@ function reRenderModalIfShowing(film) {
   // Toujours la même fiche à l'écran ? (l'utilisateur a pu en ouvrir une autre
   // pendant l'enrichissement asynchrone)
   if (openModalCtx.id !== film.id) return;
+  // Saisie en cours : la garder ; les données enrichies servent à la prochaine ouverture
+  if (modalSaisie) return;
   // Ré-ouvrir dans le MÊME mode (préserve tmdbOnly pour un film hors collection)
   openModal(film, { tmdbOnly: openModalCtx.tmdbOnly });
 }
@@ -4546,7 +4604,7 @@ function adoptFilmsFromApi(content) {
   try {
     const data = JSON.parse(content);
     if (!data || !Array.isArray(data.films)) return;
-    state.films = normalizeRatings(data.films);
+    state.films = normalizeRatings(remettreEnForme(data.films));
     initFilters();
     if (state.view === 'a_voir' || state.view === 'vu') applyFilters({ preservePage: true });
     refreshStats();
@@ -4680,7 +4738,7 @@ async function doSaveFilmsToGithub(message) {
       try {
         const remoteData = JSON.parse(cur.content);
         if (remoteData && Array.isArray(remoteData.films)) {
-          state.films = mergeRemoteFilms(normalizeRatings(remoteData.films));
+          state.films = mergeRemoteFilms(normalizeRatings(remettreEnForme(remoteData.films)));
           merged = true;
         }
       } catch { /* contenu distant illisible → on pousse l'état local tel quel */ }
@@ -5120,7 +5178,7 @@ async function saveEditedFilm(filmId) {
     initFilters();
     applyFilters({ preservePage: true });
     refreshStats();
-    closeModal();
+    if (openModalCtx.id === filmId) closeModal(); // une autre fiche a pu être ouverte pendant l'envoi
     showToast('✓ ' + film.title + ' mis à jour', 'success');
   } catch (e) {
     // Rollback : le save a échoué, films.json contient toujours les anciennes valeurs
@@ -5148,7 +5206,7 @@ async function deleteFilm(film) {
     initFilters();
     applyFilters({ preservePage: true });
     refreshStats();
-    closeModal();
+    if (openModalCtx.id === film.id) closeModal();
     showToast('✓ supprimé : ' + film.title, 'success');
   } catch (e) {
     // Rollback : films.json contient toujours le film, l'état local doit l'y remettre
@@ -5281,7 +5339,7 @@ async function confirmRematch(result) {
     applyFilters({ preservePage: true });
     refreshStats();
     closeRematchModal();
-    closeModal();
+    if (openModalCtx.id === oldFilm.id || openModalCtx.id === newFilm.id) closeModal();
     showToast('✓ re-matché : ' + newFilm.title, 'success');
   } catch (e) {
     // Rollback : le save a échoué, films.json contient toujours l'ancienne fiche
@@ -5439,8 +5497,13 @@ function wireEvents() {
 
   // Modal close
   document.getElementById('modal-close').addEventListener('click', closeModal);
+  // Un geste dans le formulaire de la fiche (édition, « déjà vu ») : saisie en cours
+  ['input', 'change', 'click'].forEach(t => document.getElementById('modal-body').addEventListener(t, (e) => {
+    if (e.target.closest('.edit-form, .tmdb-actions, .tmdb-add-form-section')) modalSaisie = true;
+  }));
   document.getElementById('modal-backdrop').addEventListener('click', (e) => {
-    if (e.target.id === 'modal-backdrop') closeModal();
+    // e.detail >= 2 : second clic d'un double clic sur la carte, tombé sur le fond
+    if (e.target.id === 'modal-backdrop' && e.detail < 2) closeModal();
   });
   // Escape ferme uniquement la couche de modal la plus haute (le rematch
   // s'ouvre au-dessus de la fiche film : ne pas tout fermer d'un coup)
@@ -5712,6 +5775,20 @@ function navInit() {
   window.addEventListener('keydown', noter, true);
 }
 
+// Repeindre la vue courante (pastilles arrivées après coup), sans nouvelle
+// requête. La collection attend films.json : une grille vide afficherait
+// « aucun film ne correspond », ou effacerait le message d'erreur de chargement.
+// Découvrir : seulement si des cartes sont à l'écran (pas pendant le
+// chargement d'une autre liste, dont l'ancienne prendrait la place).
+function repeindreVueCourante() {
+  if (state.view === 'a_voir' || state.view === 'vu') { if (state.films.length) renderGrid(); }
+  else if (state.view === 'discover') {
+    if (state.lastTmdbItems && document.querySelector('#grid .card')) renderTmdbGrid(state.lastTmdbItems);
+  }
+  else if (state.view === 'reco' && state.recoDisplayed) renderTmdbGrid(state.recoDisplayed);
+  else if (state.view === 'person') renderPersonGrid();
+}
+
 // ============================================================
 // BOOT
 // ============================================================
@@ -5720,25 +5797,11 @@ wireEvents();
 navInit();
 purgeTmdbMemories();
 loadFilms();
-chargerLyon().then(() => {
-  if (lyon && state.view === 'a_voir') renderGrid();
-});
-ensureCanalFR().then(() => {
-  if (!canalSet.size) return;
-  if (state.view === 'a_voir' || state.view === 'vu') renderGrid();
-  else if (state.view === 'discover' && state.lastTmdbItems) renderTmdbGrid(state.lastTmdbItems);
-  else if (state.view === 'reco' && state.recoDisplayed) renderTmdbGrid(state.recoDisplayed);
-  else if (state.view === 'person') renderPersonGrid();
-});
-
-// Récupérer les films actuellement en salles (France) et repeindre les badges
-// « au ciné » sur la vue courante une fois la liste prête (cache 24 h).
-ensureNowPlayingFR().then(() => {
-  if (!nowPlayingSet.size) return;
-  if (state.view === 'a_voir' || state.view === 'vu') renderGrid();
-  else if (state.view === 'discover') fetchAndRenderDiscover(state.discoverCategory);
-  else if (state.view === 'reco' && state.recoDisplayed) renderTmdbGrid(state.recoDisplayed);
-});
+// Programme de Lyon, catalogue Canal+, films « au ciné » (cache 24 h) :
+// une fois arrivés, repeindre les pastilles de la vue courante
+chargerLyon().then(() => { if (lyon) repeindreVueCourante(); });
+ensureCanalFR().then(() => { if (canalSet.size) repeindreVueCourante(); });
+ensureNowPlayingFR().then(() => { if (nowPlayingSet.size) repeindreVueCourante(); });
 
 // Admin no longer auto-activates: user enters their code each session via the lock button.
 // If localStorage has an encrypted PAT, the lock click will show the "unlock with code" view.
