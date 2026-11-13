@@ -155,3 +155,84 @@ class Banc(unittest.TestCase):
     def decouvrir(self):
         self.page.click('.tab[data-view="discover"]')
         self.attendre(lambda: self.js('state.view === "discover"'))
+
+    # ---- site « comme en ligne », pour le mode édition
+    # Le mode édition ne s'active que sur *.github.io : le site est servi sous
+    # une fausse adresse (toutes ses requêtes répondues par les fichiers locaux,
+    # rien ne sort sur Internet), et un faux GitHub tenu dans la page
+    # (window.__gh) remplace l'API : 409 si la version envoyée est périmée,
+    # « commit » d'un autre appareil possible. Faux token, chiffré par le site.
+    ORIGINE = 'https://proprio-test.github.io'
+
+    def ouvrir_en_ligne(self):
+        base = self.ORIGINE + '/films/'
+        types = {'.js': 'application/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json',
+                 '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json'}
+
+        def servir(route, req):
+            chemin = req.url.split('?')[0].split('#')[0]
+            rel = chemin[len(base):] if chemin.startswith(base) else ''
+            f = (SITE / (rel or 'index.html')).resolve()
+            if not str(f).startswith(str(SITE)) or not f.is_file():
+                return route.fulfill(status=404, body='absent')
+            # FILMS_APP_JS, FILMS_STYLE_CSS, FILMS_INDEX_HTML : la copie demandée (cette
+            # route passe devant celles de setUp, qui ne s'appliqueraient pas)
+            autre = {'app.js': 'FILMS_APP_JS', 'style.css': 'FILMS_STYLE_CSS', 'index.html': 'FILMS_INDEX_HTML'}.get(f.name)
+            if autre and os.environ.get(autre):
+                f = Path(os.environ[autre])
+            route.fulfill(status=200, body=f.read_bytes(), headers={'content-type': types.get(f.suffix, 'application/octet-stream')})
+        self.ctx.route(self.ORIGINE + '/**', servir)
+        self.ctx.add_init_script(FAUX_GITHUB)
+        self.page.goto(base)
+        self.attendre(lambda: self.js('state.films.length > 0'))
+
+    def deverrouiller(self, code='1234'):
+        """Faux token chiffré par le site lui-même, puis déverrouillage par l'interface."""
+        self.page.evaluate('''async code => localStorage.setItem('films_encrypted_pat',
+            await encryptWithCode('github_pat_FAUXJETONDETEST', code))''', code)
+        self.page.reload()
+        self.attendre(lambda: self.js('state.films.length > 0'))
+        self.js('refreshTmdbData = async () => {}')  # relecture TMDB de masse : hors sujet ici
+        self.page.click('#nav-admin')
+        self.page.wait_for_timeout(300)
+        self.page.fill('#admin-unlock-code', code)
+        self.page.click('#admin-unlock-btn')
+        return self.attendre(lambda: self.js('admin.active === true'), 20)
+
+
+FAUX_GITHUB = r'''
+(() => {
+  const vrai = window.fetch.bind(window);
+  const gh = window.__gh = { n: 1, contenu: null, journal: [] };
+  const b64 = s => btoa(unescape(encodeURIComponent(s)));
+  const deB64 = s => decodeURIComponent(escape(atob(s)));
+  const rep = (statut, obj) => new Response(JSON.stringify(obj), { status: statut, headers: { 'content-type': 'application/json' } });
+  const charger = async () => { if (gh.contenu === null) gh.contenu = await (await vrai('./films.json')).text(); };
+  window.fetch = async (entree, init) => {
+    const url = typeof entree === 'string' ? entree : entree.url;
+    if (!url.startsWith('https://api.github.com/')) return vrai(entree, init);
+    const methode = ((init && init.method) || 'GET').toUpperCase(), chemin = new URL(url).pathname;
+    await charger();
+    if (methode === 'GET' && /^\/repos\/[^/]+\/[^/]+$/.test(chemin)) return rep(200, { full_name: 'test' });
+    if (chemin.endsWith('/contents/films.json')) {
+      if (methode === 'GET') return rep(200, { sha: 'v' + gh.n, encoding: 'base64', content: b64(gh.contenu) });
+      if (methode === 'PUT') {
+        const corps = JSON.parse(init.body);
+        if (corps.sha !== 'v' + gh.n) { gh.journal.push(409); return rep(409, { message: 'films.json does not match' }); }
+        gh.contenu = deB64(corps.content); gh.n++; gh.journal.push(200);
+        return rep(200, { content: { sha: 'v' + gh.n } });
+      }
+    }
+    return rep(404, { message: 'not found' });
+  };
+  // Enregistrement fait sur un autre appareil
+  gh.ailleurs = async (id, note) => {
+    await charger();
+    const d = JSON.parse(gh.contenu);
+    const u = d.films.find(f => f.id === id).user;
+    u.rating = note; u.favorite = note === 6; // comme le site : 6 = coup de cœur
+    gh.contenu = JSON.stringify(d); gh.n++;
+  };
+  gh.film = id => JSON.parse(gh.contenu).films.find(f => f.id === id);
+})();
+'''
