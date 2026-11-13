@@ -1,6 +1,16 @@
 // *films : code de l'application (chargé à la fin d'index.html)
 'use strict';
 
+// Tri par défaut des catégories de Découvrir qui ont le leur (voir
+// discoverSortDefaut ; les autres partent de la popularité)
+const DISCOVER_TRI_DEFAUT = { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', lyon: 'gouts' };
+// Mois et lieux de visionnage, partagés par les formulaires, les stats et la Reco
+const MOIS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const LIEUX = ['Cinéma', 'Stremio', 'Disque dur', 'Autre'];
+const JOUR_MS = 24 * 3600 * 1000;
+const optionsMois = () => MOIS_FR.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}">${m}</option>`).join('');
+const optionsLieux = choisi => LIEUX.map(l => `<option value="${l}"${l === choisi ? ' selected' : ''}>${l}</option>`).join('');
+
 // ============================================================
 // STATE
 // ============================================================
@@ -36,8 +46,8 @@ const state = {
   discoverCategory: 'lyon',   // catégorie ouverte en arrivant sur Découvrir
   discoverLimits: {},   // clé de liste -> nombre de films demandés (« charger plus »)
   discoverFilters: { genre: '', country: '', decade: '', sort: 'popularity.desc', hideCollection: false },
-  // « canal+ » et « prochainement » ont chacun leur tri (voir discoverSortDefaut)
-  discoverSortsPropres: { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', lyon: 'gouts' },
+  // « canal+ », « prochainement » et « à lyon » ont chacun leur tri (voir discoverSortDefaut)
+  discoverSortsPropres: { ...DISCOVER_TRI_DEFAUT }, // le tri choisi par catégorie, au départ celui par défaut
   discoverCache: {},       // { 'catégorie|genre|pays': [items] } — session cache
   discoverSearchTimer: null,
   lastTmdbItems: null,      // dernière liste TMDB affichée (re-rendu du masquage sans refetch)
@@ -60,9 +70,9 @@ function normalizeRatings(films) {
   for (const f of films || []) {
     const u = f && f.user;
     if (!u) continue;
+    if (u.rating > RATING_FAV) u.rating = RATING_FAV; // plafond d'abord : 7 devient 6, donc coup de cœur
     if (u.favorite || u.rating === RATING_FAV) { u.rating = RATING_FAV; u.favorite = true; }
     else { u.favorite = false; }
-    if (u.rating > RATING_FAV) u.rating = RATING_FAV;
   }
   return films;
 }
@@ -101,6 +111,12 @@ async function loadFilms() {
     document.getElementById('sort').value = state.sort;
     applyFilters();
     refreshStats();
+    if (navEnAttente) { // « précédent » demandé pendant le chargement
+      const t = navEnAttente;
+      navEnAttente = null;
+      navApplying = true;
+      try { navApply(t); } finally { navApplying = false; }
+    }
   } catch (e) {
     document.getElementById('grid').innerHTML =
       `<div style="grid-column: 1/-1;" class="empty">
@@ -206,6 +222,10 @@ function applyFilters(opts) {
   const f = state.filters;
   let list = state.films.slice();
 
+  // Année vue, mois et note n'ont pas de sens pour un film à voir : ignorés
+  // sur « à voir » (gardés en mémoire, ils reviennent sur « vus »)
+  const surVus = f.status !== 'a_voir';
+
   // Status
   if (f.status === 'vu') list = list.filter(x => x.user?.statut === 'vu');
   else if (f.status === 'a_voir') list = list.filter(x => x.user?.statut === 'a_voir');
@@ -225,7 +245,7 @@ function applyFilters(opts) {
     const d = parseInt(f.decade, 10);
     list = list.filter(x => x.year && x.year >= d && x.year < d + 10);
   }
-  if (f.yearvu) {
+  if (f.yearvu && surVus) {
     list = list.filter(x => {
       const dv = x.user?.date_vue;
       if (!dv) return false;
@@ -233,7 +253,7 @@ function applyFilters(opts) {
       return dv.startsWith(f.yearvu);
     });
   }
-  if (f.mois) {
+  if (f.mois && surVus) {
     // Le mois n'existe que pour les dates "YYYY-MM" (les "YYYY" et "before-"
     // n'ont pas de mois connu). Se combine avec « année vue » en ET.
     list = list.filter(x => {
@@ -249,7 +269,7 @@ function applyFilters(opts) {
   if (f.dirCountry) {
     list = list.filter(x => dirCountriesOf(x).includes(f.dirCountry));
   }
-  if (f.ratings.size > 0) {
+  if (f.ratings.size > 0 && surVus) {
     list = list.filter(x => x.user?.rating && f.ratings.has(x.user.rating));
   }
 
@@ -348,8 +368,9 @@ function sortList(list, sortKey) {
 
 function updateFilterBadge() {
   const f = state.filters;
-  let active = ['genre', 'lieu', 'decade', 'yearvu', 'mois', 'country', 'dirCountry'].filter(k => f[k]).length;
-  if (f.ratings.size > 0) active++;
+  const surVus = f.status !== 'a_voir'; // comme applyFilters
+  let active = ['genre', 'lieu', 'decade', 'country', 'dirCountry', ...(surVus ? ['yearvu', 'mois'] : [])].filter(k => f[k]).length;
+  if (f.ratings.size > 0 && surVus) active++;
   const badge = document.getElementById('filter-badge');
   if (active > 0) {
     badge.style.display = '';
@@ -581,7 +602,6 @@ const discoverAvecPeriode = category => category === 'trending' || category === 
 // suivante…), « à lyon » les films selon les goûts du propriétaire (voir
 // classerSelonGouts), « au cinéma » et « tendances » la popularité. Le tri
 // choisi sur « canal+ », « prochainement » ou « à lyon » leur reste propre.
-const DISCOVER_TRI_DEFAUT = { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', lyon: 'gouts' };
 const discoverSortDefaut = category => DISCOVER_TRI_DEFAUT[category] || 'popularity.desc';
 
 // Filtres effectifs pour une catégorie : la décennie ne s'applique que sur
@@ -683,6 +703,7 @@ async function fetchAndRenderDiscover(category) {
     return;
   }
 
+  document.getElementById('empty').style.display = 'none'; // pas de « aucun film » sous l'attente
   grid.innerHTML = '<div style="grid-column: 1/-1; min-height: 100vh; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">chargement tmdb…<br><span id="discover-progress"></span></div>';
   countEl.textContent = '…';
   // La vue, la catégorie, les filtres ou une recherche tapée entre-temps
@@ -764,6 +785,7 @@ async function handleDiscoverSearch(query) {
     renderTmdbGrid(discoverDerniereRecherche.results.slice(0, 40));
     return;
   }
+  document.getElementById('empty').style.display = 'none';
   grid.innerHTML = '<div style="grid-column: 1/-1; min-height: 100vh; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">recherche…</div>';
   countEl.textContent = '…';
   // L'utilisateur a pu changer de vue, relancer une recherche, ou vider la
@@ -893,7 +915,7 @@ function personCredits(d) {
 
 // Sortis (du plus récent au plus ancien) / à venir (date future ou inconnue)
 function personSplit(items) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = aujourdhuiParis();
   const date = it => it.release_date || it.first_air_date || '';
   const sortis = items.filter(it => date(it) && date(it) <= today).sort((a, b) => date(b).localeCompare(date(a)));
   const aVenir = items.filter(it => !date(it) || date(it) > today)
@@ -1164,7 +1186,7 @@ async function resolveTitle(id, tmdbId, mediaType, raw) {
 const releaseFrMemory = tmdbMemory('films_card_release_fr');
 const releaseFrCache = releaseFrMemory.vals; // id -> 'AAAA-MM-JJ'
 function persistReleaseFr() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = aujourdhuiParis();
   releaseFrMemory.save((k, d) => d <= today);
 }
 function monthYear(date) {
@@ -1340,11 +1362,13 @@ function pickRecoSources() {
   const now = new Date();
   function ageInMonths(dv) {
     if (!dv || dv.startsWith('before-')) return Infinity;
-    let date;
-    if (/^\d{4}-\d{2}$/.test(dv)) date = new Date(dv + '-01');
-    else if (/^\d{4}$/.test(dv)) date = new Date(dv + '-06-01');
+    // Année et mois lus dans le texte : new Date('2026-05-01') est minuit UTC,
+    // donc encore avril pour un appareil à l'ouest de Greenwich
+    let annee, mois;
+    if (/^\d{4}-\d{2}$/.test(dv)) [annee, mois] = dv.split('-').map(Number);
+    else if (/^\d{4}$/.test(dv)) [annee, mois] = [Number(dv), 6];
     else return Infinity;
-    return (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
+    return (now.getFullYear() - annee) * 12 + (now.getMonth() + 1 - mois);
   }
 
   // Try 4+ stars in last 6 months
@@ -1520,6 +1544,45 @@ function recoCriteria(prof) {
   return female * country;
 }
 
+// Mesures de ressemblance entre deux profils, communes à la Reco et au tri
+// « selon tes goûts » : mots-clés (cosinus) et genres (Jaccard) pondérés par
+// leur rareté parmi les profils donnés (partager « mecha » en dit plus long que
+// partager « based on novel or book »), équipe (même réal = 1, sinon acteurs
+// en commun). n : nombre de films sur lequel compter la rareté (par défaut,
+// les profils donnés).
+function mesuresDeRessemblance(profils, n = profils.length) {
+  const dfK = new Map(), dfG = new Map();
+  for (const p of profils) {
+    for (const x of new Set(p.k)) dfK.set(x, (dfK.get(x) || 0) + 1);
+    for (const x of new Set(p.g)) dfG.set(x, (dfG.get(x) || 0) + 1);
+  }
+  const N = Math.max(1, n);
+  const idfK = x => Math.log(1 + N / (dfK.get(x) || 1));
+  const idfG = x => Math.log(1 + N / (dfG.get(x) || 1));
+  const meta = new Set(RECO.metaKeywords);
+  return {
+    motsCles: p => new Set(p.k.filter(x => !meta.has(x))),
+    mots(a, b) {   // cosinus pondéré par la rareté (ensembles de mots-clés)
+      if (!a.size || !b.size) return 0;
+      let dot = 0, na = 0, nb = 0;
+      for (const x of a) { const w = idfK(x) ** 2; na += w; if (b.has(x)) dot += w; }
+      for (const x of b) nb += idfK(x) ** 2;
+      return dot / Math.sqrt(na * nb);
+    },
+    genres(a, b) { // Jaccard pondéré par la rareté (listes de genres)
+      const A = new Set(a), B = new Set(b);
+      if (!A.size || !B.size) return 0;
+      let inter = 0, union = 0;
+      for (const x of new Set([...A, ...B])) { const w = idfG(x); union += w; if (A.has(x) && B.has(x)) inter += w; }
+      return inter / union;
+    },
+    equipe(a, b) { // même réal = 1, sinon acteurs en commun
+      if (a.d.some(x => b.d.includes(x))) return 1;
+      return Math.min(1, a.c.filter(x => b.c.includes(x)).length / 3);
+    },
+  };
+}
+
 async function buildRecoPool(sources, onProgress) {
   const cache = loadRecoProfiles();
   const inCollection = new Set(state.films.map(f => f.id));
@@ -1557,37 +1620,9 @@ async function buildRecoPool(sources, onProgress) {
   });
   saveRecoProfiles(cache);
 
-  // Rareté des mots-clés et des genres parmi les candidats : partager
-  // « mecha » en dit plus long que partager « based on novel or book »
-  const meta = new Set(RECO.metaKeywords);
-  const styleKw = prof => new Set(prof.k.filter(x => !meta.has(x)));
-  const dfK = new Map(), dfG = new Map();
-  for (const k of candidates.keys()) {
-    const p = cache.get(k); if (!p) continue;
-    for (const x of new Set(p.k)) dfK.set(x, (dfK.get(x) || 0) + 1);
-    for (const x of new Set(p.g)) dfG.set(x, (dfG.get(x) || 0) + 1);
-  }
-  const N = Math.max(1, candidates.size);
-  const idfK = x => Math.log(1 + N / (dfK.get(x) || 1));
-  const idfG = x => Math.log(1 + N / (dfG.get(x) || 1));
-  function keywordSim(a, b) {   // cosinus pondéré par la rareté
-    if (!a.size || !b.size) return 0;
-    let dot = 0, na = 0, nb = 0;
-    for (const x of a) { const w = idfK(x) ** 2; na += w; if (b.has(x)) dot += w; }
-    for (const x of b) nb += idfK(x) ** 2;
-    return dot / Math.sqrt(na * nb);
-  }
-  function genreSim(a, b) {     // Jaccard pondéré par la rareté
-    const A = new Set(a), B = new Set(b);
-    if (!A.size || !B.size) return 0;
-    let inter = 0, union = 0;
-    for (const x of new Set([...A, ...B])) { const w = idfG(x); union += w; if (A.has(x) && B.has(x)) inter += w; }
-    return inter / union;
-  }
-  function peopleSim(a, b) {    // même réal = 1, sinon acteurs en commun
-    if (a.d.some(x => b.d.includes(x))) return 1;
-    return Math.min(1, a.c.filter(x => b.c.includes(x)).length / 3);
-  }
+  // Rareté comptée parmi les candidats (y compris ceux sans profil, comme avant)
+  const R = mesuresDeRessemblance([...candidates.keys()].map(k => cache.get(k)).filter(Boolean), candidates.size);
+  const styleKw = R.motsCles, keywordSim = R.mots, genreSim = R.genres, peopleSim = R.equipe;
 
   // 1d. Voisinage de chaque film aimé, puis 2. critères sur le film proposé
   const W = RECO.proximity;
@@ -1667,31 +1702,8 @@ async function classerSelonGouts(items, onProgress) {
   const sources = aimes.map(f => ({ w: ratingOutOf10(f.user.rating) / 10, p: P(f.tmdb_id) })).filter(s => s.p);
   // Rareté des mots-clés et des genres sur l'ensemble (aimés + à l'affiche)
   const tous = [...sources.map(s => s.p), ...items.map(it => P(it.id)).filter(Boolean)];
-  const dfK = new Map(), dfG = new Map();
-  for (const p of tous) {
-    for (const x of new Set(p.k)) dfK.set(x, (dfK.get(x) || 0) + 1);
-    for (const x of new Set(p.g)) dfG.set(x, (dfG.get(x) || 0) + 1);
-  }
-  const N = Math.max(1, tous.length);
-  const idfK = x => Math.log(1 + N / (dfK.get(x) || 1));
-  const idfG = x => Math.log(1 + N / (dfG.get(x) || 1));
-  const meta = new Set(RECO.metaKeywords);
-  const motsCles = p => new Set(p.k.filter(x => !meta.has(x)));
-  const cosinus = (a, b) => {
-    if (!a.size || !b.size) return 0;
-    let dot = 0, na = 0, nb = 0;
-    for (const x of a) { const w = idfK(x) ** 2; na += w; if (b.has(x)) dot += w; }
-    for (const x of b) nb += idfK(x) ** 2;
-    return dot / Math.sqrt(na * nb);
-  };
-  const jaccard = (a, b) => {
-    const A = new Set(a), B = new Set(b);
-    if (!A.size || !B.size) return 0;
-    let inter = 0, union = 0;
-    for (const x of new Set([...A, ...B])) { const w = idfG(x); union += w; if (A.has(x) && B.has(x)) inter += w; }
-    return inter / union;
-  };
-  const equipe = (a, b) => a.d.some(x => b.d.includes(x)) ? 1 : Math.min(1, a.c.filter(x => b.c.includes(x)).length / 3);
+  const R = mesuresDeRessemblance(tous);
+  const motsCles = R.motsCles, cosinus = R.mots, jaccard = R.genres, equipe = R.equipe;
   for (const s of sources) s.kw = motsCles(s.p);
   // Place d'un pays, d'un genre parmi les films aimés (1 = le plus fréquent)
   const part = choix => {
@@ -1746,15 +1758,23 @@ function chargerLyon() {
   }
   return lyonChargement;
 }
-function maintenantLocal() {
-  const d = new Date(), z = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`;
+// Heure de Paris (AAAA-MM-JJTHH:MM), quel que soit le fuseau de l'appareil :
+// c'est celle des séances de cinemas_lyon.json (en voyage, ou pour un visiteur
+// à l'étranger, l'heure de l'appareil faisait garder ou cacher des séances)
+function maintenantParis() {
+  const p = {};
+  for (const x of new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hourCycle: 'h23', year: 'numeric',
+    month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date())) p[x.type] = x.value;
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
 }
+// Date du jour à Paris (AAAA-MM-JJ). toISOString donne la date UTC : entre
+// minuit et 1 h (2 h l'été), c'était encore la veille
+const aujourdhuiParis = () => maintenantParis().slice(0, 10);
 // Séances pas encore passées, salle par salle : { code: [[date, version], …] }
 function seancesLyon(id) {
   const f = lyonParFilm.get(id);
   if (!f) return {};
-  const t = maintenantLocal(), out = {};
+  const t = maintenantParis(), out = {};
   for (const [code, liste] of Object.entries(f.salles || {})) {
     const reste = liste.filter(s => s[0] >= t);
     if (reste.length) out[code] = reste;
@@ -1762,7 +1782,6 @@ function seancesLyon(id) {
   return out;
 }
 const aLyon = id => Object.keys(seancesLyon(id)).length > 0;
-const nomSalle = code => (lyon?.salles || []).find(s => s.code === code)?.nom || code;
 
 // Catégorie « à lyon » : les films qui passent encore cette semaine, avec les
 // filtres genre et pays et les tris du menu (« selon tes goûts » par défaut)
@@ -1858,7 +1877,7 @@ async function fetchAndRenderReco(forceRefresh = false) {
     return;
   }
 
-  const monthName = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'][new Date().getMonth()];
+  const monthName = MOIS_FR[new Date().getMonth()];
   ctxEl.innerHTML = `<strong>${monthName} ${new Date().getFullYear()}</strong> · basé sur <strong>${sources.length} films</strong> (${criteria})`;
 
   const cacheKey = 'films_reco_pool_' + currentMonthKey() + '_' + state.films.filter(f => f.user?.rating).length
@@ -1878,6 +1897,7 @@ async function fetchAndRenderReco(forceRefresh = false) {
   }
 
   if (!pool || forceRefresh || pool.length === 0) {
+    document.getElementById('empty').style.display = 'none';
     grid.innerHTML = '<div style="grid-column: 1/-1; min-height: 100vh; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">analyse de tes goûts… (' + sources.length + ' films à croiser)<br><span id="reco-progress"></span></div>';
     countEl.textContent = '…';
     refreshBtn.disabled = true;
@@ -2064,10 +2084,7 @@ function openModal(f, opts) {
               <label for="tmdb-add-lieu">lieu</label>
               <select id="tmdb-add-lieu">
                 <option value="">—</option>
-                <option value="Cinéma">Cinéma</option>
-                <option value="Stremio">Stremio</option>
-                <option value="Disque dur">Disque dur</option>
-                <option value="Autre">Autre</option>
+                ${optionsLieux()}
               </select>
             </div>
             <div class="field">
@@ -2076,12 +2093,7 @@ function openModal(f, opts) {
                 <input type="number" id="tmdb-add-year" min="1900" max="2099" placeholder="année (ex. 2019)" aria-label="année vue" style="flex:1;">
                 <select id="tmdb-add-month" aria-label="mois vu" style="flex:1;">
                   <option value="">—</option>
-                  <option value="01">janvier</option><option value="02">février</option>
-                  <option value="03">mars</option><option value="04">avril</option>
-                  <option value="05">mai</option><option value="06">juin</option>
-                  <option value="07">juillet</option><option value="08">août</option>
-                  <option value="09">septembre</option><option value="10">octobre</option>
-                  <option value="11">novembre</option><option value="12">décembre</option>
+                  ${optionsMois()}
                 </select>
               </div>
               <label class="date-before-toggle"><input type="checkbox" id="tmdb-add-before"> vu avant 2022 (date précise inconnue)</label>
@@ -2185,7 +2197,6 @@ function openModal(f, opts) {
         lieu: lieu,
         date_vue: dateVue,
         date_vue_label: dateLabel,
-        csv_genres: [],
       };
       addTmdbFilmToCollection(f, 'vu', userData);
     });
@@ -2207,14 +2218,6 @@ function openModal(f, opts) {
   fillWatchProviders(f);
   chargerLyon().then(() => renderOuVoir(f));
 
-  // Lazy-fetch country if missing (existing films from initial migration didn't have it)
-  if (!f.country && f.tmdb_id && f.type) {
-    enrichFilmCountry(f);
-  }
-  // Lazy-fetch trailer if not yet attempted
-  if (f.trailer === undefined && f.tmdb_id && f.type) {
-    enrichFilmTrailer(f);
-  }
   // Lazy : noms non latins (réal / casting) ET complétion de la liste des
   // réalisateurs pour les films ajoutés avant la capture des co-réalisations
   // (director_genders absent). Couvre aussi les fiches découvrir/reco.
@@ -2255,7 +2258,6 @@ async function addTmdbFilmToCollection(film, statut, userData) {
     lieu: null,
     date_vue: null,
     date_vue_label: null,
-    csv_genres: [],
   };
   // Disable buttons during save
   document.querySelectorAll('.tmdb-action, #tmdb-add-save, #tmdb-add-cancel').forEach(b => b.disabled = true);
@@ -2289,7 +2291,7 @@ async function addTmdbFilmToCollection(film, statut, userData) {
     const idx = state.films.findIndex(f => f.id === film.id);
     if (idx >= 0) state.films.splice(idx, 1);
     sessionChanges.added.delete(film.id);
-    showToast('erreur : ' + e.message, 'error');
+    showToast('erreur : ' + messageErreur(e), 'error');
     document.querySelectorAll('.tmdb-action, #tmdb-add-save, #tmdb-add-cancel').forEach(b => b.disabled = false);
   }
 }
@@ -2408,7 +2410,7 @@ function offresHtml(fr) {
 // ============================================================
 // STATS PAGE RENDER
 // ============================================================
-// Stats différées : 11 graphiques recalculés au boot et après chaque save
+// Stats différées : 13 graphiques recalculés au boot et après chaque save
 // alors que la page stats est souvent cachée. On ne rend que si elle est
 // visible ; sinon on marque « à refaire » et le rendu part au prochain
 // showPage('stats').
@@ -2458,14 +2460,6 @@ function renderStats() {
   const avgPerYear = fullYears.length
     ? Math.round(fullYears.reduce((s, [, c]) => s + c, 0) / fullYears.length)
     : 0;
-  // Peak year (numeric year only)
-  const numericPerYear = [...perYear.entries()].filter(([y]) => /^\d{4}$/.test(y));
-  numericPerYear.sort((a, b) => b[1] - a[1]);
-  const peakYear = numericPerYear.length ? numericPerYear[0] : null;
-
-  // Cinema count
-  const cinemaCount = vus.filter(f => f.user?.lieu === 'Cinéma').length;
-
   // Distinct directors
   const directors = new Set();
   for (const f of vus) {
@@ -2579,7 +2573,7 @@ function renderYearReview() {
     renderYearReview();
   }));
 
-  const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  const MOIS = MOIS_FR;
   const reals = f => (f.director || '').split(',').map(s => s.trim()).filter(Boolean);
   const genresReal = f => (f.director_genders && f.director_genders.length) ? f.director_genders : [f.director_gender];
   const de = y => vus.filter(f => anneeVue(f) === y);
@@ -2655,8 +2649,8 @@ function renderYearReview() {
     const ex = acteurs.filter(([, n]) => n === acteurs[0][1]).slice(0, 2).map(([nom]) => nom);
     faits.push(fait('le plus vu à l\'écran', escapeHtml(ex.join(', ')), ex.length === 1 ? { yearvu: Y, search: ex[0] } : null, `${acteurs[0][1]} films`));
   }
-  const LIEUX = [['Cinéma', 'cinéma'], ['Stremio', 'Stremio'], ['Disque dur', 'disque dur'], ['Autre', 'autre']];
-  const lieux = LIEUX.map(([v, nom]) => [nom, fs.filter(f => f.user.lieu === v).length]).filter(([, n]) => n);
+  const LIEUX_BILAN = LIEUX.map(l => [l, l === 'Stremio' ? l : l.toLowerCase()]); // valeur, libellé
+  const lieux = LIEUX_BILAN.map(([v, nom]) => [nom, fs.filter(f => f.user.lieu === v).length]).filter(([, n]) => n);
   if (lieux.length) faits.push(fait('où', lieux.map(([nom, n]) => `${nom} ${n}`).join(' · ')));
   const ancien = fs.filter(f => f.year).sort((a, b) => a.year - b.year)[0];
   if (ancien) faits.push(filmFait('le plus ancien', ancien, `sorti en ${escapeHtml(ancien.year)}`));
@@ -2833,6 +2827,7 @@ function renderHeatmap() {
   // Top N most-frequent genres × ratings 1..6
   const genreCounts = new Map();
   for (const f of state.films) {
+    if (f.user?.statut !== 'vu') continue; // stats : films vus seulement
     for (const g of (f.genres || [])) genreCounts.set(g, (genreCounts.get(g) || 0) + 1);
   }
   const topGenres = [...genreCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([g]) => g);
@@ -2917,12 +2912,6 @@ function renderOriginChart() {
     coverageEl.textContent = `${knownCount} / ${total} films vus analysés${missing > 0 ? ` · ${missing} sans pays` : ''}`;
   }
 
-  // Show "enrich" button if many films are missing
-  const enrichWrap = document.getElementById('origin-enrich-wrap');
-  if (enrichWrap) {
-    enrichWrap.style.display = missing > 5 ? '' : 'none';
-  }
-
   // Render bars (top 10) — valeur arrondie à l'affichage
   const sorted = [...weights.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
   const max = sorted.length ? sorted[0][1] : 1;
@@ -2970,64 +2959,6 @@ function renderDirectorCountryChart() {
       <div class="bar-track"><div class="bar-fill" style="width:${(w / max * 100).toFixed(1)}%"></div></div>
       <div class="bar-value">${Math.round(w)}</div>
     </div>`).join('');
-}
-
-// Bulk-enrich countries for all films missing it. Concurrency-limited.
-let bulkEnrichRunning = false;
-async function bulkEnrichCountries() {
-  if (bulkEnrichRunning) return;
-  bulkEnrichRunning = true;
-  const btn = document.getElementById('origin-enrich-btn');
-  const status = document.getElementById('origin-enrich-status');
-  btn.disabled = true;
-  const todo = state.films.filter(f => !f.country && f.tmdb_id && f.type);
-  let done = 0;
-  const total = todo.length;
-
-  // Process in concurrent batches of 5
-  const concurrency = 5;
-  let idx = 0;
-  async function worker() {
-    while (idx < todo.length) {
-      const i = idx++;
-      const film = todo[i];
-      try {
-        const path = film.type === 'tv' ? 'tv' : 'movie';
-        const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`;
-        const r = await tmdbFetch(url);
-        if (r.ok) {
-          const detail = await r.json();
-          const country = extractCountryFromTmdbDetail(detail);
-          if (country) film.country = country;
-        }
-      } catch {}
-      done++;
-      status.textContent = `${done} / ${total}…`;
-      // Re-render every 25 films
-      if (done % 25 === 0) renderOriginChart();
-    }
-  }
-  const workers = [];
-  for (let k = 0; k < concurrency; k++) workers.push(worker());
-  await Promise.all(workers);
-
-  status.textContent = `${done} / ${total} terminé`;
-  renderOriginChart();
-
-  // Save to GitHub if admin active
-  if (admin.active) {
-    try {
-      status.textContent += ' · sauvegarde…';
-      await saveFilmsToGithub('enrich: countries for ' + done + ' films');
-      status.textContent = `✓ ${done} films enrichis et sauvegardés`;
-    } catch (e) {
-      status.textContent = '⚠ enrichi en mémoire mais pas sauvegardé : ' + e.message;
-    }
-  } else {
-    status.textContent += ' · (active l\'admin pour sauvegarder)';
-  }
-  btn.disabled = false;
-  bulkEnrichRunning = false;
 }
 
 function heatmapColor(intensity, isFav) {
@@ -3872,7 +3803,7 @@ async function ensureCanalFR() {
     const cached = JSON.parse(localStorage.getItem(KEY) || 'null');
     // Une liste lue avec d'autres fournisseurs (avant OCS et Apple TV) est relue
     if (cached && Array.isArray(cached.ids) && cached.fournisseurs === ABONNEMENT_CANAL
-        && (Date.now() - cached.ts) < 24 * 3600 * 1000) {
+        && (Date.now() - cached.ts) < JOUR_MS) {
       canalSet = new Set(cached.ids);
       return;
     }
@@ -3890,7 +3821,7 @@ async function ensureNowPlayingFR() {
   const KEY = 'films_nowplaying_fr';
   try {
     const cached = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (cached && Array.isArray(cached.ids) && (Date.now() - cached.ts) < 24 * 3600 * 1000) {
+    if (cached && Array.isArray(cached.ids) && (Date.now() - cached.ts) < JOUR_MS) {
       nowPlayingSet = new Set(cached.ids);
       return;
     }
@@ -3952,7 +3883,6 @@ async function tmdbSearch(query) {
         return items.map(it => ({
           ...it,
           media_type: it.media_type || 'movie',
-          _from_person: p.name,
         }));
       } catch { return []; }
     }));
@@ -3992,7 +3922,7 @@ async function tmdbSearch(query) {
 
 async function tmdbDetails(id, type) {
   const path = type === 'tv' ? 'tv' : 'movie';
-  const url = `${TMDB_BASE}/${path}/${id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,external_ids,videos&include_video_language=fr,en`;
+  const url = `${TMDB_BASE}/${path}/${id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,videos&include_video_language=fr,en`;
   const r = await tmdbFetch(url);
   if (!r.ok) throw new Error('TMDB details ' + r.status);
   return await r.json();
@@ -4032,7 +3962,7 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress)
     else if (sort === 'primary_release_date.desc' && tousHorizons) voteFloor = 20;
     if (voteFloor) extra += '&vote_count.gte=' + voteFloor;
     // Fenêtre de dates
-    const today = new Date().toISOString().slice(0, 10);
+    const today = aujourdhuiParis();
     let gte = '', lte = '';
     if (category === 'now_playing') {
       gte = new Date(Date.now() - 42 * 86400000).toISOString().slice(0, 10);
@@ -4409,66 +4339,9 @@ function buildFilmFromTmdb(detail, type, csvTitle = null) {
     backdrop: detail.backdrop_path ? tmdbImgUrl(detail.backdrop_path, 'w1280') : null,
     synopsis: detail.overview || null,
     tmdb_rating: detail.vote_average || null,
-    imdb_id: (detail.external_ids && detail.external_ids.imdb_id) || detail.imdb_id || null,
-    original_language: detail.original_language || null,
     trailer: trailer,
     source: csvTitle ? { csv_title: csvTitle } : { added_via: 'admin', added_at: new Date().toISOString() },
   };
-}
-
-// Lazy-fetch country for an existing film that doesn't have it stored.
-// Cached in memory on the film object; will be persisted next time admin saves.
-async function enrichFilmCountry(film) {
-  if (film.country || !film.tmdb_id || film._countryFetching) return;
-  film._countryFetching = true;
-  try {
-    const path = film.type === 'tv' ? 'tv' : 'movie';
-    const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`;
-    const r = await tmdbFetch(url);
-    if (!r.ok) return;
-    const detail = await r.json();
-    const country = extractCountryFromTmdbDetail(detail);
-    if (country) {
-      film.country = country;
-      reRenderModalIfShowing(film);
-    }
-  } catch {}
-  delete film._countryFetching;
-}
-
-// Lazy-fetch trailer URL (first YouTube trailer, prefer French)
-async function tmdbGetTrailer(tmdbId, type) {
-  const path = type === 'tv' ? 'tv' : 'movie';
-  const url = `${TMDB_BASE}/${path}/${tmdbId}/videos?api_key=${encodeURIComponent(admin.tmdbKey)}&include_video_language=fr,en&language=fr-FR`;
-  try {
-    const r = await tmdbFetch(url);
-    if (!r.ok) return null;
-    const data = await r.json();
-    const videos = (data.results || []).filter(v => v.site === 'YouTube');
-    if (videos.length === 0) return null;
-    // Priority: FR official trailer > FR any trailer > EN official trailer > EN any trailer > any YouTube video
-    const score = v => {
-      let s = 0;
-      if (v.iso_639_1 === 'fr') s += 10;
-      if (v.type === 'Trailer') s += 5;
-      if (v.official) s += 2;
-      if (v.type === 'Teaser') s += 3;
-      return s;
-    };
-    videos.sort((a, b) => score(b) - score(a));
-    return 'https://www.youtube.com/watch?v=' + videos[0].key;
-  } catch { return null; }
-}
-
-async function enrichFilmTrailer(film) {
-  if (film.trailer !== undefined || !film.tmdb_id || film._trailerFetching) return;
-  film._trailerFetching = true;
-  try {
-    const trailer = await tmdbGetTrailer(film.tmdb_id, film.type);
-    film.trailer = trailer; // null is a valid "no trailer found" result, so we cache it
-    if (trailer) reRenderModalIfShowing(film);
-  } catch {}
-  delete film._trailerFetching;
 }
 
 // Latinise les noms non latins d'une fiche (réal + casting) via les fiches
@@ -4576,6 +4449,9 @@ const TMDB_IMPORT_DATE = '2026-05-19T00:00:00Z';
 const TMDB_FIELDS = ['title', 'original_title', 'year', 'release_date', 'director', 'director_gender',
   'director_genders', 'director_countries', 'cast', 'cast_genders', 'runtime', 'genres', 'country',
   'poster', 'backdrop', 'synopsis', 'tmdb_rating', 'imdb_id', 'original_language', 'trailer'];
+// imdb_id et original_language ne sont plus écrits (le site ne les lisait pas) :
+// ils restent ici le temps d'un cycle de relecture, qui les efface des fiches
+// existantes (applyTmdbData) ; à retirer de cette liste après le 2027-04-15.
 const tmdbRefreshed = new Map(); // id -> données relues pas encore enregistrées (fusion au conflit 409)
 let tmdbRefreshRunning = false;
 
@@ -4588,7 +4464,7 @@ function tmdbReadAt(f) {
 // Relit un film chez TMDB ; null si TMDB ne répond pas (réessayé la fois suivante)
 async function readFilmFromTmdb(f) {
   const path = f.type === 'tv' ? 'tv' : 'movie';
-  const detail = await tmdbJson(`${TMDB_BASE}/${path}/${f.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,external_ids,videos&include_video_language=fr,en`);
+  const detail = await tmdbJson(`${TMDB_BASE}/${path}/${f.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,videos&include_video_language=fr,en`);
   if (!detail || !detail.id) return null;
   const fresh = buildFilmFromTmdb(detail, f.type);
   // Noms restés non latins (cinéma asiatique…) : fiche personne, comme
@@ -4818,7 +4694,7 @@ function mergeRemoteFilms(remoteFilms) {
 
 // Sérialisation compacte : fichier plus léger à télécharger (au-delà de 1 Mo,
 // ghGetFile passe par la lecture brute). Les clés préfixées « _ » sont des
-// drapeaux transitoires (_countryFetching, _trailerFetching…) : un save qui
+// drapeaux transitoires (_namesFetching…) : un save qui
 // part pendant un fetch lazy ne doit pas les persister dans films.json.
 function buildFilmsPayload() {
   return JSON.stringify({
@@ -4835,8 +4711,12 @@ function buildFilmsPayload() {
 // save suivant lit state.films au moment où il s'exécute, donc il embarque
 // aussi les changements du save qui le précédait dans la file.
 let saveFilmsQueue = Promise.resolve();
+// Enregistrements partis ou en attente : fermer la page pendant ce temps
+// pourrait les annuler, le navigateur demande alors confirmation (beforeunload)
+let envoisEnCours = 0;
 function saveFilmsToGithub(message) {
-  const run = saveFilmsQueue.then(() => doSaveFilmsToGithub(message));
+  envoisEnCours++;
+  const run = saveFilmsQueue.then(() => doSaveFilmsToGithub(message)).finally(() => { envoisEnCours--; });
   // Un échec ne doit pas bloquer la file pour les saves suivants
   saveFilmsQueue = run.catch(() => {});
   return run;
@@ -4881,6 +4761,17 @@ async function doSaveFilmsToGithub(message) {
       throw e;
     }
   }
+}
+
+// Message d'erreur compréhensible pour les cas connus (sinon le message brut)
+function messageErreur(e) {
+  const m = String((e && e.message) || e || '');
+  if (/failed to fetch|networkerror|load failed/i.test(m)) return 'connexion perdue : l\'enregistrement n\'est peut-être pas passé, réessaie (sans risque)';
+  if (/ 401|bad credentials/i.test(m)) return 'mode édition verrouillé ou token refusé par GitHub';
+  if (/ 409|does not match/i.test(m)) return 'le fichier vient encore de changer sur un autre appareil, réessaie';
+  if (/quota|setitem/i.test(m)) return 'ce navigateur refuse de garder le code (stockage plein ou interdit)';
+  if (/atob|correctly encoded/i.test(m)) return 'code enregistré illisible : utilise « code oublié, tout recommencer »';
+  return m;
 }
 
 // ----------------- TOAST --------------------
@@ -5001,7 +4892,7 @@ async function setupAdmin() {
     setTimeout(closeAdminSetup, 1600);
     setTimeout(refreshTmdbData, 3000); // données TMDB de plus de 5 mois
   } catch (e) {
-    errBox.textContent = 'erreur : ' + e.message;
+    errBox.textContent = 'erreur : ' + messageErreur(e);
     errBox.style.display = '';
     admin.ghToken = null;
   } finally {
@@ -5050,7 +4941,7 @@ async function unlockAdmin() {
     if (e.name === 'OperationError' || (e.message && e.message.toLowerCase().includes('decrypt'))) {
       errBox.textContent = 'code incorrect';
     } else {
-      errBox.textContent = 'erreur : ' + e.message;
+      errBox.textContent = 'erreur : ' + messageErreur(e);
     }
     errBox.style.display = '';
     admin.ghToken = null;
@@ -5071,6 +4962,7 @@ function viderChampsSecrets() {
 
 function lockAdmin() {
   viderChampsSecrets();
+  if (document.getElementById('modal-backdrop').classList.contains('open')) closeModal();
   admin.active = false;
   admin.ghToken = null;
   admin.filmsSHA = null;
@@ -5140,10 +5032,7 @@ function renderEditForm(film) {
         <label for="edit-lieu">lieu</label>
         <select data-field="lieu" id="edit-lieu">
           <option value="">—</option>
-          <option value="Cinéma" ${u.lieu === 'Cinéma' ? 'selected' : ''}>Cinéma</option>
-          <option value="Stremio" ${u.lieu === 'Stremio' ? 'selected' : ''}>Stremio</option>
-          <option value="Disque dur" ${u.lieu === 'Disque dur' ? 'selected' : ''}>Disque dur</option>
-          <option value="Autre" ${u.lieu === 'Autre' ? 'selected' : ''}>Autre</option>
+          ${optionsLieux(u.lieu)}
         </select>
       </div>
 
@@ -5153,12 +5042,7 @@ function renderEditForm(film) {
           <input type="number" id="edit-date-year" min="1900" max="2099" placeholder="année (ex. 2019)" aria-label="année vue" style="flex:1;">
           <select data-field="month" id="edit-date-month" aria-label="mois vu" style="flex:1;">
             <option value="">—</option>
-            <option value="01">janvier</option><option value="02">février</option>
-            <option value="03">mars</option><option value="04">avril</option>
-            <option value="05">mai</option><option value="06">juin</option>
-            <option value="07">juillet</option><option value="08">août</option>
-            <option value="09">septembre</option><option value="10">octobre</option>
-            <option value="11">novembre</option><option value="12">décembre</option>
+            ${optionsMois()}
           </select>
         </div>
         <label class="date-before-toggle"><input type="checkbox" id="edit-date-before"> vu avant 2022 (date précise inconnue)</label>
@@ -5324,7 +5208,7 @@ async function saveEditedFilm(filmId) {
     // fiche porte encore CETTE modification (une édition suivante a pu la remplacer)
     const cur = state.films.find(f => f.id === filmId);
     if (cur && cur.user === newUser) cur.user = prevUser;
-    errEl.textContent = 'erreur : ' + e.message;
+    errEl.textContent = 'erreur : ' + messageErreur(e);
     errEl.style.display = '';
     saveBtn.disabled = false;
     saveBtn.textContent = 'enregistrer';
@@ -5350,7 +5234,7 @@ async function deleteFilm(film) {
     // Rollback : films.json contient toujours le film, l'état local doit l'y remettre
     state.films.splice(idx, 0, removed);
     sessionChanges.deleted.delete(film.id);
-    showToast('erreur : ' + e.message, 'error');
+    showToast('erreur : ' + messageErreur(e), 'error');
   }
 }
 
@@ -5486,7 +5370,7 @@ async function confirmRematch(result) {
     // Par la fiche elle-même, pas par sa position : une fusion 409 a pu décaler la liste
     const i = newFilm ? state.films.indexOf(newFilm) : -1;
     if (i !== -1) state.films[i] = oldFilm;
-    statusEl.textContent = 'erreur : ' + e.message;
+    statusEl.textContent = 'erreur : ' + messageErreur(e);
   }
 }
 
@@ -5555,7 +5439,6 @@ function wireEvents() {
   });
 
   // Stats: bulk enrich countries
-  document.getElementById('origin-enrich-btn').addEventListener('click', bulkEnrichCountries);
   // Stats: bulk enrich gender data
   document.getElementById('gender-enrich-btn').addEventListener('click', enrichGender);
 
@@ -5566,6 +5449,7 @@ function wireEvents() {
     searchTimer = setTimeout(() => {
       state.filters.search = e.target.value;
       applyFilters();
+      navReplace(); // l'étape d'historique garde ce filtre (précédent puis suivant)
     }, 180);
   });
 
@@ -5591,6 +5475,7 @@ function wireEvents() {
     document.getElementById(id).addEventListener('change', (e) => {
       state.filters[key] = e.target.value;
       applyFilters();
+      navReplace(); // l'étape d'historique garde ce filtre (précédent puis suivant)
     });
   });
 
@@ -5606,6 +5491,7 @@ function wireEvents() {
         chip.classList.add('active');
       }
       applyFilters();
+      navReplace(); // l'étape d'historique garde ce filtre (précédent puis suivant)
     });
   });
 
@@ -5613,6 +5499,7 @@ function wireEvents() {
   document.getElementById('sort').addEventListener('change', (e) => {
     state.sort = e.target.value;
     applyFilters();
+    navReplace(); // l'étape d'historique garde ce filtre (précédent puis suivant)
   });
 
   // Reset — restore defaults including the per-tab sort
@@ -5889,10 +5776,15 @@ function navApply(t) {
   }
 }
 
+// « Précédent » juste après un rechargement, avant l'arrivée de films.json :
+// l'étape attend les films (sinon un film de la collection serait rouvert
+// comme une fiche TMDB, sans ta note)
+let navEnAttente = null;
 window.addEventListener('popstate', (e) => {
   const t = e.state;
   if (!t || !t.films) return;
   navStack[t.n] = t;
+  if (!state.films.length && !navPendingGo) { navEnAttente = t; return; }
   if (navPendingGo) { // recul demandé par le site : l'écran est déjà le bon
     navPendingGo = false;
     if (navIntent) navFlush();
@@ -5934,6 +5826,7 @@ function repeindreVueCourante() {
 // ============================================================
 loadAdminCreds();
 wireEvents();
+window.addEventListener('beforeunload', e => { if (envoisEnCours > 0) e.preventDefault(); });
 suivreEtats();
 navInit();
 purgeTmdbMemories();

@@ -25,7 +25,7 @@ export function chargerApp(chemin = CHEMIN) {
   const code = src.slice(0, src.lastIndexOf('\n// ====', coupe));
   const memoire = new Map();
   const ctx = {
-    console, setTimeout, clearTimeout, URL, Intl, TextEncoder, TextDecoder, crypto: globalThis.crypto,
+    console, setTimeout, clearTimeout, queueMicrotask, URL, Intl, TextEncoder, TextDecoder, crypto: globalThis.crypto,
     document: trou(), navigator: { userAgent: 'node' }, location: { hostname: 'localhost', href: 'http://localhost/' },
     history: trou(), addEventListener() {}, matchMedia: () => ({ matches: false, addEventListener() {} }),
     localStorage: {

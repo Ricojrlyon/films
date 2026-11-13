@@ -16,9 +16,6 @@
   --red: #d97757;
   --blue: #79a6d2;
   --radius: 3px;
-  --motif-vert: oklch(0.72 0.12 150);
-  --motif-rose: oklch(0.72 0.12 350);
-  --motif-orange: oklch(0.72 0.12 55);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -88,14 +85,6 @@ body {
 @keyframes ast-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
-}
-.sub {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--ink-soft);
-  text-transform: lowercase;
-  letter-spacing: 0.14em;
-  margin-top: 6px;
 }
 
 .nav { display: flex; gap: 4px; align-items: center; }
@@ -382,85 +371,34 @@ body {
 .card .rating-badge .star { color: var(--warm); }
 .card .rating-badge.favorite .star { color: var(--bg); }
 
-/* à voir cards: no visual distinction on the poster itself; the "à voir" badge label is enough */
-.card.to-watch .a-voir-badge {
+/* Pastilles du bas des affiches (« à voir », « au ciné », « canal+ », « à lyon ») :
+   même forme et même voile (0,9 : lisible sur toute affiche) ; chacune a sa
+   couleur et son coin, ci-dessous. */
+.card.to-watch .a-voir-badge, .card .cine-badge, .card .canal-badge, .card .lyon-badge {
   position: absolute;
   bottom: 8px;
-  left: 8px;
   background: rgba(22, 31, 37, 0.9);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: var(--warm);
   font-family: 'JetBrains Mono', monospace;
   font-size: 8px;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: var(--radius);
-  border: 1px solid rgba(212, 165, 116, 0.4);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-
-/* Badge « au ciné » : film actuellement en salles en France (TMDB now_playing).
-   Coin bas-droite — le seul libre sur tous les types de cartes. */
-.card .cine-badge {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(22, 31, 37, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--green);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: var(--radius);
-  border: 1px solid rgba(127, 194, 143, 0.4);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-/* Pastille « canal+ » : film à voir disponible avec l'abonnement Canal+,
-   en bleu (celui de « dans ma collec »). Même coin que « au ciné », juste
-   au-dessus quand les deux sont là. */
-.card .canal-badge {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(22, 31, 37, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--blue);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: var(--radius);
-  border: 1px solid rgba(121, 166, 210, 0.4);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+/* « à voir » : coin bas-gauche, doré */
+.card.to-watch .a-voir-badge { left: 8px; color: var(--warm); border: 1px solid rgba(212, 165, 116, 0.4); }
+/* « au ciné » : film en salles en France (TMDB now_playing), coin bas-droite, vert */
+.card .cine-badge { right: 8px; color: var(--green); border: 1px solid rgba(127, 194, 143, 0.4); }
+/* « canal+ » : disponible avec l'abonnement (OCS et Apple TV compris), sur
+   toutes les cartes ; bleu, même coin, au-dessus de « au ciné » si les deux sont là */
+.card .canal-badge { right: 8px; color: var(--blue); border: 1px solid rgba(121, 166, 210, 0.4); }
 .card .cine-badge + .canal-badge { bottom: 28px; }
-/* Pastille « à lyon » : film à voir qui passe cette semaine dans une des
-   salles suivies (cinemas_lyon.json). Verte comme « au ciné », qu'elle remplace. */
-.card .lyon-badge {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(22, 31, 37, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--green);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: var(--radius);
-  border: 1px solid rgba(127, 194, 143, 0.4);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+/* « à lyon » : film à voir qui passe cette semaine dans une salle suivie ;
+   vert comme « au ciné », qu'elle remplace */
+.card .lyon-badge { right: 8px; color: var(--green); border: 1px solid rgba(127, 194, 143, 0.4); }
 .card .canal-badge + .lyon-badge { bottom: 28px; }
 
 /* meta on hover (desktop) and always on tap */
@@ -1497,7 +1435,7 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
   margin: 8px 0;
 }
 
-/* Search results in add/rematch modal */
+/* Résultats de recherche du re-match */
 .search-results {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -1516,12 +1454,9 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
   text-align: center;
   transition: all 0.15s;
 }
-.search-result:hover, .search-result.selected {
+.search-result:hover {
   border-color: var(--warm);
   background: var(--bg-elev-2);
-}
-.search-result.selected {
-  border-color: var(--green);
 }
 .search-result-poster {
   width: 100%;
@@ -1610,7 +1545,7 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
 }
 
 /* Explorer */
-/* Les 4 catégories de Découvrir : une ligne sur ordinateur ; sur
+/* Les 5 catégories de Découvrir : une ligne sur ordinateur ; sur
    téléphone, « canal+ » passe à la ligne au lieu de sortir de l'écran */
 .explorer-categories {
   display: flex;
@@ -1778,8 +1713,7 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
 .reco-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
 /* Enrichissements des stats : réservés au mode édition (sans lui, rien ne peut
    être enregistré). Cette règle l'emporte sur l'affichage décidé par le code */
-body:not(.admin-mode) #gender-enrich-wrap,
-body:not(.admin-mode) #origin-enrich-wrap { display: none !important; }
+body:not(.admin-mode) #gender-enrich-wrap { display: none !important; }
 
 /* TMDB-only actions in modal */
 .tmdb-actions {
@@ -1854,11 +1788,7 @@ body:not(.admin-mode) #origin-enrich-wrap { display: none !important; }
   text-transform: uppercase;
   z-index: 2;
 }
-.search-result.in-collection {
-  border-color: var(--green);
-  opacity: 0.7;
-}
-.search-result.in-collection:hover { opacity: 1; }
+
 
 /* Toast */
 .toast {

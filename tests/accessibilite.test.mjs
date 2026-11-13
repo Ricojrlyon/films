@@ -6,7 +6,11 @@ import fs from 'node:fs';
 const lire = (env, nom) => fs.readFileSync(process.env[env] || new URL('../' + nom, import.meta.url), 'utf8');
 const css = lire('FILMS_STYLE_CSS', 'style.css');
 const html = lire('FILMS_INDEX_HTML', 'index.html');
-const regle = sel => (css.match(new RegExp(sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*\\{([^}]*)\\}')) || [])[1] || '';
+// Déclarations qui s'appliquent à un sélecteur : toutes les règles dont la liste
+// de sélecteurs le contient (une règle commune à plusieurs pastilles compte aussi)
+const regle = sel => [...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^}]*)\}/g)]
+  .filter(([, selecteurs]) => selecteurs.split(',').map(x => x.trim()).includes(sel))
+  .map(([, , corps]) => corps).join('\n');
 const couleur = nom => css.match(new RegExp('--' + nom + ':\\s*(#[0-9a-f]{6})', 'i'))[1];
 const rvb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 
@@ -50,7 +54,8 @@ test('X10 : le champ de recherche peut rétrécir (bouton « + filtres » entier
 });
 
 test('X12 : cibles tactiles du pied de page et de la heatmap', () => {
-  assert.match(regle('.footer a, .footer-btn'), /padding:\s*6px/);
+  assert.match(regle('.footer a'), /padding:\s*6px/);
+  assert.match(regle('.footer-btn'), /padding:\s*6px/);
   assert.match(css, /\.heatmap-cell \{ font-size: 9px; aspect-ratio: 1\.3 \/ 1;/);
 });
 

@@ -47,7 +47,7 @@
 <link href="fonts/polices.css" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=18">
+<link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
 <div class="app">
@@ -208,7 +208,7 @@
     <div class="load-more-wrap" id="load-more-wrap" style="display: none;">
       <button class="load-more" id="load-more">charger plus</button>
     </div>
-    <!-- Découvrir, « canal+ » et « prochainement » : 40 films de plus à chaque clic -->
+    <!-- Découvrir, « canal+ », « prochainement » et « à lyon » : 40 films de plus à chaque clic -->
     <div class="load-more-wrap" id="discover-more-wrap" style="display: none;">
       <button class="load-more" id="discover-more">charger plus de films</button>
     </div>
@@ -268,10 +268,6 @@
       <h2 class="chart-title">par origine</h2>
       <div class="chart-subtitle">pays de production · <span id="origin-coverage"></span></div>
       <div id="origin-chart"></div>
-      <div id="origin-enrich-wrap" style="margin-top: 16px; display: none;">
-        <button class="reco-refresh" id="origin-enrich-btn">↻ enrichir les pays manquants</button>
-        <span id="origin-enrich-status" style="margin-left: 12px; color: var(--ink-mute); font-size: 12px;"></span>
-      </div>
     </div>
 
     <div class="chart-section">
@@ -499,6 +495,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=27"></script>
+<script src="app.js?v=28"></script>
 </body>
 </html>
