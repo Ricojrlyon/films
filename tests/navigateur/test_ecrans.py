@@ -23,19 +23,22 @@ class Ecrans(Banc):
         self.page.wait_for_timeout(2500)  # Lyon, Canal+, au ciné sont arrivés depuis
         self.assertIn('impossible de charger films.json', self.js('document.getElementById("grid").innerText'))
 
+    # Depuis le 2026-11-13, la case de Découvrir cherche dans la catégorie
+    # affichée, et la recherche dans tout TMDB est dans l'onglet « explorer »
     def test_B1_categorie_lente_ne_remplace_pas_la_recherche(self):
         self.ouvrir()
         self.decouvrir()
         self.regle('now_playing', ms=2500)
         self.page.click('.explorer-cat[data-cat="now_playing"]')
-        self.page.fill('#discover-search', 'dune')
+        self.page.fill('#discover-search', 'affiche 3')
         self.page.wait_for_timeout(3500)
-        self.assertEqual(self.page.input_value('#discover-search'), 'dune')
-        self.assertTrue(self.titres() and self.titres()[0].startswith('dune'), self.titres()[:3])
+        self.assertEqual(self.page.input_value('#discover-search'), 'affiche 3')
+        self.assertEqual(self.titres(), ['À l’affiche 3'])
 
     def test_B1_recherche_lente_ne_remplace_pas_la_categorie(self):
         self.ouvrir()
         self.decouvrir()
+        self.page.click('.explorer-cat[data-cat="canal"]')
         self.regle('search/multi', ms=2500)
         self.page.fill('#discover-search', 'amelie')
         self.page.wait_for_timeout(500)
@@ -43,21 +46,32 @@ class Ecrans(Banc):
         self.page.wait_for_timeout(3500)
         self.assertTrue(self.titres() and self.titres()[0].startswith('Tendance'), self.titres()[:3])
 
+    def test_B1_recherche_lente_d_explorer_ne_remplace_pas_decouvrir(self):
+        self.ouvrir()
+        self.explorer()
+        self.regle('search/multi', ms=2500)
+        self.page.fill('#explorer-search', 'amelie')
+        self.page.wait_for_timeout(500)
+        self.decouvrir()
+        self.page.click('.explorer-cat[data-cat="trending"]')
+        self.page.wait_for_timeout(3500)
+        self.assertTrue(self.titres() and self.titres()[0].startswith('Tendance'), self.titres()[:3])
+
     def test_B2_recherche_rendue_au_retour(self):
         self.ouvrir()
-        self.decouvrir()
-        self.page.fill('#discover-search', 'dune')
+        self.explorer()
+        self.page.fill('#explorer-search', 'dune')
         self.attendre(lambda: (self.titres() or [''])[0].startswith('dune'))
         self.page.click('.tab[data-view="a_voir"]')
         self.page.wait_for_timeout(300)
-        self.decouvrir()
+        self.explorer()
         self.page.wait_for_timeout(1500)
         self.assertTrue(self.titres() and self.titres()[0].startswith('dune'), self.titres()[:3])
 
     def test_B3_fiche_lente_ne_remplace_pas_la_suivante(self):
         self.ouvrir()
-        self.decouvrir()
-        self.page.fill('#discover-search', 'dune')
+        self.explorer()
+        self.page.fill('#explorer-search', 'dune')
         self.attendre(lambda: len(self.titres()) >= 2)
         self.regle('/movie/5001?', ms=2500)
         self.page.locator('#grid .card').nth(0).click()
@@ -72,8 +86,8 @@ class Ecrans(Banc):
     def test_B4_saisie_gardee_malgre_une_reponse_tardive(self):
         self.ouvrir()
         self.js('admin.active = true; document.body.classList.add("admin-mode")')  # mode édition simulé, aucun token
-        self.decouvrir()
-        self.page.fill('#discover-search', 'dune')
+        self.explorer()
+        self.page.fill('#explorer-search', 'dune')
         self.attendre(lambda: len(self.titres()) >= 1)
         self.page.locator('#grid .card').nth(0).click()
         self.attendre(lambda: self.js('!!document.querySelector("[data-action=show_vu_form]")'))

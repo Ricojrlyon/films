@@ -47,7 +47,7 @@
 <link href="fonts/polices.css" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=19">
+<link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
 <div class="app">
@@ -71,6 +71,7 @@
         <button class="tab active" data-view="a_voir">à voir<span class="count" id="count-a_voir">0</span></button>
         <button class="tab" data-view="vu">vus<span class="count" id="count-vu">0</span></button>
         <button class="tab tab-discover" data-view="discover">découvrir</button>
+        <button class="tab tab-explorer" data-view="explorer">explorer</button>
         <button class="tab tab-reco" data-view="reco">reco</button>
       </div>
       <div class="collection-controls" id="collection-controls">
@@ -110,7 +111,15 @@
       </div>
       <div class="discover-search-wrap">
         <span class="search-icon">⌕</span>
-        <input class="search-input" id="discover-search" type="text" placeholder="ou cherche un film, une série, un·e réal…" aria-label="chercher un film, une série, un·e réal">
+        <input class="search-input" id="discover-search" type="text" placeholder="cherche dans « à lyon »…" aria-label="chercher dans cette liste">
+      </div>
+    </div>
+
+    <!-- EXPLORER : recherche dans tout TMDB (films, séries, réals) -->
+    <div class="view-header discover-header" id="explorer-header" style="display: none;">
+      <div class="discover-search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="explorer-search" type="text" placeholder="cherche un film, une série, un·e réal…" aria-label="chercher un film, une série, un·e réal">
       </div>
     </div>
 
@@ -495,6 +504,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=28"></script>
+<script src="app.js?v=29"></script>
 </body>
 </html>

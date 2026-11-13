@@ -156,6 +156,10 @@ class Banc(unittest.TestCase):
         self.page.click('.tab[data-view="discover"]')
         self.attendre(lambda: self.js('state.view === "discover"'))
 
+    def explorer(self):
+        self.page.click('.tab[data-view="explorer"]')
+        self.attendre(lambda: self.js('state.view === "explorer"'))
+
     # ---- site « comme en ligne », pour le mode édition
     # Le mode édition ne s'active que sur *.github.io : le site est servi sous
     # une fausse adresse (toutes ses requêtes répondues par les fichiers locaux,

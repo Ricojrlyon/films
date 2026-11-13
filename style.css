@@ -307,8 +307,8 @@ body {
 }
 @media (min-width: 480px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
 @media (min-width: 720px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+/* 5 films par ligne au plus, même sur grand écran (demande du propriétaire, 2026-11-13) */
 @media (min-width: 960px) { .grid { grid-template-columns: repeat(5, 1fr); } }
-@media (min-width: 1200px) { .grid { grid-template-columns: repeat(6, 1fr); } }
 
 .card {
   position: relative;
@@ -392,7 +392,7 @@ body {
 .card.to-watch .a-voir-badge { left: 8px; color: var(--warm); border: 1px solid rgba(212, 165, 116, 0.4); }
 /* « au ciné » : film en salles en France (TMDB now_playing), coin bas-droite, vert */
 .card .cine-badge { right: 8px; color: var(--green); border: 1px solid rgba(127, 194, 143, 0.4); }
-/* « canal+ » : disponible avec l'abonnement (OCS et Apple TV compris), sur
+/* « canal+ » : disponible avec l'abonnement (Apple TV compris, pas OCS), sur
    toutes les cartes ; bleu, même coin, au-dessus de « au ciné » si les deux sont là */
 .card .canal-badge { right: 8px; color: var(--blue); border: 1px solid rgba(121, 166, 210, 0.4); }
 .card .cine-badge + .canal-badge { bottom: 28px; }
@@ -1588,19 +1588,13 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
   .explorer-cat { padding: 8px; letter-spacing: 0; }
 }
 
-/* Discover tab — same shape as other tabs but visually distinct */
-.tab-discover, .tab-reco {
+/* Onglets découvrir, explorer, reco : même forme que les autres, survol doré */
+.tab-discover, .tab-explorer, .tab-reco {
   border-color: var(--rule);
   color: var(--ink-soft);
 }
-.tab-discover::before {
-  content: '+';
-  margin-right: 4px;
-  font-weight: 700;
-  color: var(--warm);
-}
-.tab-discover:hover, .tab-reco:hover { color: var(--warm); border-color: var(--warm); }
-.tab-discover.active::before { color: var(--bg); }
+/* Pas sur l'onglet actif : texte doré sur fond doré, invisible sous la souris */
+.tab-discover:not(.active):hover, .tab-explorer:not(.active):hover, .tab-reco:not(.active):hover { color: var(--warm); border-color: var(--warm); }
 
 /* Collection controls (search + filter button) — hidden in discover/reco views */
 .collection-controls {
@@ -1611,7 +1605,7 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
   justify-content: flex-end;
 }
 
-/* View headers (discover, reco) */
+/* View headers (discover, explorer, reco) */
 .view-header {
   margin-bottom: 16px;
 }
@@ -1676,6 +1670,16 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
 .discover-search-wrap .search-input {
   width: 100%;
   padding: 9px 14px 9px 36px;
+}
+/* Explorer, case vide : ce qu'on peut y chercher */
+.explorer-invite {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--ink-mute);
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .reco-header {

@@ -24,7 +24,7 @@ test('P2 : pastilles canal+ lues dans la liste du robot, sans appel TMDB', async
   const tmdb = [];
   ctx.fetch = async url => {
     if (url.startsWith('canal_plus.json')) {
-      return reponse({ genere: new Date().toISOString(), fournisseurs: '381|685|350', complet: true, ids: ['movie-1', 'tv-2'] });
+      return reponse({ genere: new Date().toISOString(), fournisseurs: '381|350', complet: true, ids: ['movie-1', 'tv-2'] });
     }
     tmdb.push(url);
     return reponse({ total_pages: 1, results: [] });
@@ -39,7 +39,7 @@ test('P2 : liste du robot trop vieille (robot arrêté), repli sur TMDB', async 
   let tmdb = 0;
   ctx.fetch = async url => {
     if (url.startsWith('canal_plus.json')) {
-      return reponse({ genere: new Date(Date.now() - 5 * 86400000).toISOString(), fournisseurs: '381|685|350', complet: true, ids: ['movie-1'] });
+      return reponse({ genere: new Date(Date.now() - 5 * 86400000).toISOString(), fournisseurs: '381|350', complet: true, ids: ['movie-1'] });
     }
     tmdb++;
     return reponse({ total_pages: 1, results: [{ id: 9 }] });
