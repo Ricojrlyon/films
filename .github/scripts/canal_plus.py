@@ -6,15 +6,23 @@
 # 2. canal_plus.json : la liste des films et séries de l'abonnement (Canal+,
 #    OCS, Apple TV), que le site lit pour ses pastilles « canal+ » au lieu
 #    d'interroger TMDB depuis chaque appareil (131 pages par jour et par appareil).
+# 3. Règle TMDB des 6 mois : quand des données TMDB de films.json ont plus de
+#    5 mois, un ticket demande de déverrouiller le mode édition (c'est lui qui
+#    les relit) ; il est fermé une fois tout relu.
 # Lancé par .github/workflows/canal-plus.yml ; testé par test_canal_plus.py
 # (python3 -m unittest, sans réseau).
 import base64, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 CANAL_PLUS = '381'             # fournisseur TMDB : Canal+ (abonnement) ; l'alerte
 ABONNEMENT_CANAL = '381|685|350'  # Canal+, « Cine+ OCS », Apple TV : la pastille (même valeur qu'app.js)
 FICHIER = 'canal_plus.json'
 ETIQUETTE, FINI = 'canal+', 'terminé'
+ETIQUETTE_TMDB, MARQUEUR_TMDB = 'tmdb 6 mois', '<!-- tmdb-6-mois -->'
+# Mêmes règles qu'app.js (un test vérifie qu'elles sont identiques) : données
+# relues au-delà de 5 mois, date de l'import pour une fiche jamais relue
+RELECTURE_JOURS = 150
+TMDB_IMPORT_DATE = '2026-05-19T00:00:00Z'
 
 
 def lire(url, entetes=None, donnees=None, methode=None):
@@ -54,6 +62,39 @@ def lire_catalogue(lire, cle, fournisseurs):
             catalogue.update('%s-%d' % (genre, it['id']) for it in d.get('results', []))
             page += 1
     return catalogue, complet
+
+
+def marqueur_film(corps):
+    # Le dernier marqueur du ticket (celui que le robot place en fin de corps) :
+    # un titre TMDB qui contiendrait lui-même un faux marqueur ne trompe pas la mémoire
+    m = re.findall(r'<!-- canal-plus:([a-z]+-\d+) -->', corps or '')
+    return m[-1] if m else None
+
+
+def sans_mention(texte):
+    # Un « @nom » dans un titre TMDB ne doit notifier personne sur GitHub
+    return (texte or '').replace('@', '@\u200b')
+
+
+def _date(texte):
+    try:
+        return datetime.fromisoformat(texte.replace('Z', '+00:00'))
+    except (AttributeError, ValueError):
+        return None
+
+
+def lu_chez_tmdb(film):
+    # Dernière lecture des données TMDB du film (comme tmdbReadAt d'app.js)
+    s = film.get('source') or {}
+    dates = [d for d in (_date(s.get(k)) for k in ('tmdb_at', 'rematched_at', 'added_at')) if d]
+    return max(dates) if dates else _date(TMDB_IMPORT_DATE)
+
+
+def donnees_a_relire(films, maintenant):
+    # Films dont les données TMDB ont plus de 5 mois, du plus ancien au plus récent
+    seuil = maintenant - timedelta(days=RELECTURE_JOURS)
+    vieux = [(lu_chez_tmdb(f), f) for f in films if isinstance(f, dict) and f.get('tmdb_id')]
+    return [x for x in sorted(vieux, key=lambda x: x[0]) if x[0] < seuil]
 
 
 def contenu_fichier(catalogue, maintenant=None):
@@ -110,14 +151,15 @@ def main():
         page += 1
     par_film = {}
     for t in tickets:
-        m = re.search(r'<!-- canal-plus:([a-z]+-\d+) -->', t.get('body') or '')
-        if m:
-            par_film.setdefault(m.group(1), []).append(t)
+        fid = marqueur_film(t.get('body'))
+        if fid:
+            par_film.setdefault(fid, []).append(t)
     fini = lambda t: any(l['name'] == FINI for l in t.get('labels', []))
 
     if not SIMULATION:
         for nom, couleur, desc in ((ETIQUETTE, '79a6d2', 'film à voir arrivé sur Canal+'),
-                                   (FINI, '5e6973', 'plus sur Canal+ ou plus à voir')):
+                                   (FINI, '5e6973', 'plus sur Canal+ ou plus à voir'),
+                                   (ETIQUETTE_TMDB, 'd4a574', 'données TMDB à relire (règle des 6 mois)')):
             try:
                 github('/repos/%s/labels' % REPO, {'name': nom, 'color': couleur, 'description': desc}, 'POST')
             except urllib.error.HTTPError as e:
@@ -130,8 +172,8 @@ def main():
             continue
         if any(not fini(t) for t in par_film.get(fid, [])):
             continue                                   # déjà signalé pour cette arrivée
-        titre = f.get('title') or fid
-        infos = ' · '.join(str(x) for x in (f.get('year'), f.get('director')) if x)
+        titre = sans_mention(f.get('title') or fid)
+        infos = sans_mention(' · '.join(str(x) for x in (f.get('year'), f.get('director')) if x))
         genre = 'tv' if f.get('type') == 'tv' else 'movie'
         corps = ('**%s**%s, dans ta liste « à voir », est disponible avec l\'abonnement Canal+ '
                  '(en streaming, sans achat ni location).\n\n'
@@ -182,6 +224,40 @@ def main():
                 corps['sha'] = actuel['sha']
             github('/repos/%s/contents/%s' % (REPO, FICHIER), corps, 'PUT')
         ecrire('%s déposé (%d Ko)' % (FICHIER, len(texte) // 1024), deposer)
+
+    alerte_tmdb(github, ecrire, REPO, OWNER, films)
+
+
+def alerte_tmdb(github, ecrire, REPO, OWNER, films, maintenant=None):
+    # 3. Un seul ticket ouvert à la fois ; fermé dès que tout a été relu
+    maintenant = maintenant or datetime.now(timezone.utc)
+    vieux = donnees_a_relire(films, maintenant)
+    ouverts = [t for t in (github('/repos/%s/issues?state=open&labels=%s&per_page=100'
+                                  % (REPO, urllib.parse.quote(ETIQUETTE_TMDB))) or [])
+               if MARQUEUR_TMDB in (t.get('body') or '')]
+    print('données TMDB de plus de %d jours : %d films' % (RELECTURE_JOURS, len(vieux)))
+    if vieux and not ouverts:
+        plus_vieux = vieux[0][0]
+        limite = (plus_vieux + timedelta(days=182)).strftime('%d/%m/%Y')
+        corps = ('%d film%s de ta collection %s des données TMDB lues il y a plus de 5 mois '
+                 '(la plus ancienne le %s). Les conditions de TMDB interdisent de les garder plus '
+                 'de 6 mois : limite le **%s**.\n\n'
+                 'Pour les relire : ouvre le site et déverrouille le mode édition (cadenas) ; la '
+                 'relecture part toute seule au bout de 3 secondes. Ce ticket se fermera de lui-même '
+                 'au passage suivant du robot.\n\n@%s\n\n%s') % (
+                     len(vieux), 's' if len(vieux) > 1 else '', 'ont' if len(vieux) > 1 else 'a',
+                     plus_vieux.strftime('%d/%m/%Y'), limite, OWNER, MARQUEUR_TMDB)
+        ecrire('alerte : données TMDB à relire (%d films)' % len(vieux), lambda: github(
+            '/repos/%s/issues' % REPO,
+            {'title': 'Données TMDB à relire : déverrouille le mode édition', 'body': corps,
+             'labels': [ETIQUETTE_TMDB]}, 'POST'))
+    elif not vieux:
+        for t in ouverts:
+            def clore(t=t):
+                github('/repos/%s/issues/%d/comments' % (REPO, t['number']),
+                       {'body': 'Toutes les données TMDB ont moins de 5 mois.'}, 'POST')
+                github('/repos/%s/issues/%d' % (REPO, t['number']), {'state': 'closed'}, 'PATCH')
+            ecrire('fin : données TMDB relues', clore)
 
 
 if __name__ == '__main__':

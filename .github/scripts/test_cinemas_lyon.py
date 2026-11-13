@@ -3,8 +3,8 @@
 # Un faux AlloCiné se comporte comme le vrai (vérifié le 2026-11-12) :
 # « d-2026-11-14 » donne les séances du 14 ; un simple numéro (« d-2 ») est
 # ignoré et donne toujours la page par défaut (aujourd'hui et demain matin).
-import re, unittest
-from datetime import date, timedelta
+import json, re, unittest
+from datetime import date, datetime, timedelta, timezone
 import cinemas_lyon as robot
 
 AUJOURDHUI = date(2026, 11, 12)
@@ -38,6 +38,15 @@ class Programme(unittest.TestCase):
         with self.assertRaises(SystemExit):
             robot.verifier_programme({})
         robot.verifier_programme(robot.lire_programme(faux_allocine, AUJOURDHUI, salles=[('P3757', 'Comœdia')], pause=0))
+
+    def test_L2_champs_de_travail_pas_publies(self):
+        # titre original, années, réalisateurs : pas lus par le site, donc pas republiés
+        films = robot.lire_programme(faux_allocine, AUJOURDHUI, salles=[('P3757', 'Comœdia')], pause=0)
+        d = json.loads(robot.contenu_fichier(films, AUJOURDHUI, datetime(2026, 11, 12, 12, tzinfo=timezone.utc)))
+        for champ in ('titre_vo', 'annees', 'realisateurs'):
+            self.assertNotIn(champ, d['films'][0])
+        self.assertEqual(d['films'][0]['titre'], 'Film P3757')
+        self.assertTrue(d['films'][0]['salles']['P3757'])
 
 
 if __name__ == '__main__':

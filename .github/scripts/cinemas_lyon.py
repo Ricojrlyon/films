@@ -42,21 +42,6 @@ def norme(s):
     return re.sub(r'[^a-z0-9]+', ' ', s).strip()
 
 
-def realisateurs(credits):
-    # Liste de crédits, parfois sous une autre forme : on ne garde que ce qui se lit
-    if isinstance(credits, dict):
-        credits = credits.get('edges') or credits.get('nodes') or []
-    noms = []
-    for c in credits if isinstance(credits, list) else []:
-        if isinstance(c, dict) and 'node' in c:
-            c = c['node']
-        if not isinstance(c, dict) or ((c.get('position') or {}).get('name') != 'DIRECTOR'):
-            continue
-        p = c.get('person') or {}
-        noms.append(' '.join(filter(None, [p.get('firstName'), p.get('lastName')])))
-    return noms
-
-
 def adresse_seances(code, aujourdhui, j, page=1):
     # Séances d'une salle, j jours après aujourd'hui, par pages de 15 films.
     # AlloCiné attend la date complète (d-2026-11-14) : un simple numéro
@@ -91,7 +76,6 @@ def lire_programme(lire, aujourdhui, salles=SALLES, jours=JOURS, pause=0.3):
                         'allocine': m['internalId'], 'titre': m.get('title'), 'titre_vo': m.get('originalTitle'),
                         'annees': sorted({int(x['releaseDate']['date'][:4]) for x in (m.get('releases') or [])
                                           if (x.get('releaseDate') or {}).get('date')}),
-                        'realisateurs': realisateurs(m.get('credits')),
                         'salles': {},
                     })
                     seances = f['salles'].setdefault(code, [])
@@ -110,6 +94,21 @@ def lire_programme(lire, aujourdhui, salles=SALLES, jours=JOURS, pause=0.3):
         for s in f['salles'].values():
             s.sort()
     return films
+
+
+# Champs d'AlloCiné qui ne servent qu'à retrouver le film chez TMDB pendant le
+# passage : pas publiés (le site ne les lit pas ; moins de données reprises d'AlloCiné)
+CHAMPS_DE_TRAVAIL = ('titre_vo', 'annees')
+
+
+def contenu_fichier(films, aujourdhui, maintenant):
+    return json.dumps({
+        'genere': maintenant.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'du': aujourdhui.isoformat(), 'jours': JOURS,
+        'salles': [{'code': c, 'nom': n, 'url': 'https://www.allocine.fr/seance/salle_gen_csalle=%s.html' % c} for c, n in SALLES],
+        'films': sorted(({k: v for k, v in f.items() if k not in CHAMPS_DE_TRAVAIL} for f in films.values()),
+                        key=lambda f: norme(f.get('titre'))),
+    }, ensure_ascii=False, separators=(',', ':'))
 
 
 def tmdb_cherche(lire, cle, titre, annees):
@@ -198,13 +197,7 @@ def main():
     print('%d films retrouvés chez TMDB, %d non' % (trouves, len(films) - trouves))
 
     # 3. Le fichier, déposé sur GitHub
-    sortie = {
-        'genere': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'du': aujourdhui.isoformat(), 'jours': JOURS,
-        'salles': [{'code': c, 'nom': n, 'url': 'https://www.allocine.fr/seance/salle_gen_csalle=%s.html' % c} for c, n in SALLES],
-        'films': sorted(films.values(), key=lambda f: norme(f.get('titre'))),
-    }
-    texte = json.dumps(sortie, ensure_ascii=False, separators=(',', ':'))
+    texte = contenu_fichier(films, aujourdhui, datetime.now(timezone.utc))
     if SIMULATION:
         open(FICHIER, 'w', encoding='utf-8').write(texte)
         print('[simulation] %s écrit sur place (%d Ko)' % (FICHIER, len(texte) // 1024))
