@@ -3,7 +3,7 @@
 #   films.json qui vient d'entrer dans le catalogue Canal+ (abonnement, pas
 #   achat ni location) ; GitHub envoie chaque nouveau ticket par mail et sur
 #   son application ;
-# - canal_plus.json : la liste de l'abonnement (Canal+, OCS, Apple TV) que le
+# - canal_plus.json : la liste de l'abonnement (Canal+, Apple TV) que le
 #   site lit pour ses pastilles « canal+ ».
 # Aucune brique externe (pas d'avertissement Node.js) : le programme Python est
 # dans .github/scripts/canal_plus.py (testé par test_canal_plus.py), relu ici

@@ -3,8 +3,8 @@
 #    Canal+ (abonnement) -> un ticket (issue) dans le dépôt, que GitHub envoie
 #    par mail et sur l'application GitHub. Les tickets servent de mémoire : un
 #    film n'est signalé qu'une fois par arrivée.
-# 2. canal_plus.json : la liste des films et séries de l'abonnement (Canal+,
-#    OCS, Apple TV), que le site lit pour ses pastilles « canal+ » au lieu
+# 2. canal_plus.json : la liste des films et séries de l'abonnement (Canal+
+#    et Apple TV ; plus OCS depuis le 2026-11-13), que le site lit pour ses pastilles « canal+ » au lieu
 #    d'interroger TMDB depuis chaque appareil (131 pages par jour et par appareil).
 # 3. Règle TMDB des 6 mois : quand des données TMDB de films.json ont plus de
 #    5 mois, un ticket demande de déverrouiller le mode édition (c'est lui qui
@@ -15,7 +15,7 @@ import base64, json, os, re, sys, time, urllib.error, urllib.parse, urllib.reque
 from datetime import datetime, timedelta, timezone
 
 CANAL_PLUS = '381'             # fournisseur TMDB : Canal+ (abonnement) ; l'alerte
-ABONNEMENT_CANAL = '381|685|350'  # Canal+, « Cine+ OCS », Apple TV : la pastille (même valeur qu'app.js)
+ABONNEMENT_CANAL = '381|350'  # Canal+, Apple TV : la pastille (même valeur qu'app.js ; plus OCS, 685)
 FICHIER = 'canal_plus.json'
 ETIQUETTE, FINI = 'canal+', 'terminé'
 ETIQUETTE_TMDB, MARQUEUR_TMDB = 'tmdb 6 mois', '<!-- tmdb-6-mois -->'
@@ -204,11 +204,11 @@ def main():
                            {'state': 'closed', 'labels': [ETIQUETTE, FINI]}, 'PATCH')
                 ecrire('fin : %s (%s)' % (titre, raison), clore)
 
-    # 6. canal_plus.json pour les pastilles du site (Canal+, OCS, Apple TV).
+    # 6. canal_plus.json pour les pastilles du site (Canal+, Apple TV).
     #    Seulement une liste complète : sinon le site garde celle de la veille
     #    (puis, au-delà de 3 jours, relit TMDB lui-même).
     abonnement, complet = lire_catalogue(lire, cle, ABONNEMENT_CANAL)
-    print('abonnement (Canal+, OCS, Apple TV) : %d titres%s' % (len(abonnement), '' if complet else ' (incomplet : rien publié)'))
+    print('abonnement (Canal+, Apple TV) : %d titres%s' % (len(abonnement), '' if complet else ' (incomplet : rien publié)'))
     if complet and abonnement:
         texte = contenu_fichier(abonnement)
         def deposer():

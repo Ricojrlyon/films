@@ -8,7 +8,7 @@ import canal_plus as robot
 
 
 def faux_tmdb(pages_par_genre, panne_page=None):
-    # Catalogue simulé : « 381|685|350 » rend plus de titres que « 381 » seul
+    # Catalogue simulé : « 381|350 » rend plus de titres que « 381 » seul
     def lire(url):
         genre = 'movie' if '/discover/movie' in url else 'tv'
         page = int(re.search(r'page=(\d+)', url).group(1))
@@ -32,18 +32,18 @@ class Catalogue(unittest.TestCase):
         ids, complet = robot.lire_catalogue(faux_tmdb(3, panne_page=2), 'cle', robot.ABONNEMENT_CANAL)
         self.assertFalse(complet)
 
-    def test_abonnement_complet_demande_les_trois_fournisseurs(self):
+    def test_abonnement_canal_et_apple_tv_sans_ocs(self):
         vus = []
         lire = faux_tmdb(1)
         robot.lire_catalogue(lambda u: (vus.append(u), lire(u))[1], 'cle', robot.ABONNEMENT_CANAL)
-        self.assertTrue(all('with_watch_providers=381%7C685%7C350' in u for u in vus), vus[:1])
+        self.assertTrue(all('with_watch_providers=381%7C350&' in u for u in vus), vus[:1])
 
 
 class Fichier(unittest.TestCase):
     def test_contenu_lu_par_le_site(self):
         # Les champs que lit ensureCanalFR (app.js) : fournisseurs, complet, genere, ids
         d = json.loads(robot.contenu_fichier({'tv-2', 'movie-1'}, datetime(2026, 11, 13, 6, 0, tzinfo=timezone.utc)))
-        self.assertEqual(d['fournisseurs'], '381|685|350')
+        self.assertEqual(d['fournisseurs'], '381|350')
         self.assertIs(d['complet'], True)
         self.assertEqual(d['genere'], '2026-11-13T06:00:00Z')
         self.assertEqual(d['ids'], ['movie-1', 'tv-2'])
