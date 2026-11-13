@@ -110,6 +110,71 @@ class Recherche(Banc):
         self.assertTrue(ligne.startswith(attendu), '%r ne commence pas par %r' % (ligne, attendu))
 
 
+class FiltresExplorer(Banc):
+    # Mêmes filtres que Découvrir (2026-11-13). Résultats simulés « dune 1 » à
+    # « dune 10 » : genre 878 pour les impairs, 18 pour les pairs ; sortis en
+    # 1975, 1980… 2020 ; le plus populaire est « dune 8 », le mieux noté « dune 10 ».
+    def chercher(self):
+        self.ouvrir()
+        self.explorer()
+        self.page.fill('#explorer-search', 'dune')
+        self.attendre(lambda: len(self.titres()) == 10)
+
+    def choisir(self, liste, valeur, attendu):
+        self.page.select_option('#explorer-' + liste, valeur)
+        self.attendre(lambda: self.titres() == attendu)
+        self.assertEqual(self.titres(), attendu, '%s = %s' % (liste, valeur))
+
+    def test_memes_listes_que_decouvrir(self):
+        self.ouvrir()
+        self.explorer()
+        self.attendre(lambda: self.js('document.querySelectorAll("#explorer-genre option").length') > 1)
+        for liste in ('genre', 'country', 'decade'):
+            self.assertEqual(self.js('[...document.querySelectorAll("#explorer-%s option")].map(o => o.value)' % liste),
+                             self.js('[...document.querySelectorAll("#discover-%s option")].map(o => o.value)' % liste), liste)
+        self.assertTrue(self.js('!!document.getElementById("explorer-hide-collection")'))
+
+    def test_genre_periode_et_tri_sur_la_recherche(self):
+        self.chercher()
+        self.choisir('genre', '878', ['dune 1', 'dune 3', 'dune 5', 'dune 7', 'dune 9'])
+        self.choisir('decade', '1990', ['dune 5'])
+        self.choisir('genre', '', ['dune 4', 'dune 5'])
+        self.choisir('decade', '', ['dune %d' % i for i in range(1, 11)])
+        self.page.select_option('#explorer-sort', 'popularity.desc')
+        self.attendre(lambda: self.titres()[0] == 'dune 8')
+        self.assertEqual(self.titres()[0], 'dune 8')
+        self.page.select_option('#explorer-sort', 'primary_release_date.desc')
+        self.attendre(lambda: self.titres()[0] == 'dune 10')
+        self.assertEqual(self.titres()[:2], ['dune 10', 'dune 9'])
+        self.assertEqual(self.page.input_value('#explorer-search'), 'dune', 'la recherche est gardée')
+
+    def test_pays_sur_la_recherche(self):
+        # Profils des résultats déjà connus : coréens les impairs, français les pairs
+        profils = {'movie-%d' % (5001 + i): {'k': [], 'g': [], 'd': [], 'c': [], 'f': 0, 'v': 0, 'p': ['KR'] if i % 2 == 0 else ['FR'],
+                                             't': 4102444800000} for i in range(10)}
+        self.ctx.add_init_script('localStorage.setItem("films_reco_profiles_v1", %s)' % json.dumps(json.dumps(profils)))
+        self.chercher()
+        self.choisir('country', 'KR', ['dune 1', 'dune 3', 'dune 5', 'dune 7', 'dune 9'])
+
+    def test_sans_recherche_les_filtres_parcourent_le_catalogue(self):
+        self.ouvrir()
+        self.explorer()
+        self.page.select_option('#explorer-genre', '878')
+        self.attendre(lambda: len(self.titres()) > 0)
+        self.assertTrue(self.titres()[0].startswith('Découverte'), self.titres()[:2])
+        self.assertTrue(any('/discover/movie' in u and 'with_genres=878' in u for u in self.requetes_tmdb))
+        # Plus de filtre : l'invitation revient
+        self.page.select_option('#explorer-genre', '')
+        self.attendre(lambda: self.js('!!document.querySelector("#grid .explorer-invite")'))
+        self.assertTrue(self.js('!!document.querySelector("#grid .explorer-invite")'))
+
+    def test_masquer_ma_collec_propre_a_explorer(self):
+        self.chercher()
+        self.page.click('#explorer-hide-collection')
+        self.assertTrue(self.js('document.getElementById("explorer-hide-collection").classList.contains("active")'))
+        self.assertFalse(self.js('state.discoverFilters.hideCollection'), 'le bouton de Découvrir a changé aussi')
+
+
 class GrandEcran(Banc):
     largeur = 1600
 

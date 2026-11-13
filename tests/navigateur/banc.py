@@ -50,7 +50,12 @@ def reponse_tmdb(url):
         return liste(3001, 'Découverte')
     if chemin.endswith('/search/multi') or chemin.endswith('/search/movie'):
         mot = (q.get('query') or [''])[0]
-        return {'page': 1, 'total_pages': 1, 'results': [_film(5001 + i, '%s %d' % (mot, i + 1)) for i in range(10)]}
+        # Résultats variés pour les filtres d'Explorer : genre (878 / 18 en
+        # alternance), une sortie tous les 5 ans depuis 1975, popularité et note
+        return {'page': 1, 'total_pages': 1, 'results': [
+            {**_film(5001 + i, '%s %d' % (mot, i + 1)), 'genre_ids': [878] if i % 2 == 0 else [18],
+             'release_date': '%d-06-01' % (1975 + 5 * i), 'popularity': 10 + (i * 7) % 10,
+             'vote_average': round(5 + i * 0.3, 1)} for i in range(10)]}
     m = re.search(r'/(movie|tv)/(\d+)$', chemin)
     if m:
         id_ = int(m.group(2))
@@ -61,7 +66,7 @@ def reponse_tmdb(url):
     if chemin.endswith('/watch/providers'):
         return {'results': {}}
     if '/genre/' in chemin:
-        return {'genres': []}
+        return {'genres': [{'id': 18, 'name': 'Drame'}, {'id': 878, 'name': 'Science-Fiction'}]}
     return {'page': 1, 'total_pages': 1, 'results': []}
 
 

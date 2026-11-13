@@ -117,6 +117,19 @@
 
     <!-- EXPLORER : recherche dans tout TMDB (films, séries, réals) -->
     <div class="view-header discover-header" id="explorer-header" style="display: none;">
+      <div class="discover-filters" id="explorer-filters">
+        <select id="explorer-genre" aria-label="genre"><option value="">tous genres</option></select>
+        <select id="explorer-country" aria-label="pays"><option value="">tous pays</option></select>
+        <select id="explorer-decade" aria-label="période"><option value="">toutes périodes</option></select>
+        <select id="explorer-sort" aria-label="trier par">
+          <option value="pertinence">pertinence</option>
+          <option value="popularity.desc">populaires</option>
+          <option value="vote_average.desc">mieux notés</option>
+          <option value="primary_release_date.desc">sorties récentes</option>
+        </select>
+        <button class="discover-hide-toggle" id="explorer-hide-collection"
+                title="masquer les films déjà dans ma collection">masquer ma collec</button>
+      </div>
       <div class="discover-search-wrap">
         <span class="search-icon">⌕</span>
         <input class="search-input" id="explorer-search" type="text" placeholder="cherche un film, une série, un·e réal…" aria-label="chercher un film, une série, un·e réal">
@@ -504,6 +517,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=29"></script>
+<script src="app.js?v=30"></script>
 </body>
 </html>

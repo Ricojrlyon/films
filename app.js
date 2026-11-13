@@ -51,6 +51,8 @@ const state = {
   discoverCache: {},       // { 'catégorie|genre|pays': [items] } — session cache
   discoverSearchTimer: null,
   explorerSearchTimer: null,
+  // Explorer : mêmes filtres que Découvrir, à part (« pertinence » : l'ordre de TMDB)
+  explorerFilters: { genre: '', country: '', decade: '', sort: 'pertinence', hideCollection: false },
   lastTmdbItems: null,      // dernière liste TMDB affichée (re-rendu du masquage sans refetch)
   // Reco view
   recoPool: null,           // full ranked candidates
@@ -588,6 +590,7 @@ function setView(view) {
     if (q.length >= 2) handleDiscoverSearch(q);
     else fetchAndRenderDiscover(state.discoverCategory);
   } else if (isExplorer) {
+    initDiscoverFilterOptions();
     afficherExplorer();
   } else if (isReco) {
     fetchAndRenderReco();
@@ -599,7 +602,7 @@ function setView(view) {
 // ============================================================
 // Catégories sans fenêtre de dates imposée : la décennie s'y applique
 // (« au cinéma » et « prochainement » ont la leur)
-const discoverAvecPeriode = category => category === 'trending' || category === 'canal';
+const discoverAvecPeriode = category => category === 'trending' || category === 'canal' || category === 'explorer';
 
 // Tri par défaut : « canal+ » montre d'abord les sorties récentes (les films
 // récents arrivent sur Canal+ environ 6 mois après la salle), « prochainement »
@@ -636,23 +639,26 @@ async function initDiscoverFilterOptions() {
   if (!discoverCountriesLoaded) {
     discoverCountriesLoaded = true;
     // Pays : la table ISO déjà utilisée pour les fiches, en français, triée par nom
-    const csel = document.getElementById('discover-country');
-    Object.entries(ISO_TO_COUNTRY)
+    // (mêmes listes pour Découvrir et Explorer)
+    const pays = Object.entries(ISO_TO_COUNTRY)
       .map(([code, name]) => [code, countryFr(name)])
-      .sort((a, b) => a[1].localeCompare(b[1], 'fr'))
-      .forEach(([code, name]) => {
+      .sort((a, b) => a[1].localeCompare(b[1], 'fr'));
+    for (const csel of [document.getElementById('discover-country'), document.getElementById('explorer-country')]) {
+      pays.forEach(([code, name]) => {
         const o = document.createElement('option');
         o.value = code;
         o.textContent = name.toLowerCase();
         csel.appendChild(o);
       });
-    // Décennies (pertinentes sur « tendances » et « canal+ »)
-    const dsel = document.getElementById('discover-decade');
-    for (let d = 2020; d >= 1950; d -= 10) {
-      const o = document.createElement('option');
-      o.value = String(d);
-      o.textContent = 'années ' + d;
-      dsel.appendChild(o);
+    }
+    // Décennies (pertinentes sur « tendances », « canal+ » et Explorer)
+    for (const dsel of [document.getElementById('discover-decade'), document.getElementById('explorer-decade')]) {
+      for (let d = 2020; d >= 1950; d -= 10) {
+        const o = document.createElement('option');
+        o.value = String(d);
+        o.textContent = 'années ' + d;
+        dsel.appendChild(o);
+      }
     }
   }
   if (!discoverGenresLoaded) {
@@ -660,13 +666,14 @@ async function initDiscoverFilterOptions() {
       const r = await tmdbFetch(`${TMDB_BASE}/genre/movie/list?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
       if (!r.ok) return;
       const genres = (await r.json()).genres || [];
-      const gsel = document.getElementById('discover-genre');
-      genres.forEach(g => {
-        const o = document.createElement('option');
-        o.value = g.id;
-        o.textContent = g.name.toLowerCase();
-        gsel.appendChild(o);
-      });
+      for (const gsel of [document.getElementById('discover-genre'), document.getElementById('explorer-genre')]) {
+        genres.forEach(g => {
+          const o = document.createElement('option');
+          o.value = g.id;
+          o.textContent = g.name.toLowerCase();
+          gsel.appendChild(o);
+        });
+      }
       discoverGenresLoaded = true;
     } catch { /* réseau — retenté au prochain passage dans la vue */ }
   }
@@ -856,37 +863,115 @@ async function handleDiscoverSearch(query) {
 // ============================================================
 // Onglet ajouté le 2026-11-13 entre « découvrir » et « reco » : films, séries
 // et réals de tout le catalogue TMDB (c'était avant la case de Découvrir).
+// Mêmes filtres que Découvrir (genre, pays, période, tri, « masquer ma
+// collec »), à eux : state.explorerFilters.
+// - Avec une recherche : les résultats de TMDB, filtrés et triés ici (la
+//   recherche TMDB ne filtre pas). Le pays vient du profil de chaque film
+//   (recoProfile, gardé 60 jours), lu pour les 80 premiers résultats au plus.
+// - Sans recherche, avec un filtre ou un tri : tout le catalogue de films
+//   TMDB filtré (/discover/movie, comme « tendances » filtré).
+// - Ni l'un ni l'autre : ce qu'on peut y chercher.
 let explorerSeq = 0;
-let explorerDerniere = null; // { q, results } : rendue sans relire TMDB au retour
-function afficherExplorer() {
-  const q = (document.getElementById('explorer-search').value || '').trim();
-  if (q.length >= 2) { handleExplorerSearch(q); return; }
-  explorerSeq++; // une recherche encore en route ne remplit plus la grille
-  if (posterObserver) posterObserver.disconnect();
-  state.lastTmdbItems = [];
-  ['results-header', 'discover-more-wrap', 'load-more-wrap', 'empty'].forEach(id => { document.getElementById(id).style.display = 'none'; });
-  document.getElementById('grid').innerHTML = '<div class="explorer-invite">tape au moins deux lettres : un titre de film ou de série, un nom de réal ou d’acteur·ice. une année à la fin précise la recherche (ex. « play 2019 »).</div>';
+let explorerDerniere = null; // { q, results } : la réponse TMDB, refiltrée sans relecture
+const explorerListes = new Map(); // filtres -> lecture du catalogue (sans recherche), pour la visite
+// Genres TMDB : quelques genres de séries ont un autre numéro que celui des films
+const GENRE_SERIE = { 28: 10759, 12: 10759, 878: 10765, 14: 10765, 10752: 10768 };
+
+function explorerFiltresActifs(f) {
+  return !!(f.genre || f.country || f.decade || f.sort !== 'pertinence');
 }
-async function handleExplorerSearch(query) {
-  const seq = ++explorerSeq;
-  if (!query || query.length < 2) { afficherExplorer(); return; }
-  document.getElementById('results-header').style.display = '';
-  if (explorerDerniere && explorerDerniere.q === query) {
-    renderTmdbGrid(explorerDerniere.results.slice(0, 40));
-    return;
+
+// Résultats d'une recherche passés aux filtres et au tri d'Explorer (40 au plus)
+async function filtrerRecherche(items, f) {
+  let out = items;
+  if (f.genre) {
+    const g = Number(f.genre);
+    out = out.filter(it => (it.genre_ids || []).includes(it.media_type === 'tv' ? (GENRE_SERIE[g] || g) : g));
   }
+  if (f.decade) {
+    const d = parseInt(f.decade, 10);
+    out = out.filter(it => {
+      const a = parseInt((it.release_date || it.first_air_date || '').slice(0, 4), 10);
+      return a >= d && a <= d + 9;
+    });
+  }
+  if (f.country) {
+    out = out.slice(0, 80);
+    const cache = loadRecoProfiles();
+    const type = it => it.media_type === 'tv' ? 'tv' : 'movie';
+    await mapWithConcurrency(out, 6, it => recoProfile(cache, type(it), it.id));
+    saveRecoProfiles(cache);
+    out = out.filter(it => (cache.get(type(it) + '-' + it.id)?.p || []).includes(f.country));
+  }
+  const date = it => it.release_date || it.first_air_date || '';
+  if (f.sort === 'popularity.desc') out = [...out].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+  else if (f.sort === 'vote_average.desc') {
+    // Les notes à moins de 20 votes ne disent pas grand-chose : après les autres
+    const fiable = it => (it.vote_count || 0) >= 20 ? 1 : 0;
+    out = [...out].sort((a, b) => fiable(b) - fiable(a) || (b.vote_average || 0) - (a.vote_average || 0));
+  } else if (f.sort === 'primary_release_date.desc') {
+    out = [...out].sort((a, b) => date(b).localeCompare(date(a)));
+  }
+  return out.slice(0, 40);
+}
+
+// Listes actives et case de tri, comme sur Découvrir
+function majEnteteExplorer() {
+  const f = state.explorerFilters;
+  [['explorer-genre', f.genre], ['explorer-country', f.country], ['explorer-decade', f.decade]].forEach(([id, v]) => {
+    const sel = document.getElementById(id);
+    sel.classList.toggle('active', !!v);
+  });
+  document.getElementById('explorer-sort').classList.toggle('active', f.sort !== 'pertinence');
+  document.getElementById('explorer-hide-collection').classList.toggle('active', f.hideCollection);
+}
+
+async function afficherExplorer() {
+  const seq = ++explorerSeq; // une réponse encore en route ne remplit plus la grille
+  const q = (document.getElementById('explorer-search').value || '').trim();
+  const f = { ...state.explorerFilters };
+  majEnteteExplorer();
   const grid = document.getElementById('grid');
   const countEl = document.getElementById('result-count');
-  document.getElementById('empty').style.display = 'none';
-  grid.innerHTML = '<div style="grid-column: 1/-1; min-height: 100vh; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">recherche…</div>';
-  countEl.textContent = '…';
+  ['discover-more-wrap', 'load-more-wrap'].forEach(id => { document.getElementById(id).style.display = 'none'; });
+  if (q.length < 2 && !explorerFiltresActifs(f)) {
+    if (posterObserver) posterObserver.disconnect();
+    state.lastTmdbItems = [];
+    ['results-header', 'empty'].forEach(id => { document.getElementById(id).style.display = 'none'; });
+    grid.innerHTML = '<div class="explorer-invite">tape au moins deux lettres : un titre de film ou de série, un nom de réal ou d’acteur·ice. une année à la fin précise la recherche (ex. « play 2019 »). sans recherche, les filtres parcourent tous les films.</div>';
+    return;
+  }
+  document.getElementById('results-header').style.display = '';
+  const attente = texte => {
+    document.getElementById('empty').style.display = 'none';
+    grid.innerHTML = `<div style="grid-column: 1/-1; min-height: 100vh; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">${texte}</div>`;
+    countEl.textContent = '…';
+  };
+  // Autre frappe, autre filtre, autre vue pendant la lecture : ne rien écraser
   const perimee = () => seq !== explorerSeq || state.view !== 'explorer'
-    || (document.getElementById('explorer-search').value || '').trim() !== query;
+    || (document.getElementById('explorer-search').value || '').trim() !== q;
   try {
-    const results = await tmdbSearch(query);
+    let items;
+    if (q.length >= 2) {
+      if (!explorerDerniere || explorerDerniere.q !== q) {
+        attente('recherche…');
+        const results = await tmdbSearch(q);
+        if (perimee()) return;
+        explorerDerniere = { q, results };
+      }
+      items = await filtrerRecherche(explorerDerniere.results, f);
+    } else {
+      const cle = [f.genre, f.country, f.decade, f.sort].join('|');
+      if (!explorerListes.has(cle)) {
+        attente('chargement tmdb…');
+        const lecture = tmdbBrowse('explorer', { ...f, sort: f.sort === 'pertinence' ? 'popularity.desc' : f.sort }, DISCOVER_COUNT);
+        lecture.catch(() => explorerListes.delete(cle)); // une erreur se relit au passage suivant
+        explorerListes.set(cle, lecture);
+      }
+      items = await explorerListes.get(cle);
+    }
     if (perimee()) return;
-    explorerDerniere = { q: query, results };
-    renderTmdbGrid(results.slice(0, 40));
+    renderTmdbGrid(items);
   } catch (e) {
     if (perimee()) return;
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">erreur tmdb : ${escapeHtml(e.message)}</div>`;
@@ -908,7 +993,8 @@ function renderTmdbGrid(items) {
   // Liste brute mémorisée : « masquer ma collec » re-rend sans refetch
   state.lastTmdbItems = items || [];
   let shown = state.lastTmdbItems;
-  if (state.discoverFilters.hideCollection && state.view !== 'explorer') {
+  const masquer = state.view === 'explorer' ? state.explorerFilters.hideCollection : state.discoverFilters.hideCollection;
+  if (masquer) {
     const inCollec = new Set(state.films.map(f => f.id));
     shown = shown.filter(it => !inCollec.has((it.media_type || 'movie') + '-' + it.id));
   }
@@ -4047,7 +4133,7 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress)
     || (filters.sort && filters.sort !== 'popularity.desc'));
   const params = `api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
   let baseUrl;
-  if (hasFilters || category === 'canal') {
+  if (hasFilters || category === 'canal' || category === 'explorer') {
     const sort = filters.sort || 'popularity.desc';
     let extra = '&sort_by=' + encodeURIComponent(sort) + '&include_adult=false';
     if (filters.genre) extra += '&with_genres=' + encodeURIComponent(filters.genre);
@@ -5511,9 +5597,22 @@ function wireEvents() {
     state.discoverSearchTimer = setTimeout(() => handleDiscoverSearch(e.target.value.trim()), 300);
   });
   // Explorer : tout TMDB
-  document.getElementById('explorer-search').addEventListener('input', (e) => {
+  document.getElementById('explorer-search').addEventListener('input', () => {
     clearTimeout(state.explorerSearchTimer);
-    state.explorerSearchTimer = setTimeout(() => handleExplorerSearch(e.target.value.trim()), 300);
+    state.explorerSearchTimer = setTimeout(afficherExplorer, 300);
+  });
+  // Filtres d'Explorer : ils s'appliquent à la recherche tapée (gardée), ou,
+  // sans recherche, parcourent tout le catalogue
+  [['explorer-genre', 'genre'], ['explorer-country', 'country'], ['explorer-decade', 'decade'], ['explorer-sort', 'sort']].forEach(([id, k]) => {
+    document.getElementById(id).addEventListener('change', e => {
+      state.explorerFilters[k] = e.target.value;
+      afficherExplorer();
+    });
+  });
+  document.getElementById('explorer-hide-collection').addEventListener('click', () => {
+    state.explorerFilters.hideCollection = !state.explorerFilters.hideCollection;
+    majEnteteExplorer();
+    if (state.lastTmdbItems && state.lastTmdbItems.length) renderTmdbGrid(state.lastTmdbItems);
   });
 
   // Filtres découvrir (genre / pays) — relancent la catégorie courante ;
