@@ -461,7 +461,7 @@ function buildCard(f) {
     badge.className = 'rating-badge' + (f.user.favorite ? ' favorite' : '');
     badge.innerHTML = f.user.favorite
       ? '❤'
-      : `<span class="star">★</span>${f.user.rating}`;
+      : `<span class="star">★</span>${Number(f.user.rating) || ''}`; // un nombre, jamais du HTML venu de films.json
     poster.appendChild(badge);
   }
 
@@ -578,7 +578,7 @@ const discoverAvecPeriode = category => category === 'trending' || category === 
 // Tri par défaut : « canal+ » montre d'abord les sorties récentes (les films
 // récents arrivent sur Canal+ environ 6 mois après la salle), « prochainement »
 // les sorties en salle en France les plus proches (cette semaine, puis la
-// suivante…), « à lyon » les films selon les goûts d'Emeric (voir
+// suivante…), « à lyon » les films selon les goûts du propriétaire (voir
 // classerSelonGouts), « au cinéma » et « tendances » la popularité. Le tri
 // choisi sur « canal+ », « prochainement » ou « à lyon » leur reste propre.
 const DISCOVER_TRI_DEFAUT = { canal: 'primary_release_date.desc', upcoming: 'release_date.asc', lyon: 'gouts' };
@@ -958,10 +958,10 @@ function renderPersonHeader() {
   const photo = safeUrl(tmdbImgUrl(d.profile_path, 'w185'));
   const infos = [];
   const ne = d.gender === 1 ? 'née en ' : d.gender === 2 ? 'né en ' : '';
-  if (d.birthday) infos.push(ne + d.birthday.slice(0, 4));
+  if (d.birthday) infos.push(ne + escapeHtml(d.birthday.slice(0, 4)));
   const pays = countryFr(placeToCountry(d.place_of_birth));
   if (pays) infos.push(escapeHtml(pays));
-  if (d.deathday) infos.push((d.gender === 1 ? 'morte en ' : 'mort en ') + d.deathday.slice(0, 4));
+  if (d.deathday) infos.push((d.gender === 1 ? 'morte en ' : 'mort en ') + escapeHtml(d.deathday.slice(0, 4)));
   const tmdb = `https://www.themoviedb.org/person/${encodeURIComponent(d.id)}`;
   document.getElementById('person-id').innerHTML = `
     <div class="person-photo" ${photo ? `style="background-image:url(${photo})"` : ''}></div>
@@ -1647,7 +1647,7 @@ async function buildRecoPool(sources, onProgress) {
 //    100 votes), pour que les toutes petites sorties ne passent pas toutes
 //    devant.
 // Les films de la liste « à voir » passent devant. Réglé le 2026-10-27 sur
-// les films à l'affiche en France et les exemples d'Emeric : Le Corset 2e,
+// les films à l'affiche en France et les exemples du propriétaire : Le Corset 2e,
 // Garance 4e, Melpomène 11e, Notre salut 23e ; Street Fighter 133e,
 // Détective Conan 156e (sur 182). Coût : les profils des films aimés et des
 // films classés (quelques centaines d'appels TMDB la première fois), puis
@@ -2003,7 +2003,7 @@ function openModal(f, opts) {
     viewingHtml = `
       <div class="viewing-card">
         <div class="viewing-card-text">${viewingText}</div>
-        <div class="viewing-card-status ${u.statut}">${statusLabel}</div>
+        <div class="viewing-card-status ${escapeHtml(u.statut)}">${statusLabel}</div>
       </div>`;
   }
 
@@ -2659,7 +2659,7 @@ function renderYearReview() {
   const lieux = LIEUX.map(([v, nom]) => [nom, fs.filter(f => f.user.lieu === v).length]).filter(([, n]) => n);
   if (lieux.length) faits.push(fait('où', lieux.map(([nom, n]) => `${nom} ${n}`).join(' · ')));
   const ancien = fs.filter(f => f.year).sort((a, b) => a.year - b.year)[0];
-  if (ancien) faits.push(filmFait('le plus ancien', ancien, `sorti en ${ancien.year}`));
+  if (ancien) faits.push(filmFait('le plus ancien', ancien, `sorti en ${escapeHtml(ancien.year)}`));
   const long = fs.filter(f => f.runtime).sort((a, b) => b.runtime - a.runtime)[0];
   if (long) faits.push(filmFait('le plus long', long, `${Math.floor(long.runtime / 60)} h ${String(long.runtime % 60).padStart(2, '0')}`));
 
@@ -2692,7 +2692,7 @@ function renderMonthsChart() {
   for (const f of state.films) {
     if (f.user?.statut !== 'vu') continue;
     const dv = f.user.date_vue;
-    if (!dv || dv.startsWith('before-') || dv.length !== 7) continue;
+    if (!/^\d{4}-\d{2}$/.test(dv || '')) continue; // AAAA-MM seulement (la clé finit dans le SVG et l'infobulle)
     buckets.set(dv, (buckets.get(dv) || 0) + 1);
   }
 
@@ -3461,7 +3461,7 @@ function renderYearBest() {
         <div class="year-best-meta">${f.user.favorite ? '❤' : '★'.repeat(f.user.rating)}${f.director ? ' · ' + escapeHtml(f.director) : ''}</div>
       </div>`).join('');
     return `<div class="year-best-row">
-      <div class="year-best-year">${y}</div>
+      <div class="year-best-year">${escapeHtml(y)}</div>
       <div class="year-best-films">${filmCells}</div>
     </div>`;
   }).join('');
@@ -3691,7 +3691,10 @@ const UNSAFE_URL_CHARS = ['"', "'", '<', '>', '(', ')', ' ',
 function safeUrl(u) {
   const s = String(u || '');
   if (!s.startsWith('https://')) return '';
-  return UNSAFE_URL_CHARS.some(c => s.includes(c)) ? '' : s;
+  // « & » échappé : le résultat va toujours dans un attribut HTML, où « &amp; »
+  // redevient « & » ; sans cela, « &#41; » passait le contrôle puis redevenait
+  // « ) » au décodage, et fermait le url() d'un style="background-image:url(…)"
+  return UNSAFE_URL_CHARS.some(c => s.includes(c)) ? '' : s.replace(/&/g, '&amp;');
 }
 
 // ============================================================
@@ -3818,7 +3821,7 @@ async function fetchNowPlayingIdsFR() {
 // JustWatch, en streaming par abonnement ; Canal VOD, location et achat, n'en
 // fait pas partie), relu une fois par jour (clé films_canal_fr,
 // { ts, fournisseurs, ids }). Depuis le 2026-11-12, OCS et Apple TV, compris
-// dans l'abonnement Canal+ d'Emeric, en font partie (ABONNEMENT_CANAL) :
+// dans l'abonnement Canal+ du propriétaire, en font partie (ABONNEMENT_CANAL) :
 // environ 130 pages TMDB pour 2 600 titres (1 978 films, 623 séries ; OCS
 // 1 219 films dont 146 déjà sur Canal+, Apple TV 106 films). Il alimente la
 // pastille « canal+ » de toutes les cartes (sauf la liste « canal+ » de
@@ -4992,6 +4995,7 @@ async function setupAdmin() {
     document.body.classList.add('admin-mode');
     document.getElementById('nav-admin').classList.add('active');
     document.getElementById('nav-admin').innerHTML = cadenasSvg(true);
+    viderChampsSecrets();
     okBox.textContent = '✓ admin actif — ton code est mémorisé. tu peux fermer cette fenêtre.';
     okBox.style.display = '';
     setTimeout(closeAdminSetup, 1600);
@@ -5036,6 +5040,7 @@ async function unlockAdmin() {
     document.body.classList.add('admin-mode');
     document.getElementById('nav-admin').classList.add('active');
     document.getElementById('nav-admin').innerHTML = cadenasSvg(true);
+    viderChampsSecrets();
     okBox.textContent = '✓ admin actif';
     okBox.style.display = '';
     setTimeout(closeAdminSetup, 800);
@@ -5056,7 +5061,16 @@ async function unlockAdmin() {
 }
 
 // Lock: clear in-memory PAT but keep encrypted blob (so user can re-enter code)
+// Token et code tapés dans les formulaires : effacés dès qu'ils ont servi, et
+// au verrouillage. Sinon ils restaient en clair dans les cases cachées
+// jusqu'à la réouverture de la fenêtre (lisibles par un script de la page)
+function viderChampsSecrets() {
+  ['admin-setup-pat', 'admin-setup-code', 'admin-setup-code-confirm', 'admin-unlock-code']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
 function lockAdmin() {
+  viderChampsSecrets();
   admin.active = false;
   admin.ghToken = null;
   admin.filmsSHA = null;
@@ -5071,6 +5085,7 @@ function lockAdmin() {
 function disableAdmin() {
   if (!confirm('tout réinitialiser ? il faudra à nouveau saisir ton token github + choisir un nouveau code.')) return;
   clearAdminCreds();
+  viderChampsSecrets();
   admin.active = false;
   admin.filmsSHA = null;
   document.body.classList.remove('admin-mode');
@@ -5152,9 +5167,9 @@ function renderEditForm(film) {
       <div class="edit-form-error error-inline" style="display: none;"></div>
 
       <div class="edit-form-actions">
-        <button class="edit-save" data-film-id="${film.id}">enregistrer</button>
-        <button class="edit-rematch" data-film-id="${film.id}">re-matcher tmdb</button>
-        <button class="edit-delete" data-film-id="${film.id}">🗑 supprimer</button>
+        <button class="edit-save" data-film-id="${escapeHtml(film.id)}">enregistrer</button>
+        <button class="edit-rematch" data-film-id="${escapeHtml(film.id)}">re-matcher tmdb</button>
+        <button class="edit-delete" data-film-id="${escapeHtml(film.id)}">🗑 supprimer</button>
       </div>
     </div>
   `;
@@ -5412,7 +5427,7 @@ async function handleRematchSearch(query) {
       div.innerHTML = `
         <div class="search-result-poster" ${r.poster_path ? `style="background-image:url(${safeUrl(tmdbImgUrl(r.poster_path, 'w185'))})"` : ''}></div>
         <div class="search-result-title">${escapeHtml(r.title || r.name)}</div>
-        <div class="search-result-year">${year}</div>
+        <div class="search-result-year">${escapeHtml(year)}</div>
         <div class="search-result-type">${r.media_type === 'tv' ? 'série' : 'film'}</div>
       `;
       rendreActivable(div, () => confirmRematch(r));
