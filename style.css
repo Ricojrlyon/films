@@ -148,6 +148,8 @@ body {
   border-color: var(--warm);
 }
 .tab .count {
+  display: inline-block;
+  min-width: 3ch; /* largeur finale dès l'attente : les onglets ne passent plus sur deux lignes à l'arrivée des films */
   margin-left: 6px;
   opacity: 0.85; /* lisible (4,9:1 et plus) sur onglet actif comme inactif */
   font-size: 9px;

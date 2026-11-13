@@ -281,7 +281,10 @@ function viewTransition(run) {
     && !vtActive
     && typeof document.startViewTransition === 'function'
     && document.visibilityState === 'visible'
-    && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    && !matchMedia('(prefers-reduced-motion: reduce)').matches
+    // Le fondu photographie toute la page : sur une grille de 581 cartes, un
+    // filtre prenait 1,9 s sur téléphone (0,14 s sans). Gardé pour l'usage courant (60).
+    && document.getElementById('grid').childElementCount <= 120;
   firstRenderDone = true;
   if (!animate) { run(); return; }
   vtActive = true;
@@ -629,7 +632,7 @@ async function initDiscoverFilterOptions() {
   }
   if (!discoverGenresLoaded) {
     try {
-      const r = await fetch(`${TMDB_BASE}/genre/movie/list?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+      const r = await tmdbFetch(`${TMDB_BASE}/genre/movie/list?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
       if (!r.ok) return;
       const genres = (await r.json()).genres || [];
       const gsel = document.getElementById('discover-genre');
@@ -680,7 +683,7 @@ async function fetchAndRenderDiscover(category) {
     return;
   }
 
-  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">chargement tmdb…<br><span id="discover-progress"></span></div>';
+  grid.innerHTML = '<div style="grid-column: 1/-1; min-height: 100vh; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">chargement tmdb…<br><span id="discover-progress"></span></div>';
   countEl.textContent = '…';
   // La vue, la catégorie, les filtres ou une recherche tapée entre-temps
   // (case remplie) ont pu changer pendant le chargement : ne pas écraser la grille
@@ -761,7 +764,7 @@ async function handleDiscoverSearch(query) {
     renderTmdbGrid(discoverDerniereRecherche.results.slice(0, 40));
     return;
   }
-  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">recherche…</div>';
+  grid.innerHTML = '<div style="grid-column: 1/-1; min-height: 100vh; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">recherche…</div>';
   countEl.textContent = '…';
   // L'utilisateur a pu changer de vue, relancer une recherche, ou vider la
   // case en cliquant une catégorie ou un filtre pendant le chargement
@@ -1083,16 +1086,18 @@ function provisionalDirector(id) {
   return (local && local.director) || '';
 }
 async function resolveDirector(id, tmdbId, mediaType) {
-  if (directorResolved(id)) return directorCache.get(id);
+  if (directorResolved(id)) return directorCache.get(id) || provisionalDirector(id);
   if (!tmdbId) return provisionalDirector(id);
-  let dir = '';
+  let dir = '', lu = false;
   try {
     let people = [];
     if (mediaType === 'tv') {
-      const r = await fetch(`${TMDB_BASE}/tv/${tmdbId}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+      const r = await tmdbFetch(`${TMDB_BASE}/tv/${tmdbId}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+      lu = r.ok;
       if (r.ok) people = (await r.json()).created_by || [];
     } else {
-      const r = await fetch(`${TMDB_BASE}/movie/${tmdbId}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+      const r = await tmdbFetch(`${TMDB_BASE}/movie/${tmdbId}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+      lu = r.ok;
       if (r.ok) people = ((await r.json()).crew || []).filter(c => c.job === 'Director');
     }
     const seen = new Set(), names = [];
@@ -1103,7 +1108,9 @@ async function resolveDirector(id, tmdbId, mediaType) {
     }
     dir = names.join(', ');
   } catch {}
-  if (dir) directorCache.set(id, dir);
+  // TMDB a répondu sans réal (série sans créateur) : « aucun » mémorisé aussi,
+  // sinon la fiche était redemandée à chaque rendu de la grille
+  if (dir || lu) directorCache.set(id, dir);
   return dir || provisionalDirector(id);
 }
 // Remplir/latiniser les réalisateurs des cartes affichées (concurrence bornée).
@@ -1124,7 +1131,7 @@ async function resolveTitle(id, tmdbId, mediaType, raw) {
   let t = '';
   try {
     const path = mediaType === 'tv' ? 'tv' : 'movie';
-    const r = await fetch(`${TMDB_BASE}/${path}/${tmdbId}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=en-US`);
+    const r = await tmdbFetch(`${TMDB_BASE}/${path}/${tmdbId}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=en-US`);
     if (r.ok) {
       const d = await r.json();
       const cand = d.title || d.name || '';
@@ -1132,7 +1139,7 @@ async function resolveTitle(id, tmdbId, mediaType, raw) {
     }
     // Filet : certains films n'ont pas de titre en-US mais un titre alternatif latin
     if (!t) {
-      const ar = await fetch(`${TMDB_BASE}/${path}/${tmdbId}/alternative_titles?api_key=${encodeURIComponent(admin.tmdbKey)}`);
+      const ar = await tmdbFetch(`${TMDB_BASE}/${path}/${tmdbId}/alternative_titles?api_key=${encodeURIComponent(admin.tmdbKey)}`);
       if (ar.ok) {
         const ad = await ar.json();
         const list = ad.titles || ad.results || [];
@@ -1196,6 +1203,7 @@ async function fillCardMeta() {
   async function worker() {
     while (idx < cards.length) {
       const c = cards[idx++];
+      if (!c.isConnected) continue; // grille remplacée entre-temps (autre recherche, catégorie, onglet)
       if (needsTitle(c)) {
         const el = c.querySelector('.card-title');
         const t = await resolveTitle(c.dataset.filmId, c.dataset.tmdbId, c.dataset.mediaType, el.textContent);
@@ -1404,6 +1412,17 @@ const RECO_SIG = (() => {
 
 // Fetch TMDB tolérant : null en cas d'échec, nouvel essai sur 429 — le calcul
 // fait des centaines d'appels, un 429 avalé en silence tronquerait le pool.
+// fetch vers TMDB, avec nouvel essai (1 s, puis 2 s) après un refus « trop de
+// requêtes » (429) : plusieurs files d'appels tournent en même temps (cartes,
+// Découvrir, profils) et TMDB borne le débit. Même réponse que fetch sinon.
+async function tmdbFetch(url) {
+  for (let essai = 0; ; essai++) {
+    const r = await fetch(url);
+    if (r.status !== 429 || essai === 2) return r;
+    await new Promise(ok => setTimeout(ok, 1000 * (essai + 1)));
+  }
+}
+
 async function tmdbJson(url) {
   for (let attempt = 0; attempt < 3; attempt++) {
     let r;
@@ -1859,7 +1878,7 @@ async function fetchAndRenderReco(forceRefresh = false) {
   }
 
   if (!pool || forceRefresh || pool.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">analyse de tes goûts… (' + sources.length + ' films à croiser)<br><span id="reco-progress"></span></div>';
+    grid.innerHTML = '<div style="grid-column: 1/-1; min-height: 100vh; text-align: center; padding: 40px; color: var(--ink-mute); font-style: italic;">analyse de tes goûts… (' + sources.length + ' films à croiser)<br><span id="reco-progress"></span></div>';
     countEl.textContent = '…';
     refreshBtn.disabled = true;
     try {
@@ -1929,9 +1948,10 @@ function openModal(f, opts) {
   bg.style.filter = '';
 
   if (f.backdrop) {
-    bg.style.backgroundImage = `url(${f.backdrop})`;
+    // w780 pour un bandeau de 760 × 240 assombri (w1280 enregistré : 164 Ko au lieu de 68)
+    bg.style.backgroundImage = `url(${tmdbResize(f.backdrop, 'w780')})`;
   } else if (f.poster) {
-    bg.style.backgroundImage = `url(${f.poster})`;
+    bg.style.backgroundImage = `url(${tmdbResize(f.poster, 'w342')})`;
     bg.style.filter = 'blur(20px) brightness(0.6)';
   } else {
     bg.style.background = 'var(--bg-elev)';
@@ -2082,7 +2102,7 @@ function openModal(f, opts) {
 
   body.innerHTML = `
     <div class="modal-head">
-      <div class="modal-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(f.poster)})"` : ''}>${f.poster ? '' : "pas d'affiche"}</div>
+      <div class="modal-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(tmdbResize(f.poster, 'w342'))})"` : ''}>${f.poster ? '' : "pas d'affiche"}</div>
       <div class="modal-head-meta">
         <h2 class="modal-title" id="modal-title">${escapeHtml(displayTitle(f.id, f.title) || 'sans titre')}</h2>
         ${f.director ? `<div class="modal-director">par ${f.director.split(',').map(n => nameLink(n.trim(), 'real')).filter(Boolean).join(', ')}</div>` : ''}
@@ -2758,7 +2778,8 @@ function renderMonthsChart() {
       if (parseInt(r.dataset.count, 10) > 0) goToVusWithFilters({ yearvu: yr, mois: mo });
     });
   });
-  svg.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+  // Le graphique est redessiné à chaque largeur : l'écouteur n'est posé qu'une fois
+  if (!svg.dataset.wired) { svg.dataset.wired = '1'; svg.addEventListener('mouseleave', () => tooltip.style.opacity = '0'); }
 
   function showMonthTip(r) {
     const key = r.dataset.key;
@@ -2973,7 +2994,7 @@ async function bulkEnrichCountries() {
       try {
         const path = film.type === 'tv' ? 'tv' : 'movie';
         const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`;
-        const r = await fetch(url);
+        const r = await tmdbFetch(url);
         if (r.ok) {
           const detail = await r.json();
           const country = extractCountryFromTmdbDetail(detail);
@@ -3281,7 +3302,7 @@ async function fetchLatinNameById(personId) {
   ];
   for (const url of attempts) {
     try {
-      const r = await fetch(url);
+      const r = await tmdbFetch(url);
       if (!r.ok) continue;
       const p = await r.json();
       // Check main name first
@@ -3299,7 +3320,7 @@ async function fetchLatinNameById(personId) {
 /** Pays de naissance normalisé d'une personne TMDB (via place_of_birth). '' si inconnu. */
 async function fetchPersonCountry(personId) {
   try {
-    const r = await fetch(`${TMDB_BASE}/person/${personId}?api_key=${encodeURIComponent(admin.tmdbKey)}`);
+    const r = await tmdbFetch(`${TMDB_BASE}/person/${personId}?api_key=${encodeURIComponent(admin.tmdbKey)}`);
     if (!r.ok) return '';
     const p = await r.json();
     return placeToCountry(p.place_of_birth);
@@ -3345,7 +3366,7 @@ async function enrichGender() {
   for (const f of toEnrich) {
     try {
       // 1. Fetch credits (gender + name data)
-      const r = await fetch(
+      const r = await tmdbFetch(
         `${TMDB_BASE}/movie/${f.tmdb_id}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`
       );
       if (!r.ok) { done++; continue; }
@@ -3525,6 +3546,7 @@ function openModalFromCard(filmId) {
 // Combien de films vus le clic renverra-t-il ? (les graphes « pays » utilisent
 // un comptage fractionnaire : 197 pour la France ≠ 271 films impliquant la
 // France — l'infobulle annonce donc le vrai nombre avant le clic.)
+let vusIndex = null; // textes normalisés des films vus, le temps d'un rendu des stats
 function countVusMatching(filterKey, val) {
   const vus = state.films.filter(f => f.user?.statut === 'vu');
   if (filterKey === 'genre') return vus.filter(f => (f.genres || []).includes(val)).length;
@@ -3533,8 +3555,11 @@ function countVusMatching(filterKey, val) {
   if (filterKey === 'dirCountry') return vus.filter(f => dirCountriesOf(f).includes(val)).length;
   if (filterKey === 'search') {
     const q = normSearch(val);
-    return vus.filter(f => [f.title, f.original_title, f.director, (f.cast || []).join(' ')]
-      .some(t => t && normSearch(t).includes(q))).length;
+    // Textes des vus normalisés une seule fois par rendu des stats (50 lignes
+    // × 581 films × 4 textes : 116 000 normalisations, la page figeait ~0,5 s sur téléphone)
+    vusIndex = vusIndex || vus.map(f => [f.title, f.original_title, f.director, (f.cast || []).join(' ')]
+      .map(t => normSearch(t || '')));
+    return vusIndex.filter(ts => ts.some(t => t && t.includes(q))).length;
   }
   return null;
 }
@@ -3559,6 +3584,7 @@ function wireBarRowsClick(rootId, filterKey) {
 
 // Toutes les stats « catégorie » deviennent des points d'entrée vers les vus.
 function wireStatsClicks() {
+  vusIndex = null; // la collection a pu changer depuis le dernier rendu
   wireBarRowsClick('genre-rating-chart', 'genre');
   wireBarRowsClick('genre-chart', 'genre');
   wireBarRowsClick('origin-chart', 'country');
@@ -3775,15 +3801,15 @@ function tmdbImgUrl(path, size = 'w342') { return path ? TMDB_IMG + '/' + size +
 let nowPlayingSet = new Set();
 async function fetchNowPlayingIdsFR() {
   const base = `${TMDB_BASE}/movie/now_playing?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
-  const first = await fetch(base + '&page=1');
+  const first = await tmdbFetch(base + '&page=1');
   if (!first.ok) throw new Error('now_playing ' + first.status);
   const data = await first.json();
   const ids = (data.results || []).map(m => 'movie-' + m.id);
   const totalPages = Math.min(data.total_pages || 1, 12); // borne : ~240 films, couvre les sorties courantes
   const rest = [];
   for (let p = 2; p <= totalPages; p++) rest.push(p);
-  const pages = await Promise.all(rest.map(p =>
-    fetch(base + '&page=' + p).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] }))));
+  const pages = await mapWithConcurrency(rest, 6, p =>
+    tmdbFetch(base + '&page=' + p).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] })));
   for (const d of pages) for (const m of (d.results || [])) ids.push('movie-' + m.id);
   return [...new Set(ids)];
 }
@@ -3801,6 +3827,7 @@ async function fetchNowPlayingIdsFR() {
 // Fournisseurs TMDB en France : 381 Canal+, 685 « Cine+ OCS » (le catalogue
 // OCS ; il n'y a plus de fournisseur OCS seul), 350 Apple TV.
 const ABONNEMENT_CANAL = '381|685|350';   // « | » : l'un ou l'autre
+const CANAL_FICHIER_AGE_MAX = 3 * 24 * 3600 * 1000; // au-delà, la liste du robot est jugée périmée
 let canalSet = new Set();
 async function fetchCanalCatalogue() {
   const ids = [];
@@ -3821,6 +3848,22 @@ async function fetchCanalCatalogue() {
   return out;
 }
 async function ensureCanalFR() {
+  // 1. La liste du robot du matin (canal_plus.json, même catalogue, écrite une
+  //    fois par jour pour tous les appareils), relue au plus une fois par heure
+  try {
+    const r = await fetch('canal_plus.json?h=' + Math.floor(Date.now() / 3600000));
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d.fournisseurs === ABONNEMENT_CANAL && Array.isArray(d.ids) && d.complet
+          && Date.now() - Date.parse(d.genere) < CANAL_FICHIER_AGE_MAX) {
+        canalSet = new Set(d.ids);
+        return;
+      }
+    } else {
+      r.body?.cancel(); // fichier absent (404) : réponse refermée, rien ne reste ouvert
+    }
+  } catch { /* fichier absent ou illisible : repli ci-dessous */ }
+  // 2. Repli (robot arrêté, fichier trop vieux) : lecture directe chez TMDB, gardée 24 h
   const KEY = 'films_canal_fr';
   try {
     const cached = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -3881,7 +3924,7 @@ async function tmdbSearch(query) {
   // Fetch 2 pages of /search/multi for broader coverage
   const fetchPage = async (page) => {
     const url = `${TMDB_BASE}/search/multi?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
-    const r = await fetch(url);
+    const r = await tmdbFetch(url);
     if (!r.ok) throw new Error('TMDB search ' + r.status);
     return (await r.json()).results || [];
   };
@@ -3897,7 +3940,7 @@ async function tmdbSearch(query) {
     const personFilms = await Promise.all(persons.map(async (p) => {
       try {
         const url = `${TMDB_BASE}/person/${p.id}/combined_credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`;
-        const r = await fetch(url);
+        const r = await tmdbFetch(url);
         if (!r.ok) return [];
         const d = await r.json();
         // crew (e.g. directors) prioritized over cast
@@ -3947,7 +3990,7 @@ async function tmdbSearch(query) {
 async function tmdbDetails(id, type) {
   const path = type === 'tv' ? 'tv' : 'movie';
   const url = `${TMDB_BASE}/${path}/${id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&append_to_response=credits,external_ids,videos&include_video_language=fr,en`;
-  const r = await fetch(url);
+  const r = await tmdbFetch(url);
   if (!r.ok) throw new Error('TMDB details ' + r.status);
   return await r.json();
 }
@@ -4029,7 +4072,7 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress)
   // page qui échoue est simplement ignorée
   // Erreur HTTP (TMDB en panne, 429) : une erreur, pas une liste vide (qui
   // dirait « aucun film, élargis tes filtres » et resterait gardée toute la visite)
-  const page1 = () => fetch(baseUrl + '&page=1').then(r => {
+  const page1 = () => tmdbFetch(baseUrl + '&page=1').then(r => {
     if (!r.ok) throw new Error('tmdb ne répond pas (' + r.status + ')');
     return r.json();
   });
@@ -4037,16 +4080,17 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress)
   // salle) ne sont pas des nouveautés : écartées (sortie d'origine > 1 an)
   const ilYaUnAn = new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10);
   const nouveau = it => category !== 'upcoming' || !it.release_date || it.release_date >= ilYaUnAn;
-  const page = n => fetch(baseUrl + '&page=' + n).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] }));
+  const page = n => tmdbFetch(baseUrl + '&page=' + n).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] }));
   let p1, others;
   if (lots === 1) {
     // Première liste : toutes les pages d'un coup
-    [p1, ...others] = await Promise.all([page1(), ...Array.from({ length: pageCount - 1 }, (_, i) => page(i + 2))]);
+    // (pas plus de 6 pages à la fois : la page 1 en tête, les autres derrière)
+    [p1, ...others] = await mapWithConcurrency(Array.from({ length: pageCount }, (_, i) => i + 1), 6, n => (n === 1 ? page1() : page(n)));
   } else {
     // « charger plus » : pas plus de pages que TMDB n'en a
     p1 = await page1();
     const fin = Math.min(pageCount, p1.total_pages || pageCount);
-    others = await Promise.all(Array.from({ length: Math.max(0, fin - 1) }, (_, i) => page(i + 2)));
+    others = await mapWithConcurrency(Array.from({ length: Math.max(0, fin - 1) }, (_, i) => i + 2), 6, page);
   }
   const all = [p1, ...others].flatMap(p => p.results || []);
   // Une liste « all » renverrait aussi des personnes — pas affichables comme films
@@ -4377,7 +4421,7 @@ async function enrichFilmCountry(film) {
   try {
     const path = film.type === 'tv' ? 'tv' : 'movie';
     const url = `${TMDB_BASE}/${path}/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`;
-    const r = await fetch(url);
+    const r = await tmdbFetch(url);
     if (!r.ok) return;
     const detail = await r.json();
     const country = extractCountryFromTmdbDetail(detail);
@@ -4394,7 +4438,7 @@ async function tmdbGetTrailer(tmdbId, type) {
   const path = type === 'tv' ? 'tv' : 'movie';
   const url = `${TMDB_BASE}/${path}/${tmdbId}/videos?api_key=${encodeURIComponent(admin.tmdbKey)}&include_video_language=fr,en&language=fr-FR`;
   try {
-    const r = await fetch(url);
+    const r = await tmdbFetch(url);
     if (!r.ok) return null;
     const data = await r.json();
     const videos = (data.results || []).filter(v => v.site === 'YouTube');
@@ -4442,14 +4486,14 @@ async function enrichFilmNames(film) {
   const sleep = ms => new Promise(res => setTimeout(res, ms));
   try {
     const path = film.type === 'tv' ? 'tv' : 'movie';
-    const r = await fetch(`${TMDB_BASE}/${path}/${film.tmdb_id}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+    const r = await tmdbFetch(`${TMDB_BASE}/${path}/${film.tmdb_id}/credits?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
     if (!r.ok) return;
     const credits = await r.json();
     const people = [...(credits.cast || []), ...(credits.crew || [])];
     // Les créateurs de séries ne figurent pas dans les credits
     if (film.type === 'tv') {
       try {
-        const dr = await fetch(`${TMDB_BASE}/tv/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
+        const dr = await tmdbFetch(`${TMDB_BASE}/tv/${film.tmdb_id}?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR`);
         if (dr.ok) people.push(...((await dr.json()).created_by || []));
       } catch {}
     }

@@ -40,8 +40,10 @@ export function chargerApp(chemin = CHEMIN) {
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
   vm.createContext(ctx);
   // Les let/const du haut du fichier ne deviennent pas des propriétés de
-  // l'espace global : on les expose à la fin du script
+  // l'espace global : on les expose à la fin du script, par des accesseurs
+  // (une variable réaffectée par le code, comme canalSet, est lue à jour)
   const noms = [...code.matchAll(/^(?:async\s+)?(?:function|const|let|class)\s+([A-Za-z_$][\w$]*)/gm)].map(m => m[1]);
-  vm.runInContext(code + '\n;globalThis.__app = {' + [...new Set(noms)].join(',') + '};', ctx, { filename: 'app.js' });
+  vm.runInContext(code + '\n;globalThis.__app = {' + [...new Set(noms)].map(n => `get ${n}() { return ${n}; }`).join(',') + '};',
+    ctx, { filename: 'app.js' });
   return { ctx, app: ctx.__app };
 }
