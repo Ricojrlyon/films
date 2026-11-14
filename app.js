@@ -778,7 +778,11 @@ async function loadMoreDiscover() {
   btn.disabled = true;
   btn.textContent = 'chargement…';
   try {
-    const results = await tmdbBrowse(category, discoverEffectiveFilters(category), limite);
+    // Liste déjà lue en entier (« canal+ » par date) : la suite, sans relire TMDB
+    const precedent = state.discoverCache[cacheKey];
+    const results = precedent && precedent.tout
+      ? Object.assign(precedent.tout.slice(0, limite), { encore: precedent.tout.length > limite, tout: precedent.tout })
+      : await tmdbBrowse(category, discoverEffectiveFilters(category), limite);
     state.discoverLimits[cacheKey] = limite;
     state.discoverCache[cacheKey] = results;
     // Autre vue, autre catégorie ou recherche en cours : la liste attendra
@@ -4184,7 +4188,18 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress)
   // américains bien après les 40 premiers. Sinon 2 pages suffisent.
   const rebalance = !filters.country && (filters.sort || 'popularity.desc') === 'popularity.desc';
   const lots = Math.ceil(count / DISCOVER_COUNT);
-  const pageCount = lots * (rebalance ? (category === 'canal' ? DISCOVER_CANAL_PAGES : DISCOVER_REBALANCE_PAGES) : 2);
+  // « canal+ » par sorties récentes : TMDB trie sur la date de sortie
+  // mondiale (et même release_date.desc suit la première date en France,
+  // festival compris : Cannes), alors que la carte montre la sortie française
+  // en salles. Un film de festival sorti en France des mois plus tard était
+  // donc sur des pages lointaines, et « charger plus » le plaçait au-dessus
+  // des films déjà affichés (constaté le 2026-11-14 : Icefall, Rue Málaga,
+  // Nuremberg). Le catalogue est lu en entier (environ 400 films, 21 pages
+  // au 2026-11-14 ; CANAL_DATE_PAGES au plus) et trié ici ; « charger plus »
+  // en montre la suite sans relire TMDB (out.tout).
+  const toutLire = category === 'canal' && filters.sort === 'primary_release_date.desc';
+  const pageCount = toutLire ? CANAL_DATE_PAGES
+    : lots * (rebalance ? (category === 'canal' ? DISCOVER_CANAL_PAGES : DISCOVER_REBALANCE_PAGES) : 2);
   // La page 1 est indispensable (réseau coupé : erreur affichée) ; une autre
   // page qui échoue est simplement ignorée
   // Erreur HTTP (TMDB en panne, 429) : une erreur, pas une liste vide (qui
@@ -4199,7 +4214,7 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress)
   const nouveau = it => category !== 'upcoming' || !it.release_date || it.release_date >= ilYaUnAn;
   const page = n => tmdbFetch(baseUrl + '&page=' + n).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] }));
   let p1, others;
-  if (lots === 1) {
+  if (lots === 1 && !toutLire) {
     // Première liste : toutes les pages d'un coup
     // (pas plus de 6 pages à la fois : la page 1 en tête, les autres derrière)
     [p1, ...others] = await mapWithConcurrency(Array.from({ length: pageCount }, (_, i) => i + 1), 6, n => (n === 1 ? page1() : page(n)));
@@ -4241,7 +4256,8 @@ async function tmdbBrowse(category, filters, count = DISCOVER_COUNT, onProgress)
     else if (sort === 'primary_release_date.desc') list.sort((a, b) => (b.release_date || '').localeCompare(a.release_date || ''));
   }
   const out = list.slice(0, count);
-  out.encore = encore || list.length > count;
+  out.encore = (encore && !toutLire) || list.length > count;
+  if (toutLire) out.tout = list;
   return out;
 }
 
@@ -4259,6 +4275,7 @@ const DISCOVER_REBALANCE_PAGES = 5;
 // les 40 places (mesuré le 2026-10-26 : 14 films avec 5 pages, 40 avec 10,
 // environ 4 s à la première visite, le temps de connaître les pays)
 const DISCOVER_CANAL_PAGES = 10;
+const CANAL_DATE_PAGES = 30; // « canal+ » par date : tout le catalogue (voir tmdbBrowse), 600 films au plus
 const DISCOVER_MAX_US_SHARE = 1 / 3;
 const DISCOVER_NO_BOOST = ['IN'];   // films indiens (sorties pour la diaspora)
 async function capUSShare(list, count) {

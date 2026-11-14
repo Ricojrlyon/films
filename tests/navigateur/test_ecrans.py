@@ -1,7 +1,7 @@
 # Écrans du site dans un vrai navigateur, TMDB simulé (voir banc.py) :
 #   python -m unittest discover -s tests/navigateur
 # FILMS_APP_JS=<chemin> fait servir une autre copie d'app.js (voir banc.py).
-import unittest
+import json, unittest
 from banc import Banc
 
 
@@ -136,6 +136,50 @@ class Ecrans(Banc):
         self.page.wait_for_timeout(2500)
         self.assertTrue(self.js('document.getElementById("modal-backdrop").classList.contains("open")'), 'l\'autre fiche a été fermée')
         self.assertEqual(self.js('openModalCtx.id'), autre)
+
+
+class CanalParDate(Banc):
+    # Catalogue « canal+ » simulé de 21 pages, dans l'ordre de TMDB (date de
+    # sortie mondiale) ; le film 41 (page 3) est sorti en France le plus
+    # récemment, comme un film de festival sorti en salles des mois plus tard.
+    def setUp(self):
+        super().setUp()
+        from datetime import date, timedelta
+        from urllib.parse import urlparse, parse_qs
+
+        def film(i):
+            d = '2026-11-01' if i == 41 else (date(2026, 10, 1) - timedelta(days=i)).isoformat()
+            return {'id': 90000 + i, 'title': 'C%03d %s' % (i, d), 'original_title': 'C%03d' % i, 'release_date': d,
+                    'poster_path': None, 'genre_ids': [], 'vote_count': 100, 'vote_average': 7, 'popularity': 50}
+
+        def canal(route, req):
+            q = parse_qs(urlparse(req.url).query)
+            if 'with_watch_providers' not in q:
+                return route.fallback()
+            self.pages_canal.append(int(q['page'][0]))
+            n = int(q['page'][0])
+            corps = {'page': n, 'total_pages': 21, 'total_results': 420,
+                     'results': [film((n - 1) * 20 + i + 1) for i in range(20)] if n <= 21 else []}
+            route.fulfill(status=200, content_type='application/json', headers={'access-control-allow-origin': '*'},
+                          body=json.dumps(corps))
+        self.pages_canal = []
+        self.ctx.route('https://api.themoviedb.org/3/discover/movie**', canal)
+
+    def test_charger_plus_n_ajoute_rien_au_dessus(self):
+        self.ouvrir()
+        self.decouvrir()
+        self.page.click('.explorer-cat[data-cat="canal"]')
+        self.attendre(lambda: len(self.titres()) == 40)
+        avant = self.titres()
+        self.assertTrue(avant[0].startswith('C041'), 'le film sorti en France le plus récemment, en tête : %s' % avant[:2])
+        lues = len(self.pages_canal)
+        self.page.click('#discover-more')
+        self.attendre(lambda: len(self.titres()) == 80)
+        apres = self.titres()
+        self.assertEqual(apres[:40], avant, '« charger plus » a changé les films déjà affichés')
+        dates = [x.split(' ')[1] for x in apres]
+        self.assertEqual(dates, sorted(dates, reverse=True), "pas dans l'ordre des sorties")
+        self.assertEqual(len(self.pages_canal), lues, 'TMDB relu pour « charger plus »')
 
 
 class EcransTelephone(Banc):
