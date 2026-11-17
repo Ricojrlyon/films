@@ -101,6 +101,16 @@ class Ecrans(Banc):
         self.assertTrue(self.js('!!document.querySelector("#tmdb-add-rating-chips .rating-chip.active[data-rating=\'5\']")'),
                         'note saisie perdue')
 
+    def test_plus_de_pastille_au_cine(self):
+        # Retirée le 2026-11-17 : ni pastille, ni lecture des films en salles au démarrage
+        self.ouvrir()
+        self.page.wait_for_timeout(1000)
+        self.assertEqual([u for u in self.requetes_tmdb if 'now_playing' in u], [], 'films en salles lus au démarrage')
+        self.decouvrir()
+        self.page.click('.explorer-cat[data-cat="now_playing"]')
+        self.attendre(lambda: len(self.titres()) > 5)
+        self.assertEqual(self.js('document.querySelectorAll(".cine-badge").length'), 0)
+
     def test_B7_double_clic_ouvre_la_fiche(self):
         self.ouvrir()
         self.page.locator('#grid .card').nth(0).dblclick()  # carte de gauche, hors du cadre de la fiche

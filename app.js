@@ -498,16 +498,9 @@ function buildCard(f) {
   }
 
   // « à lyon » : film à voir qui passe cette semaine dans une salle suivie
-  // (il remplace « au ciné », plus vague)
+  // (la pastille « au ciné », films en salles en France, a été retirée le
+  // 2026-11-17 à la demande du propriétaire)
   const passeALyon = f.user?.statut === 'a_voir' && aLyon(f.id);
-
-  // « au ciné » : actuellement en salles en France
-  if (nowPlayingSet.has(f.id) && !passeALyon) {
-    const c = document.createElement('div');
-    c.className = 'cine-badge';
-    c.textContent = 'au ciné';
-    poster.appendChild(c);
-  }
 
   // « canal+ » : disponible avec l'abonnement Canal+ (Apple TV compris, pas OCS)
   if (canalSet.has(f.id)) {
@@ -1458,14 +1451,6 @@ function buildTmdbCard(item, sansCanal) {
     card.appendChild(tag);
   }
 
-  // « au ciné » : actuellement en salles en France
-  if (nowPlayingSet.has(id)) {
-    const c = document.createElement('div');
-    c.className = 'cine-badge';
-    c.textContent = 'au ciné';
-    poster.appendChild(c);
-  }
-
   const meta = document.createElement('div');
   meta.className = 'meta';
   meta.innerHTML = `
@@ -1689,8 +1674,8 @@ function purgeTmdbMemories() {
       const gardes = loadRecoProfiles();
       if (gardes.size < Object.keys(brut).length) saveRecoProfiles(gardes);
     }
-    const affiche = JSON.parse(localStorage.getItem('films_nowplaying_fr') || 'null');
-    if (affiche && !(Date.now() - affiche.ts < TMDB_CACHE_MAX)) localStorage.removeItem('films_nowplaying_fr');
+    // Liste des films « au ciné » (pastille retirée le 2026-11-17) : plus lue, effacée
+    localStorage.removeItem('films_nowplaying_fr');
     const canal = JSON.parse(localStorage.getItem('films_canal_fr') || 'null');
     if (canal && !(Date.now() - canal.ts < TMDB_CACHE_MAX)) localStorage.removeItem('films_canal_fr');
   } catch {}
@@ -3915,23 +3900,6 @@ const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG = 'https://image.tmdb.org/t/p';
 function tmdbImgUrl(path, size = 'w342') { return path ? TMDB_IMG + '/' + size + path : null; }
 
-// ---- « au ciné » : films actuellement en salles en France (TMDB now_playing) ----
-// Ensemble d'ids « movie-<tmdb_id>» ; alimente le badge vert sur les cartes.
-let nowPlayingSet = new Set();
-async function fetchNowPlayingIdsFR() {
-  const base = `${TMDB_BASE}/movie/now_playing?api_key=${encodeURIComponent(admin.tmdbKey)}&language=fr-FR&region=FR`;
-  const first = await tmdbFetch(base + '&page=1');
-  if (!first.ok) throw new Error('now_playing ' + first.status);
-  const data = await first.json();
-  const ids = (data.results || []).map(m => 'movie-' + m.id);
-  const totalPages = Math.min(data.total_pages || 1, 12); // borne : ~240 films, couvre les sorties courantes
-  const rest = [];
-  for (let p = 2; p <= totalPages; p++) rest.push(p);
-  const pages = await mapWithConcurrency(rest, 6, p =>
-    tmdbFetch(base + '&page=' + p).then(r => r.ok ? r.json() : { results: [] }).catch(() => ({ results: [] })));
-  for (const d of pages) for (const m of (d.results || [])) ids.push('movie-' + m.id);
-  return [...new Set(ids)];
-}
 // ---- « canal+ » : tout ce que l'abonnement Canal+ permet de voir en France ----
 // Le catalogue complet, films et séries (TMDB /discover avec les offres
 // JustWatch, en streaming par abonnement ; Canal VOD, location et achat, n'en
@@ -4003,22 +3971,6 @@ async function ensureCanalFR() {
       try { localStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), fournisseurs: ABONNEMENT_CANAL, ids })); } catch {}
     }
   } catch { /* réseau/tmdb : pas de pastille, sans bloquer le site */ }
-}
-
-async function ensureNowPlayingFR() {
-  const KEY = 'films_nowplaying_fr';
-  try {
-    const cached = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (cached && Array.isArray(cached.ids) && (Date.now() - cached.ts) < JOUR_MS) {
-      nowPlayingSet = new Set(cached.ids);
-      return;
-    }
-  } catch {}
-  try {
-    const ids = await fetchNowPlayingIdsFR();
-    nowPlayingSet = new Set(ids);
-    try { localStorage.setItem(KEY, JSON.stringify({ ts: Date.now(), ids })); } catch {}
-  } catch { /* réseau/tmdb — pas de badge, sans bloquer l'app */ }
 }
 
 /** Réécrit la taille d'une URL d'affiche TMDB déjà stockée
@@ -6055,12 +6007,11 @@ suivreEtats();
 navInit();
 purgeTmdbMemories();
 loadFilms();
-// Programme de Lyon, catalogue Canal+, films « au ciné » (cache 24 h) :
+// Programme de Lyon, catalogue Canal+ :
 // une fois arrivés, repeindre les pastilles de la vue courante
 chargerLyon().then(() => { if (lyon) repeindreVueCourante(); });
 canalPret = ensureCanalFR();
 canalPret.then(() => { if (canalSet.size) repeindreVueCourante(); });
-ensureNowPlayingFR().then(() => { if (nowPlayingSet.size) repeindreVueCourante(); });
 
 // Admin no longer auto-activates: user enters their code each session via the lock button.
 // If localStorage has an encrypted PAT, the lock click will show the "unlock with code" view.

@@ -27,7 +27,7 @@ const voile = (r, a, fond) => r.map((v, i) => v * a + fond[i] * (1 - a));
 const BLANC = [255, 255, 255], NOIR = [0, 0, 0];
 
 test('X3 : pastilles lisibles sur une affiche claire comme sombre', () => {
-  for (const sel of ['.card .rating-badge', '.card.to-watch .a-voir-badge', '.card .cine-badge', '.card .canal-badge', '.card .lyon-badge']) {
+  for (const sel of ['.card .rating-badge', '.card.to-watch .a-voir-badge', '.card .canal-badge', '.card .lyon-badge']) {
     const r = regle(sel);
     const [, a] = r.match(/background:\s*rgba\(22, 31, 37, ([\d.]+)\)/) || [];
     const texte = (r.match(/\bcolor:\s*var\(--([\w-]+)\)/) || [])[1];

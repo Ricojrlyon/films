@@ -341,7 +341,7 @@ body {
 }
 
 /* rating badge (top-right corner)
-   Pastilles posées sur les affiches (note, à voir, au ciné, canal+, à lyon,
+   Pastilles posées sur les affiches (note, à voir, canal+, à lyon,
    dans ma collec) : voile à 0,9, lisible même sur une affiche claire
    (au moins 4,9:1 ; à 0,3, le texte disparaissait sur fond clair). */
 .card .rating-badge {
@@ -371,10 +371,10 @@ body {
 .card .rating-badge .star { color: var(--warm); }
 .card .rating-badge.favorite .star { color: var(--bg); }
 
-/* Pastilles du bas des affiches (« à voir », « au ciné », « canal+ », « à lyon ») :
+/* Pastilles du bas des affiches (« à voir », « canal+ », « à lyon ») :
    même forme et même voile (0,9 : lisible sur toute affiche) ; chacune a sa
    couleur et son coin, ci-dessous. */
-.card.to-watch .a-voir-badge, .card .cine-badge, .card .canal-badge, .card .lyon-badge {
+.card.to-watch .a-voir-badge, .card .canal-badge, .card .lyon-badge {
   position: absolute;
   bottom: 8px;
   background: rgba(22, 31, 37, 0.9);
@@ -390,14 +390,10 @@ body {
 }
 /* « à voir » : coin bas-gauche, doré */
 .card.to-watch .a-voir-badge { left: 8px; color: var(--warm); border: 1px solid rgba(212, 165, 116, 0.4); }
-/* « au ciné » : film en salles en France (TMDB now_playing), coin bas-droite, vert */
-.card .cine-badge { right: 8px; color: var(--green); border: 1px solid rgba(127, 194, 143, 0.4); }
 /* « canal+ » : disponible avec l'abonnement (Apple TV compris, pas OCS), sur
-   toutes les cartes ; bleu, même coin, au-dessus de « au ciné » si les deux sont là */
+   toutes les cartes ; bleu, coin bas-droite (« au ciné », retirée le 2026-11-17) */
 .card .canal-badge { right: 8px; color: var(--blue); border: 1px solid rgba(121, 166, 210, 0.4); }
-.card .cine-badge + .canal-badge { bottom: 28px; }
-/* « à lyon » : film à voir qui passe cette semaine dans une salle suivie ;
-   vert comme « au ciné », qu'elle remplace */
+/* « à lyon » : film à voir qui passe cette semaine dans une salle suivie ; vert */
 .card .lyon-badge { right: 8px; color: var(--green); border: 1px solid rgba(127, 194, 143, 0.4); }
 .card .canal-badge + .lyon-badge { bottom: 28px; }
 
