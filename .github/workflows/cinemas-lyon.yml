@@ -1,4 +1,4 @@
-# Cinémas de Lyon : chaque nuit, le programme des 7 prochains jours de dix
+# Cinémas de Lyon : chaque matin, le programme des 7 prochains jours de dix
 # salles (Lumière Terreaux, Bellecour, Fourmi, Comœdia, UGC Part-Dieu,
 # Astoria, Cité Internationale, Confluence, Pathé Bellecour, Vaise), lu sur
 # AlloCiné, chaque film retrouvé chez TMDB, dans cinemas_lyon.json que le
@@ -10,8 +10,18 @@
 name: cinémas lyon
 
 on:
+  # Un passage par jour, voulu vers 7 h à Paris (choix du propriétaire,
+  # 2026-11-17). GitHub lance les passages programmés de ce dépôt avec 6 h à
+  # 8 h 40 de retard (mesuré du 28/10 au 16/11 : 3 h 30 UTC parti entre
+  # 10 h 40 et 12 h UTC ; 6 h UTC, robot Canal+, entre 12 h et 14 h 40 UTC).
+  # Il est donc programmé la veille à 22 h 30 UTC, pour partir vers 4 h 30 à
+  # 7 h 10 UTC, soit 5 h 30 à 8 h 10 à Paris l'hiver (une heure de plus
+  # l'été). S'il partait un jour à l'heure, ce serait la veille au soir :
+  # le programme garde ses 7 jours à partir de cette date. Les salles
+  # publient la semaine suivante (qui commence le mercredi) le lundi
+  # après-midi ou le mardi : le passage du mardi matin la prend.
   schedule:
-    - cron: '30 3 * * *'   # 3 h 30 UTC ; en pratique GitHub le lance plutôt vers midi
+    - cron: '30 22 * * *'   # 22 h 30 UTC la veille ; en pratique vers 7 h à Paris
   workflow_dispatch:
 
 permissions:

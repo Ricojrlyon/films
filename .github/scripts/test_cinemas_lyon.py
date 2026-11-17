@@ -49,5 +49,18 @@ class Programme(unittest.TestCase):
         self.assertTrue(d['films'][0]['salles']['P3757'])
 
 
+class Passages(unittest.TestCase):
+    def test_un_passage_par_jour_vers_7_h_a_paris(self):
+        # Choix du propriétaire (2026-11-17) : un seul passage, le matin vers 7 h.
+        # GitHub part avec 6 h à 8 h 40 de retard sur ce dépôt : programmé
+        # la veille au soir (UTC). Le passage du mardi matin prend la semaine
+        # suivante, publiée par les salles le lundi après-midi ou le mardi.
+        from pathlib import Path
+        yml = (Path(__file__).resolve().parents[1] / 'workflows' / 'cinemas-lyon.yml').read_text(encoding='utf-8')
+        heures = [int(h) for h in re.findall(r"cron:\s*'\d+ (\d+) \* \* \*'", yml)]
+        self.assertEqual(len(heures), 1, heures)
+        self.assertIn(heures[0], (21, 22, 23), "programmé à %d h UTC : avec le retard de GitHub, pas vers 7 h à Paris" % heures[0])
+
+
 if __name__ == '__main__':
     unittest.main()
