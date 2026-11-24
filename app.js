@@ -3332,6 +3332,29 @@ function renderActorChart() {
   renderSide(fCounts, 'actor-chart-f', 2);
 }
 
+// Note moyenne (/10) des films vus et notés selon le genre des réals.
+// « réalisatrices » : au moins une femme à la réalisation (comme la part des
+// réalisatrices du bilan de l'année) ; « réalisateurs » : que des hommes ;
+// un genre inconnu (TMDB ne le donne pas) écarte le film, sauf s'il y a une femme.
+function notesSelonGenreReal(vus) {
+  const femmes = [], hommes = [];
+  for (const f of vus) {
+    if (!f.user?.rating) continue;
+    const g = (f.director_genders && f.director_genders.length) ? f.director_genders : [f.director_gender];
+    if (g.includes(1)) femmes.push(f);
+    else if (g.every(x => x === 2)) hommes.push(f);
+  }
+  const moyenne = l => l.length ? l.reduce((s, f) => s + ratingOutOf10(f.user.rating), 0) / l.length : null;
+  // Nombre de films par note : 1★ … 5★ puis ❤
+  const repartition = l => {
+    const n = new Array(RATING_FAV).fill(0);
+    for (const f of l) if (f.user.rating >= 1 && f.user.rating <= RATING_FAV) n[f.user.rating - 1]++;
+    return n;
+  };
+  const groupe = l => ({ n: l.length, note: moyenne(l), repartition: repartition(l) });
+  return { femmes: groupe(femmes), hommes: groupe(hommes) };
+}
+
 function renderGenderBalance() {
   const vus = state.films.filter(f => f.user?.statut === 'vu');
   const root = document.getElementById('gender-balance');
@@ -3387,9 +3410,59 @@ function renderGenderBalance() {
       </div>`;
   };
 
+  // Ta note moyenne, films de réalisatrices et de réalisateurs (3 films notés
+  // au moins de chaque côté), sur l'échelle /10 de la carte « note moyenne »
+  const N = notesSelonGenreReal(vus);
+  let notesHtml = '';
+  if (N.femmes.n >= 3 && N.hommes.n >= 3) {
+    const virgule = v => v.toFixed(1).replace('.', ',');
+    const ligne = (nom, cls, x) => `
+        <div class="bar-row">
+          <div class="bar-label">${nom}</div>
+          <div class="bar-track"><div class="bar-fill ${cls}" style="width:${(x.note * 10).toFixed(1)}%"></div></div>
+          <div class="bar-value">${virgule(x.note)}</div>
+        </div>`;
+    // Écart entre les deux notes affichées (arrondies), pour que le texte dise
+    // la même chose que les barres (7,0 et 6,9 : 0,1 point, pas « même note »)
+    const ecart = (Math.round(N.femmes.note * 10) - Math.round(N.hommes.note * 10)) / 10;
+    const texte = ecart === 0 ? 'même note moyenne'
+      : `${virgule(Math.abs(ecart))} point${Math.abs(ecart) >= 2 ? 's' : ''} de plus pour les ${ecart > 0 ? 'réalisatrices' : 'réalisateurs'}`;
+    notesHtml = `
+      <div class="gender-balance-row gender-notes">
+        <div class="gender-balance-label">ta note moyenne</div>
+        ${ligne('réalisatrices', 'female', N.femmes)}${ligne('réalisateurs', 'male', N.hommes)}
+        <div class="gender-balance-legend"><span>${texte}</span><span>sur ${N.femmes.n} et ${N.hommes.n} films notés · une co-réalisation avec une femme compte côté réalisatrices</span></div>
+      </div>`;
+
+    // Répartition de tes notes des deux côtés, en % des films notés de chacun
+    // (87 films de réalisatrices face à 468 le 2026-11-24 : les nombres bruts
+    // ne se compareraient pas). La plus haute barre prend toute la hauteur.
+    const part = (x, i) => x.repartition[i] / x.n * 100;
+    const partMax = Math.max(...[N.femmes, N.hommes].flatMap(x => x.repartition.map((_, i) => part(x, i))), 1);
+    const arrondi = (x, i) => {
+      const v = Math.round(part(x, i));
+      return v === 0 && x.repartition[i] > 0 ? '<1' : String(v);
+    };
+    const nomNote = i => i === RATING_FAV - 1 ? 'coup de cœur' : (i + 1) + (i ? ' étoiles' : ' étoile');
+    const barre = (cls, x, i) => `<div class="note-barre ${cls}" style="height:${(part(x, i) / partMax * 100).toFixed(1)}%"><span>${arrondi(x, i)}</span></div>`;
+    const paires = N.femmes.repartition.map((_, i) => `
+          <div class="note-paire" role="img" aria-label="${nomNote(i)} : ${arrondi(N.femmes, i)} % des films de réalisatrices (${N.femmes.repartition[i]}), ${arrondi(N.hommes, i)} % des films de réalisateurs (${N.hommes.repartition[i]})">
+            <div class="note-barres" aria-hidden="true">${barre('female', N.femmes, i)}${barre('male', N.hommes, i)}</div>
+            <div class="note-paire-label" aria-hidden="true">${i === RATING_FAV - 1 ? '❤' : (i + 1) + '★'}</div>
+          </div>`).join('');
+    notesHtml += `
+      <div class="gender-balance-row gender-repartition">
+        <div class="gender-balance-label">répartition de tes notes</div>
+        <div class="note-paires">${paires}
+        </div>
+        <div class="gender-balance-legend"><span class="cle female">réalisatrices</span><span class="cle male">réalisateurs</span><span>en % des films notés de chaque côté</span></div>
+      </div>`;
+  }
+
   root.innerHTML =
     bar('réalisateur · réalisatrice', dirM, dirF, dirU, dirTotal) +
-    bar('acteur · actrice principal·e', leadM, leadF, leadU, leadTotal);
+    bar('acteur · actrice principal·e', leadM, leadF, leadU, leadTotal) +
+    notesHtml;
 }
 
 /** Fetch the best available Latin name for a TMDB person by their ID.

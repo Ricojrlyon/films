@@ -660,9 +660,69 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
 .gender-balance-seg.female { background: rgba(180,100,130,0.35); color: rgba(240,180,200,0.9); }
 .gender-balance-seg.unknown { background: var(--bg-elev-2); color: var(--ink-mute); }
 .gender-balance-legend {
-  display: flex; gap: 16px; margin-top: 6px;
+  display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px;
   font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute);
 }
+/* Note moyenne selon le genre des réals : barres /10, couleurs des segments ci-dessus */
+.gender-notes .bar-row .bar-fill.female { background: rgb(180, 100, 130); }
+.gender-notes .bar-row .bar-fill.male { background: rgb(100, 130, 180); }
+/* Répartition des notes selon le genre des réals : par note, une barre
+   réalisatrices et une barre réalisateurs, en % de leurs films notés */
+.note-paires {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  height: 140px;
+  margin-top: 4px;
+}
+.note-paire { display: flex; flex-direction: column; min-width: 0; }
+.note-barres {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  padding-top: 16px; /* place du nombre au-dessus de la plus haute barre */
+  border-bottom: 1px solid var(--rule);
+}
+.note-barre {
+  position: relative;
+  width: 40%;
+  max-width: 26px;
+  min-height: 2px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.note-barre.female { background: rgb(180, 100, 130); }
+.note-barre.male { background: rgb(100, 130, 180); }
+.note-barre span {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.note-paire-label {
+  margin-top: 4px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-mute);
+}
+.gender-balance-legend .cle::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
+  border-radius: 2px;
+  vertical-align: baseline;
+}
+.gender-balance-legend .cle.female::before { background: rgb(180, 100, 130); }
+.gender-balance-legend .cle.male::before { background: rgb(100, 130, 180); }
 .modal-meta-line {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;

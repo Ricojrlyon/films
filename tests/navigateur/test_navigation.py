@@ -62,6 +62,42 @@ class Navigation(Banc):
         self.assertFalse(self.js('getComputedStyle(document.getElementById("empty")).display !== "none"'),
                          '« aucun film ne correspond » affiché sous « chargement tmdb… »')
 
+    def test_P1_note_moyenne_realisatrices_et_realisateurs(self):
+        self.ouvrir()
+        self.page.click('.nav-btn[data-page="stats"]')
+        self.attendre(lambda: self.js('!!document.querySelector("#gender-balance .gender-notes")'))
+        valeurs = self.js('[...document.querySelectorAll("#gender-balance .gender-notes .bar-row")].map(r => [r.querySelector(".bar-label").textContent, r.querySelector(".bar-value").textContent])')
+        attendu = self.js('''(() => { const n = notesSelonGenreReal(state.films.filter(f => f.user?.statut === "vu"));
+            return [["réalisatrices", n.femmes.note.toFixed(1).replace(".", ",")], ["réalisateurs", n.hommes.note.toFixed(1).replace(".", ",")]]; })()''')
+        self.assertEqual(valeurs, attendu)
+        legende = self.js('document.querySelector("#gender-balance .gender-notes .gender-balance-legend").textContent')
+        self.assertIn('films notés', legende)
+        # Le texte suit les notes affichées : « même note » seulement si elles sont égales
+        if valeurs[0][1] == valeurs[1][1]:
+            self.assertIn('même note moyenne', legende)
+        else:
+            self.assertNotIn('même note moyenne', legende)
+
+    def test_P2_repartition_des_notes_realisatrices_et_realisateurs(self):
+        self.ouvrir()
+        self.page.click('.nav-btn[data-page="stats"]')
+        self.attendre(lambda: self.js('!!document.querySelector("#gender-balance .gender-repartition")'))
+        self.assertEqual(self.js('[...document.querySelectorAll(".gender-repartition .note-paire-label")].map(e => e.textContent)'),
+                         ['1★', '2★', '3★', '4★', '5★', '❤'])
+        # Nombres affichés : la part de chaque note dans les films notés de chaque côté
+        affiches = self.js('[...document.querySelectorAll(".gender-repartition .note-barres")].map(b => [...b.querySelectorAll("span")].map(s => s.textContent))')
+        attendu = self.js('''(() => { const n = notesSelonGenreReal(state.films.filter(f => f.user?.statut === "vu"));
+            const p = (x, i) => { const v = Math.round(x.repartition[i] / x.n * 100); return v === 0 && x.repartition[i] ? "<1" : String(v); };
+            return n.femmes.repartition.map((_, i) => [p(n.femmes, i), p(n.hommes, i)]); })()''')
+        self.assertEqual(affiches, attendu)
+        # Chaque côté fait environ 100 %
+        for cote in (0, 1):
+            total = sum(int(x[cote].replace('<1', '0')) for x in affiches)
+            self.assertTrue(97 <= total <= 103, total)
+        # La plus haute barre prend toute la hauteur
+        self.assertEqual(self.js('Math.max(...[...document.querySelectorAll(".note-barre")].map(b => parseFloat(b.style.height)))'), 100)
+        self.assertIn('des films de réalisatrices', self.js('document.querySelector(".gender-repartition .note-paire").getAttribute("aria-label")'))
+
     def test_M8_heatmap_genres_des_films_vus(self):
         donnees = json.loads((SITE / 'films.json').read_text(encoding='utf-8'))
         # 300 films « à voir » d'un genre absent des vus : assez pour entrer dans
