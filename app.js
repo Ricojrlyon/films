@@ -602,6 +602,7 @@ function setView(view) {
   } else if (isReco) {
     fetchAndRenderReco();
   }
+  majHabillage(); // bandeau de la page tout de suite, avant même la grille
 }
 
 // ============================================================
@@ -1125,6 +1126,7 @@ async function openPerson(name, role, ctxFilmId, tab) {
   closeModal();
   showPage('collection');
   state.view = 'person';
+  majHabillage(); // pas de bandeau de page sur une filmographie
   state.person = { nom: name, role, ctx: ctxFilmId || null, tab: tab || (role === 'real' ? 'real' : 'jeu'), data: null, real: [], jeu: [] };
   document.querySelectorAll('#status-tabs .tab').forEach(t => t.classList.remove('active'));
   document.getElementById('collection-controls').style.display = 'none';
@@ -1139,7 +1141,7 @@ async function openPerson(name, role, ctxFilmId, tab) {
   // Clavier : la sélection va au bouton « ← retour » (la fiche d'où l'on vient a disparu)
   if (entree) document.getElementById('person-back').focus({ preventScroll: true });
   document.getElementById('person-id').innerHTML = `
-    <div><h2 class="person-name">${escapeHtml(name)}</h2>
+    <div><h2 class="person-name" data-t="${escapeHtml(name)}">${escapeHtml(name)}</h2>
     <div class="person-meta">chargement de la filmographie…</div></div>`;
   document.getElementById('person-tabs').innerHTML = '';
   document.getElementById('person-progress').innerHTML = '';
@@ -1176,7 +1178,7 @@ function renderPersonHeader() {
   document.getElementById('person-id').innerHTML = `
     <div class="person-photo" ${photo ? `style="background-image:url(${photo})"` : ''}></div>
     <div>
-      <h2 class="person-name">${escapeHtml(P.nom)}</h2>
+      <h2 class="person-name" data-t="${escapeHtml(P.nom)}">${escapeHtml(P.nom)}</h2>
       <div class="person-meta">${infos.join(' · ')}${infos.length ? ' · ' : ''}<a href="${tmdb}" target="_blank" rel="noopener">tmdb ↗</a></div>
     </div>`;
   const onglets = [['real', 'réalisation'], ['jeu', 'interprétation']].filter(([k]) => P[k].length);
@@ -1228,6 +1230,7 @@ function closePerson() {
     document.querySelectorAll('#status-tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.view === r.view));
     document.getElementById('collection-controls').style.display = '';
     applyFilters({ preservePage: true });
+    majHabillage(); // le bandeau revient tout de suite
   } else {
     setView(r.view);
   }
@@ -2186,7 +2189,8 @@ function openModal(f, opts) {
     </div>` : '';
 
   const ratingsHtml = (userRatingHtml || tmdbRatingHtml)
-    ? `<div class="ratings-row">${userRatingHtml}${tmdbRatingHtml}</div>` : '';
+    // Les deux notes : en duel, « vs » entre elles
+    ? `<div class="ratings-row">${userRatingHtml}${userRatingHtml && tmdbRatingHtml ? '<span class="note-vs" aria-hidden="true">vs</span>' : ''}${tmdbRatingHtml}</div>` : '';
 
   // Viewing card — only for collection films
   let viewingHtml = '';
@@ -2299,7 +2303,7 @@ function openModal(f, opts) {
     <div class="modal-head">
       <div class="modal-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(tmdbResize(f.poster, 'w342'))})"` : ''}>${f.poster ? '' : "pas d'affiche"}</div>
       <div class="modal-head-meta">
-        <h2 class="modal-title" id="modal-title">${escapeHtml(displayTitle(f.id, f.title) || 'sans titre')}</h2>
+        <h2 class="modal-title" id="modal-title" data-t="${escapeHtml(displayTitle(f.id, f.title) || 'sans titre')}">${escapeHtml(displayTitle(f.id, f.title) || 'sans titre')}</h2>
         ${f.director ? `<div class="modal-director">par ${f.director.split(',').map(n => nameLink(n.trim(), 'real')).filter(Boolean).join(', ')}</div>` : ''}
         <div class="modal-meta-line">${metaParts.map(escapeHtml).join(' · ')}</div>
       </div>
@@ -6158,6 +6162,148 @@ function repeindreVueCourante() {
 }
 
 // ============================================================
+// HABILLAGE « SIGNAL » DES PAGES (2026-11-24)
+// ============================================================
+// Le style de la page stats sur tout le site : deux rubans sous le haut de
+// page (tes chiffres, tes derniers vus), un bandeau par page dessiné comme
+// celui des stats (couleur, motif du liquide et « chaîne » propres à chaque
+// page), et les numéros des fiches (N°594 : dans « vus » triés par date, le
+// plus récent porte le numéro le plus haut). Tout est recalculé à chaque
+// changement de la grille (majHabillage, branché par brancherHabillage).
+const MOIS_COURT = ['janv.', 'févr.', 'mars', 'avril', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+const BANDEAU_CATEGORIES = {
+  lyon: ['à lyon', 'salles · 7 prochains jours'],
+  now_playing: ['au ciné', 'en salles en France'],
+  trending: ['tendances', 'cette semaine'],
+  upcoming: ['bientôt', 'prochaines sorties'],
+  canal: ['canal+', 'dans ton abonnement'],
+};
+// « 5 de tes à voir passent à lyon », « 1 … passe », « aucun … »
+const phraseLyon = n => n === 0 ? 'aucun de tes à voir à lyon' : `${n} de tes à voir passe${n > 1 ? 'nt' : ''} à lyon`;
+
+// Contenu du bandeau d'une page ; null : pas de bandeau (filmographie).
+// Sans effet de bord (testé sans navigateur). ctx : categorie, salles
+// (nombre de salles suivies), tri (libellé), recherche, cartes (affiches
+// affichées), dejaLa (dont déjà dans la collection), baseReco (films aimés
+// pris pour la Reco), maintenant (Date), aLyon(id), canal (Set d'ids)
+function donneesBandeau(vue, films, ctx) {
+  const vus = films.filter(f => f.user?.statut === 'vu');
+  const avoir = films.filter(f => f.user?.statut === 'a_voir');
+  const an = ctx.maintenant.getFullYear(), mois = ctx.maintenant.getMonth();
+  // Texte de l'anneau de l'autocollant : environ 52 signes en font le tour
+  const anneau = t => (t + ' ').repeat(Math.max(1, Math.round(52 / (t.length + 1))));
+  const nb = n => n.toLocaleString('fr-FR');
+  if (vue === 'a_voir') {
+    const lyonN = avoir.filter(f => ctx.aLyon(f.id)).length;
+    const canalN = avoir.filter(f => ctx.canal.has(f.id)).length;
+    return { ch: '02', couleur: 'var(--cyan)', teinte: 150, graine: 3, gros: String(avoir.length), mot: false,
+      sous: 'à voir · dans l’ordre où tu les as ajoutés', n: String(lyonN), l: 'à lyon',
+      anneau: anneau(`★ ${phraseLyon(lyonN)} ★ ${canalN} sur canal+`), e1: 'canal+', e2: String(canalN) };
+  }
+  if (vue === 'vu') {
+    const coeurs = vus.filter(f => f.user.favorite).length;
+    const heures = Math.round(vus.reduce((s, f) => s + (f.runtime || 0), 0) / 60);
+    return { ch: '03', couleur: 'var(--hot)', teinte: 0, graine: 7, gros: nb(vus.length), mot: false,
+      sous: 'films vus · du plus récent au plus ancien', n: String(coeurs), l: 'coups de cœur',
+      anneau: anneau(`★ ${coeurs} coups de cœur ★ ${nb(heures)} heures`),
+      e1: 'en ' + an, e2: String(vus.filter(f => String(f.user.date_vue || '').startsWith(String(an))).length) };
+  }
+  if (vue === 'discover') {
+    const [mot, sous] = BANDEAU_CATEGORIES[ctx.categorie] || ['découvrir', ''];
+    return { ch: '04', couleur: 'var(--warm)', teinte: 220, graine: 23, gros: mot, mot: true,
+      sous: 'découvrir · ' + (ctx.categorie === 'lyon' ? ctx.salles + ' ' : '') + sous,
+      n: String(ctx.cartes), l: 'films', anneau: anneau(`★ ${ctx.cartes} films ★ ${ctx.tri}`),
+      e1: 'collec', e2: String(ctx.dejaLa) };
+  }
+  if (vue === 'explorer') {
+    return { ch: '05', couleur: 'var(--orange)', teinte: 300, graine: 31,
+      gros: ctx.recherche ? '« ' + ctx.recherche + ' »' : 'explorer', mot: true, sous: 'explorer · tout tmdb',
+      n: ctx.recherche ? String(ctx.cartes) : '?', l: ctx.recherche ? 'résultats' : 'cherche',
+      anneau: anneau('★ films ★ séries ★ réals ★ tout tmdb'), e1: 'tout', e2: 'tmdb' };
+  }
+  if (vue === 'reco') {
+    return { ch: '06', couleur: '#a98be0', teinte: 80, graine: 47, gros: String(ctx.cartes), mot: false,
+      sous: 'pour toi · ' + MOIS_FR[mois] + ' ' + an, n: String(ctx.baseReco), l: 'films aimés',
+      anneau: anneau(`★ basé sur ${ctx.baseReco} films aimés ★ renouvelé chaque mois`), e1: MOIS_COURT[mois], e2: String(an) };
+  }
+  return null;
+}
+
+// Rubans sous le haut de page : tes chiffres, puis tes derniers films vus
+function textesRubans(films, aLyonFn, canal) {
+  const vus = films.filter(f => f.user?.statut === 'vu');
+  const avoir = films.filter(f => f.user?.statut === 'a_voir');
+  const heures = Math.round(vus.reduce((s, f) => s + (f.runtime || 0), 0) / 60);
+  const morceaux = [`${vus.length.toLocaleString('fr-FR')} films vus`, `${heures.toLocaleString('fr-FR')} heures`,
+    `${avoir.length} à voir`, `${vus.filter(f => f.user.favorite).length} coups de cœur`,
+    phraseLyon(avoir.filter(f => aLyonFn(f.id)).length), `${avoir.filter(f => canal.has(f.id)).length} sur canal+`];
+  // Une même année : les films datés au mois d'abord, puis ceux datés de
+  // l'année seule (mois inconnu) ; à date égale, l'ordre d'ajout (le
+  // tableau commence par le plus récent ajout)
+  const derniers = vus.filter(f => /^\d{4}/.test(f.user.date_vue || ''))
+    .sort((a, b) => String(b.user.date_vue).localeCompare(String(a.user.date_vue))).slice(0, 10);
+  return [(morceaux.join(' ✦ ') + ' ✦ ').repeat(4),
+    ('derniers vus ▸ ' + derniers.map(f => displayTitle(f.id, f.title)).join(' ✦ ') + ' ✦ ').repeat(3)];
+}
+
+function majHabillage() {
+  const grid = document.getElementById('grid');
+  const ecrire = (id, txt) => { const e = document.getElementById(id); if (e.textContent !== txt) e.textContent = txt; };
+  if (state.films.length) {
+    const [chiffres, derniers] = textesRubans(state.films, aLyon, canalSet);
+    ecrire('ruban-chiffres', chiffres);
+    ecrire('ruban-derniers', derniers);
+  }
+  const vue = state.view;
+  const c = vue === 'person' ? null : donneesBandeau(vue, state.films, {
+    categorie: state.discoverCategory,
+    salles: lyon && Array.isArray(lyon.salles) ? lyon.salles.length : 10,
+    tri: (document.getElementById('discover-sort').selectedOptions[0] || {}).textContent || '',
+    recherche: document.getElementById('explorer-search').value.trim(),
+    cartes: grid.querySelectorAll('.card').length,
+    dejaLa: grid.querySelectorAll('.card.in-collection').length,
+    baseReco: vue === 'reco' ? pickRecoSources().sources.length : 0,
+    maintenant: new Date(), aLyon, canal: canalSet,
+  });
+  // Visible dès le départ (index.html), vide tant que films.json n'est pas
+  // arrivé : sa place est réservée, la page ne saute pas au chargement
+  const b = document.getElementById('bandeau-page');
+  b.hidden = !c;
+  if (c && state.films.length) {
+    b.style.setProperty('--bandeau-couleur', c.couleur);
+    b.style.setProperty('--bandeau-teinte', c.teinte + 'deg');
+    // Autre graine, autre motif du liquide (redessiné une fois par page)
+    const turb = b.querySelector('feTurbulence');
+    if (turb.getAttribute('seed') !== String(c.graine)) turb.setAttribute('seed', c.graine);
+    ecrire('bandeau-coords', 'lat 45.76 · long 4.83 · ch. ' + c.ch);
+    const gros = document.getElementById('bandeau-gros');
+    ecrire('bandeau-gros', c.gros);
+    gros.dataset.t = c.gros;
+    gros.classList.toggle('bandeau-mot', c.mot && c.gros.length <= 9);
+    gros.classList.toggle('bandeau-mot-long', c.mot && c.gros.length > 9);
+    ecrire('bandeau-sous', c.sous);
+    ecrire('bandeau-auto-n', c.n);
+    ecrire('bandeau-auto-l', c.l);
+    ecrire('bandeau-anneau', c.anneau);
+    ecrire('bandeau-e1', c.e1);
+    ecrire('bandeau-e2', c.e2);
+  }
+  // Numéros des fiches (compteur CSS « fiche ») : à rebours dans « vus »
+  // triés par date, depuis le nombre de films de la liste
+  const decompte = vue === 'vu' && state.sort === TAB_SORT_DEFAULTS.vu;
+  grid.classList.toggle('numeros-decompte', decompte);
+  grid.style.counterReset = decompte ? 'fiche ' + (state.filtered.length + 1) : '';
+}
+
+// La grille change à chaque vue, catégorie, recherche, page ou filtre :
+// l'habillage suit (le rappel ne touche ni aux enfants de la grille ni à
+// ceux du bandeau : pas de boucle)
+function brancherHabillage() {
+  new MutationObserver(majHabillage).observe(document.getElementById('grid'), { childList: true });
+  document.getElementById('explorer-search').addEventListener('input', majHabillage);
+}
+
+// ============================================================
 // TON ANNÉE EN FILMS : écrans plein écran façon stories (2026-11-24)
 // ============================================================
 // Ouvert par le bouton du bilan de l'année. 10 écrans dessinés sur une toile
@@ -6613,6 +6759,7 @@ function brancherAnnee() {
 loadAdminCreds();
 wireEvents();
 brancherAnnee();
+brancherHabillage();
 window.addEventListener('beforeunload', e => { if (envoisEnCours > 0) e.preventDefault(); });
 suivreEtats();
 navInit();

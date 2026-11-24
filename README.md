@@ -10,8 +10,9 @@ Site personnel de suivi de films et séries, sur GitHub Pages, sans build ni ser
 - **Découvrir** : à lyon, au cinéma, tendances, prochainement, canal+ ; la recherche cherche dans la catégorie affichée ; au plus un film américain sur trois en tri par popularité.
 - **Explorer** : recherche dans tout TMDB (films, séries, personnes), mêmes filtres que Découvrir.
 - **Reco** : 24 films proches de tes films aimés récents, renouvelés chaque mois, la moitié réalisés par des femmes quand c'est possible.
-- **Stats** : chiffres clés, bilan de l'année (top 5, flop 5, tour du monde), par mois, par année, notes, genres, pays, tops réals et acteurs, parité, tes coups de cœur. Presque tout est cliquable et ouvre les films vus correspondants. Style « signal » (vert acide, glitch, polaroïds, pellicule…) limité à la page stats ; allégé sur téléphone.
+- **Stats** : chiffres clés, bilan de l'année (top 5, flop 5, tour du monde), par mois, par année, notes, genres, pays, tops réals et acteurs, parité, tes coups de cœur. Presque tout est cliquable et ouvre les films vus correspondants.
 - **Ton année en films** : bouton du bilan, 10 écrans animés façon stories.
+- **Style « signal »** sur tout le site : vert acide, grain, glitch. Sous le haut de page, deux rubans (tes chiffres, tes derniers vus). Chaque page a son bandeau dessiné comme celui des stats, avec sa couleur et ses chiffres (`majHabillage`). La page se lit en quatre zones : navigation, réglages, bandeau, films. Les infos du film sont posées sur l'affiche, les étiquettes restent à l'intérieur. La fiche montre un polaroïd et les notes en duel. Sur téléphone, rien ne redessine la page en continu.
 - **Mode édition** (cadenas) : ajouter, noter, modifier, supprimer, re-matcher, enrichir.
 - **Application** : s'installe sur l'écran d'accueil (manifeste et icônes « \*F »). Le bouton « précédent » referme ce qui a été ouvert en dernier.
 
@@ -57,7 +58,7 @@ Un film : `id` (`movie-123`), `tmdb_id`, `type`, titres, `year`, `release_date`,
 
 - Token GitHub fine-grained (Contents, ce seul dépôt), chiffré avec ton code (PBKDF2 + AES-GCM) dans le navigateur ; le code le déverrouille à chaque session.
 - Actif seulement sur `*.github.io`. Le dépôt est public, `films.json` compris.
-- `ricojrlyon.github.io` est partagé avec nocturne-lyon (même stockage) : le garder aussi strict.
+- `ricojrlyon.github.io` peut héberger d'autres sites, qui partagent le même stockage du navigateur.
 - Conflit entre deux appareils (409) : fusion film par film ; un film modifié ici depuis le dernier enregistrement garde sa version.
 
 ## Tests
@@ -73,13 +74,3 @@ Les tests navigateur simulent TMDB (`tests/navigateur/banc.py`) et bloquent tout
 ## En local
 
 `python -m http.server 8000` dans le dossier : tout marche sauf le mode édition.
-
-## Journal
-
-- 2026-10-26 : catégorie et alerte Canal+.
-- 2026-10-27 : cinémas de Lyon (robot, catégorie, pastille, fiche).
-- 2026-11-12 et 13 : audit complet en 7 lots (enregistrement sûr entre appareils, robustesse, accessibilité, performance, sécurité, tests).
-- 2026-11-13 : onglet Explorer ; 5 films par ligne ; Canal+ sans OCS.
-- 2026-11-14 : « canal+ » trié par date de sortie française sur tout le catalogue.
-- 2026-11-17 : pastille « au ciné » retirée ; robot des cinémas vers 7 h.
-- 2026-11-24 : stats cliquables, parité (violet hommes, vert femmes), flop 5, tour du monde, « ton année en films », page stats en style « signal » (allégée sur téléphone).

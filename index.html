@@ -47,7 +47,7 @@
 <link href="fonts/polices.css" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=32">
+<link rel="stylesheet" href="style.css?v=33">
 </head>
 <body>
 <div class="app">
@@ -63,6 +63,13 @@
       <button class="nav-btn admin-btn" id="nav-admin" title="mode édition" aria-label="mode édition"><svg class="cadenas" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 11V7.5a4 4 0 0 1 8 0V11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/></svg></button>
     </div>
   </header>
+
+  <!-- Deux rubans sous le haut de page (tes chiffres, tes derniers vus),
+       remplis par majHabillage ; cachés sur la page stats, qui a les siens -->
+  <div class="rubans-haut" aria-hidden="true">
+    <div class="ruban-haut ruban-haut-1"><div id="ruban-chiffres"></div></div>
+    <div class="ruban-haut ruban-haut-2"><div id="ruban-derniers"></div></div>
+  </div>
 
   <!-- ============== COLLECTION PAGE ============== -->
   <main class="collection-page" id="collection-page">
@@ -85,6 +92,42 @@
         </button>
       </div>
     </div>
+
+    <!-- Bandeau de la page (à voir, vus, découvrir, explorer, reco), dessiné
+         comme celui des stats ; textes, couleur et motif posés par majHabillage -->
+    <section class="stats-hero bandeau-page" id="bandeau-page" aria-labelledby="bandeau-titre">
+      <div class="bandeau-teinte"><svg class="stats-liquide" viewBox="0 0 800 420" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <filter id="bandeau-liquide-f" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.006" numOctaves="2" seed="3"/>
+          <feColorMatrix type="matrix" values=".5 .5 0 0 0  0 .5 .5 0 0  .5 0 .5 0 0  0 0 0 0 1" result="bruit"/>
+          <feFlood flood-color="#161f25" result="fond"/>
+          <feComponentTransfer in="bruit">
+            <feFuncR type="discrete" tableValues="0 0 1 0 0 0 1 1 0 0 0 1 0 0 1 0 0 0 1 0"/>
+            <feFuncG type="discrete" tableValues="0 1 0 0 1 0 0 1 0 0 1 0 0 1 1 0 1 0 0 0"/>
+            <feFuncB type="discrete" tableValues="1 0 0 1 1 0 0 0 1 0 0 1 1 0 0 0 0 1 0 1"/>
+          </feComponentTransfer>
+          <feBlend in2="fond" mode="lighten"/>
+        </filter>
+        <rect width="800" height="420" filter="url(#bandeau-liquide-f)"/>
+      </svg></div>
+      <span class="stats-hero-coords" id="bandeau-coords" aria-hidden="true"></span>
+      <span class="stats-hero-barres" aria-hidden="true"></span>
+      <svg class="stats-autocollant" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+        <defs><path id="bandeau-cercle" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs>
+        <circle cx="100" cy="100" r="96"/>
+        <text><textPath href="#bandeau-cercle" id="bandeau-anneau"></textPath></text>
+        <text x="100" y="94" text-anchor="middle" class="stats-auto-gros" id="bandeau-auto-n"></text>
+        <text x="100" y="122" text-anchor="middle" id="bandeau-auto-l"></text>
+      </svg>
+      <svg class="stats-etoile" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+        <polygon points="198.0,100.0 170.9,112.5 192.1,133.5 162.4,136.0 175.1,163.0 146.3,155.2 149.0,184.9 124.6,167.7 117.0,196.5 100.0,172.0 83.0,196.5 75.4,167.7 51.0,184.9 53.7,155.2 24.9,163.0 37.6,136.0 7.9,133.5 29.1,112.5 2.0,100.0 29.1,87.5 7.9,66.5 37.6,64.0 24.9,37.0 53.7,44.8 51.0,15.1 75.4,32.3 83.0,3.5 100.0,28.0 117.0,3.5 124.6,32.3 149.0,15.1 146.3,44.8 175.1,37.0 162.4,64.0 192.1,66.5 170.9,87.5"/>
+        <text x="100" y="96" text-anchor="middle" id="bandeau-e1"></text><text x="100" y="124" text-anchor="middle" id="bandeau-e2"></text>
+      </svg>
+      <svg class="stats-op" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><circle cx="100" cy="100" r="8"/><circle cx="100" cy="100" r="22"/><circle cx="100" cy="100" r="36"/><circle cx="100" cy="100" r="50"/><circle cx="100" cy="100" r="64"/><circle cx="100" cy="100" r="78"/><circle cx="100" cy="100" r="92"/></svg>
+      <div class="stats-hero-txt">
+        <h2 class="stats-hero-n" id="bandeau-titre"><span class="stats-raye" id="bandeau-gros" data-t=""></span><span class="stats-hero-sous" id="bandeau-sous"></span></h2>
+      </div>
+    </section>
 
     <!-- DISCOVER VIEW HEADER (hidden by default) -->
     <div class="view-header discover-header" id="discover-header" style="display: none;">
@@ -592,6 +635,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=42"></script>
+<script src="app.js?v=43"></script>
 </body>
 </html>

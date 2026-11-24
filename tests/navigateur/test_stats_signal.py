@@ -1,6 +1,6 @@
 # Page stats en style « signal » (2026-11-24) : vert acide, rayures, sections
-# numérotées, sur le fond du site. Le haut de page prend ce style sur la page
-# stats seulement ; la collection, les fiches et les fenêtres gardent le leur.
+# numérotées, sur le fond du site. Depuis le même jour, tout le site a ce
+# style (haut de page, collection, fiches : voir aussi test_site_signal.py).
 import unittest
 from banc import Banc
 
@@ -19,47 +19,55 @@ class StatsSignal(Banc):
     def style(self, sel, prop):
         return self.js('getComputedStyle(document.querySelector(%r)).%s' % (sel, prop))
 
-    def test_haut_de_page_en_style_signal_sur_la_page_stats_seulement(self):
-        self.ouvrir()
-        self.assertFalse(self.js('document.body.classList.contains("vue-stats")'))
-        self.assertEqual(self.style('.wordmark', 'backgroundColor'), CREME)
-        self.assertEqual(self.style('.nav-btn.active', 'backgroundColor'), CREME)
-        self.page.click('.nav-btn[data-page="stats"]')
-        self.page.wait_for_timeout(300)
-        self.assertTrue(self.js('document.body.classList.contains("vue-stats")'))
+    def haut_signal(self):
         self.assertEqual(self.style('.wordmark', 'color'), ACIDE)
         self.assertEqual(self.style('.wordmark', 'backgroundColor'), 'rgba(0, 0, 0, 0)')
         self.assertEqual(self.style('.nav-btn.active', 'backgroundColor'), ACIDE)
+
+    def test_haut_de_page_en_style_signal_partout(self):
+        # Avant le 2026-11-24 au soir : sur la page stats seulement
+        self.ouvrir()
+        self.assertFalse(self.js('document.body.classList.contains("vue-stats")'))
+        self.haut_signal()
+        self.page.click('.nav-btn[data-page="stats"]')
+        self.page.wait_for_timeout(300)
+        self.assertTrue(self.js('document.body.classList.contains("vue-stats")'))
+        self.haut_signal()
+        # Les rubans du haut de la collection laissent la place à ceux des stats
+        self.assertEqual(self.style('.rubans-haut', 'display'), 'none')
         # Retour à la collection par le bouton (le site recule d'une étape),
         # puis « suivant » (les stats) et « précédent » (la collection)
         self.page.click('.nav-btn[data-page="collection"]')
         self.page.wait_for_timeout(400)
         self.assertFalse(self.js('document.body.classList.contains("vue-stats")'))
-        self.assertEqual(self.style('.wordmark', 'backgroundColor'), CREME)
+        self.haut_signal()
+        self.assertNotEqual(self.style('.rubans-haut', 'display'), 'none')
         self.page.go_forward()
         self.attendre(lambda: self.js('document.body.classList.contains("vue-stats")'))
         self.assertTrue(self.js('document.body.classList.contains("vue-stats")'))
         self.page.go_back()
         self.attendre(lambda: not self.js('document.body.classList.contains("vue-stats")'))
         self.page.wait_for_timeout(300)
-        self.assertEqual(self.style('.wordmark', 'backgroundColor'), CREME)
+        self.haut_signal()
 
     def test_fond_du_site_garde_et_accent_vert(self):
         self.stats()
         self.assertEqual(self.style('body', 'backgroundColor'), FOND)
         self.assertEqual(self.js('getComputedStyle(document.getElementById("stats-page")).getPropertyValue("--warm").trim()'), '#c8ff3a')
         self.assertIn('repeating-linear-gradient', self.style('#genre-chart .bar-fill', 'backgroundImage'))
-        # Une stat cliquée mène à la collection, qui garde ses couleurs
+        # Une stat cliquée mène à la collection, au même vert acide
         self.page.locator('#genre-chart .bar-row').first.click()
         self.attendre(lambda: self.js('state.view === "vu" && !document.body.classList.contains("vue-stats")'))
         self.page.wait_for_timeout(500)  # fin de la transition de l'onglet
-        self.assertEqual(self.js('getComputedStyle(document.querySelector(".tab.active")).backgroundColor'), 'rgb(212, 165, 116)')
+        self.assertEqual(self.js('getComputedStyle(document.querySelector(".tab.active")).backgroundColor'), ACIDE)
 
-    def test_une_fiche_ouverte_depuis_les_stats_garde_le_style_du_site(self):
+    def test_une_fiche_ouverte_depuis_les_stats_en_style_signal(self):
         self.stats()
         self.page.locator('#year-best .year-best-film').first.click()
         self.attendre(lambda: self.js('document.getElementById("modal-backdrop").classList.contains("open")'))
-        self.assertEqual(self.js('getComputedStyle(document.getElementById("modal-content")).getPropertyValue("--warm").trim()'), '#d4a574')
+        self.assertEqual(self.js('getComputedStyle(document.getElementById("modal-content")).getPropertyValue("--warm").trim()'), '#c8ff3a')
+        if self.largeur > 760:  # sur téléphone, la fiche prend tout l'écran, sans cadre
+            self.assertEqual(self.style('#modal-content', 'borderTopColor'), ACIDE)
 
     def test_bandeau_et_cartes(self):
         self.stats()
