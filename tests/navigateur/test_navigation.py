@@ -96,7 +96,44 @@ class Navigation(Banc):
             self.assertTrue(97 <= total <= 103, total)
         # La plus haute barre prend toute la hauteur
         self.assertEqual(self.js('Math.max(...[...document.querySelectorAll(".note-barre")].map(b => parseFloat(b.style.height)))'), 100)
-        self.assertIn('des films de réalisatrices', self.js('document.querySelector(".gender-repartition .note-paire").getAttribute("aria-label")'))
+        self.assertIn('réalisatrices : ', self.js('document.querySelector(".gender-repartition .note-cible").getAttribute("aria-label")'))
+
+    def bilan(self, donnees=None):
+        if donnees is not None:
+            corps = json.dumps(donnees, ensure_ascii=False)
+            self.ctx.route('**/films.json*', lambda route, req: route.fulfill(body=corps, content_type='application/json'))
+        self.ouvrir()
+        self.page.click('.nav-btn[data-page="stats"]')
+        self.attendre(lambda: self.js('!!document.querySelector("#year-review .year-review-top")'))
+        return self.js('''[...document.querySelectorAll("#year-review .modal-section-label")].map(l => [l.textContent,
+            [...l.nextElementSibling.querySelectorAll(".year-best-title")].map(e => e.textContent)])''')
+
+    def test_Y1_flop_5_du_bilan(self):
+        # Année 2099 (la plus récente, ouverte d'office) : 7 films notés
+        donnees = json.loads((SITE / 'films.json').read_text(encoding='utf-8'))
+        vus = [f for f in donnees['films'] if (f.get('user') or {}).get('statut') == 'vu'][:7]
+        for i, (f, note, tmdb) in enumerate(zip(vus, [1, 2, 3, 4, 5, 6, 3], [5, 6, 8, 7, 7, 9, 4])):
+            f['title'] = 'F%d' % i
+            f['tmdb_rating'] = tmdb
+            f['user'].update({'date_vue': '2099-0%d' % (i + 1), 'rating': note, 'favorite': note == 6})
+        sections = self.bilan(donnees)
+        self.assertEqual(sections, [['top 5 de 2099', ['F5', 'F4', 'F3', 'F2', 'F6']], ['flop 2 de 2099', ['F0', 'F1']]])
+
+    def test_Y1_flop_5_jamais_dans_le_top(self):
+        sections = dict(self.bilan())
+        flop = [k for k in sections if k.startswith('flop')]
+        self.assertEqual(len(flop), 1, list(sections))
+        self.assertTrue(flop[0].startswith('flop 5 de '), flop)
+        top = sections[[k for k in sections if k.startswith('top')][0]]
+        self.assertFalse(set(top) & set(sections[flop[0]]))
+
+    def test_Y1_pas_de_flop_sous_6_films_notes(self):
+        donnees = json.loads((SITE / 'films.json').read_text(encoding='utf-8'))
+        vus = [f for f in donnees['films'] if (f.get('user') or {}).get('statut') == 'vu'][:5]
+        for i, f in enumerate(vus):
+            f['user'].update({'date_vue': '2099-01', 'rating': 3, 'favorite': False})
+        sections = self.bilan(donnees)
+        self.assertEqual([k for k, _ in sections], ['top 5 de 2099'])
 
     def test_M8_heatmap_genres_des_films_vus(self):
         donnees = json.loads((SITE / 'films.json').read_text(encoding='utf-8'))

@@ -15,6 +15,11 @@
   --amber: #e3c16e;
   --red: #d97757;
   --blue: #79a6d2;
+  /* Section « genre · parité » des stats : une couleur pour les hommes, une
+     pour les femmes, partout dans la section (barres, segments, légendes ;
+     choix du propriétaire, 2026-11-24). Texte foncé (--bg) dessus : 5,9:1 et 7,9:1 */
+  --homme: #a98be0;   /* violet */
+  --femme: #6dc394;   /* vert */
   --radius: 3px;
 }
 
@@ -656,16 +661,18 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   min-width: 30px;
   white-space: nowrap;
 }
-.gender-balance-seg.male { background: rgba(100,130,180,0.35); color: rgba(180,200,240,0.9); }
-.gender-balance-seg.female { background: rgba(180,100,130,0.35); color: rgba(240,180,200,0.9); }
+.gender-balance-seg[data-go] { cursor: pointer; }
+.gender-balance-seg[data-go]:hover { filter: brightness(1.15); }
+.gender-balance-seg.male { background: var(--homme); color: var(--bg); }
+.gender-balance-seg.female { background: var(--femme); color: var(--bg); }
 .gender-balance-seg.unknown { background: var(--bg-elev-2); color: var(--ink-mute); }
 .gender-balance-legend {
   display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px;
   font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute);
 }
 /* Note moyenne selon le genre des réals : barres /10, couleurs des segments ci-dessus */
-.gender-notes .bar-row .bar-fill.female { background: rgb(180, 100, 130); }
-.gender-notes .bar-row .bar-fill.male { background: rgb(100, 130, 180); }
+.gender-notes .bar-row .bar-fill.female { background: var(--femme); }
+.gender-notes .bar-row .bar-fill.male { background: var(--homme); }
 /* Répartition des notes selon le genre des réals : par note, une barre
    réalisatrices et une barre réalisateurs, en % de leurs films notés */
 .note-paires {
@@ -685,15 +692,25 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   padding-top: 16px; /* place du nombre au-dessus de la plus haute barre */
   border-bottom: 1px solid var(--rule);
 }
-.note-barre {
-  position: relative;
+/* Cible d'une barre : toute la hauteur de la colonne (les petites barres
+   restent faciles à toucher) ; la barre colorée est posée au fond */
+.note-cible {
   width: 40%;
   max-width: 26px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.note-cible[data-go] { cursor: pointer; }
+.note-cible[data-go]:hover .note-barre { filter: brightness(1.15); }
+.note-barre {
+  position: relative;
+  width: 100%;
   min-height: 2px;
   border-radius: var(--radius) var(--radius) 0 0;
 }
-.note-barre.female { background: rgb(180, 100, 130); }
-.note-barre.male { background: rgb(100, 130, 180); }
+.note-barre.female { background: var(--femme); }
+.note-barre.male { background: var(--homme); }
 .note-barre span {
   position: absolute;
   bottom: 100%;
@@ -721,8 +738,8 @@ a.name-link:hover { color: var(--ink); border-color: var(--warm); }
   border-radius: 2px;
   vertical-align: baseline;
 }
-.gender-balance-legend .cle.female::before { background: rgb(180, 100, 130); }
-.gender-balance-legend .cle.male::before { background: rgb(100, 130, 180); }
+.gender-balance-legend .cle.female::before { background: var(--femme); }
+.gender-balance-legend .cle.male::before { background: var(--homme); }
 .modal-meta-line {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
@@ -1025,6 +1042,15 @@ a.watch-logo:hover { border-color: var(--warm); }
 .year-review-numbers .stat-card { background: var(--bg); }
 .year-review-numbers .stat-card-value { font-size: clamp(26px, 4vw, 34px); }
 .year-review-numbers button.stat-card { font: inherit; color: inherit; cursor: pointer; }
+/* Temps fort à plusieurs cibles (lieux, ex aequo) : un bouton souligné chacune */
+.yr-lien {
+  font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px;
+}
+.yr-lien:hover { text-decoration-color: var(--ink-soft); }
+.yr-lien-bloc { white-space: nowrap; }
+.yr-fact-ligne { display: block; }
+.yr-fact-ligne + .yr-fact-ligne { margin-top: 3px; }
 .year-review-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-bottom: 20px; }
 .yr-fact {
   display: flex; flex-direction: column; gap: 3px;
@@ -1050,6 +1076,21 @@ button.yr-fact:hover { background: var(--bg-elev-2); border-color: var(--rule-st
   justify-content: center;
   gap: 6px;
 }
+/* Cartes chiffrées des stats : deux boutons, le chiffre (tous les vus
+   correspondants) et la ligne de l'année en cours (ceux de cette année) */
+.stat-card-split { padding: 0; overflow: hidden; justify-content: stretch; }
+.stat-card-main, button.stat-card-year {
+  font: inherit; color: inherit; background: none; border: 0; cursor: pointer;
+  width: 100%; text-align: center; transition: background 0.15s;
+}
+.stat-card-main {
+  flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 20px 16px 12px;
+}
+.stat-card-main:only-child { padding-bottom: 20px; }
+.stat-card-main > span { display: block; }
+button.stat-card-year { margin-top: 0; padding: 8px 16px 14px; border-top: 1px solid var(--rule); }
+.stat-card-main:hover, button.stat-card-year:hover { background: var(--bg-elev-2); }
 .stat-card-year-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px;
@@ -2001,3 +2042,179 @@ a:focus-visible, [tabindex]:focus-visible,
 .modal-backdrop { scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
 .modal-backdrop::-webkit-scrollbar { width: 6px; }
 .modal-backdrop::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+
+/* ============================================================
+   TON ANNÉE EN FILMS : écrans plein écran façon stories (2026-11-24)
+   ============================================================
+   Toile de 300 × 640 agrandie à la taille de l'écran (anneeEchelle) ; les
+   animations ne partent que sur l'écran affiché (.annee-ecran.actif). */
+.annee-ouvrir {
+  display: flex; align-items: center; gap: 12px; width: 100%; margin: 0 0 16px;
+  padding: 14px 18px; border: 0; border-radius: var(--radius); cursor: pointer; text-align: left;
+  background: linear-gradient(100deg, #7b2ff7, #ff3d6e 55%, #ff8a1f); color: #fff;
+  font: 800 18px/1.1 'Bricolage Grotesque', sans-serif; letter-spacing: -0.01em;
+  transition: filter 0.15s;
+}
+.annee-ouvrir:hover { filter: brightness(1.08); }
+.annee-ouvrir-play {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; background: #fff; color: #7b2ff7;
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+}
+.annee-ouvrir small {
+  margin-left: auto; font: 10px 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.12em;
+}
+
+.annee-backdrop { background: #0b0614; overflow: hidden; }
+.annee-backdrop.open { display: flex; align-items: center; justify-content: center; }
+.annee { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.annee-cadre { position: relative; overflow: hidden; border-radius: 22px; }
+@media (max-width: 500px) { .annee-cadre { border-radius: 0; } }
+.annee-toile {
+  position: absolute; left: 0; top: 0; width: 300px; height: 640px; transform-origin: 0 0;
+  font-family: 'Bricolage Grotesque', sans-serif; color: #1a0b2e;
+}
+.annee-scene, .annee-ecran { position: absolute; inset: 0; overflow: hidden; }
+.annee-fond { position: absolute; inset: 0; width: 100%; height: 100%; }
+.annee-annonce { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Zones de navigation : un tiers à gauche (précédent), le reste (suivant) */
+.annee-zone { position: absolute; top: 44px; bottom: 0; z-index: 6; border: 0; padding: 0; background: transparent; cursor: pointer; }
+.annee-zone-prec { left: 0; width: 33%; }
+.annee-zone-suiv { right: 0; width: 67%; }
+.annee-zone:focus-visible { outline: 2px solid currentColor; outline-offset: -6px; }
+
+.annee-barres { position: absolute; top: 12px; left: 14px; right: 14px; z-index: 8; display: flex; gap: 4px; }
+.annee-barres i { flex: 1; height: 3px; border-radius: 2px; overflow: hidden; background: color-mix(in srgb, currentColor 30%, transparent); }
+.annee-barres span { display: block; height: 100%; background: currentColor; transform: scaleX(0); transform-origin: left; }
+.annee-barres .vu span, .annee-barres .en-cours span:not([style]) { transform: scaleX(1); }
+.annee-barres .en-cours span[style] { animation: annee-barre linear forwards; }
+@keyframes annee-barre { to { transform: scaleX(1); } }
+.annee-tete {
+  position: absolute; top: 22px; left: 14px; right: 8px; z-index: 8;
+  display: flex; justify-content: space-between; align-items: center; font: 12px Bungee, sans-serif;
+}
+.annee-btn { background: none; border: 0; color: inherit; font: 700 13px sans-serif; padding: 6px 8px; cursor: pointer; }
+.annee-btn:focus-visible { outline: 2px solid currentColor; }
+.annee.pause *, .annee.pause *::before { animation-play-state: paused !important; }
+
+/* Textes et formes des écrans */
+.annee-bloc { position: absolute; z-index: 3; }
+.annee-enorme { font: 92px/0.9 Bungee, sans-serif; }
+.annee-titre { font-weight: 800; font-size: 34px; line-height: 1.02; letter-spacing: -0.02em; }
+.annee-petit { font-size: 14px; font-weight: 600; }
+.annee-noir { color: #1a0b2e; }
+.annee-surligne { display: inline-block; padding: 0 6px; background: #ff5a36; }
+.annee-logo { position: absolute; left: 0; right: 0; z-index: 3; text-align: center; font: 22px Bungee, sans-serif; }
+.annee .vert { color: #39e07a; font-style: normal; }
+.annee .violet { color: #b18cff; font-style: normal; }
+.annee-bandes { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; }
+.annee-bandes div { font: 74px/1 Bungee, sans-serif; white-space: nowrap; overflow: hidden; padding: 2px 0; }
+.annee-bandes span { display: inline-block; }
+.annee-etiquette {
+  position: absolute; left: 18px; right: 18px; z-index: 4; padding: 10px; border-radius: 14px;
+  background: #fff; color: #1a0b2e; text-align: center; font-weight: 800; font-size: 22px; line-height: 1.05;
+}
+.annee-etiquette small { font-size: 13px; font-weight: 600; }
+.annee-pellicule {
+  position: absolute; top: 0; bottom: 0; width: 18px; z-index: 1; background-color: #1a0b2e;
+  background-image: repeating-linear-gradient(#c8ff3a 0 8px, transparent 8px 22px);
+  background-size: 8px 22px; background-position: 5px 0; background-repeat: repeat-y;
+}
+.annee-pilule {
+  display: inline-block; margin-top: 16px; padding: 10px 16px; border-radius: 999px;
+  background: #1a0b2e; color: #c8ff3a; font-weight: 700; font-size: 13px;
+}
+.annee-affiche {
+  position: absolute; z-index: 2; border-radius: 6px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  transform: rotate(var(--r, 0deg));
+}
+.annee-affiche-mini { width: 70px; border: 3px solid #fff; }
+.annee-coeur {
+  display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 999px;
+  background: #ff3d6e; color: #fff; font-weight: 700; font-size: 12px;
+}
+.annee-cadran text { font: 600 12px 'Bricolage Grotesque', sans-serif; fill: #1a0b2e; }
+.annee-cadran .annee-mois-top { font-weight: 800; font-size: 15px; fill: #ff3d6e; }
+.annee-decennies { display: flex; align-items: flex-end; gap: 6px; height: 100px; margin-top: 10px; }
+.annee-dec { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; color: #fff; }
+.annee-dec i { width: 100%; max-width: 26px; background: #ff7ad9; border-radius: 4px 4px 0 0; transform-origin: bottom; }
+.annee-dec-n { font-size: 11px; font-weight: 700; color: #f6ff3a; }
+.annee-dec-nom { font: 10px Bungee, sans-serif; }
+.annee-pile { position: absolute; left: 30px; right: 30px; top: 190px; display: flex; flex-direction: column; gap: 5px; }
+.annee-couche {
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-radius: 12px;
+  color: #1a0b2e; font-weight: 800; font-size: 15px; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.18);
+}
+.annee-couche span { font: 18px Bungee, sans-serif; }
+.annee-pain { position: relative; height: 54px; background: #ffb347; border-radius: 120px 120px 16px 16px; }
+.annee-pain-bas { height: 34px; border-radius: 16px 16px 60px 60px; }
+.annee-pain i { position: absolute; top: 18px; width: 9px; height: 5px; border-radius: 5px; background: #fff6d6; }
+.annee-pain i:nth-child(1) { left: 60px; transform: rotate(20deg); }
+.annee-pain i:nth-child(2) { left: 100px; top: 12px; }
+.annee-pain i:nth-child(3) { left: 140px; top: 22px; transform: rotate(-15deg); }
+.annee-pain i:nth-child(4) { left: 180px; top: 13px; }
+.annee-pain i:nth-child(5) { left: 85px; top: 32px; }
+.annee-cartes-p { position: absolute; top: 410px; left: 20px; right: 20px; z-index: 3; display: flex; flex-direction: column; gap: 8px; }
+.annee-carte-p {
+  display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; border-radius: 12px;
+  background: #1f1235; color: #fff; font-size: 13px; font-weight: 600;
+}
+.annee-carte-p b { font: 10px 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: #b18cff; }
+.annee-carte-p em { font-weight: 800; }
+.annee-recap {
+  position: absolute; top: 258px; left: 18px; right: 18px; z-index: 3; color: #fff;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px;
+}
+.annee-recap h4 { margin: 0 0 4px; font-size: 11px; font-weight: 700; color: #f6ff3a; }
+.annee-recap p { margin: 0; font-size: 12px; font-weight: 600; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.annee-recap p b { margin-right: 4px; color: #ff7ad9; }
+.annee-recap p em { font-style: normal; color: #ff8a1f; }
+.annee-recap .annee-gros { font: 26px/1 Bungee, sans-serif; }
+.annee-fin { position: absolute; left: 18px; right: 18px; bottom: 42px; z-index: 7; display: flex; gap: 8px; }
+.annee-fin-btn {
+  flex: 1; padding: 9px 6px; border-radius: 999px; border: 2px solid #f6ff3a; cursor: pointer;
+  background: transparent; color: #f6ff3a; font: 700 12px 'Bricolage Grotesque', sans-serif;
+}
+.annee-fin-btn:hover, .annee-fin-btn:focus-visible { background: #f6ff3a; color: #120a1f; }
+
+/* Animations : seulement sur l'écran affiché */
+.annee-ecran .anim-monte, .annee-ecran .anim-tombe, .annee-ecran .anim-zoom, .annee-ecran .anim-couche { opacity: 0; }
+.annee-ecran.actif .anim-monte { animation: annee-monte 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) forwards; }
+.annee-ecran.actif .anim-tombe { animation: annee-tombe 0.9s cubic-bezier(0.3, 1.35, 0.5, 1) var(--d, 0s) forwards; }
+.annee-ecran.actif .anim-zoom { animation: annee-zoom 0.9s cubic-bezier(0.3, 1.4, 0.5, 1) var(--d, 0s) forwards; }
+.annee-ecran.actif .anim-couche { animation: annee-couche 0.7s cubic-bezier(0.3, 1.3, 0.5, 1) var(--d, 0s) forwards; }
+.annee-ecran.actif .anim-glisse { animation: annee-glisse 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.annee-ecran.actif .anim-tourne { animation: annee-tourne 40s linear infinite; }
+.annee-ecran.actif .anim-tourne-inverse { animation: annee-tourne 30s linear infinite reverse; }
+.annee-ecran.actif .anim-pulse { animation: annee-pulse 1.6s ease-in-out infinite alternate; }
+.annee-ecran.actif .anim-respire { animation: annee-respire 2.6s ease-in-out infinite alternate; }
+.annee-ecran.actif .anim-vague { animation: annee-vague 2.4s ease-in-out infinite alternate; }
+.annee-ecran.actif .anim-gauche { animation: annee-gauche 9s linear infinite; }
+.annee-ecran.actif .anim-droite { animation: annee-gauche 9s linear infinite reverse; }
+.annee-ecran.actif .anim-cadran { animation: annee-cadran 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.annee-ecran.actif .anim-pousse { animation: annee-pousse 0.7s cubic-bezier(0.3, 1.3, 0.5, 1) var(--d, 0s) both; }
+.annee-ecran.actif .anim-meridien { animation: annee-meridien 4s ease-in-out infinite; }
+.annee-ecran .anim-anneau { stroke-dashoffset: var(--plein); }
+.annee-ecran.actif .anim-anneau { animation: annee-anneau 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards; }
+@keyframes annee-monte { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes annee-tombe {
+  from { opacity: 0; transform: translateY(-260px) rotate(calc(var(--r, 0deg) - 30deg)); }
+  to { opacity: 1; transform: rotate(var(--r, 0deg)); }
+}
+@keyframes annee-zoom { from { opacity: 0; transform: scale(0.2) rotate(-12deg); } to { opacity: 1; transform: none; } }
+@keyframes annee-couche { from { opacity: 0; transform: translateY(-320px); } to { opacity: 1; transform: none; } }
+@keyframes annee-glisse { from { transform: translateX(140px); } to { transform: none; } }
+@keyframes annee-tourne { to { transform: rotate(360deg); } }
+@keyframes annee-pulse { to { transform: scale(1.1); } }
+@keyframes annee-respire { to { transform: scale(1.05) rotate(4deg); } }
+@keyframes annee-vague { from { transform: translateX(-10px); } to { transform: translateX(10px); } }
+@keyframes annee-gauche { to { transform: translateX(-25%); } }
+@keyframes annee-cadran { from { transform: rotate(-200deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes annee-pousse { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes annee-meridien { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.15); } }
+@keyframes annee-anneau { from { stroke-dashoffset: var(--plein); } to { stroke-dashoffset: var(--fin); } }
+/* Réduire les animations : tout est en place d'emblée, rien ne bouge */
+@media (prefers-reduced-motion: reduce) {
+  .annee-ecran [class*="anim-"] { animation: none !important; opacity: 1 !important; }
+  .annee-ecran .anim-anneau { stroke-dashoffset: var(--fin); }
+}

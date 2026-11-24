@@ -47,7 +47,7 @@
 <link href="fonts/polices.css" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=23">
+<link rel="stylesheet" href="style.css?v=28">
 </head>
 <body>
 <div class="app">
@@ -186,6 +186,18 @@
       <div class="filter-group">
         <div class="filter-label" id="label-realpays">pays du·de la réal</div>
         <select id="filter-realpays" aria-labelledby="label-realpays"><option value="">tous</option></select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label" id="label-realgenre">réalisé par</div>
+        <select id="filter-realgenre" aria-labelledby="label-realgenre" title="une femme : au moins une femme à la réalisation">
+          <option value="">tous</option><option value="f">une femme</option><option value="h">un homme</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label" id="label-rolegenre">premier rôle</div>
+        <select id="filter-rolegenre" aria-labelledby="label-rolegenre">
+          <option value="">tous</option><option value="f">une actrice</option><option value="h">un acteur</option>
+        </select>
       </div>
       <div class="filter-group" style="flex: 1 0 100%;">
         <div class="filter-label">notes</div>
@@ -395,6 +407,26 @@
   </article>
 </div>
 
+<!-- TON ANNÉE EN FILMS : écrans plein écran façon stories, ouverts par le
+     bouton du bilan de l'année (app.js, ouvrirAnnee) -->
+<div class="modal-backdrop annee-backdrop" id="annee-backdrop">
+  <div class="annee" id="annee" role="dialog" aria-modal="true" aria-label="ton année en films">
+    <div class="annee-cadre" id="annee-cadre">
+      <div class="annee-toile" id="annee-toile">
+        <div class="annee-scene" id="annee-scene"></div>
+        <button class="annee-zone annee-zone-prec" id="annee-prec" aria-label="écran précédent"></button>
+        <button class="annee-zone annee-zone-suiv" id="annee-suiv" aria-label="écran suivant"></button>
+        <div class="annee-barres" id="annee-barres" aria-hidden="true"></div>
+        <div class="annee-tete" id="annee-tete">
+          <span>*films</span>
+          <span><button class="annee-btn" id="annee-pause" aria-label="mettre en pause">❚❚</button><button class="annee-btn" id="annee-fermer" aria-label="fermer">✕</button></span>
+        </div>
+      </div>
+    </div>
+    <p class="annee-annonce" id="annee-annonce" aria-live="polite"></p>
+  </div>
+</div>
+
 <!-- ============== DETAIL MODAL ============== -->
 <div class="modal-backdrop" id="modal-backdrop">
   <article class="modal" id="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-label="fiche du film">
@@ -517,6 +549,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=34"></script>
+<script src="app.js?v=40"></script>
 </body>
 </html>

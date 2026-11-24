@@ -31,3 +31,19 @@ test('X2 : les liens ont un repère du clavier visible', () => {
   assert.match(regle[1], /(^|[\s,])a:focus-visible/, 'les liens (a) n\'y sont pas');
   assert.match(regle[1], /\.edit-form input:focus-visible/, 'les champs du formulaire d\'édition n\'y sont pas');
 });
+
+test('X5 : section parité, une seule couleur pour les hommes et une pour les femmes', () => {
+  // Toute règle .male / .female de la section prend --homme / --femme, jamais une couleur écrite à la main
+  const regles = [...css.matchAll(/([^{}]*\.(?:male|female)\b[^{}]*)\{([^}]*)\}/g)];
+  assert.ok(regles.length >= 4, 'règles introuvables');
+  for (const [, sel, corps] of regles) {
+    const fond = (corps.match(/background:\s*([^;]+)/) || [])[1] || '';
+    const attendu = /\.female\b/.test(sel) ? 'var(--femme)' : 'var(--homme)';
+    assert.equal(fond.trim(), attendu, sel.trim());
+  }
+  // Texte foncé lisible sur les segments
+  for (const nom of ['homme', 'femme']) {
+    const r = contraste(couleur(nom), couleur('bg'));
+    assert.ok(r >= 4.5, `--bg sur --${nom} : ${r.toFixed(2)}:1`);
+  }
+});

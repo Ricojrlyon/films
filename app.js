@@ -11,6 +11,29 @@ const JOUR_MS = 24 * 3600 * 1000;
 const optionsMois = () => MOIS_FR.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}">${m}</option>`).join('');
 const optionsLieux = choisi => LIEUX.map(l => `<option value="${l}"${l === choisi ? ' selected' : ''}>${l}</option>`).join('');
 
+// Filtres de la collection en listes déroulantes : [id de la liste, clé dans
+// state.filters]. Une seule liste pour l'état, le panneau, la remise à zéro,
+// les stats cliquées et le bouton précédent (ajouter un filtre = une ligne ici).
+const FILTRES_LISTES = [
+  ['filter-genre', 'genre'], ['filter-lieu', 'lieu'], ['filter-decade', 'decade'],
+  ['filter-yearvu', 'yearvu'], ['filter-mois', 'mois'], ['filter-country', 'country'],
+  ['filter-realpays', 'dirCountry'], ['filter-realgenre', 'realGenre'], ['filter-rolegenre', 'roleGenre'],
+];
+const filtresVides = status => ({ status, search: '', ...Object.fromEntries(FILTRES_LISTES.map(([, k]) => [k, ''])), ratings: new Set() });
+
+// Genre de la réalisation d'un film : 'f' (au moins une femme), 'h' (que des
+// hommes), '' (inconnu). Même règle pour le filtre « réalisé par », la
+// section parité et le bilan de l'année.
+function genreReal(f) {
+  const g = (f.director_genders && f.director_genders.length) ? f.director_genders : [f.director_gender];
+  return g.includes(1) ? 'f' : g.every(x => x === 2) ? 'h' : '';
+}
+// Genre du premier rôle (premier nom du casting) : 'f', 'h' ou ''
+function genreRole(f) {
+  const g = (f.cast_genders || [])[0];
+  return g === 1 ? 'f' : g === 2 ? 'h' : '';
+}
+
 // ============================================================
 // STATE
 // ============================================================
@@ -27,18 +50,7 @@ const state = {
   films: [],
   filtered: [],
   view: 'a_voir',           // 'a_voir' | 'vu' | 'discover' | 'explorer' | 'reco' | 'person' (filmographie)
-  filters: {
-    status: 'a_voir',       // shadows view for filtering logic
-    search: '',
-    genre: '',
-    lieu: '',
-    decade: '',
-    yearvu: '',
-    mois: '',
-    country: '',
-    dirCountry: '',
-    ratings: new Set(),
-  },
+  filters: filtresVides('a_voir'), // status : suit l'onglet (à voir / vus)
   sort: TAB_SORT_DEFAULTS.a_voir,
   page: 1,
   pageSize: 60,
@@ -272,6 +284,8 @@ function applyFilters(opts) {
   if (f.dirCountry) {
     list = list.filter(x => dirCountriesOf(x).includes(f.dirCountry));
   }
+  if (f.realGenre) list = list.filter(x => genreReal(x) === f.realGenre);
+  if (f.roleGenre) list = list.filter(x => genreRole(x) === f.roleGenre);
   if (f.ratings.size > 0 && surVus) {
     list = list.filter(x => x.user?.rating && f.ratings.has(x.user.rating));
   }
@@ -372,7 +386,7 @@ function sortList(list, sortKey) {
 function updateFilterBadge() {
   const f = state.filters;
   const surVus = f.status !== 'a_voir'; // comme applyFilters
-  let active = ['genre', 'lieu', 'decade', 'country', 'dirCountry', ...(surVus ? ['yearvu', 'mois'] : [])].filter(k => f[k]).length;
+  let active = FILTRES_LISTES.map(([, k]) => k).filter(k => f[k] && (surVus || (k !== 'yearvu' && k !== 'mois'))).length;
   if (f.ratings.size > 0 && surVus) active++;
   const badge = document.getElementById('filter-badge');
   if (active > 0) {
@@ -2653,51 +2667,34 @@ function renderStats() {
     if (f.director) f.director.split(',').forEach(d => cyDirs.add(d.trim()));
   }
 
-  const yearSub = (label, value) => `
-    <div class="stat-card-year">
-      <span class="stat-card-year-label">${label}</span>
-      <span class="stat-card-year-value">${value}</span>
+  // Cartes chiffrées : deux boutons côte à côte (pas l'un dans l'autre) ; le
+  // chiffre ouvre les vus correspondants, la ligne de l'année en cours ceux de
+  // cette année
+  const goCarte = filtres => `data-go="${escapeHtml(JSON.stringify(filtres))}"`;
+  const carteStat = (cls, label, valeur, detail, filtres, annee) => `
+    <div class="stat-card stat-card-split ${cls}">
+      <button class="stat-card-main" ${goCarte(filtres)} title="voir ces films">
+        <span class="stat-card-label">${label}</span>
+        <span class="stat-card-value">${valeur}</span>
+        <span class="stat-card-detail">${detail}</span>
+      </button>
+      ${annee == null ? '' : `<button class="stat-card-year" ${goCarte({ ...filtres, yearvu: CY })} title="voir les films vus en ${CY}">
+        <span class="stat-card-year-label">${CY}</span>
+        <span class="stat-card-year-value">${annee}</span>
+      </button>`}
     </div>`;
-
-  // Number cards
-  document.getElementById('stats-numbers').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-card-label">films vus</div>
-      <div class="stat-card-value">${vus.length}</div>
-      <div class="stat-card-detail">${films.length - vus.length} à voir</div>
-      ${yearSub(CY, vusThisYear.length)}
-    </div>
-    <div class="stat-card accent">
-      <div class="stat-card-label">temps cumulé</div>
-      <div class="stat-card-value">${totalHours.toLocaleString('fr-FR')}h</div>
-      <div class="stat-card-detail">soit ${totalDays} jours</div>
-      ${yearSub(CY, cyHours + 'h')}
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-label">note moyenne</div>
-      <div class="stat-card-value">${avgRating.toFixed(1)}<span style="font-size:0.5em; color: var(--ink-mute)">/10</span></div>
-      <div class="stat-card-detail">sur ${rated.length} films notés</div>
-      ${cyRated.length ? yearSub(CY, cyAvgRating.toFixed(1) + '/10') : ''}
-    </div>
-    <div class="stat-card hot stat-card-clickable" data-stat="favorites" title="voir ces films">
-      <div class="stat-card-label">coups de cœur</div>
-      <div class="stat-card-value">${favorites}</div>
-      <div class="stat-card-detail">${(favorites * 100 / Math.max(1, vus.length)).toFixed(0)}% des vus</div>
-      ${yearSub(CY, cyFavorites)}
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-label">films par an</div>
-      <div class="stat-card-value">${avgPerYear}</div>
-      <div class="stat-card-detail">moyenne (années complètes)</div>
-      ${yearSub(CY, vusThisYear.length + ' vus')}
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-label">réalisateurs</div>
-      <div class="stat-card-value">${directors.size}</div>
-      <div class="stat-card-detail">distincts</div>
-      ${yearSub(CY, cyDirs.size + ' distincts')}
-    </div>
-  `;
+  const coeurs = { ratings: [RATING_FAV] };
+  document.getElementById('stats-numbers').innerHTML = [
+    carteStat('', 'films vus', vus.length, `${films.length - vus.length} à voir`, {}, vusThisYear.length),
+    carteStat('accent', 'temps cumulé', totalHours.toLocaleString('fr-FR') + 'h', `soit ${totalDays} jours`, {}, cyHours + 'h'),
+    carteStat('', 'note moyenne', avgRating.toFixed(1) + '<span style="font-size:0.5em; color: var(--ink-mute)">/10</span>',
+      `sur ${rated.length} films notés`, {}, cyRated.length ? cyAvgRating.toFixed(1) + '/10' : null),
+    carteStat('hot', 'coups de cœur', favorites, `${(favorites * 100 / Math.max(1, vus.length)).toFixed(0)}% des vus`, coeurs, cyFavorites),
+    carteStat('', 'films par an', avgPerYear, 'moyenne (années complètes)', {}, vusThisYear.length + ' vus'),
+    carteStat('', 'réalisateurs', directors.size, 'distincts', {}, cyDirs.size + ' distincts'),
+  ].join('');
+  document.querySelectorAll('#stats-numbers [data-go]').forEach(b =>
+    b.addEventListener('click', () => goToVusWithFilters(JSON.parse(b.dataset.go))));
 
   renderYearReview();
   renderMonthsChart();
@@ -2717,7 +2714,7 @@ function renderStats() {
 
 // ---- Bilan de l'année ----
 // Une année de visionnage au choix (les films « avant 2022 » n'ont pas
-// d'année) : chiffres clés comparés à l'année d'avant, temps forts, top 5.
+// d'année) : chiffres clés comparés à l'année d'avant, temps forts, top 5, flop 5.
 // Tout vient de films.json, sans appel TMDB. Les chiffres et temps forts
 // cliquables mènent aux vus filtrés (goToVusWithFilters), les films à leur fiche.
 let yearReviewYear = null;
@@ -2758,7 +2755,7 @@ function renderYearReview() {
       note: notes.length ? notes.reduce((s, f) => s + ratingOutOf10(f.user.rating), 0) / notes.length : null,
       coeurs: list.filter(f => f.user.favorite).length,
       cine: pct(list.filter(f => f.user.lieu === 'Cinéma').length, list.length),
-      femmes: pct(list.filter(f => genresReal(f).includes(1)).length, list.length),
+      femmes: pct(list.filter(f => genreReal(f) === 'f').length, list.length),
     };
   };
   const enCours = Y === String(new Date().getFullYear());
@@ -2785,11 +2782,11 @@ function renderYearReview() {
     : `<div class="stat-card ${cls}"><div class="stat-card-label">${label}</div><div class="stat-card-value">${valeur}</div>${detail}</div>`;
   const cartes = [
     carte('films vus', m.films, evo('films', '', 0, true), { yearvu: Y }),
-    carte('heures', m.heures + 'h', evo('heures', 'h', 0, true), null, 'accent'),
-    carte('note moyenne', m.note == null ? '<span style="font-size:0.5em; color: var(--ink-mute)">aucune note</span>' : m.note.toFixed(1).replace('.', ',') + '<span style="font-size:0.5em; color: var(--ink-mute)">/10</span>', evo('note', '', 1), null),
+    carte('heures', m.heures + 'h', evo('heures', 'h', 0, true), { yearvu: Y }, 'accent'),
+    carte('note moyenne', m.note == null ? '<span style="font-size:0.5em; color: var(--ink-mute)">aucune note</span>' : m.note.toFixed(1).replace('.', ',') + '<span style="font-size:0.5em; color: var(--ink-mute)">/10</span>', evo('note', '', 1), { yearvu: Y }),
     carte('coups de cœur', m.coeurs, evo('coeurs', '', 0, true), m.coeurs ? { yearvu: Y, ratings: [RATING_FAV] } : null, 'hot'),
     carte('au cinéma', m.cine + ' %', evo('cine', ' pts'), { yearvu: Y, lieu: 'Cinéma' }),
-    carte('réalisés par une femme', m.femmes + ' %', evo('femmes', ' pts'), null),
+    carte('réalisés par une femme', m.femmes + ' %', evo('femmes', ' pts'), { yearvu: Y, realGenre: 'f' }),
   ].join('');
 
   // Temps forts
@@ -2811,36 +2808,83 @@ function renderYearReview() {
   faits.push(fait('réal découvert·es', `${decouverts.size}`, null, `vu·es pour la première fois, dont ${decouvertes} réalisatrice${decouvertes > 1 ? 's' : ''}`));
   const genre = compte(fs.flatMap(f => f.genres || []))[0];
   if (genre) faits.push(fait('genre le plus vu', `${escapeHtml(genre[0])} · ${genre[1]} films`, { yearvu: Y, genre: genre[0] }));
-  const pays = compte(fs.flatMap(f => [...new Set((f.country || '').split(' · ').map(c => countryFr(c.trim())).filter(Boolean))]))[0];
+  const paysDe = f => [...new Set((f.country || '').split(' · ').map(c => countryFr(c.trim())).filter(Boolean))];
+  const pays = compte(fs.flatMap(paysDe))[0];
   if (pays) faits.push(fait('pays le plus vu', `${escapeHtml(pays[0])} · ${pays[1]} films`, { yearvu: Y, country: pays[0] }));
+  // Plusieurs cibles dans un même temps fort (lieux, ex aequo, pays) : un bouton chacune
+  const lien = (texte, filtres) => `<button class="yr-lien" ${go(filtres)} title="voir ces films">${texte}</button>`;
+  // Liste de boutons séparés par des virgules : chaque virgule reste collée à
+  // son nom (sinon elle pouvait commencer la ligne suivante)
+  const liens = items => items.map(([texte, filtres], i) =>
+    `<span class="yr-lien-bloc">${lien(texte, filtres)}${i < items.length - 1 ? ',' : ''}</span>`).join(' ');
+  // Tour du monde, deux façons de compter les pays de l'année :
+  // - production : les pays qui ont produit les films (TMDB) ;
+  // - réals : les pays de naissance des réalisateur·rices (dirCountriesOf ;
+  //   TMDB ne connaît pas toujours le lieu de naissance : ces films-là sont
+  //   signalés, sans compter).
+  // Pour chacune, les pays qu'aucun film vu avant cette année ne comptait
+  // (« avant 2022 » compris), 8 nommés au plus, chacun cliquable : les films
+  // de l'année venus de ce pays (filtres « pays du film », « pays du·de la réal »).
+  const deja = new Set(vus.filter(f => (f.user.date_vue || '').startsWith('before-') || (anneeVue(f) && anneeVue(f) < Y)));
+  const tour = (paysDeFilm, cle) => {
+    const annee = new Set(fs.flatMap(paysDeFilm));
+    const avant = new Set([...deja].flatMap(paysDeFilm));
+    const nouveaux = [...annee].filter(c => !avant.has(c)).sort((a, b) => a.localeCompare(b, 'fr'));
+    const reste = nouveaux.length > 8 ? ` et ${nouveaux.length - 8} autre${nouveaux.length - 8 > 1 ? 's' : ''}` : '';
+    return { n: annee.size, nouveaux: nouveaux.length ? liens(nouveaux.slice(0, 8).map(c => [escapeHtml(c), { yearvu: Y, [cle]: c }])) + reste : '' };
+  };
+  const prod = tour(paysDe, 'country');
+  const nes = tour(f => [...new Set(dirCountriesOf(f))], 'dirCountry');
+  if (prod.n || nes.n) {
+    const sansNaissance = fs.filter(f => f.director && !dirCountriesOf(f).length).length;
+    const ligne = texte => `<span class="yr-fact-ligne">${texte}</span>`;
+    faits.push(fait('tour du monde', `${prod.n} pays de production · réals nés dans ${nes.n} pays`, null,
+      ligne(prod.nouveaux ? `nouveaux en production : ${prod.nouveaux}` : 'aucun nouveau pays de production') +
+      ligne(nes.nouveaux ? `nouveaux pour les réals : ${nes.nouveaux}` : 'aucun nouveau pays de naissance') +
+      (sansNaissance ? ligne(`naissance inconnue pour ${sansNaissance} film${sansNaissance > 1 ? 's' : ''}`) : '')));
+  }
   const acteurs = compte(fs.flatMap(f => f.cast || [])).filter(([, n]) => n >= 2);
   if (acteurs.length) {
     const ex = acteurs.filter(([, n]) => n === acteurs[0][1]).slice(0, 2).map(([nom]) => nom);
-    faits.push(fait('le plus vu à l\'écran', escapeHtml(ex.join(', ')), ex.length === 1 ? { yearvu: Y, search: ex[0] } : null, `${acteurs[0][1]} films`));
+    faits.push(ex.length === 1
+      ? fait('le plus vu à l\'écran', escapeHtml(ex[0]), { yearvu: Y, search: ex[0] }, `${acteurs[0][1]} films`)
+      : fait('le plus vu à l\'écran', liens(ex.map(nom => [escapeHtml(nom), { yearvu: Y, search: nom }])), null, `${acteurs[0][1]} films`));
   }
   const LIEUX_BILAN = LIEUX.map(l => [l, l === 'Stremio' ? l : l.toLowerCase()]); // valeur, libellé
-  const lieux = LIEUX_BILAN.map(([v, nom]) => [nom, fs.filter(f => f.user.lieu === v).length]).filter(([, n]) => n);
-  if (lieux.length) faits.push(fait('où', lieux.map(([nom, n]) => `${nom} ${n}`).join(' · ')));
+  const lieux = LIEUX_BILAN.map(([v, nom]) => [v, nom, fs.filter(f => f.user.lieu === v).length]).filter(([, , n]) => n);
+  if (lieux.length) faits.push(fait('où', lieux.map(([v, nom, n]) => lien(`${nom} ${n}`, { yearvu: Y, lieu: v })).join(' · ')));
   const ancien = fs.filter(f => f.year).sort((a, b) => a.year - b.year)[0];
   if (ancien) faits.push(filmFait('le plus ancien', ancien, `sorti en ${escapeHtml(ancien.year)}`));
   const long = fs.filter(f => f.runtime).sort((a, b) => b.runtime - a.runtime)[0];
   if (long) faits.push(filmFait('le plus long', long, `${Math.floor(long.runtime / 60)} h ${String(long.runtime % 60).padStart(2, '0')}`));
 
   // Top 5 : note, puis moyenne TMDB pour départager
-  const top = fs.filter(f => f.user.rating).sort((a, b) => (b.user.rating - a.user.rating) || ((b.tmdb_rating || 0) - (a.tmdb_rating || 0))).slice(0, 5);
-  const topHtml = top.map(f => `
+  const notes = fs.filter(f => f.user.rating);
+  const top = [...notes].sort((a, b) => (b.user.rating - a.user.rating) || ((b.tmdb_rating || 0) - (a.tmdb_rating || 0))).slice(0, 5);
+  // Flop 5 : les moins bien notés, la moins bonne moyenne TMDB d'abord à note
+  // égale ; jamais un film du top (une année de moins de 10 films notés a un
+  // flop plus court, et pas de flop sous 6 films notés)
+  const dansTop = new Set(top);
+  const flop = notes.filter(f => !dansTop.has(f))
+    .sort((a, b) => (a.user.rating - b.user.rating) || ((a.tmdb_rating || 0) - (b.tmdb_rating || 0))).slice(0, 5);
+  const carteFilm = f => `
     <div class="year-best-film" data-film-id="${escapeHtml(f.id)}" role="button" tabindex="0">
       <div class="year-best-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(tmdbResize(f.poster, 'w185'))})"` : ''}></div>
       <div class="year-best-title">${escapeHtml(displayTitle(f.id, f.title))}</div>
       <div class="year-best-meta">${f.user.favorite ? '❤' : '★'.repeat(f.user.rating)}${f.director ? ' · ' + escapeHtml(f.director) : ''}</div>
-    </div>`).join('');
+    </div>`;
+  const topHtml = top.map(carteFilm).join('');
+  const flopHtml = flop.map(carteFilm).join('');
 
   root.innerHTML = `
+    <button class="annee-ouvrir" id="annee-ouvrir"><span class="annee-ouvrir-play" aria-hidden="true">▶</span>ton année ${Y} en films<small>${fs.length} films</small></button>
     ${enCours ? `<div class="year-review-note">année en cours, jusqu'à ${MOIS[new Date().getMonth()]}</div>` : ''}
     <div class="stats-numbers year-review-numbers">${cartes}</div>
     <div class="year-review-facts">${faits.join('')}</div>
-    ${top.length ? `<div class="modal-section-label">top ${top.length} de ${Y}</div><div class="year-review-top">${topHtml}</div>` : ''}`;
+    ${top.length ? `<div class="modal-section-label">top ${top.length} de ${Y}</div><div class="year-review-top">${topHtml}</div>` : ''}
+    ${flop.length ? `<div class="modal-section-label">flop ${flop.length} de ${Y}</div><div class="year-review-top year-review-flop">${flopHtml}</div>` : ''}`;
   root.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', () => goToVusWithFilters(JSON.parse(el.dataset.go))));
+  document.getElementById('annee-ouvrir').addEventListener('click', () => ouvrirAnnee(Y));
   root.querySelectorAll('[data-film-id]').forEach(el => {
     el.addEventListener('click', () => openModalFromCard(el.dataset.filmId));
     if (el.getAttribute('role') === 'button') el.addEventListener('keydown', e => {
@@ -3340,9 +3384,9 @@ function notesSelonGenreReal(vus) {
   const femmes = [], hommes = [];
   for (const f of vus) {
     if (!f.user?.rating) continue;
-    const g = (f.director_genders && f.director_genders.length) ? f.director_genders : [f.director_gender];
-    if (g.includes(1)) femmes.push(f);
-    else if (g.every(x => x === 2)) hommes.push(f);
+    const g = genreReal(f);
+    if (g === 'f') femmes.push(f);
+    else if (g === 'h') hommes.push(f);
   }
   const moyenne = l => l.length ? l.reduce((s, f) => s + ratingOutOf10(f.user.rating), 0) / l.length : null;
   // Nombre de films par note : 1★ … 5★ puis ❤
@@ -3380,19 +3424,23 @@ function renderGenderBalance() {
     return;
   }
 
-  // Director gender
-  const dirM = vus.filter(f => f.director_gender === 2).length;
-  const dirF = vus.filter(f => f.director_gender === 1).length;
-  const dirU = vus.filter(f => f.director && (!f.director_gender || f.director_gender === 0)).length;
+  // Réalisation : même règle que le filtre « réalisé par » (genreReal : une
+  // co-réalisation avec une femme compte côté femmes), pour qu'un clic sur un
+  // segment montre autant de films que le segment en annonce
+  const dirM = vus.filter(f => genreReal(f) === 'h').length;
+  const dirF = vus.filter(f => genreReal(f) === 'f').length;
+  const dirU = vus.filter(f => f.director && genreReal(f) === '').length;
   const dirTotal = dirM + dirF + dirU || 1;
 
-  // Lead actor gender (first cast member with known gender)
-  const leadM = vus.filter(f => (f.cast_genders || [])[0] === 2).length;
-  const leadF = vus.filter(f => (f.cast_genders || [])[0] === 1).length;
-  const leadU = vus.filter(f => f.cast && f.cast.length > 0 && (!(f.cast_genders || [])[0] || (f.cast_genders || [])[0] === 0)).length;
+  // Premier rôle (premier nom du casting), comme le filtre « premier rôle »
+  const leadM = vus.filter(f => genreRole(f) === 'h').length;
+  const leadF = vus.filter(f => genreRole(f) === 'f').length;
+  const leadU = vus.filter(f => f.cast && f.cast.length > 0 && genreRole(f) === '').length;
   const leadTotal = leadM + leadF + leadU || 1;
 
-  const bar = (label, m, f, u, total) => {
+  // Un clic sur un segment, une barre : les vus correspondants (rendreActivable plus bas)
+  const go = (filtres, nom) => `data-go="${escapeHtml(JSON.stringify(filtres))}" data-nom="${escapeHtml(nom)}"`;
+  const bar = (label, m, f, u, total, cle, noms) => {
     const pctM = (m / total * 100).toFixed(1);
     const pctF = (f / total * 100).toFixed(1);
     const pctU = (u / total * 100).toFixed(1);
@@ -3400,12 +3448,12 @@ function renderGenderBalance() {
       <div class="gender-balance-row">
         <div class="gender-balance-label">${label}</div>
         <div class="gender-balance-track">
-          <div class="gender-balance-seg male" style="width:${pctM}%">${m > 0 ? m : ''}</div>
-          <div class="gender-balance-seg female" style="width:${pctF}%">${f > 0 ? f : ''}</div>
+          <div class="gender-balance-seg male" style="width:${pctM}%" ${m ? go({ [cle]: 'h' }, `${noms[0]} : voir ces ${m} films`) : ''}>${m > 0 ? m : ''}</div>
+          <div class="gender-balance-seg female" style="width:${pctF}%" ${f ? go({ [cle]: 'f' }, `${noms[1]} : voir ces ${f} films`) : ''}>${f > 0 ? f : ''}</div>
           ${u > 0 ? `<div class="gender-balance-seg unknown" style="width:${pctU}%">${u}</div>` : ''}
         </div>
         <div class="gender-balance-legend">
-          <span>hommes ${pctM}%</span><span>femmes ${pctF}%</span>${u > 0 ? `<span>non renseigné ${pctU}%</span>` : ''}
+          <span class="cle male">hommes ${pctM}%</span><span class="cle female">femmes ${pctF}%</span>${u > 0 ? `<span>non renseigné ${pctU}%</span>` : ''}
         </div>
       </div>`;
   };
@@ -3417,7 +3465,7 @@ function renderGenderBalance() {
   if (N.femmes.n >= 3 && N.hommes.n >= 3) {
     const virgule = v => v.toFixed(1).replace('.', ',');
     const ligne = (nom, cls, x) => `
-        <div class="bar-row">
+        <div class="bar-row bar-row-clickable" ${go({ realGenre: cls === 'female' ? 'f' : 'h' }, `${nom} : voir ces films`)}>
           <div class="bar-label">${nom}</div>
           <div class="bar-track"><div class="bar-fill ${cls}" style="width:${(x.note * 10).toFixed(1)}%"></div></div>
           <div class="bar-value">${virgule(x.note)}</div>
@@ -3444,10 +3492,19 @@ function renderGenderBalance() {
       return v === 0 && x.repartition[i] > 0 ? '<1' : String(v);
     };
     const nomNote = i => i === RATING_FAV - 1 ? 'coup de cœur' : (i + 1) + (i ? ' étoiles' : ' étoile');
-    const barre = (cls, x, i) => `<div class="note-barre ${cls}" style="height:${(part(x, i) / partMax * 100).toFixed(1)}%"><span>${arrondi(x, i)}</span></div>`;
+    // Chaque barre : une cible de toute la hauteur (les petites barres restent
+    // faciles à toucher), qui ouvre les films de ce côté avec cette note
+    const barre = (cls, x, i) => {
+      const qui = cls === 'female' ? 'réalisatrices' : 'réalisateurs';
+      const nom = `${nomNote(i)}, ${qui} : ${arrondi(x, i)} % de leurs films notés (${x.repartition[i]})`;
+      const colonne = `<div class="note-barre ${cls}" style="height:${(part(x, i) / partMax * 100).toFixed(1)}%"><span aria-hidden="true">${arrondi(x, i)}</span></div>`;
+      return x.repartition[i]
+        ? `<div class="note-cible" ${go({ realGenre: cls === 'female' ? 'f' : 'h', ratings: [i + 1] }, nom)}>${colonne}</div>`
+        : `<div class="note-cible" role="img" aria-label="${escapeHtml(nom)}">${colonne}</div>`;
+    };
     const paires = N.femmes.repartition.map((_, i) => `
-          <div class="note-paire" role="img" aria-label="${nomNote(i)} : ${arrondi(N.femmes, i)} % des films de réalisatrices (${N.femmes.repartition[i]}), ${arrondi(N.hommes, i)} % des films de réalisateurs (${N.hommes.repartition[i]})">
-            <div class="note-barres" aria-hidden="true">${barre('female', N.femmes, i)}${barre('male', N.hommes, i)}</div>
+          <div class="note-paire">
+            <div class="note-barres">${barre('female', N.femmes, i)}${barre('male', N.hommes, i)}</div>
             <div class="note-paire-label" aria-hidden="true">${i === RATING_FAV - 1 ? '❤' : (i + 1) + '★'}</div>
           </div>`).join('');
     notesHtml += `
@@ -3460,9 +3517,11 @@ function renderGenderBalance() {
   }
 
   root.innerHTML =
-    bar('réalisateur · réalisatrice', dirM, dirF, dirU, dirTotal) +
-    bar('acteur · actrice principal·e', leadM, leadF, leadU, leadTotal) +
+    bar('réalisateur · réalisatrice', dirM, dirF, dirU, dirTotal, 'realGenre', ['films de réalisateurs', 'films de réalisatrices']) +
+    bar('acteur · actrice principal·e', leadM, leadF, leadU, leadTotal, 'roleGenre', ['premier rôle masculin', 'premier rôle féminin']) +
     notesHtml;
+  root.querySelectorAll('[data-go]').forEach(el =>
+    rendreActivable(el, () => goToVusWithFilters(JSON.parse(el.dataset.go)), el.dataset.nom));
 }
 
 /** Fetch the best available Latin name for a TMDB person by their ID.
@@ -3765,13 +3824,6 @@ function wireStatsClicks() {
   // réalisateurs / acteurs : pas de filtre dédié -> on passe par la recherche
   ['director-chart-m', 'director-chart-f', 'actor-chart-m', 'actor-chart-f']
     .forEach(id => wireBarRowsClick(id, 'search'));
-  document.querySelectorAll('#stats-numbers .stat-card-clickable').forEach(c => {
-    if (c.dataset.wired) return;
-    c.dataset.wired = '1';
-    rendreActivable(c, () => {
-      if (c.dataset.stat === 'favorites') goToVusWithFilters({ ratings: [RATING_FAV] });
-    });
-  });
 }
 
 // Depuis une stat cliquable → page collection, onglet « vus », filtres appliqués.
@@ -3779,8 +3831,8 @@ function wireStatsClicks() {
 function goToVusWithFilters(partial) {
   partial = partial || {};
   // Repartir de filtres propres, puis appliquer le sous-ensemble demandé
-  state.filters = { status: 'vu', search: '', genre: '', lieu: '', decade: '', yearvu: '', mois: '', country: '', dirCountry: '', ratings: new Set() };
-  ['genre', 'lieu', 'decade', 'yearvu', 'mois', 'country', 'dirCountry', 'search'].forEach(k => { if (partial[k]) state.filters[k] = partial[k]; });
+  state.filters = filtresVides('vu');
+  [...FILTRES_LISTES.map(([, k]) => k), 'search'].forEach(k => { if (partial[k]) state.filters[k] = partial[k]; });
   if (partial.ratings) partial.ratings.forEach(rt => state.filters.ratings.add(rt));
   state.view = 'vu';
   state.sort = TAB_SORT_DEFAULTS.vu;
@@ -3797,14 +3849,7 @@ function goToVusWithFilters(partial) {
   // Refléter l'état dans l'UI des filtres + ouvrir le panneau pour montrer ce qui est appliqué
   document.getElementById('search').value = state.filters.search || '';
   document.getElementById('sort').value = state.sort;
-  const setSel = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
-  setSel('filter-genre', state.filters.genre);
-  setSel('filter-lieu', state.filters.lieu);
-  setSel('filter-decade', state.filters.decade);
-  setSel('filter-yearvu', state.filters.yearvu);
-  setSel('filter-mois', state.filters.mois);
-  setSel('filter-country', state.filters.country);
-  setSel('filter-realpays', state.filters.dirCountry);
+  FILTRES_LISTES.forEach(([id, k]) => { const el = document.getElementById(id); if (el) el.value = state.filters[k] || ''; });
   document.querySelectorAll('#rating-chips .rating-chip').forEach(c =>
     c.classList.toggle('active', state.filters.ratings.has(parseInt(c.dataset.rating, 10))));
   document.getElementById('filter-panel').classList.add('open');
@@ -5710,16 +5755,8 @@ function wireEvents() {
     document.getElementById('filter-toggle-label').textContent = open ? '− filtres' : '+ filtres';
   });
 
-  // Filter dropdowns (genre, lieu, decade, yearvu)
-  const filterIds = {
-    'filter-genre': 'genre',
-    'filter-lieu': 'lieu',
-    'filter-decade': 'decade',
-    'filter-yearvu': 'yearvu',
-    'filter-mois': 'mois',
-    'filter-country': 'country',
-    'filter-realpays': 'dirCountry',
-  };
+  // Listes déroulantes des filtres (FILTRES_LISTES)
+  const filterIds = Object.fromEntries(FILTRES_LISTES);
   Object.entries(filterIds).forEach(([id, key]) => {
     document.getElementById(id).addEventListener('change', (e) => {
       state.filters[key] = e.target.value;
@@ -5753,7 +5790,7 @@ function wireEvents() {
 
   // Reset — restore defaults including the per-tab sort
   document.getElementById('filter-reset').addEventListener('click', () => {
-    state.filters = { status: 'a_voir', search: '', genre: '', lieu: '', decade: '', yearvu: '', mois: '', country: '', dirCountry: '', ratings: new Set() };
+    state.filters = filtresVides('a_voir');
     state.sort = TAB_SORT_DEFAULTS.a_voir;
     document.getElementById('search').value = '';
     Object.keys(filterIds).forEach(id => { document.getElementById(id).value = ''; });
@@ -5785,6 +5822,7 @@ function wireEvents() {
   // s'ouvre au-dessus de la fiche film : ne pas tout fermer d'un coup)
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    if (document.getElementById('annee-backdrop').classList.contains('open')) { fermerAnnee(); return; }
     if (document.getElementById('legal-backdrop').classList.contains('open')) { closeLegal(); return; }
     if (document.getElementById('rematch-backdrop').classList.contains('open')) { closeRematchModal(); return; }
     if (document.getElementById('admin-setup-backdrop').classList.contains('open')) { closeAdminSetup(); return; }
@@ -5899,17 +5937,15 @@ function navFiltres() {
   return { ...f, ratings: [...f.ratings], sort: state.sort,
     panneau: document.getElementById('filter-panel').classList.contains('open') };
 }
-const navCle = x => JSON.stringify(x && [x.status, x.search, x.genre, x.lieu, x.decade, x.yearvu,
-  x.mois, x.country, x.dirCountry, [...x.ratings].sort(), x.sort, x.panneau]);
+const navCle = x => JSON.stringify(x && [x.status, x.search, ...FILTRES_LISTES.map(([, k]) => x[k] || ''),
+  [...x.ratings].sort(), x.sort, x.panneau]);
 function navRendFiltres(x) {
   const { sort, panneau, ratings, ...f } = x;
-  state.filters = { ...f, ratings: new Set(ratings) };
+  state.filters = { ...filtresVides(f.status), ...f, ratings: new Set(ratings) }; // étape d'avant un nouveau filtre : il vaut « tous »
   state.sort = sort;
   document.getElementById('search').value = f.search || '';
   document.getElementById('sort').value = sort;
-  [['filter-genre', 'genre'], ['filter-lieu', 'lieu'], ['filter-decade', 'decade'], ['filter-yearvu', 'yearvu'],
-    ['filter-mois', 'mois'], ['filter-country', 'country'], ['filter-realpays', 'dirCountry']]
-    .forEach(([id, k]) => { document.getElementById(id).value = f[k] || ''; });
+  FILTRES_LISTES.forEach(([id, k]) => { document.getElementById(id).value = state.filters[k] || ''; });
   document.querySelectorAll('#rating-chips .rating-chip').forEach(c =>
     c.classList.toggle('active', state.filters.ratings.has(parseInt(c.dataset.rating, 10))));
   document.getElementById('filter-panel').classList.toggle('open', !!panneau);
@@ -5928,7 +5964,7 @@ function navCurrent() {
     view: P ? (personReturn?.view || 'a_voir') : state.view,
     person: P ? { nom: P.nom, role: P.role || 'jeu', ctx: P.ctx || null, tab: P.tab } : null,
     fiche: open('modal-backdrop') ? openModalCtx.id : null,
-    dialog: open('legal-backdrop') ? 'legal' : open('rematch-backdrop') ? 'rematch'
+    dialog: open('annee-backdrop') ? 'annee' : open('legal-backdrop') ? 'legal' : open('rematch-backdrop') ? 'rematch'
       : open('admin-setup-backdrop') ? 'admin' : null,
     filtres: navFiltres(), // gardés mais ne font pas une étape à eux seuls
   };
@@ -5994,6 +6030,7 @@ function navReplace() {
 // « Précédent » (ou « suivant ») : remettre l'écran de l'étape atteinte
 function navApply(t) {
   const c = navCurrent();
+  if (c.dialog === 'annee' && t.dialog !== 'annee') fermerAnnee();
   if (c.dialog === 'legal' && t.dialog !== 'legal') closeLegal();
   if (c.dialog === 'rematch' && t.dialog !== 'rematch') closeRematchModal();
   if (c.dialog === 'admin' && t.dialog !== 'admin') closeAdminSetup();
@@ -6019,6 +6056,7 @@ function navApply(t) {
   }
   if (t.dialog === 'admin' && c.dialog !== 'admin') openAdminSetup();
   if (t.dialog === 'legal' && c.dialog !== 'legal') openLegal();
+  if (t.dialog === 'annee' && c.dialog !== 'annee') ouvrirAnnee();
   if (t.dialog === 'rematch' && c.dialog !== 'rematch' && admin.active) {
     const f = state.films.find(x => x.id === t.fiche);
     if (f) openRematchModal(f);
@@ -6071,10 +6109,461 @@ function repeindreVueCourante() {
 }
 
 // ============================================================
+// TON ANNÉE EN FILMS : écrans plein écran façon stories (2026-11-24)
+// ============================================================
+// Ouvert par le bouton du bilan de l'année. 10 écrans dessinés sur une toile
+// de 300 × 640, agrandie à la taille de l'écran (annee-toile, transform) :
+// ouverture, films, heures, sorties de l'année et rattrapages, mois, film de
+// l'année, genres, parité, tour du monde, récapitulatif. Chaque écran dure
+// ANNEE_DUREE (la barre du haut se remplit, puis l'écran suivant) ; toucher
+// la droite avance, la gauche recule, glisser aussi ; flèches, Espace (pause),
+// Échap (fermer) ; « précédent » ferme. Avec « réduire les animations » :
+// ni animation, ni avancée automatique.
+// Les données viennent de donneesAnnee (pure, testée) ; mêmes règles que le
+// bilan (genreReal, genreRole, notesSelonGenreReal, countryFr, dirCountriesOf).
+
+// Chiffres d'une année de visionnage (vus : films vus ; Y : 'AAAA' ; maintenant : Date)
+function donneesAnnee(vus, Y, maintenant = new Date()) {
+  const anneeVue = f => /^\d{4}/.test(f.user.date_vue || '') ? f.user.date_vue.slice(0, 4) : null;
+  const fs = vus.filter(f => anneeVue(f) === Y);
+  const avant = vus.filter(f => (f.user.date_vue || '').startsWith('before-') || (anneeVue(f) && anneeVue(f) < Y));
+  const compte = valeurs => { const c = new Map(); valeurs.forEach(v => v && c.set(v, (c.get(v) || 0) + 1)); return [...c].sort((a, b) => b[1] - a[1]); };
+  const notes = fs.filter(f => f.user.rating);
+  const parNote = (a, b) => (b.user.rating - a.user.rating) || ((b.tmdb_rating || 0) - (a.tmdb_rating || 0));
+  const minutes = fs.reduce((s, f) => s + (f.runtime || 0), 0);
+  // Jours écoulés dans l'année (l'année en cours n'est pas finie)
+  const enCours = Y === String(maintenant.getFullYear());
+  const joursAnnee = enCours
+    ? Math.max(1, Math.ceil((maintenant - new Date(+Y, 0, 1)) / JOUR_MS))
+    : ((+Y % 4 === 0 && +Y % 100 !== 0) || +Y % 400 === 0 ? 366 : 365);
+  // Sorties de l'année et rattrapages, par décennie de sortie
+  const nouveautes = fs.filter(f => String(f.year) === Y);
+  const rattrapages = fs.filter(f => f.year && String(f.year) !== Y);
+  const decennies = new Map();
+  for (const f of rattrapages) { const d = Math.floor(f.year / 10) * 10; decennies.set(d, (decennies.get(d) || 0) + 1); }
+  const plusAncien = [...rattrapages].sort((a, b) => a.year - b.year)[0] || null;
+  // Mois
+  const mois = new Array(12).fill(0);
+  for (const f of fs) if (/^\d{4}-\d{2}$/.test(f.user.date_vue)) mois[+f.user.date_vue.slice(5, 7) - 1]++;
+  const moisMax = Math.max(...mois);
+  const moisTop = moisMax ? mois.indexOf(moisMax) : -1;
+  const filmDuMois = moisTop < 0 ? null
+    : fs.filter(f => f.user.date_vue === `${Y}-${String(moisTop + 1).padStart(2, '0')}` && f.user.rating).sort(parNote)[0] || null;
+  // Parité (mêmes règles que la section parité et le filtre)
+  const pct = (k, n) => n ? Math.round(k * 100 / n) : 0;
+  const reals = f => (f.director || '').split(',').map(s => s.trim()).filter(Boolean);
+  const genresReal = f => (f.director_genders && f.director_genders.length) ? f.director_genders : [f.director_gender];
+  const dejaReals = new Set(avant.flatMap(reals));
+  const decouvertes = new Set();
+  for (const f of fs) reals(f).forEach((n, i) => { if (!dejaReals.has(n) && genresReal(f)[i] === 1) decouvertes.add(n); });
+  const N = notesSelonGenreReal(fs);
+  // Pays : de production, et de naissance des réals ; nouveaux = jamais vus avant
+  const paysDe = f => [...new Set((f.country || '').split(' · ').map(c => countryFr(c.trim())).filter(Boolean))];
+  const nesDe = f => [...new Set(dirCountriesOf(f))];
+  const tour = de => {
+    const annee = new Set(fs.flatMap(de));
+    const deja = new Set(avant.flatMap(de));
+    return { n: annee.size, nouveaux: [...annee].filter(c => !deja.has(c)).sort((a, b) => a.localeCompare(b, 'fr')) };
+  };
+  const production = tour(paysDe);
+  // Affiches du tour du monde : un film par pays, les pays nouveaux d'abord
+  const affichesMonde = [];
+  const paysPris = new Set();
+  for (const nouveau of [true, false]) {
+    for (const f of fs) {
+      if (affichesMonde.length >= 5 || !f.poster) continue;
+      const c = paysDe(f).find(p => !paysPris.has(p) && production.nouveaux.includes(p) === nouveau);
+      if (!c || affichesMonde.some(x => x.film === f)) continue;
+      paysPris.add(c);
+      affichesMonde.push({ film: f, pays: c });
+    }
+  }
+  const acteurs = compte(fs.flatMap(f => f.cast || [])).filter(([, n]) => n >= 2);
+  return {
+    annee: Y, enCours, films: fs.length, heures: Math.round(minutes / 60), minutes,
+    tousLes: fs.length ? Math.max(1, Math.round(joursAnnee / fs.length)) : null,
+    nouveautes: nouveautes.length, rattrapages: rattrapages.length,
+    decennies: [...decennies].sort((a, b) => a[0] - b[0]), plusAncien,
+    mois, moisTop, moisMax, filmDuMois,
+    top: [...notes].sort(parNote).slice(0, 5),
+    coeurs: fs.filter(f => f.user.favorite).length,
+    genres: compte(fs.flatMap(f => f.genres || [])).slice(0, 5),
+    femmes: pct(fs.filter(f => genreReal(f) === 'f').length, fs.length),
+    premierRoleFeminin: pct(fs.filter(f => genreRole(f) === 'f').length, fs.length),
+    notesReal: N, realisatricesDecouvertes: decouvertes.size,
+    production, naissance: tour(nesDe), affichesMonde,
+    acteur: acteurs.length ? { nom: acteurs[0][0], films: acteurs[0][1] } : null,
+  };
+}
+
+let ANNEE_DUREE = 7000; // ms par écran (les tests l'abrègent)
+const ANNEE_MOIS = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
+let annee = null; // { d, ecrans, i, pause, retour }
+
+// Étoile (rayons r1 et r2, n branches) pour les SVG des écrans
+function anneeEtoile(cx, cy, r1, r2, n, rot = 0) {
+  const pts = [];
+  for (let i = 0; i < 2 * n; i++) {
+    const r = i % 2 ? r2 : r1, a = Math.PI * i / n + rot;
+    pts.push((cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1));
+  }
+  return pts.join(' ');
+}
+const anneeAffiche = (f, cls, style) => f && f.poster
+  ? `<img class="annee-affiche ${cls || ''}" src="${safeUrl(tmdbResize(f.poster, 'w342'))}" alt="" style="${style || ''}">`
+  : '';
+// Nombre qui défile jusqu'à sa valeur à l'arrivée sur l'écran
+const anneeNombre = (n, suffixe = '') => `<span class="annee-compte" data-compte="${n}" data-suffixe="${escapeHtml(suffixe)}">${n}${escapeHtml(suffixe)}</span>`;
+const virguleAnnee = v => v.toFixed(1).replace('.', ',');
+
+// Les écrans : [couleur du texte de la tête, résumé lu par les lecteurs d'écran, HTML]
+function anneeEcrans(d) {
+  const Y = d.annee, e = [];
+  const sortieDe = f => escapeHtml(displayTitle(f.id, f.title));
+
+  // 1. Ouverture
+  e.push(['#1a0b2e', `ton année ${Y} en films`, `
+    <div class="annee-ecran" style="background:#ff5a36">
+      <svg class="annee-fond" viewBox="0 0 300 640" aria-hidden="true">
+        <defs><linearGradient id="ae1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7b2ff7"/><stop offset=".55" stop-color="#c13cff"/><stop offset="1" stop-color="#39ff88"/></linearGradient>
+        <linearGradient id="ae1b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#36c9ff"/><stop offset="1" stop-color="#c8ff3a"/></linearGradient></defs>
+        <g class="anim-vague"><path d="M-20 120 C 60 60, 120 200, 200 110 S 320 40, 330 160" fill="none" stroke="#1a0b2e" stroke-width="26"/>
+        <path d="M-20 120 C 60 60, 120 200, 200 110 S 320 40, 330 160" fill="none" stroke="#39ff88" stroke-width="5"/></g>
+        <rect class="anim-glisse" x="232" y="170" width="90" height="300" fill="url(#ae1b)"/>
+        <polygon class="anim-tourne" style="transform-origin:140px 300px" points="${anneeEtoile(140, 300, 150, 62, 14, .2)}" fill="url(#ae1)"/>
+        <circle cx="250" cy="560" r="70" fill="#1a0b2e"/><circle class="anim-pulse" style="transform-origin:250px 560px" cx="250" cy="560" r="52" fill="none" stroke="#39ff88" stroke-width="6"/>
+        <path d="M10 640 l18-60 l26 42 l22-70 l26 70 l26-42 l18 60z" fill="none" stroke="#39ff88" stroke-width="9" stroke-linejoin="round"/>
+      </svg>
+      <div class="annee-bloc anim-monte" style="top:250px;left:24px">
+        <div class="annee-enorme annee-noir">${Y}</div>
+        <div class="annee-titre annee-noir annee-surligne">ton année<br>en films</div>
+      </div>
+      <div class="annee-logo anim-monte" style="bottom:118px;color:#1a0b2e;--d:.5s">*films</div>
+    </div>`]);
+
+  // 2. Films vus, en bandes qui glissent
+  const bandes = [['#ff8a1f', '#1a0b2e'], ['#39e07a', '#1a0b2e'], ['#ff7ad9', '#1a0b2e'], ['#ff8a1f', '#1a0b2e'],
+    ['#f6ff3a', '#1a0b2e'], ['#7b2ff7', '#f6ff3a'], ['#39e07a', '#1a0b2e'], ['#ff7ad9', '#1a0b2e'], ['#1a0b2e', '#ff8a1f']];
+  const motFilms = `${d.films}&nbsp;film${d.films > 1 ? 's' : ''}`;
+  e.push(['#fff', `${d.films} films vus en ${Y}`, `
+    <div class="annee-ecran" style="background:#1a0b2e">
+      <div class="annee-bandes" aria-hidden="true">${bandes.map(([b, c], i) =>
+        `<div style="background:${b};color:${c}"><span class="${i % 2 ? 'anim-droite' : 'anim-gauche'}">${(motFilms + ' ').repeat(4)}</span></div>`).join('')}</div>
+      <div class="annee-etiquette anim-monte" style="bottom:46px;--d:.4s">${anneeNombre(d.films)} film${d.films > 1 ? 's' : ''} vus en ${Y}<br>
+        <small>${d.tousLes === 1 ? 'un par jour' : `un tous les ${d.tousLes} jours`}${d.enCours ? ' depuis janvier' : ''}</small></div>
+    </div>`]);
+
+  // 3. Heures
+  const j = Math.floor(d.minutes / 1440), h = Math.round((d.minutes % 1440) / 60);
+  e.push(['#1a0b2e', `${d.heures} heures devant l'écran`, `
+    <div class="annee-ecran" style="background:#c8ff3a">
+      <div class="annee-pellicule" style="left:0"></div><div class="annee-pellicule" style="right:0"></div>
+      <svg class="annee-fond" viewBox="0 0 300 640" aria-hidden="true"><g class="anim-monte" style="--d:.2s">
+        <circle cx="150" cy="560" r="120" fill="#7b2ff7"/><circle class="anim-pulse" style="transform-origin:150px 560px" cx="150" cy="560" r="80" fill="#ff5a36"/><circle cx="150" cy="560" r="40" fill="#1a0b2e"/></g></svg>
+      <div class="annee-bloc" style="top:150px;left:30px;right:30px;text-align:center">
+        <div class="annee-petit annee-noir anim-monte">tu as passé</div>
+        <div class="annee-enorme annee-noir anim-monte" style="font-size:118px;--d:.15s">${anneeNombre(d.heures)}</div>
+        <div class="annee-titre annee-noir anim-monte" style="--d:.3s">heures<br>devant l'écran</div>
+        ${j ? `<div class="annee-pilule anim-monte" style="--d:.6s">soit ${j} jour${j > 1 ? 's' : ''}${h ? ` et ${h} heure${h > 1 ? 's' : ''}` : ''}<br>sans t'arrêter</div>` : ''}
+      </div>
+    </div>`]);
+
+  // 4. Sorties de l'année et rattrapages
+  if (d.nouveautes + d.rattrapages) {
+    const maxDec = Math.max(1, ...d.decennies.map(([, n]) => n));
+    const barres = d.decennies.map(([dec, n], i) => `
+      <div class="annee-dec"><span class="annee-dec-n">${n}</span>
+        <i class="anim-pousse" style="height:${Math.round(n / maxDec * 70) + 4}px;--d:${(.5 + i * .08).toFixed(2)}s"></i>
+        <span class="annee-dec-nom">${String(dec).slice(2)}</span></div>`).join('');
+    const pa = d.plusAncien;
+    e.push(['#1a0b2e', `${d.nouveautes} films sortis en ${Y}, ${d.rattrapages} rattrapages`, `
+      <div class="annee-ecran" style="background:#7b2ff7">
+        <svg class="annee-fond" viewBox="0 0 300 640" aria-hidden="true"><polygon class="anim-glisse" points="0,0 300,0 300,250 0,330" fill="#c8ff3a"/></svg>
+        <div class="annee-bloc" style="top:70px;left:24px;right:24px">
+          <div class="annee-enorme annee-noir anim-monte" style="font-size:96px">${anneeNombre(d.nouveautes)}</div>
+          <div class="annee-titre annee-noir anim-monte" style="font-size:26px;--d:.15s">sortis en ${Y}</div>
+          <div class="annee-petit annee-noir anim-monte" style="--d:.3s">tout frais, vus l'année de leur sortie</div>
+        </div>
+        <div class="annee-bloc" style="top:345px;left:24px;right:24px;color:#f6ff3a">
+          <div class="annee-titre anim-monte" style="font-size:26px;--d:.4s">${anneeNombre(d.rattrapages)} rattrapage${d.rattrapages > 1 ? 's' : ''}</div>
+          <div class="annee-decennies">${barres}</div>
+          ${pa ? `<div class="annee-petit anim-monte" style="color:#fff;margin-top:12px;--d:.9s;padding-right:${pa.poster ? 80 : 0}px">le plus ancien :<br><b>${sortieDe(pa)}</b>, ${escapeHtml(pa.year)}</div>` : ''}
+        </div>
+        ${pa ? anneeAffiche(pa, 'anim-tombe', 'right:22px;bottom:34px;width:70px;--r:8deg;--d:1s') : ''}
+      </div>`]);
+  }
+
+  // 5. Cadran des mois
+  if (d.moisTop >= 0) {
+    let cadran = '';
+    ANNEE_MOIS.forEach((m, i) => {
+      const a = -Math.PI / 2 + 2 * Math.PI * i / 12;
+      const x = 150 + 92 * Math.cos(a), y = 330 + 92 * Math.sin(a), rot = a * 180 / Math.PI + 90;
+      const b = a + Math.PI / 12;
+      cadran += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" transform="rotate(${rot.toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})" text-anchor="middle" dominant-baseline="middle"${i === d.moisTop ? ' class="annee-mois-top"' : ''}>${m}</text>`
+        + `<line x1="${(150 + 108 * Math.cos(b)).toFixed(1)}" y1="${(330 + 108 * Math.sin(b)).toFixed(1)}" x2="${(150 + 76 * Math.cos(b)).toFixed(1)}" y2="${(330 + 76 * Math.sin(b)).toFixed(1)}" stroke="#1a0b2e" stroke-width="1.5"/>`;
+    });
+    const nomMois = MOIS_FR[d.moisTop];
+    e.push(['#1a0b2e', `ton mois le plus chargé : ${nomMois}, ${d.moisMax} films`, `
+      <div class="annee-ecran" style="background:#b8b2ff">
+        <div class="annee-bloc anim-monte" style="top:78px;left:0;right:0;text-align:center"><div class="annee-titre annee-noir" style="font-size:30px">#1 ${nomMois}</div></div>
+        <svg class="annee-fond" viewBox="0 0 300 640" aria-hidden="true">
+          <defs><radialGradient id="ae5"><stop offset=".45" stop-color="#ff3d6e"/><stop offset=".75" stop-color="#ff8a1f"/><stop offset="1" stop-color="#f6ff3a"/></radialGradient></defs>
+          <path class="anim-respire" style="transform-origin:150px 330px" d="M150 180 C 230 170, 290 230, 280 300 C 300 370, 260 460, 180 470 C 110 495, 30 450, 25 370 C 5 290, 60 190, 150 180z" fill="url(#ae5)"/>
+          <rect x="-10" y="250" width="40" height="170" fill="#f6ff3a"/><path d="M-10 270 q20 15 0 30 q20 15 0 30 q20 15 0 30" stroke="#7b2ff7" stroke-width="5" fill="none"/>
+          <circle cx="150" cy="330" r="112" fill="#b8b2ff"/>
+          <g class="anim-cadran annee-cadran" style="transform-origin:150px 330px">${cadran}</g>
+          <circle cx="258" cy="215" r="10" fill="#f6ff3a" stroke="#1a0b2e" stroke-width="2"/>
+        </svg>
+        ${anneeAffiche(d.filmDuMois, 'anim-tombe', 'left:108px;top:272px;width:84px;--r:-4deg;--d:.6s')}
+        <div class="annee-bloc anim-monte" style="top:500px;left:16px;right:16px;text-align:center;--d:.8s">
+          <div class="annee-petit annee-noir">ton mois le plus chargé</div>
+          <div class="annee-titre annee-noir" style="font-size:28px">${anneeNombre(d.moisMax)} films</div>
+          ${d.filmDuMois ? `<div class="annee-petit annee-noir" style="font-size:11px;opacity:.85">le meilleur : <i>${sortieDe(d.filmDuMois)}</i></div>` : ''}
+        </div>
+      </div>`]);
+  }
+
+  // 6. Film de l'année
+  const top = d.top[0];
+  if (top) {
+    e.push(['#fff', `ton film de l'année : ${displayTitle(top.id, top.title)}`, `
+      <div class="annee-ecran" style="background:#120a1f">
+        <svg class="annee-fond" viewBox="0 0 300 640" aria-hidden="true">
+          <circle cx="150" cy="270" r="140" fill="#7b2ff7"/>
+          <polygon class="anim-tourne" style="transform-origin:150px 270px" points="${anneeEtoile(150, 270, 150, 104, 22)}" fill="#f6ff3a"/>
+          <polygon class="anim-tourne-inverse" style="transform-origin:150px 270px" points="${anneeEtoile(150, 270, 128, 96, 22, .14)}" fill="#ff8a1f"/>
+        </svg>
+        ${anneeAffiche(top, 'anim-zoom', 'left:85px;top:172px;width:130px;--d:.3s')}
+        <div class="annee-bloc anim-monte" style="top:448px;left:22px;right:22px;text-align:center;color:#fff;--d:.6s">
+          <div class="annee-petit" style="color:#f6ff3a">ton film de l'année</div>
+          <div class="annee-titre" style="font-size:30px;line-height:1">${sortieDe(top)}</div>
+          ${top.director ? `<div class="annee-petit" style="margin-top:8px">${escapeHtml(top.director)}</div>` : ''}
+          ${top.user.favorite ? `<div class="annee-coeur">♥ ${d.coeurs === 1 ? `ton seul coup de cœur de ${Y}` : `un de tes ${d.coeurs} coups de cœur`}</div>` : ''}
+        </div>
+      </div>`]);
+  }
+
+  // 7. Genres en couches
+  if (d.genres.length) {
+    const degrades = ['#ff3d6e,#ff8a1f', '#39e07a,#c8ff3a', '#36c9ff,#7b2ff7', '#c13cff,#ff7ad9', '#f6ff3a,#ff8a1f'];
+    const max = d.genres[0][1];
+    const couches = d.genres.map(([g, n], i) => `<div class="annee-couche anim-couche" style="background:linear-gradient(90deg,${degrades[i]});height:${Math.round(26 + 40 * n / max)}px;--d:${(.25 + i * .15).toFixed(2)}s"><b>${escapeHtml(g)}</b><span>${n}</span></div>`).join('');
+    e.push(['#fff', `tes genres : ${d.genres.map(([g, n]) => g + ' ' + n).join(', ')}`, `
+      <div class="annee-ecran" style="background:#6a1fd1">
+        <div class="annee-bloc anim-monte" style="top:78px;left:0;right:0;text-align:center;color:#fff">
+          <div class="annee-titre" style="font-size:26px">tes genres,<br>en couches</div>
+          <div class="annee-petit" style="color:#f6ff3a">bien garni</div>
+        </div>
+        <div class="annee-pile">
+          <div class="annee-pain annee-pain-haut anim-couche" style="--d:${(.25 + d.genres.length * .15).toFixed(2)}s"><i></i><i></i><i></i><i></i><i></i></div>
+          ${couches}
+          <div class="annee-pain annee-pain-bas anim-couche" style="--d:.1s"></div>
+        </div>
+      </div>`]);
+  }
+
+  // 8. Parité
+  const circ = 2 * Math.PI * 80;
+  const N = d.notesReal;
+  const notesTxt = N.femmes.n >= 3 && N.hommes.n >= 3
+    ? `<div class="annee-carte-p anim-monte" style="--d:1.3s"><b>ta note</b><span><em class="vert">${virguleAnnee(N.femmes.note)}</em> réalisatrices · <em class="violet">${virguleAnnee(N.hommes.note)}</em> réalisateurs</span></div>` : '';
+  e.push(['#fff', `${d.femmes} % de tes films réalisés par des femmes`, `
+    <div class="annee-ecran" style="background:#120a1f">
+      <div class="annee-bloc anim-monte" style="top:74px;left:20px;right:20px;color:#fff;text-align:center"><div class="annee-titre" style="font-size:24px">côté parité</div></div>
+      <svg class="annee-fond" viewBox="0 0 300 640" aria-hidden="true">
+        <polygon class="anim-tourne" style="transform-origin:150px 245px" points="${anneeEtoile(150, 245, 126, 108, 30)}" fill="#1f1235"/>
+        <circle cx="150" cy="245" r="80" fill="none" stroke="#7b2ff7" stroke-width="26"/>
+        <circle class="anim-anneau" cx="150" cy="245" r="80" fill="none" stroke="#39e07a" stroke-width="26" stroke-linecap="butt"
+          transform="rotate(-90 150 245)" stroke-dasharray="${circ.toFixed(1)}" style="--plein:${circ.toFixed(1)};--fin:${(circ * (1 - d.femmes / 100)).toFixed(1)}"/>
+      </svg>
+      <div class="annee-bloc" style="top:${d.femmes === 100 ? 226 : 220}px;left:0;right:0;text-align:center">
+        <div class="annee-enorme" style="font-size:${d.femmes === 100 ? 34 : 44}px;color:#39e07a">${anneeNombre(d.femmes, '%')}</div>
+      </div>
+      <div class="annee-bloc anim-monte" style="top:372px;left:20px;right:20px;text-align:center;color:#fff;--d:.9s">
+        <div class="annee-petit">de tes films réalisés par <span class="vert">une femme</span></div>
+      </div>
+      <div class="annee-cartes-p">
+        <div class="annee-carte-p anim-monte" style="--d:1.1s"><b>premier rôle féminin</b><span><em class="vert">${d.premierRoleFeminin} %</em> de tes films</span></div>
+        ${notesTxt}
+        ${d.realisatricesDecouvertes ? `<div class="annee-carte-p anim-monte" style="--d:1.5s"><b>découvertes</b><span><em class="vert">${d.realisatricesDecouvertes}</em> réalisatrice${d.realisatricesDecouvertes > 1 ? 's' : ''} vue${d.realisatricesDecouvertes > 1 ? 's' : ''} pour la première fois</span></div>` : ''}
+      </div>
+    </div>`]);
+
+  // 9. Tour du monde
+  if (d.production.n) {
+    const places = [[18, 150, -10], [208, 160, 8], [208, 380, -7], [20, 385, 9], [116, 432, -3]];
+    const affiches = d.affichesMonde.map((x, i) => anneeAffiche(x.film, 'annee-affiche-mini anim-tombe',
+      `left:${places[i][0]}px;top:${places[i][1]}px;--r:${places[i][2]}deg;--d:${(.5 + i * .18).toFixed(2)}s`)).join('');
+    const nouv = d.production.nouveaux;
+    e.push(['#1a0b2e', `ton cinéma t'a emmené dans ${d.production.n} pays`, `
+      <div class="annee-ecran" style="background:#ff5a36">
+        <div class="annee-bloc anim-monte" style="top:74px;left:20px;right:20px;color:#1a0b2e"><div class="annee-titre" style="font-size:25px;line-height:1.05">ton cinéma t'a emmené dans</div></div>
+        <svg class="annee-fond" viewBox="0 0 300 640" aria-hidden="true">
+          <circle cx="150" cy="330" r="112" fill="#1fd1a5"/>
+          <g fill="none" stroke="#0b6b55" stroke-width="2"><ellipse class="anim-meridien" style="transform-origin:150px 330px" cx="150" cy="330" rx="45" ry="112"/>
+            <ellipse class="anim-meridien" style="transform-origin:150px 330px;animation-delay:-2s" cx="150" cy="330" rx="90" ry="112"/>
+            <line x1="38" y1="330" x2="262" y2="330"/><path d="M48 280 Q150 300 252 280 M48 380 Q150 360 252 380"/></g>
+          <path d="M300 200 C 240 230, 300 290, 250 320" stroke="#1a0b2e" stroke-width="14" fill="none"/><path d="M300 200 C 240 230, 300 290, 250 320" stroke="#f6ff3a" stroke-width="4" fill="none"/>
+        </svg>
+        <div class="annee-bloc" style="top:296px;left:0;right:0;text-align:center"><div class="annee-enorme annee-noir" style="font-size:64px">${anneeNombre(d.production.n)}</div></div>
+        ${affiches}
+        <div class="annee-bloc anim-monte" style="top:560px;left:20px;right:20px;color:#1a0b2e;--d:1.2s">
+          <div class="annee-petit" style="font-weight:700">pays de production${nouv.length ? `, dont ${nouv.length} nouveau${nouv.length > 1 ? 'x' : ''} pour toi` : ''}</div>
+          ${nouv.length ? `<div class="annee-petit" style="font-size:11px">${nouv.slice(0, 6).map(escapeHtml).join(' · ')}${nouv.length > 6 ? ' …' : ''}</div>` : ''}
+          ${d.naissance.n ? `<div class="annee-petit" style="font-size:11px">et des réals nés dans ${d.naissance.n} pays</div>` : ''}
+        </div>
+      </div>`]);
+  }
+
+  // 10. Récapitulatif
+  e.push(['#fff', `récapitulatif de ${Y}`, `
+    <div class="annee-ecran" style="background:#120a1f">
+      <svg class="annee-fond" viewBox="0 0 300 640" aria-hidden="true"><circle cx="150" cy="150" r="92" fill="#7b2ff7"/>
+        <polygon class="anim-tourne" style="transform-origin:150px 150px" points="${anneeEtoile(150, 150, 96, 70, 16)}" fill="#f6ff3a"/>
+        <polygon class="anim-tourne-inverse" style="transform-origin:150px 150px" points="${anneeEtoile(150, 150, 84, 64, 16, .2)}" fill="#ff8a1f"/></svg>
+      ${anneeAffiche(top, 'anim-zoom', 'left:110px;top:92px;width:80px')}
+      <div class="annee-recap anim-monte" style="--d:.3s">
+        <div><h4>top films</h4>${d.top.map((f, k) => `<p><b>${k + 1}</b> ${sortieDe(f)} <em>${f.user.favorite ? '♥' : '★' + f.user.rating}</em></p>`).join('')}</div>
+        <div><h4>top genres</h4>${d.genres.map(([g], k) => `<p><b>${k + 1}</b> ${escapeHtml(g)}</p>`).join('')}</div>
+        <div><h4>films</h4><p class="annee-gros">${d.films}</p></div>
+        <div><h4>heures</h4><p class="annee-gros">${d.heures}</p></div>
+        <div><h4>pays</h4><p class="annee-gros">${d.production.n}</p></div>
+        ${d.acteur ? `<div><h4>le plus vu à l'écran</h4><p style="font-size:13px;font-weight:700">${escapeHtml(d.acteur.nom)}<br><small>${d.acteur.films} films</small></p></div>` : ''}
+      </div>
+      <div class="annee-fin">
+        <button class="annee-fin-btn" data-annee-action="revoir">↺ revoir</button>
+        <button class="annee-fin-btn" data-annee-action="fermer">le bilan détaillé</button>
+      </div>
+      <div class="annee-logo" style="bottom:16px;color:#fff;font-size:13px">*films · ${Y}</div>
+    </div>`]);
+  return e;
+}
+
+// Toile à la taille de l'écran (300 × 640 agrandie, sans dépasser)
+function anneeEchelle() {
+  const cadre = document.getElementById('annee-cadre');
+  if (!cadre) return;
+  const s = Math.min(window.innerWidth / 300, window.innerHeight / 640, 1.5);
+  cadre.style.width = Math.floor(300 * s) + 'px';
+  cadre.style.height = Math.floor(640 * s) + 'px';
+  document.getElementById('annee-toile').style.transform = `scale(${s})`;
+}
+
+const anneeMouvementReduit = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function anneeMontrer(i) {
+  if (!annee) return;
+  annee.i = Math.max(0, Math.min(annee.ecrans.length - 1, i));
+  const [tete, resume, html] = annee.ecrans[annee.i];
+  const scene = document.getElementById('annee-scene');
+  scene.innerHTML = html;
+  document.getElementById('annee-tete').style.color = tete;
+  document.getElementById('annee-barres').style.color = tete;
+  document.getElementById('annee-annonce').textContent = `écran ${annee.i + 1} sur ${annee.ecrans.length} : ${resume}`;
+  const derniere = annee.i === annee.ecrans.length - 1;
+  document.getElementById('annee-barres').innerHTML = annee.ecrans.map((_, k) =>
+    `<i class="${k < annee.i ? 'vu' : k === annee.i ? 'en-cours' : ''}"><span${k === annee.i && !derniere && !anneeMouvementReduit() ? ` style="animation-duration:${ANNEE_DUREE}ms"` : ''}></span></i>`).join('');
+  // Nombres qui défilent
+  const reduit = anneeMouvementReduit();
+  scene.querySelectorAll('.annee-compte').forEach(el => {
+    const fin = +el.dataset.compte, suffixe = el.dataset.suffixe || '';
+    if (reduit || !fin) return;
+    const debut = performance.now(), duree = 1200;
+    const pas = t => {
+      if (!el.isConnected) return;
+      const k = Math.min(1, (t - debut) / duree);
+      el.textContent = Math.round(fin * (1 - Math.pow(1 - k, 3))) + suffixe;
+      if (k < 1) requestAnimationFrame(pas);
+    };
+    el.textContent = '0' + suffixe;
+    requestAnimationFrame(pas);
+  });
+  // L'écran est en place : ses animations démarrent
+  requestAnimationFrame(() => scene.firstElementChild && scene.firstElementChild.classList.add('actif'));
+}
+
+function anneeSuivant() { if (annee && annee.i < annee.ecrans.length - 1) anneeMontrer(annee.i + 1); }
+function anneePrecedent() { if (annee) anneeMontrer(annee.i - 1); }
+function anneePause(forcer) {
+  if (!annee) return;
+  annee.pause = forcer == null ? !annee.pause : forcer;
+  document.getElementById('annee').classList.toggle('pause', annee.pause);
+  const b = document.getElementById('annee-pause');
+  b.textContent = annee.pause ? '▶' : '❚❚';
+  b.setAttribute('aria-label', annee.pause ? 'reprendre' : 'mettre en pause');
+}
+
+function ouvrirAnnee(Y) {
+  const bd = document.getElementById('annee-backdrop');
+  if (!bd || bd.classList.contains('open')) return;
+  const d = donneesAnnee(state.films.filter(f => f.user?.statut === 'vu'), Y || yearReviewYear);
+  if (!d.films) return;
+  annee = { d, ecrans: anneeEcrans(d), i: 0, pause: false, retour: document.activeElement };
+  bd.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  anneeEchelle();
+  anneePause(false);
+  anneeMontrer(0);
+  document.getElementById('annee-suiv').focus({ preventScroll: true });
+  navLater('open');
+}
+function fermerAnnee() {
+  const bd = document.getElementById('annee-backdrop');
+  if (!bd || !bd.classList.contains('open')) return;
+  bd.classList.remove('open');
+  majFenetres();
+  document.getElementById('annee-scene').innerHTML = '';
+  document.body.style.overflow = '';
+  const retour = annee && annee.retour;
+  annee = null;
+  if (retour && document.contains(retour)) retour.focus({ preventScroll: true });
+  navLater('close');
+}
+
+function brancherAnnee() {
+  document.getElementById('annee-suiv').addEventListener('click', anneeSuivant);
+  document.getElementById('annee-prec').addEventListener('click', anneePrecedent);
+  document.getElementById('annee-fermer').addEventListener('click', fermerAnnee);
+  document.getElementById('annee-pause').addEventListener('click', () => anneePause());
+  // Barre du haut remplie : écran suivant (sauf en pause, qui fige la barre)
+  document.getElementById('annee-barres').addEventListener('animationend', e => {
+    // (« réduire les animations » : la barre est remplie d'un coup, sans avancer)
+    if (!anneeMouvementReduit() && e.target.parentElement && e.target.parentElement.classList.contains('en-cours')) anneeSuivant();
+  });
+  document.getElementById('annee-scene').addEventListener('click', e => {
+    const b = e.target.closest('[data-annee-action]');
+    if (!b) return;
+    if (b.dataset.anneeAction === 'revoir') anneeMontrer(0);
+    else fermerAnnee();
+  });
+  // Glisser (téléphone) : vers la gauche, suivant ; vers la droite, précédent
+  let x0 = null;
+  const cadre = document.getElementById('annee-cadre');
+  cadre.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  cadre.addEventListener('touchend', e => {
+    if (x0 == null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    x0 = null;
+    if (Math.abs(dx) < 50) return;
+    e.preventDefault(); // pas de clic sur une zone après un glissé
+    if (dx < 0) anneeSuivant(); else anneePrecedent();
+  });
+  document.addEventListener('keydown', e => {
+    if (!annee) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); anneeSuivant(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); anneePrecedent(); }
+    else if (e.key === ' ') { e.preventDefault(); anneePause(); }
+  });
+  window.addEventListener('resize', () => { if (annee) anneeEchelle(); });
+}
+
+// ============================================================
 // BOOT
 // ============================================================
 loadAdminCreds();
 wireEvents();
+brancherAnnee();
 window.addEventListener('beforeunload', e => { if (envoisEnCours > 0) e.preventDefault(); });
 suivreEtats();
 navInit();
