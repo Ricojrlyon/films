@@ -2274,10 +2274,7 @@ body.vue-stats::after {
 .stats-formes span:nth-child(7) { width: 34px; height: 34px; left: 24%; top: 88%; background: #ff3d6e; border-radius: 0;
   clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
 @keyframes stats-flotte { to { transform: translate(30px, -50px) rotate(40deg) scale(1.1); } }
-@media (max-width: 760px) {
-  body.vue-stats::before { animation: none; }
-  .stats-formes { display: none; }
-}
+
 
 /* Haut de page, sur la page stats seulement */
 body.vue-stats .masthead .wordmark {
@@ -2310,11 +2307,11 @@ body.vue-stats .nav-btn.active { background: var(--warm); border-color: var(--wa
 }
 @keyframes stats-liquide { to { transform: translate3d(4%, 3%, 0) scale(1.15); filter: hue-rotate(160deg); } }
 .stats-hero::after {
-  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.55;
+  content: ''; position: absolute; left: 0; right: 0; top: -40px; bottom: 0; pointer-events: none; opacity: 0.55;
   background: repeating-linear-gradient(var(--profond) 0 2px, transparent 2px 4px);
-  animation: stats-balaye 6s linear infinite;
+  animation: stats-balaye 6s linear infinite; /* déplacé, pas redessiné : léger */
 }
-@keyframes stats-balaye { to { background-position: 0 40px; } }
+@keyframes stats-balaye { to { transform: translateY(40px); } }
 .stats-hero-coords {
   position: absolute; left: 24px; top: 18px; z-index: 2; padding: 4px 8px; background: var(--profond); color: var(--ink);
   font: 600 11px 'JetBrains Mono', monospace; letter-spacing: 0.14em;
@@ -2439,13 +2436,13 @@ body.vue-stats .nav-btn.active { background: var(--warm); border-color: var(--wa
   text-shadow: -2px 0 rgba(255, 61, 110, 0.7), 2px 0 rgba(54, 201, 255, 0.7);
 }
 @media (max-width: 760px) { #stats-page .chart-title { font-size: 22px; } }
-#stats-page .chart-subtitle { position: relative; z-index: 1; }
+#stats-page .chart-subtitle { position: relative; z-index: 1; overflow: hidden; }
 #stats-page .chart-subtitle::before {
-  content: ''; display: block; width: 240px; max-width: 100%; height: 12px; margin: 6px 0 4px;
+  content: ''; display: block; width: 270px; height: 12px; margin: 6px 0 4px -30px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='12'%3E%3Cpath d='M0 6 Q 7.5 0 15 6 T 30 6' fill='none' stroke='%23ff3d6e' stroke-width='2.5' stroke-dasharray='5 3'/%3E%3C/svg%3E") repeat-x 0 0 / 30px 12px;
   animation: stats-vague 1.5s linear infinite;
 }
-@keyframes stats-vague { to { background-position: 30px 0; } }
+@keyframes stats-vague { to { transform: translateX(30px); } } /* déplacée, pas redessinée */
 
 /* Barres en pilules hachurées et lumineuses, qui se remplissent à l'ouverture */
 #stats-page .bar-row { padding: 6px 0; border-radius: 0; border-bottom: 0; }
@@ -2552,7 +2549,6 @@ body.vue-stats .nav-btn.active { background: var(--warm); border-color: var(--wa
 #stats-page .year-review-top .year-best-meta { color: #4a5560; }
 #stats-page .year-review-flop .year-best-film::before { color: var(--hot); }
 #stats-page .year-review-flop .year-best-film::after { background: rgba(255, 61, 110, 0.75); }
-#stats-page .year-review-flop .year-best-poster { filter: grayscale(1) contrast(1.2); }
 #stats-page .year-review-flop .year-best-poster::after {
   content: 'flop'; position: absolute; right: 6%; bottom: 10%; padding: 1px 7px; transform: rotate(-14deg);
   font: 20px 'Bungee', sans-serif; color: var(--hot); border: 3px solid var(--hot); background: rgba(22, 31, 37, 0.55);
@@ -2613,3 +2609,27 @@ body.vue-stats .nav-btn.active { background: var(--warm); border-color: var(--wa
 .stats-geant { white-space: nowrap; font: 140px/1 'Bungee', sans-serif; color: transparent; -webkit-text-stroke: 2px rgba(200, 255, 58, 0.5); }
 .stats-geant div { display: inline-block; animation: stats-defile 30s linear infinite; }
 @media (max-width: 760px) { .stats-geant { font-size: 80px; } .stats-pied svg { width: 100px; } }
+
+/* Téléphone (en fin de fichier, pour passer après les règles de la page) : rien qui oblige à redessiner la page en continu (sinon des
+   morceaux restent vides pendant le défilement, constaté le 2026-11-24) :
+   ni grain ni assombrissement, ni formes, bandeau et cartes figés, glitch
+   seulement sur le grand nombre du haut */
+@media (max-width: 760px) {
+  body.vue-stats::before, body.vue-stats::after, .stats-formes { display: none; }
+  .stats-liquide { animation: none; will-change: auto; }
+  #stats-numbers .stat-card { animation: none; }
+  #stats-page .stat-card-value[data-t]::after { display: none; }
+  #months-chart { filter: none; }
+  #stats-page .annee-ouvrir { animation: none; }
+  #stats-page .annee-ouvrir-play { animation: none; }
+  /* Mise en page sur téléphone */
+  #stats-page .chart-title { font-size: 18px; }
+  #stats-page .bar-row { grid-template-columns: 96px minmax(0, 1fr) auto; }
+  #stats-page .bar-row .bar-value { font-size: 13px; white-space: nowrap; }
+  .parite-txt p { line-height: 1.35; }
+  .parite-gros { display: block; font-size: 34px; margin: 0 0 2px; }
+  #stats-page .gender-notes { gap: 10px; }
+  #stats-page .gender-notes .bar-row { flex: 1 1 0; min-width: 0; padding: 10px 12px; }
+  #stats-page .gender-notes .bar-value { font-size: 32px; }
+  #stats-page .duel-vs { font-size: 22px; }
+}

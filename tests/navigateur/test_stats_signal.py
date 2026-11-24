@@ -102,6 +102,7 @@ class StatsSignal(Banc):
         self.assertTrue(largeurs and max(largeurs) <= 150, largeurs)
         self.assertEqual(self.js('document.querySelectorAll("#year-review .censure").length'), 0)
         self.assertEqual(self.js('getComputedStyle(document.querySelector(".year-review-flop .year-best-poster"), "::after").content'), '"flop"')
+        self.assertEqual(self.style('.year-review-flop .year-best-poster', 'filter'), 'none', 'flop en couleurs normales')
 
     def test_pellicule_de_tous_les_coups_de_coeur(self):
         self.stats()
@@ -130,6 +131,17 @@ class StatsSignal(Banc):
 
 class StatsSignalTelephone(StatsSignal):
     largeur = 375
+
+    def test_rien_qui_redessine_en_continu_sur_telephone(self):
+        # Seules restent des animations que le téléphone déplace sans redessiner
+        # (transform, opacity), et le glitch du grand nombre du haut
+        self.stats()
+        lourdes = self.js('''document.getAnimations().filter(a => a.playState === 'running' && a.effect.getTiming().iterations === Infinity).map(a => {
+            const props = new Set(); for (const k of a.effect.getKeyframes()) for (const p of Object.keys(k))
+              if (!['offset', 'easing', 'composite', 'computedOffset', 'transform', 'opacity'].includes(p)) props.add(p);
+            return props.size || a.animationName === 'stats-holo' ? a.animationName : null; }).filter(Boolean)''')
+        self.assertEqual(lourdes, ['stats-glitch'], lourdes)
+        self.assertEqual(self.js('getComputedStyle(document.body, "::before").display'), 'none', 'grain')
 
 
 if __name__ == '__main__':
