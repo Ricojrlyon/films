@@ -14,7 +14,7 @@ Site personnel de suivi de films et séries, sur GitHub Pages, sans build ni ser
 - **Ton année en films** : bouton du bilan, 10 écrans animés façon stories.
 - **Style « signal »** sur tout le site : vert acide, grain, glitch. Sous le haut de page, deux rubans (tes chiffres, tes derniers vus). Chaque page a son bandeau dessiné comme celui des stats, avec sa couleur et ses chiffres (`majHabillage`). La page se lit en quatre zones : navigation, réglages, bandeau, films. Les infos du film sont posées sur l'affiche, les étiquettes restent à l'intérieur. La fiche montre un polaroïd et les notes en duel. Sur téléphone, rien ne redessine la page en continu.
 - **Mode édition** (cadenas) : ajouter, noter, modifier, supprimer, re-matcher, enrichir.
-- **Application** : s'installe sur l'écran d'accueil (manifeste et icônes « \*F »). Le bouton « précédent » referme ce qui a été ouvert en dernier.
+- **Application** : s'installe sur l'écran d'accueil (manifeste et icône « \*F » vert acide décalé de rose et de bleu, comme l'aperçu de partage et l'icône d'onglet). Le bouton « précédent » referme ce qui a été ouvert en dernier.
 
 ## Fichiers
 
@@ -31,7 +31,7 @@ Site personnel de suivi de films et séries, sur GitHub Pages, sans build ni ser
 ## Règles à respecter
 
 - **Pousser ensemble** les fichiers modifiés, en un seul envoi.
-- **Numéros de version** : à chaque changement de `style.css` ou `app.js`, augmenter `?v=…` dans `index.html` et pousser `index.html` avec.
+- **Numéros de version** : à chaque changement de `style.css` ou `app.js`, augmenter `?v=…` dans `index.html` et pousser `index.html` avec. Pour une nouvelle icône ou un nouvel aperçu, augmenter aussi le `?v=` des images (`index.html` et `manifest.webmanifest`).
 - **Ne jamais pousser** une copie locale de `films.json`, `cinemas_lyon.json` ou `canal_plus.json` : ce sont les données vivantes du dépôt.
 - **Sécurité (CSP d'`index.html`)** : seul `app.js` exécute du code (pas de `<script>` ni d'`onclick` dans la page), styles seulement dans `style.css` (les attributs `style=` sont permis). Toute nouvelle ressource externe doit être ajoutée à la CSP.
 - Tout texte venant de TMDB ou de `films.json` passe par `escapeHtml`, toute adresse par `safeUrl`.

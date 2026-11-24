@@ -14,9 +14,11 @@
 <!-- Site sombre : listes déroulantes, barres de défilement et champs natifs du navigateur en version sombre -->
 <meta name="color-scheme" content="dark">
 <!-- Application installable sur l'écran d'accueil (iPhone et Android) : nom,
-     couleurs et icônes dans manifest.webmanifest ; icône iPhone à part -->
+     couleurs et icônes dans manifest.webmanifest ; icône iPhone à part.
+     ?v= sur les images : à augmenter à chaque nouvelle icône ou nouvel aperçu
+     (téléphones et messageries gardent sinon l'ancienne image) -->
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <meta name="apple-mobile-web-app-title" content="*films">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>*films · ma collection</title>
@@ -29,13 +31,14 @@
 <meta property="og:title" content="*films · ma collection">
 <meta property="og:description" content="Ma collection de films : à voir, vus, notes, statistiques et recommandations.">
 <meta property="og:url" content="https://ricojrlyon.github.io/films/">
-<meta property="og:image" content="https://ricojrlyon.github.io/films/apercu.png">
+<meta property="og:image" content="https://ricojrlyon.github.io/films/apercu.png?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="*films, ma collection de films">
 <meta property="og:locale" content="fr_FR">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-16 -16 32 32'><g fill='%23d4a574'><rect x='-2' y='-13' width='4' height='26' rx='2'/><rect x='-2' y='-13' width='4' height='26' rx='2' transform='rotate(60)'/><rect x='-2' y='-13' width='4' height='26' rx='2' transform='rotate(120)'/></g></svg>">
+<!-- Icône de l'onglet : l'astérisque en vert acide, décalé de rose et de bleu (comme l'icône « *F ») -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-16 -16 32 32'><defs><g id='a'><rect x='-2' y='-13' width='4' height='26' rx='2'/><rect x='-2' y='-13' width='4' height='26' rx='2' transform='rotate(60)'/><rect x='-2' y='-13' width='4' height='26' rx='2' transform='rotate(120)'/></g></defs><use href='%23a' x='-1.5' fill='%23ff3d6e'/><use href='%23a' x='1.5' fill='%2336c9ff'/><use href='%23a' fill='%23c8ff3a'/></svg>">
 <!-- Polices hébergées sur le site (fonts/polices.css, comme nocturne-lyon) et non
      plus chez Google Fonts, qui recevait l'adresse IP de chaque visiteur. Les quatre
      de l'écran d'accueil (alphabet latin de base) sont demandées dès l'ouverture,
