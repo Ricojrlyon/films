@@ -2667,6 +2667,24 @@ function renderStats() {
     if (f.director) f.director.split(',').forEach(d => cyDirs.add(d.trim()));
   }
 
+  // Haut de la page : nombre de films vus, et bandeau qui défile (deux fois le
+  // même texte : il boucle sans à-coup en glissant de la moitié de sa longueur)
+  const plusAncien = [...perYear.keys()].filter(y => y.startsWith('avant ')).sort()[0];
+  document.getElementById('stats-hero-nombre').textContent = vus.length;
+  document.getElementById('stats-hero-sous').textContent = `film${vus.length > 1 ? 's' : ''} vus${plusAncien ? ' · depuis ' + plusAncien : ''}`;
+  const genreTete = (() => { const c = new Map(); vus.forEach(f => (f.genres || []).forEach(g => c.set(g, (c.get(g) || 0) + 1))); return [...c].sort((a, b) => b[1] - a[1])[0]; })();
+  const morceaux = [`${vus.length} films vus`, `${totalHours.toLocaleString('fr-FR')} heures`, `${avgRating.toFixed(1).replace('.', ',')} / 10`,
+    `${favorites} coups de cœur`, `${directors.size} réals`, genreTete ? `${genreTete[0]} en tête` : '', `${vusThisYear.length} films en ${CY}`].filter(Boolean);
+  // (quatre fois : la moitié qui défile dépasse la largeur d'un grand écran)
+  document.getElementById('stats-ticker').textContent = (morceaux.join(' ✦ ') + ' ✦ ').repeat(4);
+  document.getElementById('stats-ticker-2').textContent = `★ stats ★ ton année ★ cinéma ★ ${vusThisYear.length} films en ${CY} `.repeat(10);
+  document.getElementById('stats-hero-nombre').dataset.t = vus.length;
+  document.getElementById('stats-auto-n').textContent = vus.length;
+  document.getElementById('stats-auto-cercle').textContent = `★ ${vus.length} films vus ★ ${totalHours.toLocaleString('fr-FR')} heures de cinéma `.repeat(2);
+  // Étoile « record » : l'année de visionnage la plus chargée
+  const anneeRecord = [...perYear.entries()].filter(([y]) => /^\d{4}$/.test(y)).sort((a, b) => b[1] - a[1])[0];
+  document.getElementById('stats-etoile-an').textContent = anneeRecord ? anneeRecord[0] : '';
+
   // Cartes chiffrées : deux boutons côte à côte (pas l'un dans l'autre) ; le
   // chiffre ouvre les vus correspondants, la ligne de l'année en cours ceux de
   // cette année
@@ -2675,7 +2693,7 @@ function renderStats() {
     <div class="stat-card stat-card-split ${cls}">
       <button class="stat-card-main" ${goCarte(filtres)} title="voir ces films">
         <span class="stat-card-label">${label}</span>
-        <span class="stat-card-value">${valeur}</span>
+        <span class="stat-card-value" data-t="${escapeHtml(String(valeur).replace(/<[^>]+>/g, ''))}">${valeur}</span>
         <span class="stat-card-detail">${detail}</span>
       </button>
       ${annee == null ? '' : `<button class="stat-card-year" ${goCarte({ ...filtres, yearvu: CY })} title="voir les films vus en ${CY}">
@@ -2687,8 +2705,8 @@ function renderStats() {
   document.getElementById('stats-numbers').innerHTML = [
     carteStat('', 'films vus', vus.length, `${films.length - vus.length} à voir`, {}, vusThisYear.length),
     carteStat('accent', 'temps cumulé', totalHours.toLocaleString('fr-FR') + 'h', `soit ${totalDays} jours`, {}, cyHours + 'h'),
-    carteStat('', 'note moyenne', avgRating.toFixed(1) + '<span style="font-size:0.5em; color: var(--ink-mute)">/10</span>',
-      `sur ${rated.length} films notés`, {}, cyRated.length ? cyAvgRating.toFixed(1) + '/10' : null),
+    carteStat('', 'note moyenne', avgRating.toFixed(1).replace('.', ',') + '<span style="font-size:0.5em; color: var(--ink-mute)">/10</span>',
+      `sur ${rated.length} films notés`, {}, cyRated.length ? cyAvgRating.toFixed(1).replace('.', ',') + '/10' : null),
     carteStat('hot', 'coups de cœur', favorites, `${(favorites * 100 / Math.max(1, vus.length)).toFixed(0)}% des vus`, coeurs, cyFavorites),
     carteStat('', 'films par an', avgPerYear, 'moyenne (années complètes)', {}, vusThisYear.length + ' vus'),
     carteStat('', 'réalisateurs', directors.size, 'distincts', {}, cyDirs.size + ' distincts'),
@@ -2778,8 +2796,8 @@ function renderYearReview() {
   const go = filtres => `data-go="${escapeHtml(JSON.stringify(filtres))}"`;
   const carte = (label, valeur, detail, filtres, cls = '') => filtres
     ? `<button class="stat-card stat-card-clickable ${cls}" ${go(filtres)} title="voir ces films">
-         <span class="stat-card-label">${label}</span><span class="stat-card-value">${valeur}</span>${detail}</button>`
-    : `<div class="stat-card ${cls}"><div class="stat-card-label">${label}</div><div class="stat-card-value">${valeur}</div>${detail}</div>`;
+         <span class="stat-card-label">${label}</span><span class="stat-card-value" data-t="${escapeHtml(String(valeur).replace(/<[^>]+>/g, ''))}">${valeur}</span>${detail}</button>`
+    : `<div class="stat-card ${cls}"><div class="stat-card-label">${label}</div><div class="stat-card-value" data-t="${escapeHtml(String(valeur).replace(/<[^>]+>/g, ''))}">${valeur}</div>${detail}</div>`;
   const cartes = [
     carte('films vus', m.films, evo('films', '', 0, true), { yearvu: Y }),
     carte('heures', m.heures + 'h', evo('heures', 'h', 0, true), { yearvu: Y }, 'accent'),
@@ -2869,7 +2887,7 @@ function renderYearReview() {
     .sort((a, b) => (a.user.rating - b.user.rating) || ((a.tmdb_rating || 0) - (b.tmdb_rating || 0))).slice(0, 5);
   const carteFilm = f => `
     <div class="year-best-film" data-film-id="${escapeHtml(f.id)}" role="button" tabindex="0">
-      <div class="year-best-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(tmdbResize(f.poster, 'w185'))})"` : ''}></div>
+      <div class="year-best-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(tmdbResize(f.poster, 'w342'))})"` : ''}></div>
       <div class="year-best-title">${escapeHtml(displayTitle(f.id, f.title))}</div>
       <div class="year-best-meta">${f.user.favorite ? '❤' : '★'.repeat(f.user.rating)}${f.director ? ' · ' + escapeHtml(f.director) : ''}</div>
     </div>`;
@@ -2936,13 +2954,15 @@ function renderMonthsChart() {
   let yearLines = '';
   let yearLabels = '';
   let lastYear = null;
+  let recordTxt = '';
   months.forEach((d, i) => {
     const x = padLeft + i * (barW + gap);
     const barH = (d.count / max) * innerH;
     const y = padTop + innerH - barH;
     const [yr, mo] = d.key.split('-');
     const isCurrent = d.count === max;
-    bars += `<rect class="month-bar" data-key="${d.key}" data-count="${d.count}" x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${barW.toFixed(2)}" height="${Math.max(1, barH).toFixed(2)}" fill="${isCurrent ? 'var(--hot)' : 'var(--warm)'}" rx="1"/>`;
+    bars += `<rect class="month-bar" data-key="${d.key}" data-count="${d.count}" x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${barW.toFixed(2)}" height="${Math.max(1, barH).toFixed(2)}" fill="${isCurrent ? 'url(#mois-degrade-record)' : 'url(#mois-degrade)'}" mask="url(#mois-masque)"/>`;
+    if (isCurrent && !recordTxt) recordTxt = `<text class="mois-record" x="${(x + barW / 2).toFixed(2)}" y="${(y - 6).toFixed(2)}" text-anchor="middle">record ✦ ${d.count}</text>`;
     // Year marker on January or at first month
     if (mo === '01' || lastYear === null) {
       yearLines += `<line x1="${(x - gap/2).toFixed(2)}" y1="${padTop}" x2="${(x - gap/2).toFixed(2)}" y2="${padTop + innerH}" stroke="var(--rule-strong)" stroke-width="0.5" stroke-dasharray="2 2"/>`;
@@ -2965,9 +2985,16 @@ function renderMonthsChart() {
   svg.setAttribute('role', 'img');
   svg.setAttribute('aria-label', `films vus par mois, de ${prettyMonth(months[0].key)} à ${prettyMonth(months[months.length - 1].key)} ; record : ${max} en ${prettyMonth(record.key)}`);
   svg.innerHTML = `
+    <defs>
+      <linearGradient id="mois-degrade" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#36c9ff"/><stop offset="1" stop-color="#c8ff3a"/></linearGradient>
+      <linearGradient id="mois-degrade-record" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff8a1f"/><stop offset="1" stop-color="#ff3d6e"/></linearGradient>
+      <pattern id="mois-rayures" width="8" height="6" patternUnits="userSpaceOnUse"><rect width="8" height="4" fill="#fff"/></pattern>
+      <mask id="mois-masque" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="url(#mois-rayures)"/></mask>
+    </defs>
     ${yearLines}
     ${maxLine}
     ${bars}
+    ${recordTxt}
     ${yearLabels}
   `;
   scroller.scrollLeft = scroller.scrollWidth; // les mois les plus récents
@@ -3082,9 +3109,10 @@ function renderHeatmap() {
       const bg = heatmapColor(intensity, isFav);
       // Texte sombre sur les cases claires, clair sur les sombres (blanc et
       // beige donnaient 1,9 à 3,9:1)
-      const textCol = intensity > 0.57 ? 'var(--bg)' : 'var(--ink)';
+      const textCol = v > 0 ? heatmapTexte(intensity, isFav) : 'var(--ink-mute)';
       const clickAttrs = v > 0 ? ` heatmap-cell-clickable" data-genre="${escapeHtml(m.genre)}" data-rating="${i + 1}` : '';
-      html += `<div class="heatmap-cell${clickAttrs}" style="background:${bg}; color:${textCol}">${v > 0 ? v : '·'}</div>`;
+      const top = v > 0 && v === maxCell ? ' heatmap-top' : '';
+      html += `<div class="heatmap-cell${top}${clickAttrs}" style="background:${bg}; color:${textCol}; --a:${intensity.toFixed(2)}">${v > 0 ? v : '·'}</div>`;
     }
     html += `</div>`;
   }
@@ -3174,22 +3202,29 @@ function renderDirectorCountryChart() {
     </div>`).join('');
 }
 
+// Couleur d'une case « genre × note » (page stats, style signal) : du fond des
+// cases (#1c272f) au vert acide (#c8ff3a), ou au rose clair (#ff7a9c) pour ❤.
+// La teinte saute la zone moyenne (sombre jusqu'à la moitié, vive ensuite) :
+// dans cette zone, ni le texte clair ni le texte foncé n'atteignaient 4,5:1
+// (3,5:1 au pire) ; ainsi, 4,9:1 au moins partout (test_stats_signal).
+function heatmapRvb(intensity, isFav) {
+  const de = [28, 39, 47], a = isFav ? [255, 122, 156] : [200, 255, 58];
+  const u = intensity < 0.5 ? intensity * 0.5 : 0.8 + (intensity - 0.5) * 0.4;
+  return de.map((v, k) => Math.round(v + (a[k] - v) * u));
+}
 function heatmapColor(intensity, isFav) {
-  // From bg-elev (low) to warm (mid) to hot (high) for normal cells
-  // For ❤ column, use a more red-ish progression
-  if (intensity === 0) return 'var(--bg-elev)';
-  if (isFav) {
-    // hot (red) gradient
-    const r = Math.round(28 + (255 - 28) * intensity);
-    const g = Math.round(39 + (107 - 39) * intensity);
-    const b = Math.round(47 + (74 - 47) * intensity);
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-  // warm gradient: bg-elev #1c272f → warm #d4a574
-  const r = Math.round(28 + (212 - 28) * intensity);
-  const g = Math.round(39 + (165 - 39) * intensity);
-  const b = Math.round(47 + (116 - 47) * intensity);
-  return `rgb(${r}, ${g}, ${b})`;
+  if (intensity === 0) return 'var(--profond)';
+  return `rgb(${heatmapRvb(intensity, isFav).join(', ')})`;
+}
+// Texte d'une case : le fond du site ou le texte clair, celui qui contraste le plus
+function heatmapTexte(intensity, isFav) {
+  const lum = c => {
+    const s = c.map(v => v / 255).map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * s[0] + 0.7152 * s[1] + 0.0722 * s[2];
+  };
+  const fond = lum(heatmapRvb(intensity, isFav));
+  const sombre = (fond + 0.05) / (lum([22, 31, 37]) + 0.05), clair = (lum([231, 223, 190]) + 0.05) / (fond + 0.05);
+  return sombre >= clair ? '#161f25' : '#e7dfbe';
 }
 
 function prettyMonth(yyyymm) {
@@ -3465,7 +3500,7 @@ function renderGenderBalance() {
   if (N.femmes.n >= 3 && N.hommes.n >= 3) {
     const virgule = v => v.toFixed(1).replace('.', ',');
     const ligne = (nom, cls, x) => `
-        <div class="bar-row bar-row-clickable" ${go({ realGenre: cls === 'female' ? 'f' : 'h' }, `${nom} : voir ces films`)}>
+        <div class="bar-row bar-row-clickable note-${cls === 'female' ? 'f' : 'h'}" ${go({ realGenre: cls === 'female' ? 'f' : 'h' }, `${nom} : voir ces films`)}>
           <div class="bar-label">${nom}</div>
           <div class="bar-track"><div class="bar-fill ${cls}" style="width:${(x.note * 10).toFixed(1)}%"></div></div>
           <div class="bar-value">${virgule(x.note)}</div>
@@ -3478,7 +3513,7 @@ function renderGenderBalance() {
     notesHtml = `
       <div class="gender-balance-row gender-notes">
         <div class="gender-balance-label">ta note moyenne</div>
-        ${ligne('réalisatrices', 'female', N.femmes)}${ligne('réalisateurs', 'male', N.hommes)}
+        ${ligne('réalisatrices', 'female', N.femmes)}<span class="duel-vs" aria-hidden="true">vs</span>${ligne('réalisateurs', 'male', N.hommes)}
         <div class="gender-balance-legend"><span>${texte}</span><span>sur ${N.femmes.n} et ${N.hommes.n} films notés · une co-réalisation avec une femme compte côté réalisatrices</span></div>
       </div>`;
 
@@ -3516,7 +3551,19 @@ function renderGenderBalance() {
       </div>`;
   }
 
-  root.innerHTML =
+  // Deux anneaux : part des films réalisés par une femme (extérieur), avec une
+  // actrice en premier rôle (intérieur) ; mêmes comptes que les barres dessous
+  const pF = dirF / dirTotal * 100, pL = leadF / leadTotal * 100;
+  const arc = (r, p, cls) => `<circle cx="110" cy="110" r="${r}" class="anneau-fond"/><circle cx="110" cy="110" r="${r}" class="anneau-arc${cls}" style="--c:${(2 * Math.PI * r).toFixed(1)};--p:${p.toFixed(1)}"/>`;
+  const anneaux = `
+      <div class="parite-anneaux">
+        <svg viewBox="0 0 220 220" aria-hidden="true" focusable="false">${arc(96, pF, '')}${arc(70, pL, ' interieur')}</svg>
+        <div class="parite-txt">
+          <p><b class="parite-gros">${Math.round(pF)} %</b> des films réalisés par une femme</p>
+          <p><b class="parite-gros clair">${Math.round(pL)} %</b> avec une actrice en premier rôle</p>
+        </div>
+      </div>`;
+  root.innerHTML = anneaux +
     bar('réalisateur · réalisatrice', dirM, dirF, dirU, dirTotal, 'realGenre', ['films de réalisateurs', 'films de réalisatrices']) +
     bar('acteur · actrice principal·e', leadM, leadF, leadU, leadTotal, 'roleGenre', ['premier rôle masculin', 'premier rôle féminin']) +
     notesHtml;
@@ -3664,43 +3711,43 @@ async function enrichGender() {
   btn.disabled = false;
 }
 
+// Tes coups de cœur, année de visionnage par année (« avant 2022 » à la fin),
+// toutes les affiches sur une pellicule qui défile ; une année sans coup de
+// cœur montre son film le mieux noté (puis la moyenne TMDB pour départager)
 function renderYearBest() {
-  // For each year of viewing, find the highest-rated film
-  const byYear = new Map(); // year → [films]
+  const groupes = new Map();
   for (const f of state.films) {
     if (f.user?.statut !== 'vu' || !f.user.rating) continue;
-    const dv = f.user.date_vue;
-    if (!dv || dv.startsWith('before-')) continue;
-    const y = dv.slice(0, 4);
-    if (!byYear.has(y)) byYear.set(y, []);
-    byYear.get(y).push(f);
+    const dv = f.user.date_vue || '';
+    const y = dv.startsWith('before-') ? 'avant ' + dv.slice(7) : /^\d{4}/.test(dv) ? dv.slice(0, 4) : null;
+    if (!y) continue;
+    if (!groupes.has(y)) groupes.set(y, []);
+    groupes.get(y).push(f);
   }
-  const years = [...byYear.keys()].sort().reverse();
   const root = document.getElementById('year-best');
-  if (!years.length) {
+  if (!groupes.size) {
     root.innerHTML = '<div style="color: var(--ink-mute); font-style: italic;">pas de données suffisantes.</div>';
     return;
   }
-  root.innerHTML = years.map(y => {
-    const list = byYear.get(y);
-    list.sort((a, b) => b.user.rating - a.user.rating);
-    const top = list[0];
-    const others = list.filter(f => f.user.rating === top.user.rating).slice(0, 3);
-    const filmCells = others.map(f => `
-      <div class="year-best-film" data-film-id="${escapeHtml(f.id)}" role="button" tabindex="0">
+  const rang = y => (y.startsWith('avant ') ? '0' : '1') + y.replace('avant ', '');
+  const annees = [...groupes.keys()].sort((a, b) => rang(b).localeCompare(rang(a)));
+  const cadre = (f, note) => `
+      <div class="year-best-film" data-film-id="${escapeHtml(f.id)}" title="${escapeHtml(displayTitle(f.id, f.title))}">
         <div class="year-best-poster ${f.poster ? '' : 'empty'}" ${f.poster ? `style="background-image:url(${safeUrl(tmdbResize(f.poster, 'w185'))})"` : ''}></div>
-        <div class="year-best-title">${escapeHtml(f.title)}</div>
-        <div class="year-best-meta">${f.user.favorite ? '❤' : '★'.repeat(f.user.rating)}${f.director ? ' · ' + escapeHtml(f.director) : ''}</div>
-      </div>`).join('');
-    return `<div class="year-best-row">
-      <div class="year-best-year">${escapeHtml(y)}</div>
-      <div class="year-best-films">${filmCells}</div>
-    </div>`;
-  }).join('');
+        <div class="year-best-title">${escapeHtml(displayTitle(f.id, f.title))}</div>
+        ${note ? `<div class="year-best-meta">${note}</div>` : ''}
+      </div>`;
+  root.innerHTML = '<div class="pellicule">' + annees.map(y => {
+    const list = groupes.get(y);
+    const coeurs = list.filter(f => f.user.favorite).sort((a, b) => (b.user.date_vue || '').localeCompare(a.user.date_vue || ''));
+    const films = coeurs.length ? coeurs.map(f => cadre(f, ''))
+      : [cadre([...list].sort((a, b) => (b.user.rating - a.user.rating) || ((b.tmdb_rating || 0) - (a.tmdb_rating || 0)))[0], 'meilleure note')];
+    return `<div class="pellicule-annee"><span class="pellicule-an">${escapeHtml(y)}</span><div class="pellicule-films">${films.join('')}</div></div>`;
+  }).join('') + '</div>';
   // Écouteurs plutôt qu'un onclick inline : un id interpolé dans du JS
   // d'attribut n'est pas neutralisable par escapeHtml
   root.querySelectorAll('.year-best-film').forEach(el => {
-    rendreActivable(el, () => openModalFromCard(el.dataset.filmId)); // Entrée l'ouvre aussi
+    rendreActivable(el, () => openModalFromCard(el.dataset.filmId), el.getAttribute('title')); // Entrée l'ouvre aussi
   });
 }
 
@@ -5902,6 +5949,8 @@ function wireEvents() {
 
 function showPage(name) {
   document.getElementById('collection-page').style.display = name === 'collection' ? '' : 'none';
+  // Page stats : le haut de page prend son style (« signal », style.css)
+  document.body.classList.toggle('vue-stats', name === 'stats');
   document.getElementById('stats-page').classList.toggle('active', name === 'stats');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
   if (name === 'stats' && statsDirty) {

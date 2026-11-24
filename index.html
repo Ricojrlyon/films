@@ -47,7 +47,7 @@
 <link href="fonts/polices.css" rel="stylesheet">
 <!-- Apparence : style.css. Augmenter le numéro v= à chaque modification du fichier,
      sinon les navigateurs peuvent garder l'ancienne version jusqu'à 10 minutes. -->
-<link rel="stylesheet" href="style.css?v=28">
+<link rel="stylesheet" href="style.css?v=30">
 </head>
 <body>
 <div class="app">
@@ -250,16 +250,55 @@
 
   <!-- ============== STATS PAGE ============== -->
   <main class="stats-page" id="stats-page">
+    <!-- Haut de la page stats : liquide animé (SVG, sans script) et nombre de films vus -->
+    <div class="stats-formes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <section class="stats-hero" aria-labelledby="stats-hero-n">
+      <svg class="stats-liquide" viewBox="0 0 800 420" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <filter id="stats-liquide-f" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.006" numOctaves="2" seed="11"/>
+          <feColorMatrix type="matrix" values=".5 .5 0 0 0  0 .5 .5 0 0  .5 0 .5 0 0  0 0 0 0 1" result="bruit"/>
+          <feFlood flood-color="#161f25" result="fond"/>
+          <feComponentTransfer in="bruit">
+            <feFuncR type="discrete" tableValues="0 0 1 0 0 0 1 1 0 0 0 1 0 0 1 0 0 0 1 0"/>
+            <feFuncG type="discrete" tableValues="0 1 0 0 1 0 0 1 0 0 1 0 0 1 1 0 1 0 0 0"/>
+            <feFuncB type="discrete" tableValues="1 0 0 1 1 0 0 0 1 0 0 1 1 0 0 0 0 1 0 1"/>
+          </feComponentTransfer>
+          <feBlend in2="fond" mode="lighten"/>
+        </filter>
+        <rect width="800" height="420" filter="url(#stats-liquide-f)"/>
+      </svg>
+      <span class="stats-hero-coords" aria-hidden="true">lat 45.76 · long 4.83 · ch. 01</span>
+      <span class="stats-hero-barres" aria-hidden="true"></span>
+      <svg class="stats-autocollant" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+        <defs><path id="stats-cercle" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs>
+        <circle cx="100" cy="100" r="96"/>
+        <text><textPath href="#stats-cercle" id="stats-auto-cercle"></textPath></text>
+        <text x="100" y="94" text-anchor="middle" class="stats-auto-gros" id="stats-auto-n"></text>
+        <text x="100" y="122" text-anchor="middle">films vus</text>
+      </svg>
+      <svg class="stats-etoile" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+        <polygon points="198.0,100.0 170.9,112.5 192.1,133.5 162.4,136.0 175.1,163.0 146.3,155.2 149.0,184.9 124.6,167.7 117.0,196.5 100.0,172.0 83.0,196.5 75.4,167.7 51.0,184.9 53.7,155.2 24.9,163.0 37.6,136.0 7.9,133.5 29.1,112.5 2.0,100.0 29.1,87.5 7.9,66.5 37.6,64.0 24.9,37.0 53.7,44.8 51.0,15.1 75.4,32.3 83.0,3.5 100.0,28.0 117.0,3.5 124.6,32.3 149.0,15.1 146.3,44.8 175.1,37.0 162.4,64.0 192.1,66.5 170.9,87.5"/>
+        <text x="100" y="96" text-anchor="middle">record</text><text x="100" y="124" text-anchor="middle" id="stats-etoile-an"></text>
+      </svg>
+      <svg class="stats-op" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><circle cx="100" cy="100" r="8"/><circle cx="100" cy="100" r="22"/><circle cx="100" cy="100" r="36"/><circle cx="100" cy="100" r="50"/><circle cx="100" cy="100" r="64"/><circle cx="100" cy="100" r="78"/><circle cx="100" cy="100" r="92"/></svg>
+      <div class="stats-hero-txt">
+        <h2 class="stats-hero-n" id="stats-hero-n"><span class="stats-raye" id="stats-hero-nombre" data-t="0">0</span><span class="stats-hero-sous" id="stats-hero-sous">films vus</span></h2>
+      </div>
+    </section>
+    <div class="stats-rubans" aria-hidden="true">
+      <div class="stats-ruban stats-ruban-1"><div id="stats-ticker"></div></div>
+      <div class="stats-ruban stats-ruban-2"><div id="stats-ticker-2"></div></div>
+    </div>
     <div class="stats-numbers" id="stats-numbers"></div>
 
-    <div class="chart-section">
+    <div class="chart-section chart-large">
       <h2 class="chart-title">bilan de l'année</h2>
       <div class="chart-subtitle">tes films vus, année par année</div>
       <div class="year-review-years" id="year-review-years"></div>
       <div id="year-review"></div>
     </div>
 
-    <div class="chart-section">
+    <div class="chart-section chart-large">
       <h2 class="chart-title">par mois</h2>
       <div class="chart-subtitle">cadence de visionnage</div>
       <div class="months-chart-wrap">
@@ -310,13 +349,13 @@
       <div id="director-country-chart"></div>
     </div>
 
-    <div class="chart-section">
+    <div class="chart-section chart-large">
       <h2 class="chart-title">top genres</h2>
       <div class="chart-subtitle">10 genres les plus représentés</div>
       <div id="genre-chart"></div>
     </div>
 
-    <div class="chart-section">
+    <div class="chart-section chart-large">
       <h2 class="chart-title">top réalisateurs · réalisatrices</h2>
       <div class="chart-subtitle">qui revient le plus chez toi</div>
       <div class="gender-split">
@@ -331,7 +370,7 @@
       </div>
     </div>
 
-    <div class="chart-section">
+    <div class="chart-section chart-large">
       <h2 class="chart-title">top acteurs · actrices</h2>
       <div class="chart-subtitle">visages qui reviennent</div>
       <div class="gender-split">
@@ -346,7 +385,7 @@
       </div>
     </div>
 
-    <div class="chart-section">
+    <div class="chart-section chart-large">
       <h2 class="chart-title">genre · parité</h2>
       <div class="chart-subtitle">sur les films vus · données enrichies via tmdb</div>
       <div id="gender-balance"></div>
@@ -356,10 +395,14 @@
       </div>
     </div>
 
-    <div class="chart-section">
-      <h2 class="chart-title">ton film de l'année</h2>
-      <div class="chart-subtitle">le mieux noté pour chaque année de visionnage</div>
+    <div class="chart-section chart-large">
+      <h2 class="chart-title">tes coups de cœur</h2>
+      <div class="chart-subtitle">toutes les affiches, année par année · le mieux noté quand une année n'en a pas</div>
       <div id="year-best"></div>
+    </div>
+    <div class="stats-pied" aria-hidden="true">
+      <svg viewBox="0 0 200 200" focusable="false"><circle cx="100" cy="100" r="8"/><circle cx="100" cy="100" r="22"/><circle cx="100" cy="100" r="36"/><circle cx="100" cy="100" r="50"/><circle cx="100" cy="100" r="64"/><circle cx="100" cy="100" r="78"/><circle cx="100" cy="100" r="92"/></svg>
+      <div class="stats-geant"><div>*films · stats · *films · stats · *films · stats · *films · stats · *films · stats · *films · stats · </div></div>
     </div>
   </main>
 
@@ -549,6 +592,6 @@
 
 <!-- Code : app.js (même règle pour le numéro v=). Aucun code dans la page elle-même :
      la politique de sécurité bloquerait tout script ou onclick= écrit ici. -->
-<script src="app.js?v=40"></script>
+<script src="app.js?v=42"></script>
 </body>
 </html>

@@ -2218,3 +2218,398 @@ a:focus-visible, [tabindex]:focus-visible,
   .annee-ecran [class*="anim-"] { animation: none !important; opacity: 1 !important; }
   .annee-ecran .anim-anneau { stroke-dashoffset: var(--fin); }
 }
+
+/* ============================================================
+   PAGE STATS, STYLE « SIGNAL AU MAXIMUM » (2026-11-24)
+   ============================================================
+   Fond du site gardé (#161f25) ; vert acide en accent, rose pour ce qui
+   ressort ; grain, grille et formes qui flottent derrière ; bandeau du haut
+   en glitch, autocollant qui tourne, rubans en diagonale ; cartes à bord
+   holographique ; sections numérotées en grand ; top et flop en polaroïds,
+   coups de cœur sur une pellicule. Tout est limité à la page stats
+   (#stats-page) et, quand elle est ouverte, au haut de page et au fond
+   (body.vue-stats, posé par showPage) : la collection, Découvrir, les fiches
+   et les fenêtres gardent le style du site. « Réduire les animations » du
+   système fige tout (règle générale en tête de ce fichier) ; sur téléphone,
+   le grain ne bouge pas et les formes ne s'affichent pas (batterie). */
+@property --stats-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+#stats-page, body.vue-stats .masthead {
+  --warm: #c8ff3a;      /* vert acide : 14:1 sur le fond */
+  --hot: #ff3d6e;       /* rose : 4,9:1 sur le fond */
+  --cyan: #36c9ff;
+  --orange: #ff8a1f;
+  --profond: #10171c;
+  --pointille: #222d35;
+  --papier: #f4efe2;    /* polaroïds */
+}
+
+/* Fond de la page : grille fine, grain de film, bords assombris, viseur */
+body.vue-stats {
+  cursor: crosshair;
+  background-image: linear-gradient(rgba(200, 255, 58, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 255, 58, 0.035) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+body.vue-stats::before {
+  content: ''; position: fixed; inset: -50%; z-index: 50; pointer-events: none; opacity: 0.08;
+  animation: stats-grain 1s steps(6) infinite;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body.vue-stats::after {
+  content: ''; position: fixed; inset: 0; z-index: 49; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45));
+}
+@keyframes stats-grain {
+  20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); } 80% { transform: translate(3%, 3%); }
+}
+.stats-formes { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.stats-formes span { position: absolute; border-radius: 50%; opacity: 0.5; animation: stats-flotte 14s ease-in-out infinite alternate; }
+.stats-formes span:nth-child(1) { width: 120px; height: 120px; left: 3%; top: 30%; background: radial-gradient(circle at 30% 30%, #fff, #ff3d6e 30%, #5a0a24 75%); }
+.stats-formes span:nth-child(2) { width: 70px; height: 70px; right: 5%; top: 18%; background: radial-gradient(circle at 30% 30%, #fff, #c8ff3a 30%, #2f4200 75%); animation-duration: 11s; }
+.stats-formes span:nth-child(3) { width: 180px; height: 180px; right: -60px; top: 62%; background: radial-gradient(circle at 30% 30%, #fff, #36c9ff 30%, #03304a 75%); animation-duration: 17s; }
+.stats-formes span:nth-child(4) { width: 46px; height: 46px; left: 46%; top: 8%; background: radial-gradient(circle at 30% 30%, #fff, #ff8a1f 30%, #4a2000 75%); }
+.stats-formes span:nth-child(5) { width: 90px; height: 90px; left: -30px; top: 78%; background: radial-gradient(circle at 30% 30%, #fff, #a98be0 30%, #26124a 75%); animation-duration: 13s; }
+.stats-formes span:nth-child(6) { width: 24px; height: 24px; left: 70%; top: 44%; background: #c8ff3a; border-radius: 4px; }
+.stats-formes span:nth-child(7) { width: 34px; height: 34px; left: 24%; top: 88%; background: #ff3d6e; border-radius: 0;
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+@keyframes stats-flotte { to { transform: translate(30px, -50px) rotate(40deg) scale(1.1); } }
+@media (max-width: 760px) {
+  body.vue-stats::before { animation: none; }
+  .stats-formes { display: none; }
+}
+
+/* Haut de page, sur la page stats seulement */
+body.vue-stats .masthead .wordmark {
+  background: none; color: var(--warm); padding-left: 0; padding-right: 0;
+  text-shadow: -2px 0 var(--hot), 2px 0 var(--cyan);
+}
+body.vue-stats .masthead .ast { color: var(--warm); }
+body.vue-stats .nav-btn { border-radius: 999px; }
+body.vue-stats .nav-btn.active { background: var(--warm); border-color: var(--warm); color: #161f25; box-shadow: 0 0 18px rgba(200, 255, 58, 0.55); }
+
+/* Grille de la page : panneaux espacés, numérotés en grand 07, 08…
+   après les 6 cartes chiffrées (01 à 06) */
+.stats-page.active {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; counter-reset: bloc 6;
+}
+.stats-page.active > * { position: relative; z-index: 1; }
+.stats-page.active > .stats-formes { position: fixed; z-index: 0; }
+.stats-hero, .stats-rubans, #stats-numbers, #stats-page .chart-large, .stats-pied { grid-column: 1 / -1; }
+@media (max-width: 760px) { .stats-page.active { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+
+/* Bandeau du haut : liquide (filtre SVG dessiné une fois, puis déplacé et
+   teinté en CSS), lignes d'écran qui défilent, nombre en glitch */
+.stats-hero {
+  height: 460px; overflow: hidden; border: 2px solid var(--warm);
+  box-shadow: 0 0 0 6px var(--bg), 0 0 0 7px var(--rule), 0 0 40px rgba(200, 255, 58, 0.25);
+}
+.stats-liquide {
+  position: absolute; left: -10%; top: -10%; width: 120%; height: 120%;
+  animation: stats-liquide 30s ease-in-out infinite alternate; will-change: transform, filter;
+}
+@keyframes stats-liquide { to { transform: translate3d(4%, 3%, 0) scale(1.15); filter: hue-rotate(160deg); } }
+.stats-hero::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.55;
+  background: repeating-linear-gradient(var(--profond) 0 2px, transparent 2px 4px);
+  animation: stats-balaye 6s linear infinite;
+}
+@keyframes stats-balaye { to { background-position: 0 40px; } }
+.stats-hero-coords {
+  position: absolute; left: 24px; top: 18px; z-index: 2; padding: 4px 8px; background: var(--profond); color: var(--ink);
+  font: 600 11px 'JetBrains Mono', monospace; letter-spacing: 0.14em;
+}
+.stats-hero-barres {
+  position: absolute; right: 250px; top: 26px; z-index: 2; width: 120px; height: 40px;
+  background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 9px, var(--ink) 9px 12px, transparent 12px 13px);
+}
+.stats-hero-txt { position: absolute; left: 24px; right: 24px; bottom: 16px; z-index: 3; }
+.stats-hero-n { margin: 0; font-weight: 400; }
+.stats-hero-n .stats-raye {
+  position: relative; display: block; font: 250px/0.8 'Bungee', sans-serif; color: var(--ink);
+  text-shadow: -6px 0 var(--hot), 6px 0 var(--cyan), 0 0 30px rgba(0, 0, 0, 0.6);
+}
+.stats-hero-n .stats-raye::after {
+  content: attr(data-t); position: absolute; left: 0; top: 0; color: var(--warm); text-shadow: none;
+  clip-path: inset(100% 0 0 0); animation: stats-glitch 2.6s steps(1) infinite;
+}
+@keyframes stats-glitch {
+  0%, 86% { clip-path: inset(100% 0 0 0); }
+  88% { clip-path: inset(40% 0 45% 0); transform: translateX(-14px); }
+  91% { clip-path: inset(10% 0 70% 0); transform: translateX(12px); }
+  94% { clip-path: inset(70% 0 10% 0); transform: translateX(-6px); }
+}
+.stats-hero-sous {
+  display: inline-block; margin-top: 14px; padding: 5px 10px; background: var(--warm); color: #161f25; transform: rotate(-1.5deg);
+  font: 700 12px 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.14em;
+}
+.stats-autocollant {
+  position: absolute; right: 30px; top: 24px; z-index: 4; width: 190px;
+  animation: stats-tourne 22s linear infinite; filter: drop-shadow(4px 6px 0 var(--profond));
+}
+.stats-autocollant circle { fill: var(--warm); }
+.stats-autocollant text { font: 700 13px 'JetBrains Mono', monospace; fill: #161f25; letter-spacing: 0.1em; text-transform: uppercase; }
+.stats-autocollant .stats-auto-gros { font: 44px 'Bungee', sans-serif; letter-spacing: 0; }
+@keyframes stats-tourne { to { transform: rotate(360deg); } }
+.stats-etoile { position: absolute; right: 250px; bottom: 30px; z-index: 4; width: 130px; animation: stats-tourne 18s linear infinite; }
+.stats-etoile polygon { fill: var(--hot); }
+.stats-etoile text { font: 22px 'Bungee', sans-serif; fill: #fff; }
+.stats-op { position: absolute; right: 40px; bottom: -40px; z-index: 2; width: 200px; animation: stats-tourne 26s linear infinite reverse; }
+.stats-op circle, .stats-pied svg circle { fill: none; stroke: var(--warm); stroke-width: 7; }
+@media (max-width: 760px) {
+  .stats-hero { height: 330px; }
+  .stats-hero-n .stats-raye { font-size: 120px; }
+  .stats-autocollant { width: 120px; right: 12px; top: 12px; }
+  .stats-etoile, .stats-hero-barres { display: none; }
+  .stats-op { width: 140px; }
+}
+
+/* Deux rubans de chantier en diagonale, qui défilent en sens inverse */
+.stats-rubans { height: 104px; margin: -8px 0 0; }
+.stats-ruban {
+  position: absolute; left: -4%; width: 108%; overflow: hidden; white-space: nowrap; padding: 9px 0;
+  border-top: 2px solid var(--bg); border-bottom: 2px solid var(--bg);
+  font: 700 15px 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em;
+}
+.stats-ruban div { display: inline-block; animation: stats-defile 40s linear infinite; }
+.stats-ruban-1 { top: 12px; background: var(--warm); color: #161f25; transform: rotate(-3deg); }
+.stats-ruban-2 { top: 48px; background: var(--hot); color: #161f25; transform: rotate(2.5deg); }
+.stats-ruban-2 div { animation-direction: reverse; animation-duration: 50s; }
+@keyframes stats-defile { to { transform: translateX(-50%); } }
+
+/* Cartes chiffrées : bord holographique qui tourne, grand numéro en contour,
+   chiffres décalés en rose et bleu avec un glitch de temps en temps */
+#stats-numbers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 0; counter-reset: carte; }
+@media (max-width: 760px) { #stats-numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+#stats-numbers .stat-card {
+  position: relative; overflow: hidden; padding: 2px; border: 0; border-radius: 14px; counter-increment: carte;
+  background: conic-gradient(from var(--stats-angle), var(--warm), var(--cyan), #a98be0, var(--hot), var(--orange), var(--warm));
+  animation: stats-holo 6s linear infinite; transition: transform 0.3s;
+}
+#stats-numbers .stat-card:nth-child(2n) { animation-delay: -2s; }
+#stats-numbers .stat-card:nth-child(3n) { animation-delay: -4s; }
+#stats-numbers .stat-card:hover { transform: perspective(600px) rotateX(5deg) rotateY(-7deg) scale(1.02); }
+@keyframes stats-holo { to { --stats-angle: 360deg; } }
+#stats-numbers .stat-card::after {
+  content: counter(carte, decimal-leading-zero); position: absolute; right: -8px; bottom: -30px; pointer-events: none;
+  font: 130px/1 'Bungee', sans-serif; color: transparent; -webkit-text-stroke: 1.5px rgba(200, 255, 58, 0.22);
+}
+#stats-numbers .stat-card-main {
+  align-items: flex-start; text-align: left; padding: 16px 20px 12px; background: var(--bg); border-radius: 12px 12px 0 0;
+}
+#stats-numbers .stat-card-main::before { content: counter(carte, decimal-leading-zero); margin-bottom: 4px; color: var(--warm); font: 700 11px 'JetBrains Mono', monospace; }
+#stats-numbers .stat-card-label { color: var(--ink-mute); letter-spacing: 0.14em; }
+#stats-page .stat-card-value { position: relative; font-family: 'Bungee', sans-serif; font-variation-settings: normal; letter-spacing: 0; color: var(--ink); }
+#stats-numbers .stat-card-value { font-size: clamp(34px, 4.6vw, 58px); line-height: 1.05; text-shadow: -3px 0 var(--hot), 3px 0 var(--cyan); }
+#stats-page .stat-card-value[data-t]::after {
+  content: attr(data-t); position: absolute; left: 0; top: 0; color: var(--warm); text-shadow: none;
+  clip-path: inset(100% 0 0 0); animation: stats-glitch 3.4s steps(1) infinite;
+}
+#stats-numbers .stat-card:nth-child(2n) .stat-card-value::after { animation-delay: -1.3s; }
+#stats-numbers button.stat-card-year {
+  justify-content: flex-start; padding: 10px 20px 12px; background: var(--bg); border-radius: 0 0 12px 12px; border-top: 1px dashed var(--rule);
+}
+#stats-numbers button.stat-card-year:only-child, #stats-numbers .stat-card-main:only-child { border-radius: 12px; }
+#stats-numbers .stat-card-main:hover, #stats-numbers button.stat-card-year:hover { background: var(--bg-elev); }
+#stats-numbers .stat-card-year-label { padding: 2px 6px; border-radius: 3px; background: var(--warm); color: #161f25; font-weight: 700; }
+#stats-numbers .stat-card-year-value { font-family: 'Bungee', sans-serif; font-size: 16px; color: var(--ink); }
+
+/* Sections : panneaux à bord rayé, titre surligné, grand numéro en contour */
+#stats-page .chart-section {
+  min-width: 0; margin: 0; padding: 26px 24px 28px; overflow: hidden; counter-increment: bloc;
+  background: rgba(16, 23, 28, 0.72); border: 1px solid var(--rule); border-radius: 16px;
+}
+#stats-page .chart-section::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: repeating-linear-gradient(90deg, var(--warm) 0 14px, var(--bg) 14px 28px);
+}
+#stats-page .chart-section::after {
+  content: counter(bloc, decimal-leading-zero); position: absolute; right: -6px; top: -24px; pointer-events: none;
+  font: 120px/1 'Bungee', sans-serif; color: transparent; -webkit-text-stroke: 2px rgba(255, 61, 110, 0.32);
+}
+@media (max-width: 760px) {
+  #stats-page .chart-section { padding: 22px 16px 24px; }
+  #stats-page .chart-section::after { font-size: 84px; }
+}
+#stats-page .chart-title {
+  display: inline-block; position: relative; z-index: 1; padding: 0 4px; transform: rotate(-1deg);
+  font-family: 'Bungee', sans-serif; font-variation-settings: normal; font-size: 28px; line-height: 1.15; letter-spacing: 0;
+  /* surligné ligne par ligne (un titre sur deux lignes : deux bandes, pas un bloc) */
+  background: linear-gradient(transparent 55%, rgba(200, 255, 58, 0.45) 55% 92%, transparent 92%) 0 0 / 100% 1.15em repeat-y;
+  text-shadow: -2px 0 rgba(255, 61, 110, 0.7), 2px 0 rgba(54, 201, 255, 0.7);
+}
+@media (max-width: 760px) { #stats-page .chart-title { font-size: 22px; } }
+#stats-page .chart-subtitle { position: relative; z-index: 1; }
+#stats-page .chart-subtitle::before {
+  content: ''; display: block; width: 240px; max-width: 100%; height: 12px; margin: 6px 0 4px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='12'%3E%3Cpath d='M0 6 Q 7.5 0 15 6 T 30 6' fill='none' stroke='%23ff3d6e' stroke-width='2.5' stroke-dasharray='5 3'/%3E%3C/svg%3E") repeat-x 0 0 / 30px 12px;
+  animation: stats-vague 1.5s linear infinite;
+}
+@keyframes stats-vague { to { background-position: 30px 0; } }
+
+/* Barres en pilules hachurées et lumineuses, qui se remplissent à l'ouverture */
+#stats-page .bar-row { padding: 6px 0; border-radius: 0; border-bottom: 0; }
+#stats-page .bar-row .bar-track { height: 14px; background: rgba(255, 255, 255, 0.04); border-radius: 999px; overflow: hidden; }
+#stats-page .bar-row .bar-fill {
+  border-radius: 999px; transform-origin: left; animation: stats-avance 1.2s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  background: repeating-linear-gradient(-45deg, var(--warm) 0 6px, #a6d92a 6px 12px); box-shadow: 0 0 12px rgba(200, 255, 58, 0.5);
+}
+@keyframes stats-avance { from { transform: scaleX(0); } }
+#stats-page .bar-row .bar-fill.hot { background: repeating-linear-gradient(-45deg, var(--hot) 0 6px, #d92c58 6px 12px); box-shadow: 0 0 12px rgba(255, 61, 110, 0.5); }
+#year-chart .bar-row .bar-fill.hot { background: repeating-linear-gradient(-45deg, var(--warm) 0 6px, #a6d92a 6px 12px); box-shadow: 0 0 12px rgba(200, 255, 58, 0.5); }
+#stats-page #director-chart-m .bar-fill, #stats-page #actor-chart-m .bar-fill { background: repeating-linear-gradient(-45deg, var(--homme) 0 6px, #8d6cd0 6px 12px); box-shadow: 0 0 12px rgba(169, 139, 224, 0.5); }
+#stats-page #director-chart-f .bar-fill, #stats-page #actor-chart-f .bar-fill { background: repeating-linear-gradient(-45deg, var(--femme) 0 6px, #4ea877 6px 12px); box-shadow: 0 0 12px rgba(109, 195, 148, 0.5); }
+#stats-page .bar-row .bar-value { font: 15px 'Bungee', sans-serif; color: var(--ink); }
+#stats-page .gender-col:first-child .gender-col-label { color: var(--homme); }
+#stats-page .gender-col:last-child .gender-col-label { color: var(--femme); }
+
+/* Par mois : barres en dégradé rayé (motif dans le SVG), qui poussent */
+#stats-page .month-bar { transform-box: fill-box; transform-origin: bottom; animation: stats-pousse 1.2s cubic-bezier(0.2, 0.9, 0.2, 1) both; }
+@keyframes stats-pousse { from { transform: scaleY(0); } }
+#months-chart { filter: drop-shadow(0 0 6px rgba(200, 255, 58, 0.35)); }
+#stats-page .mois-record { font: 700 10px 'JetBrains Mono', monospace; fill: var(--hot); }
+
+/* Distribution des notes : colonnes de points lumineux, ♥ qui bat */
+#stats-page .rating-dist { margin-top: 30px; }
+#stats-page .rating-bar {
+  border-radius: 0; transform-origin: bottom; animation: stats-pousse 1.2s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  background: radial-gradient(circle, var(--warm) 3px, transparent 3.5px) 0 0 / 10px 10px; filter: drop-shadow(0 0 6px rgba(200, 255, 58, 0.6));
+}
+#stats-page .rating-bar.fav, #stats-page .rating-bar:hover {
+  background-image: radial-gradient(circle, var(--hot) 3px, transparent 3.5px); filter: drop-shadow(0 0 8px rgba(255, 61, 110, 0.9));
+}
+#stats-page .rating-bar-count { color: var(--ink); font: 16px 'Bungee', sans-serif; }
+#stats-page .rating-axis div:last-child { color: var(--hot); font-size: 16px; animation: stats-battement 1s ease-in-out infinite; }
+@keyframes stats-battement { 50% { transform: scale(1.35); } }
+
+/* Genre × note : cases arrondies, halo selon la valeur, la plus grande en rose */
+#stats-page .heatmap-cell { border-radius: 6px; box-shadow: 0 0 calc(var(--a, 0) * 16px) rgba(200, 255, 58, calc(var(--a, 0) * 0.6)); }
+#stats-page .heatmap-cell:hover { transform: scale(1.25) rotate(-4deg); z-index: 2; }
+#stats-page .heatmap-cell.heatmap-top { position: relative; background: var(--hot) !important; color: #161f25 !important; animation: stats-battement 1.6s ease-in-out infinite; }
+#stats-page .heatmap-cell.heatmap-top::after { content: '✦'; position: absolute; top: -12px; right: -8px; color: var(--warm); font-size: 16px; }
+
+/* Bilan de l'année */
+#stats-page .year-review-years .explorer-cat { border-radius: 999px; }
+#stats-page .year-review-years .explorer-cat.active { background: var(--warm); border-color: var(--warm); color: #161f25; box-shadow: 0 0 14px rgba(200, 255, 58, 0.55); }
+#stats-page .annee-ouvrir {
+  position: relative; overflow: hidden; padding: 18px 20px; border-radius: 14px; color: #fff; font: 400 22px/1.1 'Bungee', sans-serif;
+  background: linear-gradient(100deg, #7b2ff7, #ff3d6e 45%, #ff8a1f 75%, #c8ff3a); background-size: 200% 100%;
+  animation: stats-degrade 6s ease-in-out infinite alternate; box-shadow: 0 8px 0 var(--profond), 0 0 30px rgba(255, 61, 110, 0.4);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+@keyframes stats-degrade { to { background-position: 100% 0; } }
+#stats-page .annee-ouvrir::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.45) 45%, transparent 60%);
+  transform: translateX(-100%); animation: stats-reflet 3.5s ease-in-out infinite;
+}
+@keyframes stats-reflet { 60%, 100% { transform: translateX(100%); } }
+#stats-page .annee-ouvrir-play { width: 44px; height: 44px; background: #fff; color: #7b2ff7; animation: stats-pulse 1.4s ease-in-out infinite; }
+@keyframes stats-pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); } 70%, 100% { box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); } }
+#stats-page .annee-ouvrir small { color: #fff; text-shadow: none; }
+@media (max-width: 760px) { #stats-page .annee-ouvrir { font-size: 17px; } }
+#stats-page .year-review-numbers { gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (min-width: 1000px) { #stats-page .year-review-numbers { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (max-width: 760px) { #stats-page .year-review-numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+#stats-page .year-review-numbers .stat-card {
+  align-items: flex-start; text-align: left; padding: 12px; background: var(--profond); border: 1px solid var(--rule); border-radius: 10px;
+}
+#stats-page .year-review-numbers .stat-card-value { font-size: clamp(24px, 2.6vw, 30px); text-shadow: -2px 0 var(--hot), 2px 0 var(--cyan); }
+/* Temps forts : étiquettes crème un peu penchées, ombrées de vert, rose ou cyan */
+#stats-page .year-review-facts { gap: 14px; }
+#stats-page .yr-fact { background: #e7dfbe; color: #161f25; border: 0; border-radius: 4px; transform: rotate(-1deg); box-shadow: 4px 5px 0 var(--warm); }
+#stats-page .yr-fact:nth-child(3n+2) { transform: rotate(1deg); box-shadow: 4px 5px 0 var(--hot); }
+#stats-page .yr-fact:nth-child(3n) { transform: rotate(-0.5deg); box-shadow: 4px 5px 0 var(--cyan); }
+#stats-page button.yr-fact:hover { background: #fff8dc; }
+#stats-page .yr-fact-label, #stats-page .yr-fact-detail { color: #4a5560; }
+#stats-page .yr-fact-value { font: 16px/1.2 'Bungee', sans-serif; }
+#stats-page .yr-lien { text-decoration-color: #c42a52; }
+/* Top 5 et flop 5 : petits polaroïds scotchés et numérotés ; le flop en noir
+   et blanc, tamponné « flop » */
+#stats-page .year-review-top { display: flex; flex-wrap: wrap; gap: 22px; padding: 14px 6px 10px; margin-bottom: 8px; counter-reset: rang; }
+@media (max-width: 760px) { #stats-page .year-review-top { flex-wrap: nowrap; overflow-x: auto; padding: 16px 10px 14px; } }
+#stats-page .year-review-top .year-best-film {
+  position: relative; flex: 0 0 124px; flex-direction: column; align-items: stretch; gap: 6px; max-width: none;
+  padding: 8px 8px 10px; background: var(--papier); border-radius: 0; counter-increment: rang;
+  transform: rotate(-4deg); box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.35); transition: transform 0.25s;
+}
+#stats-page .year-review-top .year-best-film:nth-child(2) { transform: rotate(3deg); }
+#stats-page .year-review-top .year-best-film:nth-child(3) { transform: rotate(-2deg); }
+#stats-page .year-review-top .year-best-film:nth-child(4) { transform: rotate(5deg); }
+#stats-page .year-review-top .year-best-film:nth-child(5) { transform: rotate(-3deg); }
+#stats-page .year-review-top .year-best-film:hover { transform: rotate(0) scale(1.06); z-index: 5; background: var(--papier); }
+#stats-page .year-review-top .year-best-film::before {
+  content: counter(rang); position: absolute; left: -12px; top: -16px; z-index: 3;
+  font: 32px 'Bungee', sans-serif; color: var(--warm); -webkit-text-stroke: 2px #161f25; text-shadow: 3px 3px 0 #161f25;
+}
+#stats-page .year-review-top .year-best-film::after {
+  content: ''; position: absolute; top: -9px; left: 50%; z-index: 2; width: 56px; height: 18px;
+  transform: translateX(-50%) rotate(-4deg); background: rgba(200, 255, 58, 0.75);
+}
+#stats-page .year-review-top .year-best-poster { position: relative; width: 100%; height: auto; aspect-ratio: 2 / 3; border-radius: 0; }
+#stats-page .year-review-top .year-best-film:hover .year-best-poster { filter: drop-shadow(-3px 0 var(--hot)) drop-shadow(3px 0 var(--cyan)); }
+#stats-page .year-review-top .year-best-title { color: #161f25; font-size: 12px; }
+#stats-page .year-review-top .year-best-meta { color: #4a5560; }
+#stats-page .year-review-flop .year-best-film::before { color: var(--hot); }
+#stats-page .year-review-flop .year-best-film::after { background: rgba(255, 61, 110, 0.75); }
+#stats-page .year-review-flop .year-best-poster { filter: grayscale(1) contrast(1.2); }
+#stats-page .year-review-flop .year-best-poster::after {
+  content: 'flop'; position: absolute; right: 6%; bottom: 10%; padding: 1px 7px; transform: rotate(-14deg);
+  font: 20px 'Bungee', sans-serif; color: var(--hot); border: 3px solid var(--hot); background: rgba(22, 31, 37, 0.55);
+}
+
+/* Parité : deux anneaux qui se remplissent, et la note en duel « vs » */
+.parite-anneaux { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; align-items: center; margin-bottom: 10px; }
+@media (max-width: 760px) { .parite-anneaux { grid-template-columns: minmax(0, 1fr); justify-items: center; } }
+.parite-anneaux svg { width: 210px; transform: rotate(-90deg); }
+.parite-anneaux .anneau-fond { fill: none; stroke: var(--homme); stroke-width: 18; }
+.parite-anneaux .anneau-arc {
+  fill: none; stroke: var(--femme); stroke-width: 18; stroke-linecap: round; stroke-dasharray: var(--c);
+  stroke-dashoffset: calc(var(--c) * (1 - var(--p) / 100)); animation: stats-arc 2s cubic-bezier(0.2, 0.9, 0.2, 1) 0.3s both;
+  filter: drop-shadow(0 0 8px rgba(109, 195, 148, 0.8));
+}
+.parite-anneaux .anneau-arc.interieur { stroke: #9bffbf; }
+@keyframes stats-arc { from { stroke-dashoffset: var(--c); } }
+.parite-txt p { margin: 0 0 10px; font-size: 16px; }
+.parite-gros { margin-right: 10px; vertical-align: middle; font: 44px 'Bungee', sans-serif; color: var(--femme); text-shadow: -3px 0 var(--hot), 3px 0 var(--cyan); }
+.parite-gros.clair { color: #9bffbf; }
+#stats-page .gender-notes { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+#stats-page .gender-notes .gender-balance-label, #stats-page .gender-notes .gender-balance-legend { flex: 0 0 100%; }
+#stats-page .gender-notes .bar-row {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 150px; padding: 12px 18px; border-radius: 12px;
+}
+#stats-page .gender-notes .bar-row.note-f { background: var(--femme); color: #0b3a1d; }
+#stats-page .gender-notes .bar-row.note-h { background: var(--homme); color: #26124a; }
+#stats-page .gender-notes .bar-label { color: inherit; font: 700 11px 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; }
+#stats-page .gender-notes .bar-track { display: none; }
+#stats-page .gender-notes .bar-value { color: inherit; font: 40px/1 'Bungee', sans-serif; text-align: left; }
+#stats-page .duel-vs { font: 30px 'Bungee', sans-serif; color: var(--hot); transform: rotate(-10deg); text-shadow: 2px 2px 0 var(--profond); }
+
+/* Tes coups de cœur, sur une pellicule qui défile à l'horizontale */
+#year-best { overflow-x: auto; padding-bottom: 4px; }
+.pellicule {
+  position: relative; display: flex; gap: 14px; width: max-content; padding: 28px 14px; background: #0b0f12; border-radius: 6px;
+}
+.pellicule::before, .pellicule::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 12px;
+  background: repeating-linear-gradient(90deg, transparent 0 8px, #e7dfbe 8px 20px, transparent 20px 28px) 0 1px / 28px 10px repeat-x;
+}
+.pellicule::before { top: 7px; }
+.pellicule::after { bottom: 7px; }
+.pellicule-annee { display: flex; flex-direction: column; gap: 6px; }
+.pellicule-an { font: 22px 'Bungee', sans-serif; color: var(--warm); text-shadow: 2px 2px 0 #000; }
+.pellicule-films { display: flex; gap: 8px; }
+#year-best .year-best-film {
+  flex-direction: column; align-items: stretch; gap: 4px; width: 104px; max-width: none; padding: 0; border: 3px solid #222; border-radius: 0; background: #0b0f12;
+}
+#year-best .year-best-poster { width: 100%; height: auto; aspect-ratio: 2 / 3; border-radius: 0; filter: sepia(0.25) saturate(1.3); transition: filter 0.3s; }
+#year-best .year-best-film:hover .year-best-poster { filter: none; }
+#year-best .year-best-title { padding: 2px 4px 6px; text-align: center; font: 600 10px/1.25 'JetBrains Mono', monospace; color: var(--ink); }
+#year-best .year-best-meta { padding: 0 4px 6px; text-align: center; color: var(--warm); }
+
+/* Pied de la page stats : « *films · stats » géant en contour qui défile */
+.stats-pied { overflow: hidden; padding: 20px 0 30px; }
+.stats-pied svg { position: absolute; right: 30px; top: 0; width: 150px; animation: stats-tourne 20s linear infinite; }
+.stats-geant { white-space: nowrap; font: 140px/1 'Bungee', sans-serif; color: transparent; -webkit-text-stroke: 2px rgba(200, 255, 58, 0.5); }
+.stats-geant div { display: inline-block; animation: stats-defile 30s linear infinite; }
+@media (max-width: 760px) { .stats-geant { font-size: 80px; } .stats-pied svg { width: 100px; } }
