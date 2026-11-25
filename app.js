@@ -524,12 +524,7 @@ function buildCard(f) {
     poster.appendChild(c);
   }
 
-  if (passeALyon) {
-    const c = document.createElement('div');
-    c.className = 'lyon-badge';
-    c.textContent = 'à lyon';
-    poster.appendChild(c);
-  }
+  if (passeALyon) poster.appendChild(etiquetteLyon());
 
   // meta (title + year)
   const meta = document.createElement('div');
@@ -1965,6 +1960,19 @@ function seancesLyon(id) {
   return out;
 }
 const aLyon = id => Object.keys(seancesLyon(id)).length > 0;
+
+// Étiquette « à lyon » posée sur l'affiche : le « à » est écrit plus petit
+// (style.css), pour que son accent ne monte pas plus haut que « lyon » et
+// que le mot reste centré dans son cadre
+function etiquetteLyon() {
+  const c = document.createElement('div');
+  c.className = 'lyon-badge';
+  const a = document.createElement('span');
+  a.className = 'lyon-a';
+  a.textContent = 'à';
+  c.append(a, ' lyon');
+  return c;
+}
 
 // Catégorie « à lyon » : les films qui passent encore cette semaine, avec les
 // filtres genre et pays et les tris du menu (« selon tes goûts » par défaut)

@@ -12,6 +12,35 @@ HORS_AFFICHE = '''(() => { const hors = []; document.querySelectorAll('#grid .ca
     const r = b.getBoundingClientRect();
     if (r.left < p.left - 0.5 || r.right > p.right + 0.5 || r.top < p.top - 0.5 || r.bottom > p.bottom + 0.5) hors.push(b.className); }); });
   return hors; })()'''
+# Une étiquette posée sur la première affiche (avec ou sans « canal+ » au-dessus),
+# « à lyon » faite par le site (etiquetteLyon), remise droite pour la mesure.
+# Pour chaque morceau de texte (le « à » a sa propre taille) : haut et bas de
+# son encre, accent compris, mesurés dans la police depuis sa ligne de base
+# (le bas d'un repère vide posé juste après). Rend l'air au-dessus et en
+# dessous de l'encre dans le cadre, et le haut de l'encre de chaque morceau.
+ETIQUETTE = '''async ([lyon, avecCanal]) => {
+  await document.fonts.ready;
+  const canal = () => { const c = document.createElement('div'); c.className = 'canal-badge'; c.textContent = 'canal+'; return c; };
+  const p = document.querySelector('#grid .card .poster');
+  p.querySelectorAll('.rating-badge, .canal-badge, .lyon-badge').forEach(x => x.remove());
+  if (avecCanal) p.appendChild(canal());
+  const b = lyon ? etiquetteLyon() : canal();
+  p.appendChild(b);
+  b.style.transform = 'none';
+  const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT), textes = [];
+  while (w.nextNode()) if (w.currentNode.data.trim()) textes.push(w.currentNode);
+  const ctx = document.createElement('canvas').getContext('2d');
+  const morceaux = textes.map(t => {
+    const m = document.createElement('span'); m.style.cssText = 'display:inline-block;width:0;height:0'; t.after(m);
+    const cs = getComputedStyle(t.parentElement), k = parseFloat(cs.fontSize) / 1000;
+    ctx.font = '1000px ' + cs.fontFamily;
+    const e = ctx.measureText(t.data.trim());
+    return { m, haut: e.actualBoundingBoxAscent * k, bas: e.actualBoundingBoxDescent * k }; })
+    .map(({ m, haut, bas }) => { const ligne = m.getBoundingClientRect().bottom; return { haut: ligne - haut, bas: ligne + bas }; });
+  const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
+  return { dessus: Math.min(...morceaux.map(x => x.haut)) - (r.top + parseFloat(cs.borderTopWidth)),
+           dessous: r.bottom - parseFloat(cs.borderBottomWidth) - Math.max(...morceaux.map(x => x.bas)),
+           hauts: morceaux.map(x => x.haut), hauteur: r.height }; }'''
 
 
 class SiteSignal(Banc):
@@ -96,6 +125,24 @@ class SiteSignal(Banc):
         self.page.click('.tab[data-view="a_voir"]')
         self.attendre(lambda: self.js('state.view === "a_voir"'))
         self.assertEqual(self.js('document.getElementById("grid").style.counterReset'), '')
+
+    def test_etiquettes_canal_et_lyon_centrees(self):
+        # « À LYON » : l'accent touchait le haut du cadre, le mot paraissait
+        # décentré. Le « à » est plus petit : avec son accent, il monte juste
+        # à la hauteur de « LYON », et le mot est au milieu du cadre
+        self.ouvrir()
+        mesure = lambda lyon, avec=False: self.page.evaluate(ETIQUETTE, [lyon, avec])
+        lyon, canal = mesure(True), mesure(False)
+        self.assertEqual(len(lyon['hauts']), 2, lyon)
+        self.assertLessEqual(abs(lyon['hauts'][0] - lyon['hauts'][1]), 0.5, lyon)
+        for m in (lyon, canal):
+            self.assertGreaterEqual(m['dessus'], 1, m)
+            self.assertLessEqual(abs(m['dessus'] - m['dessous']), 1, m)
+        # Les deux étiquettes ont la même hauteur
+        self.assertEqual(lyon['hauteur'], canal['hauteur'])
+        # Sous « canal+ », « à lyon » gardait aussi le bas de l'ancienne
+        # pastille et s'étirait sur l'affiche
+        self.assertEqual(mesure(True, True)['hauteur'], lyon['hauteur'])
 
     def test_fiche_en_duel(self):
         self.ouvrir()

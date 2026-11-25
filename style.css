@@ -2791,13 +2791,18 @@ body.vue-stats .rubans-haut { display: none; }
 .tmdb-in-collec { top: 13px; left: 9px; background: rgba(54, 201, 255, 0.8); color: #10171c; }
 /* « canal+ » et « à lyon » : petits tampons encrés, penchés */
 .card .canal-badge, .card .lyon-badge {
-  top: 10px; bottom: auto; right: 8px; padding: 0 5px 1px; border: 1.5px solid; border-radius: 3px;
-  background: rgba(16, 23, 28, 0.65); font: 10px 'Bungee', sans-serif; letter-spacing: 0; text-transform: none;
+  top: 10px; bottom: auto; right: 8px; padding: 1px 5px 0; border: 1.5px solid; border-radius: 3px;
+  background: rgba(16, 23, 28, 0.65); font: 9px/10px 'Bungee', sans-serif; letter-spacing: 0; text-transform: none;
   transform: rotate(-7deg);
 }
 .card .canal-badge { color: var(--cyan); border-color: var(--cyan); }
 .card .lyon-badge { color: #ff6d8f; border-color: #ff6d8f; }
-.card .canal-badge + .lyon-badge { top: 34px; transform: rotate(4deg); }
+/* Le « à » en plus petit : avec son accent, il a la hauteur des majuscules
+   de « lyon » (dans Bungee, majuscules 0,734 em, haut de l'accent du « À »
+   0,969 em), et tout le mot reste centré dans le cadre. Hauteur de ligne
+   nulle : il ne pousse pas la ligne. */
+.card .lyon-badge .lyon-a { font-size: 0.758em; line-height: 0; }
+.card .canal-badge + .lyon-badge { top: 34px; bottom: auto; transform: rotate(4deg); }
 .card .rating-badge ~ .canal-badge, .card .rating-badge ~ .lyon-badge { top: 40px; }
 .card .rating-badge ~ .canal-badge + .lyon-badge { top: 64px; }
 .card.tmdb-card.in-collection .poster { opacity: 0.65; }
@@ -3053,7 +3058,7 @@ body.vue-stats .footer::before { display: none; }
   .card .rating-badge { top: 6px; right: 6px; min-width: 26px; padding: 3px 5px; font-size: 10px; }
   .card .rating-badge.favorite { top: 5px; right: 5px; width: 30px; height: 30px; padding: 0; font-size: 12px; }
   .card.to-watch .a-voir-badge, .tmdb-in-collec { top: 9px; left: 5px; padding: 2px 8px; font-size: 7px; }
-  .card .canal-badge, .card .lyon-badge { top: 8px; right: 6px; font-size: 9px; }
+  .card .canal-badge, .card .lyon-badge { top: 8px; right: 6px; padding: 1px 5px; font-size: 8px; line-height: 8px; }
   .card .canal-badge + .lyon-badge { top: 28px; }
   .card .rating-badge ~ .canal-badge, .card .rating-badge ~ .lyon-badge { top: 32px; }
   .card .rating-badge ~ .canal-badge + .lyon-badge { top: 52px; }
