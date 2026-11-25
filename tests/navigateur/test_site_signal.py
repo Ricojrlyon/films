@@ -41,6 +41,27 @@ ETIQUETTE = '''async ([lyon, avecCanal]) => {
   return { dessus: Math.min(...morceaux.map(x => x.haut)) - (r.top + parseFloat(cs.borderTopWidth)),
            dessous: r.bottom - parseFloat(cs.borderBottomWidth) - Math.max(...morceaux.map(x => x.bas)),
            hauts: morceaux.map(x => x.haut), hauteur: r.height }; }'''
+# Tout ce qui a un bord en pointillé dans la page (même caché)
+POINTILLES = '''[...document.querySelectorAll('*')].filter(e => { const s = getComputedStyle(e);
+  return ['Top', 'Right', 'Bottom', 'Left'].some(c => /dashed|dotted/.test(s['border' + c + 'Style']) && parseFloat(s['border' + c + 'Width']) > 0); })
+  .map(e => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (typeof e.className === 'string' && e.className ? '.' + e.className.trim().split(/\\s+/).join('.') : ''))'''
+# Fiche d'un film à voir au long synopsis, avec six salles de Lyon simulées
+FICHE_AVEC_SALLES = '''async () => {
+  const f = state.films.find(f => f.user?.statut === 'a_voir' && (f.synopsis || '').length > 300 && (f.cast || []).length);
+  lyon = { films: [], salles: ['Lumière Terreaux', 'Comœdia', 'UGC Part-Dieu', 'UGC Astoria', 'Pathé Bellecour', 'Pathé Vaise']
+    .map((nom, i) => ({ code: 'S' + i, nom, url: 'https://example.org/' + i })) };
+  lyonParFilm = new Map([[f.id, { salles: Object.fromEntries(lyon.salles.map(s => [s.code, [['2099-01-01T20:00', 'VF']]])) }]]);
+  openModal(f);
+  for (let i = 0; i < 50 && !document.querySelector('#modal-body .watch-salle'); i++) await new Promise(ok => setTimeout(ok, 100));
+  return f.id; }'''
+# Lignes du synopsis sans sa première lettre : haut et bord gauche de chaque ligne
+LIGNES_SYNOPSIS = '''(() => { const p = document.querySelector('#modal-body .synopsis'), r = document.createRange();
+  r.setStart(p.firstChild, 1); r.setEnd(p.firstChild, p.firstChild.length);
+  const lignes = [];
+  for (const x of r.getClientRects()) { const l = lignes.find(l => Math.abs(l.haut - x.top) < 3);
+    if (l) l.gauche = Math.min(l.gauche, x.left); else lignes.push({ haut: x.top, gauche: x.left }); }
+  const b = p.getBoundingClientRect(), s = getComputedStyle(p);
+  return { bord: b.left + parseFloat(s.paddingLeft) + parseFloat(s.borderLeftWidth), lignes: lignes.sort((a, b) => a.haut - b.haut) }; })()'''
 
 
 class SiteSignal(Banc):
@@ -157,6 +178,58 @@ class SiteSignal(Banc):
         self.js('openModal(state.films.find(f => f.user?.statut === "a_voir"))')
         self.page.wait_for_timeout(300)
         self.assertEqual(self.js('document.querySelectorAll("#modal-body .note-vs").length'), 0)
+
+    def test_contours_pleins_partout(self):
+        # Plus aucun bord en pointillé : onglets, recherche, filtres, fiche,
+        # salles, stats (demandé le 2026-11-25)
+        self.ouvrir()
+        self.assertEqual(self.js(POINTILLES), [], 'collection')
+        self.page.evaluate(FICHE_AVEC_SALLES)
+        self.assertTrue(self.js('!!document.querySelector("#modal-body .watch-salle") && !!document.querySelector("#modal-body a.cast-item")'))
+        self.assertEqual(self.js(POINTILLES), [], 'fiche')
+        self.js('closeModal()')
+        self.page.click('.nav-btn[data-page="stats"]')
+        self.attendre(lambda: self.js('document.getElementById("stats-page").classList.contains("active")'))
+        self.page.wait_for_timeout(300)
+        self.assertEqual(self.js(POINTILLES), [], 'stats')
+
+    def test_nombres_dans_le_cadre_des_onglets(self):
+        # Les pastilles de « à voir » et « vus » sortaient en haut à droite
+        self.ouvrir()
+        for vue in ('a_voir', 'vu'):
+            dedans = self.js('''(() => { const t = document.querySelector('.tab[data-view="%s"]'), c = t.querySelector('.count');
+              const a = t.getBoundingClientRect(), b = c.getBoundingClientRect();
+              return b.left >= a.left && b.right <= a.right && b.top >= a.top && b.bottom <= a.bottom; })()''' % vue)
+            self.assertTrue(dedans, vue)
+        # L'onglet garde sa largeur pendant l'attente (« 0 ») et après (« 581 »)
+        largeurs = self.js('''['0', '581'].map(n => { const c = document.getElementById('count-vu'); c.textContent = n;
+            return c.parentElement.getBoundingClientRect().width; })''')
+        self.assertAlmostEqual(largeurs[0], largeurs[1], delta=0.5)
+
+    def test_texte_d_aide_d_explorer_en_police_simple(self):
+        # « tape au moins deux lettres… » était en Bungee évidé, difficile à lire
+        self.ouvrir()
+        self.explorer()
+        self.attendre(lambda: self.js('!!document.querySelector("#grid .explorer-invite")'))
+        police = self.js('getComputedStyle(document.querySelector("#grid .explorer-invite")).fontFamily')
+        self.assertTrue(police.startswith('"JetBrains Mono"'), police)
+        self.assertEqual(self.js('getComputedStyle(document.querySelector("#grid .explorer-invite")).webkitTextStrokeWidth'), '0px')
+
+    def test_petits_tickets_et_premiere_lettre_sur_une_ligne(self):
+        self.ouvrir()
+        self.page.evaluate(FICHE_AVEC_SALLES)
+        # Tickets des salles plus petits (environ 30 px de haut avant)
+        hauteurs = self.js('[...document.querySelectorAll("#modal-body .watch-salle")].map(e => e.offsetHeight)')
+        self.assertEqual(len(hauteurs), 6)
+        self.assertLessEqual(max(hauteurs), 21, hauteurs)
+        # La première lettre du synopsis tenait sur deux lignes : la deuxième
+        # ligne était décalée vers la droite. Elle commence au bord, et la
+        # première ligne n'est pas plus haute que les autres
+        s = self.js(LIGNES_SYNOPSIS)
+        self.assertGreaterEqual(len(s['lignes']), 3, s)
+        self.assertLess(abs(s['lignes'][1]['gauche'] - s['bord']), 1, s)
+        ecarts = [b['haut'] - a['haut'] for a, b in zip(s['lignes'], s['lignes'][1:])]
+        self.assertLess(abs(ecarts[0] - ecarts[1]), 1, ecarts)
 
 
 class SiteSignalTelephone(SiteSignal):
