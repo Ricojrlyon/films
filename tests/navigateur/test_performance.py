@@ -8,6 +8,9 @@ window.__cls = 0;
 new PerformanceObserver(l => { for (const e of l.getEntries()) window.__cls += e.value; })
   .observe({ type: 'layout-shift', buffered: true });
 '''
+# Haut et hauteur des grandes zones du haut de la collection
+RANGEMENT = '''(() => { const r = s => { const b = document.querySelector(s).getBoundingClientRect(); return [Math.round(b.top), Math.round(b.height)]; };
+  return { 'haut de page': r('.masthead'), barre: r('.filter-bar'), bandeau: r('#bandeau-page'), films: r('#grid') }; })()'''
 
 
 class Performance(Banc):
@@ -22,6 +25,30 @@ class Performance(Banc):
         self.assertNotIn('/w1280/', fond)
         self.assertNotIn('/w500/', affiche)
         self.assertIn('/w342/', affiche)  # celle des cartes, déjà dans le cache du navigateur
+
+    def test_P8_le_rangement_ne_depend_pas_des_polices(self):
+        # Sur GitHub (Linux), la page s'affichait d'abord avec les polices de
+        # secours : à l'arrivée de celles du site, le menu du haut passait sous
+        # le nom et « découvrir » changeait de ligne, tout descendait (CLS
+        # 0,165 sur téléphone). Le rangement est maintenant le même sans elles.
+        largeurs = (320, 375, 430, 520, 768, 1280)
+
+        def mesurer():
+            out = {}
+            for l in largeurs:
+                self.page.set_viewport_size({'width': l, 'height': 900})
+                self.page.goto(self.base + '/index.html')
+                self.attendre(lambda: self.js('state.films.length > 0'))
+                self.page.evaluate('document.fonts.ready.then(() => 0)')
+                self.page.wait_for_timeout(200)
+                out[l] = self.js(RANGEMENT)
+            return out
+        avec = mesurer()
+        self.ctx.route('**/fonts/*.woff2', lambda route, req: route.abort())
+        sans = mesurer()
+        self.assertEqual(self.js('[...document.fonts].filter(f => f.status === "loaded").length'), 0, 'polices encore chargées')
+        for l in largeurs:
+            self.assertEqual(avec[l], sans[l], '%d px' % l)
 
     def test_P7_un_seul_ecouteur_sur_le_graphique_par_mois(self):
         self.ouvrir()

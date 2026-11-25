@@ -98,7 +98,7 @@ class StatsSignal(Banc):
         self.assertEqual(self.js('document.getElementById("stats-hero-nombre").dataset.t'), str(vus))
         self.assertEqual(self.js('document.getElementById("stats-auto-n").textContent'), str(vus))
         self.assertIn('%d films vus' % vus, self.js('document.getElementById("stats-auto-cercle").textContent'))
-        record = self.js('''(() => { const c = new Map(); state.films.filter(f => f.user?.statut === "vu" && /^\d{4}/.test(f.user.date_vue || ""))
+        record = self.js('''(() => { const c = new Map(); state.films.filter(f => f.user?.statut === "vu" && /^\\d{4}/.test(f.user.date_vue || ""))
             .forEach(f => c.set(f.user.date_vue.slice(0, 4), (c.get(f.user.date_vue.slice(0, 4)) || 0) + 1));
             return [...c].sort((a, b) => b[1] - a[1])[0][0]; })()''')
         self.assertEqual(self.js('document.getElementById("stats-etoile-an").textContent'), record)
@@ -116,7 +116,7 @@ class StatsSignal(Banc):
         self.stats()
         attendu = self.js('''(() => { const g = new Map();
             for (const f of state.films) { if (f.user?.statut !== "vu" || !f.user.rating) continue;
-              const dv = f.user.date_vue || ""; const y = dv.startsWith("before-") ? "avant " + dv.slice(7) : /^\d{4}/.test(dv) ? dv.slice(0, 4) : null;
+              const dv = f.user.date_vue || ""; const y = dv.startsWith("before-") ? "avant " + dv.slice(7) : /^\\d{4}/.test(dv) ? dv.slice(0, 4) : null;
               if (!y) continue; if (!g.has(y)) g.set(y, { c: 0 }); if (f.user.favorite) g.get(y).c++; }
             return [...g.values()].reduce((s, x) => s + Math.max(x.c, 1), 0); })()''')
         self.assertEqual(self.js('document.querySelectorAll("#year-best .year-best-film").length'), attendu)
