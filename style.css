@@ -2625,7 +2625,9 @@ body.vue-stats .masthead { margin-bottom: 32px; }
   text-shadow: -2px 0 var(--hot), 2px 0 var(--cyan);
 }
 .masthead .ast { color: var(--warm); }
-.nav-btn { border-radius: 999px; }
+/* Hauteurs de ligne fixes (ici et sur les onglets) : la page ne bouge pas
+   quand les polices du site arrivent après celles de secours */
+.nav-btn { border-radius: 999px; line-height: 13px; }
 .nav-btn.active { background: var(--warm); border-color: var(--warm); color: #161f25; box-shadow: 0 0 18px rgba(200, 255, 58, 0.55); }
 
 /* Deux rubans de chantier en diagonale sous le haut de page : tes chiffres
@@ -2655,8 +2657,19 @@ body.vue-stats .rubans-haut { display: none; }
 .tabs { gap: 10px; padding-top: 8px; }
 .tab {
   position: relative; padding: 9px 16px; border-radius: 999px; border-color: var(--rule-strong);
-  font-size: 11px; font-weight: 700;
+  font-size: 11px; font-weight: 700; line-height: 15px;
 }
+/* Sur téléphone, rangement fixe : « à voir » et « vus » sur une ligne, les
+   trois autres sur la suivante (avant, « découvrir » changeait de ligne
+   à l'arrivée des polices et la page sautait) */
+@media (max-width: 600px) {
+  .tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); flex: 1 1 100%; }
+  .tab { grid-column: span 2; padding-left: 8px; padding-right: 8px; }
+  .tab[data-view="a_voir"], .tab[data-view="vu"] { grid-column: span 3; }
+}
+/* Sur téléphone, le menu toujours sous le nom du site (avant : à côté ou
+   dessous selon la police déjà chargée, et toute la page descendait) */
+@media (max-width: 480px) { .masthead .brand { flex-basis: 100%; } }
 .tab.active { background: var(--warm); border-color: var(--warm); color: #161f25; box-shadow: 0 0 18px rgba(200, 255, 58, 0.5); }
 /* Le nombre : petite pastille rose penchée, dans le cadre de l'onglet, après
    le mot ; largeur de 3 chiffres dès l'attente (l'onglet ne bouge pas à
@@ -2671,11 +2684,11 @@ body.vue-stats .rubans-haut { display: none; }
 
 .search-input {
   background: var(--profond); border: 1px solid var(--rule-strong); border-radius: 999px;
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; caret-color: var(--hot);
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 16px; caret-color: var(--hot);
 }
 .search-input:focus { border-color: var(--warm); box-shadow: 0 0 0 3px rgba(200, 255, 58, 0.15), 0 0 18px rgba(200, 255, 58, 0.25); }
 .search-icon, .discover-search-wrap .search-icon { color: var(--warm); }
-.filter-toggle { border-radius: 999px; border-color: var(--cyan); color: var(--cyan); font-weight: 700; }
+.filter-toggle { border-radius: 999px; border-color: var(--cyan); color: var(--cyan); font-weight: 700; line-height: 13px; }
 .filter-toggle:hover { background: var(--cyan); border-color: var(--cyan); color: #161f25; }
 .filter-toggle .badge { background: var(--hot); border-radius: 999px; }
 
@@ -2737,8 +2750,8 @@ body.vue-stats .rubans-haut { display: none; }
 
 /* Zone 4 : un trait vert et l'étiquette des films accrochée dessous */
 .results-header { margin: 30px 0 26px; padding: 0; border-top: 3px solid var(--warm); }
-.results-count { padding: 5px 14px 7px; background: var(--warm); color: #161f25; border-radius: 0 0 10px 10px; font-weight: 700; }
-.results-count strong { font: 16px 'Bungee', sans-serif; color: #161f25; vertical-align: -1px; }
+.results-count { padding: 5px 14px 7px; background: var(--warm); color: #161f25; border-radius: 0 0 10px 10px; font-weight: 700; line-height: 21px; }
+.results-count strong { display: inline-block; position: relative; top: -1px; font: 16px/21px 'Bungee', sans-serif; color: #161f25; vertical-align: top; }
 .results-count::after { content: ' ▾'; }
 
 /* ---------- Les affiches */
