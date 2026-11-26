@@ -2667,9 +2667,20 @@ body.vue-stats .rubans-haut { display: none; }
   .tab { grid-column: span 2; padding-left: 8px; padding-right: 8px; }
   .tab[data-view="a_voir"], .tab[data-view="vu"] { grid-column: span 3; }
 }
-/* Sur téléphone, le menu toujours sous le nom du site (avant : à côté ou
-   dessous selon la police déjà chargée, et toute la page descendait) */
-@media (max-width: 480px) { .masthead .brand { flex-basis: 100%; } }
+/* Sur téléphone, le menu toujours à côté du nom du site, comme sur
+   ordinateur : jamais de retour à la ligne (avant, il passait dessous selon
+   la police déjà chargée, et toute la page descendait), nom et boutons
+   resserrés pour tenir jusqu'à 320 px de large */
+@media (max-width: 480px) {
+  .masthead { flex-wrap: nowrap; gap: 8px; }
+  .masthead .wordmark { font-size: 22px; }
+  .masthead .nav { flex-shrink: 0; }
+  .nav-btn { padding-left: 10px; padding-right: 10px; letter-spacing: 0.06em; }
+}
+@media (max-width: 359px) {
+  .masthead .wordmark { font-size: 18px; }
+  .nav-btn { padding-left: 8px; padding-right: 8px; }
+}
 .tab.active { background: var(--warm); border-color: var(--warm); color: #161f25; box-shadow: 0 0 18px rgba(200, 255, 58, 0.5); }
 /* Le nombre : petite pastille rose penchée, dans le cadre de l'onglet, après
    le mot ; largeur de 3 chiffres dès l'attente (l'onglet ne bouge pas à

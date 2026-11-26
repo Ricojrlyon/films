@@ -235,6 +235,23 @@ class SiteSignal(Banc):
 class SiteSignalTelephone(SiteSignal):
     largeur = 375
 
+    def test_menu_a_cote_du_nom_comme_sur_ordinateur(self):
+        # « collection », « stats » et le cadenas passaient sous « *films » ;
+        # ils restent à côté, sans sortir de l'écran, jusqu'à 320 px de large
+        self.ouvrir()
+        for largeur in (375, 320):
+            self.page.set_viewport_size({'width': largeur, 'height': 812})
+            self.page.evaluate('document.fonts.ready.then(() => 0)')
+            self.page.wait_for_timeout(200)
+            m = self.js('''(() => { const n = document.querySelector('.masthead .wordmark').getBoundingClientRect(),
+                b = document.querySelector('.masthead .nav').getBoundingClientRect();
+              return { nom: [n.top, n.bottom, n.right], menu: [b.top, b.bottom, b.left, b.right], largeur: innerWidth,
+                defile: document.documentElement.scrollWidth > innerWidth }; })()''')
+            self.assertLess(m['menu'][0], m['nom'][1], m)    # même ligne
+            self.assertGreater(m['menu'][2], m['nom'][2], m)  # à droite du nom
+            self.assertLessEqual(m['menu'][3], m['largeur'] - 19.5, m)
+            self.assertFalse(m['defile'], m)
+
     def test_rien_qui_redessine_en_continu_sur_la_collection(self):
         # Comme sur la page stats : seules restent des animations que le
         # téléphone déplace sans redessiner, et le glitch du grand nombre
